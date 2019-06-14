@@ -82,7 +82,7 @@ Move files out of folders and unzip
 Check for missing files 
 ```{r}
 # get filenames that were downloaded
-downloaded_fnames <- list.files("~/dlbcl_landscape/data/htseq_counts/", all.files = FALSE) 
+downloaded_fnames <- list.files("data/htseq_counts/", all.files = FALSE) 
 
 # get filenames from manifest
 manifest_fnames <- nci_manifest %>% pull(filename) %>% str_replace(".gz", "")
