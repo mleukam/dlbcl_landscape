@@ -1,5 +1,5 @@
 ---
-title: "Home"
+title: "Immune Landscape of DLBCL"
 site: workflowr::wflow_site
 output:
   workflowr::wflow_html:
