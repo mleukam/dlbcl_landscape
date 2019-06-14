@@ -1,5 +1,5 @@
 ---
-title: "gdc_download"
+title: "gDownload NCI data from GDC"
 author: "mleukam"
 date: "2019-06-13"
 output: workflowr::wflow_html
@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Introduction
+## Setup
 
 ```{r}
 
