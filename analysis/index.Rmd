@@ -8,4 +8,20 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+Welcome to the computational lab notebook for our research project focused on profiling the immune microenvironment of DLBCL using gene expression data and multi-channel immunohistochemistry, then linking clusters of similar immune signatures with mutations in tumors.
+
+The over-arching questions are:
+
+1. Are there recurrent immune phenotypes in DLBCL?
+
+2. What is the influence of tumor gene mutations on immune phenotypes in DLBCL?
+
+## Prepare RNAseq data for analysis
+
+[Download raw RNAseq counts in NCI lymphoma dataset from GDC]
+
+See source code for scripts used to pseudoalign and count Duke RNAseq seauence data.
+
+## Prepare gene sets for enrichment analysis
+
+## Gene set enrichment analysis
