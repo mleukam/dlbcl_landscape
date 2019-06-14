@@ -1,4 +1,6 @@
-# dlbcl_landscape
+# The immune landscape of the DLBCL tumor microenvironment
+
+Best viewed as a [website](https://mleukam.github.io/dlbcl_landscape/)
 
 A [workflowr][] project.
 
