@@ -1,7 +1,7 @@
 name: "dlbcl_landscape"
 output_dir: ../docs
 navbar:
-  title: "dlbcl_landscape"
+  title: "Immune Landscape of DLBCL"
   left:
   - text: Home
     href: index.html
@@ -13,5 +13,5 @@ output:
   workflowr::wflow_html:
     toc: yes
     toc_float: yes
-    theme: cosmo
+    theme: flatly
     highlight: textmate
