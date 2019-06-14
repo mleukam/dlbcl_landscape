@@ -7,4 +7,4 @@ editor_options:
   chunk_output_type: console
 ---
 
-Describe your project.
+This is a research project focused on profiling the immune microenvironment of DLBCL using gene expression data and multi-channel immunohistochemistry, then linking clusters of similar immune signatures with mutations in tumors.
