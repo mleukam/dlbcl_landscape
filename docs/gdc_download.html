@@ -17,7 +17,7 @@
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -378,7 +378,7 @@ div.tocify {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">dlbcl_landscape</a>
+      <a class="navbar-brand" href="index.html">Immune Landscape of DLBCL</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -419,7 +419,7 @@ div.section {
 
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
-<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
 </button>
 </p>
 <div id="workflowr-report" class="collapse">
@@ -428,7 +428,7 @@ div.section {
 <a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -440,7 +440,7 @@ div.section {
 <strong>Last updated:</strong> 2019-06-13
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
@@ -452,7 +452,7 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <hr>
 </div>
 <div id="checks" class="tab-pane fade">
-<div id="workflowr-checks" class="panel-group">
+<div class="panel-group" id="workflowr-checks">
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
@@ -516,22 +516,46 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongabsolute"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>File paths:</strong> absolute </a>
 </p>
 </div>
-<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div id="strongFilepathsstrongabsolute" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+<p>
+Using absolute paths to the files within your workflowr project makes it difficult for you and others to run your code on a different machine. Change the absolute path(s) below to the suggested relative path(s) to make your code more reproducible.
+</p>
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th style="text-align:left;">
+absolute
+</th>
+<th style="text-align:left;">
+relative
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+~/dlbcl_landscape/data/htseq_counts/
+</td>
+<td style="text-align:left;">
+data/htseq_counts
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreef0014c731bfad11e07491ff5c229b89de8f77febtargetblankf0014c7a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/f0014c731bfad11e07491ff5c229b89de8f77feb" target="_blank">f0014c7</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree979795d6d254203eb1bfd76c9fd2bcfeed1493a0targetblank979795da"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/979795d6d254203eb1bfd76c9fd2bcfeed1493a0" target="_blank">979795d</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreef0014c731bfad11e07491ff5c229b89de8f77febtargetblankf0014c7a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree979795d6d254203eb1bfd76c9fd2bcfeed1493a0targetblank979795da" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -540,6 +564,11 @@ Great! You are using Git for version control. Tracking code development and conn
 Ignored files:
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+
+Untracked files:
+    Untracked:  data/htseq_counts/
+    Untracked:  output/nci_dlbcl_annotation.csv
+    Untracked:  output/nci_dlbcl_unprocessed_counts.csv
 
 </code></pre>
 <p>
@@ -578,6 +607,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/979795d6d254203eb1bfd76c9fd2bcfeed1493a0/analysis/gdc_download.Rmd" target="_blank">979795d</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-13
+</td>
+<td>
+working gdc download
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/3b64bb0ce77fdf1b1a1222107d41a87c4d0d7961/docs/gdc_download.html" target="_blank">3b64bb0</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-13
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -672,6 +735,117 @@ start of analysis workbook for GDC download
 </div>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
+<p>Clear workspace</p>
+<pre class="r"><code>rm(list = ls())</code></pre>
+<p>All of this is recorded for completeness - this notebook is not intended to be run more than once and the global options for evaluation are set to FALSE. Once this notebook was completed, results were stored in a list of dataframes saved with the saveRDS function.</p>
+<pre class="r"><code>knitr::opts_chunk$set(eval = FALSE)</code></pre>
+<pre class="r"><code>library(&quot;GenomicDataCommons&quot;)
+library(&quot;tidyverse&quot;)</code></pre>
+<div id="test-connection" class="section level4">
+<h4>Test connection</h4>
+<pre class="r"><code>GenomicDataCommons::status()
+
+# how many cases available in NCICCR
+cases() %&gt;% 
+  GenomicDataCommons::filter(~ project.program.name==&#39;NCICCR&#39;) %&gt;%
+  facet(&#39;samples.sample_type&#39;) %&gt;% 
+  aggregations()</code></pre>
+</div>
+</div>
+<div id="download-raw-count-files" class="section level2">
+<h2>Download raw count files</h2>
+<pre class="r"><code># Get manifest ids for HTSeq raw counts
+nci_manifest &lt;- files() %&gt;%
+  GenomicDataCommons::select(available_fields(&#39;files&#39;)) %&gt;%
+    GenomicDataCommons::filter(~ cases.project.project_id == &#39;NCICCR-DLBCL&#39; &amp;
+             data_type==&#39;Gene Expression Quantification&#39; &amp;
+             analysis.workflow_type == &#39;HTSeq - Counts&#39;) %&gt;%
+    GenomicDataCommons::select(&#39;file_id&#39;) %&gt;%
+    manifest()
+
+# Get uuIDs for each file
+file_ids &lt;- nci_manifest %&gt;%
+  pull(id)
+
+# download
+library(BiocParallel)
+register(MulticoreParam())
+destdir = tmpdir()
+fnames = gdcdata(file_ids)</code></pre>
+<p>Move files out of folders and unzip</p>
+<pre class="bash"><code>## done in command line, stored here for documentation only - not part of notebook
+## get files out of subfolders and move to parent
+# find . -mindepth 2 -type f -print -exec mv {} . \;
+
+## create a folder for counts
+# mkdir htseq_counts
+
+## move all sequence files into a folder
+# find . -name &#39;*.htseq_counts.txt.gz&#39; -exec mv {} ~/Library/Caches/GenomicDataCommons/htseq_counts \;
+
+## unzip
+# find . -name &#39;*.htseq_counts.txt.gz&#39; -exec gunzip {} \;
+
+## move to local repo data folder
+# find . -name &#39;*.htseq_counts.txt&#39; -exec mv {} ~/dlbcl_landscape/data/htseq_counts \;
+</code></pre>
+<p>Check for missing files</p>
+<pre class="r"><code># get filenames that were downloaded
+downloaded_fnames &lt;- list.files(&quot;~/dlbcl_landscape/data/htseq_counts/&quot;, all.files = FALSE) 
+
+# get filenames from manifest
+manifest_fnames &lt;- nci_manifest %&gt;% pull(filename) %&gt;% str_replace(&quot;.gz&quot;, &quot;&quot;)
+
+# find the difference
+missing_files &lt;- setdiff(manifest_fnames, downloaded_fnames)
+missing_files
+# no missing files</code></pre>
+</div>
+<div id="initial-processing" class="section level2">
+<h2>Initial processing</h2>
+<p>Combine files into dataframe</p>
+<pre class="r"><code># get a vector of filepaths
+filepaths &lt;- nci_manifest %&gt;% dplyr::select(filename) %&gt;% 
+    mutate(filename = (str_replace(filename, &quot;.gz&quot;, &quot;&quot;))) %&gt;%
+    mutate(filepath = (str_c(&quot;data/htseq_counts/&quot;, filename))) %&gt;%
+  pull(filepath)</code></pre>
+<pre class="r"><code># read in files
+nci_dlbcl_df &lt;- map(filepaths, function(x){read_tsv(x, col_names = FALSE)}) %&gt;% 
+  reduce(left_join, by = &quot;X1&quot;)
+
+# set column names
+cols &lt;- paste0(&quot;nci_dlbcl_&quot;, seq(1, (ncol(nci_dlbcl_df) - 1)))
+allcols &lt;- c(&quot;gene&quot;, cols)
+colnames(nci_dlbcl_df) &lt;- allcols
+
+# start metadata with manifest
+enframe(cols) 
+nci_dlbcl_pheno &lt;- add_column(nci_manifest, cols, .before = 1)
+nci_dlbcl_pheno &lt;- dplyr::rename(nci_dlbcl_pheno, sample = cols)
+
+# review results
+nci_dlbcl_pheno
+nci_dlbcl_df</code></pre>
+<p>Get additional metadata</p>
+<pre class="r"><code># build query
+qfiles = files() %&gt;% GenomicDataCommons::filter( ~ cases.project.project_id == &#39;NCICCR-DLBCL&#39; &amp;
+                                 type == &#39;gene_expression&#39; &amp;
+                                 analysis.workflow_type == &#39;HTSeq - Counts&#39;)
+
+# get results
+extended_metadata &lt;- results_all(qfiles)
+extended_metadata &lt;- extended_metadata %&gt;% as_tibble() %&gt;%
+  dplyr::select(-state, -acl)
+
+# combine with existing phenodata
+nci_dlbcl_annotation &lt;- nci_dlbcl_pheno %&gt;%
+  left_join(extended_metadata, by = &quot;id&quot;) %&gt;%
+  print()</code></pre>
+</div>
+<div id="save-for-later-use" class="section level2">
+<h2>Save for later use</h2>
+<pre class="r"><code>write_csv(nci_dlbcl_df, &quot;output/nci_dlbcl_unprocessed_counts.csv&quot;)
+write_csv(nci_dlbcl_annotation, &quot;output/nci_dlbcl_annotation.csv&quot;)</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -680,26 +854,6 @@ start of analysis workbook for GDC download
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.5.3 (2019-03-11)
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
-Running under: macOS Mojave 10.14.4
-
-Matrix products: default
-BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
-
-locale:
-[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-
-attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
-
-loaded via a namespace (and not attached):
- [1] workflowr_1.4.0 Rcpp_1.0.1      digest_0.6.19   rprojroot_1.3-2
- [5] backports_1.1.4 git2r_0.25.2    magrittr_1.5    evaluate_0.14  
- [9] stringi_1.4.3   fs_1.3.1        whisker_0.3-2   rmarkdown_1.13 
-[13] tools_3.5.3     stringr_1.4.0   glue_1.3.1      xfun_0.7       
-[17] yaml_2.2.0      compiler_3.5.3  htmltools_0.3.6 knitr_1.23     </code></pre>
 </div>
 </div>
 
