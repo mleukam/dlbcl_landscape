@@ -18,9 +18,9 @@ The over-arching questions are:
 
 ## Prepare RNAseq data for analysis
 
-[Download raw RNAseq counts in NCI lymphoma dataset from GDC](gdc_download.html)
-
-See source code for scripts used to pseudoalign and count Duke RNAseq seauence data.
+* [Download raw RNAseq counts in NCI lymphoma dataset from GDC](gdc_download.html)
+* Pseudoalign and count Duke RNAseq sequence data (source code for cluster-based processing in `/code/`)
+* Data cleaning and pre-processing
 
 ## Prepare gene sets for enrichment analysis
 
