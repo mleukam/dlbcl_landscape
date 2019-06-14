@@ -9,7 +9,143 @@ editor_options:
 
 ## Setup
 
+Clear workspace
 ```{r}
+rm(list = ls())
+```
+
+All of this is recorded for completeness - this notebook is not intended to be run more than once and the global options for evaluation are set to FALSE. Once this notebook was completed, results were stored in a list of dataframes saved with the saveRDS function. 
+
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r}
+library("GenomicDataCommons")
+library("tidyverse")
+```
+
+#### Test connection
+
+```{r}
+GenomicDataCommons::status()
+
+# how many cases available in NCICCR
+cases() %>% 
+  GenomicDataCommons::filter(~ project.program.name=='NCICCR') %>%
+  facet('samples.sample_type') %>% 
+  aggregations()
+```
+
+## Download raw count files
+```{r}
+# Get manifest ids for HTSeq raw counts
+nci_manifest <- files() %>%
+  GenomicDataCommons::select(available_fields('files')) %>%
+    GenomicDataCommons::filter(~ cases.project.project_id == 'NCICCR-DLBCL' &
+             data_type=='Gene Expression Quantification' &
+             analysis.workflow_type == 'HTSeq - Counts') %>%
+    GenomicDataCommons::select('file_id') %>%
+    manifest()
+
+# Get uuIDs for each file
+file_ids <- nci_manifest %>%
+  pull(id)
+
+# download
+library(BiocParallel)
+register(MulticoreParam())
+destdir = tmpdir()
+fnames = gdcdata(file_ids)
+```
+
+Move files out of folders and unzip
+```{bash}
+## done in command line, stored here for documentation only - not part of notebook
+## get files out of subfolders and move to parent
+# find . -mindepth 2 -type f -print -exec mv {} . \;
+
+## create a folder for counts
+# mkdir htseq_counts
+
+## move all sequence files into a folder
+# find . -name '*.htseq_counts.txt.gz' -exec mv {} ~/Library/Caches/GenomicDataCommons/htseq_counts \;
+
+## unzip
+# find . -name '*.htseq_counts.txt.gz' -exec gunzip {} \;
+
+## move to local repo data folder
+# find . -name '*.htseq_counts.txt' -exec mv {} ~/dlbcl_landscape/data/htseq_counts \;
+
+```
+
+Check for missing files 
+```{r}
+# get filenames that were downloaded
+downloaded_fnames <- list.files("~/dlbcl_landscape/data/htseq_counts/", all.files = FALSE) 
+
+# get filenames from manifest
+manifest_fnames <- nci_manifest %>% pull(filename) %>% str_replace(".gz", "")
+
+# find the difference
+missing_files <- setdiff(manifest_fnames, downloaded_fnames)
+missing_files
+# no missing files
+```
+
+## Initial processing
+
+Combine files into dataframe
+```{r}
+# get a vector of filepaths
+filepaths <- nci_manifest %>% dplyr::select(filename) %>% 
+    mutate(filename = (str_replace(filename, ".gz", ""))) %>%
+    mutate(filepath = (str_c("data/htseq_counts/", filename))) %>%
+  pull(filepath)
+```
+
+```{r}
+# read in files
+nci_dlbcl_df <- map(filepaths, function(x){read_tsv(x, col_names = FALSE)}) %>% 
+  reduce(left_join, by = "X1")
+
+# set column names
+cols <- paste0("nci_dlbcl_", seq(1, (ncol(nci_dlbcl_df) - 1)))
+allcols <- c("gene", cols)
+colnames(nci_dlbcl_df) <- allcols
+
+# start metadata with manifest
+enframe(cols) 
+nci_dlbcl_pheno <- add_column(nci_manifest, cols, .before = 1)
+nci_dlbcl_pheno <- dplyr::rename(nci_dlbcl_pheno, sample = cols)
+
+# review results
+nci_dlbcl_pheno
+nci_dlbcl_df
+```
+
+Get additional metadata
+```{r}
+# build query
+qfiles = files() %>% GenomicDataCommons::filter( ~ cases.project.project_id == 'NCICCR-DLBCL' &
+                                 type == 'gene_expression' &
+                                 analysis.workflow_type == 'HTSeq - Counts')
+
+# get results
+extended_metadata <- results_all(qfiles)
+extended_metadata <- extended_metadata %>% as_tibble() %>%
+  dplyr::select(-state, -acl)
+
+# combine with existing phenodata
+nci_dlbcl_annotation <- nci_dlbcl_pheno %>%
+  left_join(extended_metadata, by = "id") %>%
+  print()
+```
+
+## Save for later use
+```{r}
+write_csv(nci_dlbcl_df, "output/nci_dlbcl_unprocessed_counts.csv")
+write_csv(nci_dlbcl_annotation, "output/nci_dlbcl_annotation.csv")
 
 ```
 
