@@ -1,0 +1,144 @@
+---
+title: "Preprocessing NCI Count Data from GDC"
+author: "mleukam"
+date: "2019-06-13"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+## Setup
+
+Clear workspace
+```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+library("tidyverse")
+library("edgeR")
+library("limma")
+library("GSVA")
+```
+
+Read in data
+```{r}
+total_counts <- read_csv("output/nci_dlbcl_unprocessed_counts.csv")
+```
+
+Read in lookup table for features, gencode v22 (used by GDC to label features)
+```{r}
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
+```
+
+## Normalization, filtering and transformation
+
+Preprocessing RNAseq count data following methods outlined here: https://f1000research.com/articles/5-1408/v3
+
+#### Filter for protein coding genes
+```{r}
+# filter for protein coding genes
+total_counts_prcode <- total_counts %>%
+  dplyr::rename(gene_id = gene) %>%
+  left_join(gencode_gtf, by = "gene_id") %>%
+  dplyr::filter(gene_type == "protein_coding") %>%
+  dplyr::select(-gene_name, -gene_type, -gene_status, -level, -havana_gene) %>%
+  dplyr::select(gene_id, everything())
+
+nrow(total_counts)
+nrow(total_counts_prcode)
+```
+
+#### Correct for library size: convert to CPM
+```{r}
+# normalize rows by log cpm using EdgeR
+df_data <- total_counts_prcode %>% 
+  dplyr::select(-gene_id) %>% as.matrix()
+df_names <- total_counts_prcode %>% dplyr::select(gene_id) 
+out_data <- cpm(df_data, log = FALSE) %>% as_tibble()
+total_counts_prcode_cpm <- bind_cols(df_names, out_data)
+```
+
+#### Density plots of CPM values
+```{r}
+tidy_cpm <- total_counts_prcode_cpm %>% 
+  gather(key = "sampleID", value = "intensity", -gene_id) 
+
+dplot1 <- ggplot(tidy_cpm, aes(intensity)) +
+  geom_density() + 
+  theme(legend.position = "none") +
+  xlim(-5, 100) +
+  ggtitle("Density plot of CPM for NCI DLBCL")
+dplot1
+
+dplot2 <- ggplot(tidy_cpm, aes(log(intensity))) +
+  geom_density() +
+  theme(legend.position = "none") +
+  xlim(-20, 20) +
+  ggtitle("Density plot of log(CPM) for NCI DLBCL")
+dplot2
+```
+
+#### Filter by expression levels
+```{r}
+# move gene names to rownames
+totcounts_prcode_cpm_matrix <- total_counts_prcode_cpm %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_id")
+totcounts_prcode_cpm_matrix[1:5, 1:5]
+
+# filter out genes that aren't at least expressed greater than 1 in at least 45 cases (45 being about the size of the smallest group)
+total_cpm_stats <- data.frame(
+  total = apply(totcounts_prcode_cpm_matrix, 1, function(x) sum(x > 1, na.rm = TRUE)))
+keep <- which(total_cpm_stats$total >= 50) 
+
+dim(totcounts_prcode_cpm_matrix)
+total_cpm_filtered = totcounts_prcode_cpm_matrix[keep,]
+dim(total_cpm_filtered)
+```
+
+#### Normalize gene expression distributions
+
+Normalisation by the method of trimmed mean of M-values (TMM) is performed using the calcNormFactors function in edgeR. The normalisation factors calculated here are used as a scaling factor for the library sizes. 
+```{r}
+# get normalization factors
+norm_factors <- calcNormFactors(total_cpm_filtered, method = "TMM")
+
+# apply factor to each column
+total_cpm_norm <- map2_dfc(total_cpm_filtered, norm_factors, `*`)
+total_cpm_norm <- as.data.frame(total_cpm_norm)
+rownames(total_cpm_norm) <- rownames(total_cpm_filtered)
+total_cpm_norm[1:5, 1:5]
+```
+
+#### Log transformation
+```{r}
+total_log_cpm_filtered_norm <- log2(total_cpm_norm)
+total_log_cpm_filtered_norm[1:5, 1:5]
+```
+
+```{r}
+total_log_cpm_filtered_tbl <- total_log_cpm_filtered_norm %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene") %>%
+  as_tibble() %>% 
+  print()
+
+tidy_log_cpm <- total_log_cpm_filtered_tbl %>% 
+  gather(key = "sampleID", value = "intensity", -gene) %>% 
+  print()
+
+dplot3 <- ggplot(tidy_log_cpm, aes(intensity)) +
+  geom_density() +
+  theme(legend.position = "none") +
+  xlim(-20, 20) +
+  ggtitle("Final density plot of log(CPM) for NCI DLBCL")
+dplot3
+```
+
+## Write out for later use
+```{r}
+write_csv(total_log_cpm_filtered_norm, "output/expr_matrix.csv")
+```
