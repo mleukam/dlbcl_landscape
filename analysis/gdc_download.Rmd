@@ -51,8 +51,10 @@ nci_manifest <- files() %>%
 # Get uuIDs for each file
 file_ids <- nci_manifest %>%
   pull(id)
+```
 
-# download
+```{r}
+# download all selected files
 library(BiocParallel)
 register(MulticoreParam())
 destdir = tmpdir()
@@ -142,10 +144,131 @@ nci_dlbcl_annotation <- nci_dlbcl_pheno %>%
   print()
 ```
 
+## Phenotype data
+
+Get phenotype data from GenomicDataCommons
+```{r}
+# get linked htseq count filenames / caseID from GDC web portal as JSON
+# saved as "data/gdc_files_and_case_ids.json"
+library(jsonlite)
+filescases <- fromJSON("data/gdc_files_and_case_ids.json", 
+                       flatten = TRUE) %>%
+  as_tibble() %>%
+  print()
+
+# get case ids out of nested table structure
+casefiles <- filescases$cases %>% 
+  bind_rows() %>% 
+  dplyr::select(case_id) %>%
+  bind_cols(filescases) %>%
+  as_tibble() %>%
+  dplyr::select(case_id, file_name) %>%
+  print()
+
+# get linked case IDs and case uuIDs from GDC here: https://portal.gdc.cancer.gov/repository?facetTab=cases&filters=%7B%22op%22%3A%22and%22%2C%22content%22%3A%5B%7B%22op%22%3A%22in%22%2C%22content%22%3A%7B%22field%22%3A%22cases.project.program.name%22%2C%22value%22%3A%5B%22NCICCR%22%5D%7D%7D%5D%7D&searchTableTab=cases
+# exported as TSV (two tables, aliquot.tsv and sample.tsv)
+# moved files to data folder
+sample_ids <- read_tsv("data/sample.tsv")
+str(sample_ids)
+
+phenodata <- casefiles %>%
+  left_join(sample_ids) %>%
+  dplyr::select(case_submitter_id, everything()) %>%
+  print()
+
+# download clinical data from GDC as JSON and import
+clinicaldata <- fromJSON("data/gdc_clinical_data.json", 
+                       flatten = TRUE) %>%
+  as_tibble() %>%
+  print()
+
+diag_df <- clinicaldata$diagnoses %>%
+  bind_rows() %>%
+  as_tibble() %>%
+  mutate(case_submitter_id = str_replace(submitter_id,
+                                         "-diagnosis",
+                                         "")) %>%
+  dplyr::select(case_submitter_id, everything()) %>%
+  print()
+
+demo_df <- clinicaldata %>%
+  dplyr::select(-diagnoses) %>%
+  mutate(case_submitter_id = str_replace(demographic.submitter_id,
+                                         "-demographic",
+                                         "")) %>%
+  dplyr::select(case_submitter_id, everything()) %>%
+  print()
+
+pheno_data <- phenodata %>%
+  left_join(diag_df) %>%
+  left_join(demo_df) %>%
+  print()
+
+# remove columns with all NA
+not_all_na <- function(x) {!all(is.na(x))}
+pheno_data <- pheno_data %>% dplyr::select_if(not_all_na)
+pheno_data
+
+# add in PDL1-amp calls from James' Blood paper project using NCI data
+# table of calls imported to data folder
+pdl1_amp_csv <- read_csv("data/NIH_PDL1_amp_cases.csv")
+pdl1_nonamp_csv <- read_csv("data/NIH_PDL1_nonamp_cases.csv")
+pdl1_nonamp_cases <- pdl1_nonamp_csv %>% 
+  dplyr::select(key) %>% 
+  dplyr::rename(cases = key) %>%
+  mutate(status = rep("non-amplified", length = nrow(pdl1_nonamp_csv))) %>%
+  print()
+pdl1_amp_cases <- pdl1_amp_csv %>%
+  dplyr::rename(cases = key) %>%
+  mutate(status = ifelse(value == 1, "low_amplified", 
+                         ifelse(value == 2, "high_amplified", NA))) %>%
+  dplyr::select(cases, status) %>%
+  print()
+summary(as.factor(pdl1_amp_cases$status))
+all_pdl1_status <- bind_rows(pdl1_amp_cases, pdl1_nonamp_cases) %>%
+  mutate(pdl1_status = as.factor(status)) %>%
+  dplyr::rename(case_submitter_id = cases) %>%
+  dplyr::select(case_submitter_id, pdl1_status)
+summary(all_pdl1_status$pdl1_status)
+
+# add to pheno_data
+pheno_data_pdl1 <- pheno_data %>%
+  left_join(all_pdl1_status) %>%
+  dplyr::select(case_submitter_id, case_id, pdl1_status, everything()) %>%
+  print()
+summary(pheno_data_pdl1$pdl1_status)
+
+# pull in temporary sample names
+nci_dlbcl_pheno
+
+pheno_data_samples <- pheno_data_pdl1 %>%
+  rename(filename = file_name) %>%
+  left_join(nci_dlbcl_pheno, by = "filename") %>%
+  dplyr::select(case_submitter_id, sample, everything()) %>%
+  print()
+
+```
+
+```{r}
+# rename the expression matrix columns with meaningful sample names
+pheno_data_ids <- pheno_data_samples %>%
+  dplyr::select(case_submitter_id, sample)
+id_frame <- (colnames(nci_dlbcl_df)) %>%
+  enframe() %>%
+  dplyr::select(sample = value) %>%
+  left_join(pheno_data_ids) %>%
+  print()
+id_frame$case_submitter_id[1] <- "gene"
+id_frame
+cnames <- id_frame %>% pull(case_submitter_id)
+
+colnames(nci_dlbcl_df) <- cnames
+```
+
 ## Save for later use
 ```{r}
 write_csv(nci_dlbcl_df, "output/nci_dlbcl_unprocessed_counts.csv")
-write_csv(nci_dlbcl_annotation, "output/nci_dlbcl_annotation.csv")
+write_csv(pheno_data_samples, "output/nci_dlbcl_annotation.csv")
 
 ```
 
