@@ -437,7 +437,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-06-13
+<strong>Last updated:</strong> 2019-06-17
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -528,23 +528,37 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreec4a6b640bcaec15be232ae3a7aa3cabda0876e23targetblankc4a6b64a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/c4a6b640bcaec15be232ae3a7aa3cabda0876e23" target="_blank">c4a6b64</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreeb979bc2c52f04f06681aabe8a567d360529e5a0btargetblankb979bc2a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/b979bc2c52f04f06681aabe8a567d360529e5a0b" target="_blank">b979bc2</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreec4a6b640bcaec15be232ae3a7aa3cabda0876e23targetblankc4a6b64a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreeb979bc2c52f04f06681aabe8a567d360529e5a0btargetblankb979bc2a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 </p>
 <pre><code>
 Ignored files:
+    Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
 
 Untracked files:
+    Untracked:  analysis/enrichment.Rmd
+    Untracked:  data/NIH_PDL1_amp_cases.csv
+    Untracked:  data/NIH_PDL1_nonamp_cases.csv
+    Untracked:  data/aliquot.tsv
+    Untracked:  data/gdc_clinical_data.json
+    Untracked:  data/gdc_files_and_case_ids.json
+    Untracked:  data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Untracked:  data/gset_ids_complete.rds
     Untracked:  data/htseq_counts/
+    Untracked:  data/sample.tsv
+    Untracked:  output/expr_matrix.csv
     Untracked:  output/nci_dlbcl_annotation.csv
     Untracked:  output/nci_dlbcl_unprocessed_counts.csv
+
+Unstaged changes:
+    Modified:   analysis/preprocessing_count_data.Rmd
 
 </code></pre>
 <p>
@@ -583,6 +597,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/b979bc2c52f04f06681aabe8a567d360529e5a0b/analysis/gdc_download.Rmd" target="_blank">b979bc2</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-17
+</td>
+<td>
+full pheno data added
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/5f4a79befc3e839f1de95d289af56cac9869017e/docs/gdc_download.html" target="_blank">5f4a79b</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-13
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -792,9 +840,8 @@ nci_manifest &lt;- files() %&gt;%
 
 # Get uuIDs for each file
 file_ids &lt;- nci_manifest %&gt;%
-  pull(id)
-
-# download
+  pull(id)</code></pre>
+<pre class="r"><code># download all selected files
 library(BiocParallel)
 register(MulticoreParam())
 destdir = tmpdir()
@@ -869,10 +916,125 @@ nci_dlbcl_annotation &lt;- nci_dlbcl_pheno %&gt;%
   left_join(extended_metadata, by = &quot;id&quot;) %&gt;%
   print()</code></pre>
 </div>
+<div id="phenotype-data" class="section level2">
+<h2>Phenotype data</h2>
+<p>Get phenotype data from GenomicDataCommons</p>
+<pre class="r"><code># get linked htseq count filenames / caseID from GDC web portal as JSON
+# saved as &quot;data/gdc_files_and_case_ids.json&quot;
+library(jsonlite)
+filescases &lt;- fromJSON(&quot;data/gdc_files_and_case_ids.json&quot;, 
+                       flatten = TRUE) %&gt;%
+  as_tibble() %&gt;%
+  print()
+
+# get case ids out of nested table structure
+casefiles &lt;- filescases$cases %&gt;% 
+  bind_rows() %&gt;% 
+  dplyr::select(case_id) %&gt;%
+  bind_cols(filescases) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(case_id, file_name) %&gt;%
+  print()
+
+# get linked case IDs and case uuIDs from GDC here: https://portal.gdc.cancer.gov/repository?facetTab=cases&amp;filters=%7B%22op%22%3A%22and%22%2C%22content%22%3A%5B%7B%22op%22%3A%22in%22%2C%22content%22%3A%7B%22field%22%3A%22cases.project.program.name%22%2C%22value%22%3A%5B%22NCICCR%22%5D%7D%7D%5D%7D&amp;searchTableTab=cases
+# exported as TSV (two tables, aliquot.tsv and sample.tsv)
+# moved files to data folder
+sample_ids &lt;- read_tsv(&quot;data/sample.tsv&quot;)
+str(sample_ids)
+
+phenodata &lt;- casefiles %&gt;%
+  left_join(sample_ids) %&gt;%
+  dplyr::select(case_submitter_id, everything()) %&gt;%
+  print()
+
+# download clinical data from GDC as JSON and import
+clinicaldata &lt;- fromJSON(&quot;data/gdc_clinical_data.json&quot;, 
+                       flatten = TRUE) %&gt;%
+  as_tibble() %&gt;%
+  print()
+
+diag_df &lt;- clinicaldata$diagnoses %&gt;%
+  bind_rows() %&gt;%
+  as_tibble() %&gt;%
+  mutate(case_submitter_id = str_replace(submitter_id,
+                                         &quot;-diagnosis&quot;,
+                                         &quot;&quot;)) %&gt;%
+  dplyr::select(case_submitter_id, everything()) %&gt;%
+  print()
+
+demo_df &lt;- clinicaldata %&gt;%
+  dplyr::select(-diagnoses) %&gt;%
+  mutate(case_submitter_id = str_replace(demographic.submitter_id,
+                                         &quot;-demographic&quot;,
+                                         &quot;&quot;)) %&gt;%
+  dplyr::select(case_submitter_id, everything()) %&gt;%
+  print()
+
+pheno_data &lt;- phenodata %&gt;%
+  left_join(diag_df) %&gt;%
+  left_join(demo_df) %&gt;%
+  print()
+
+# remove columns with all NA
+not_all_na &lt;- function(x) {!all(is.na(x))}
+pheno_data &lt;- pheno_data %&gt;% dplyr::select_if(not_all_na)
+pheno_data
+
+# add in PDL1-amp calls from James&#39; Blood paper project using NCI data
+# table of calls imported to data folder
+pdl1_amp_csv &lt;- read_csv(&quot;data/NIH_PDL1_amp_cases.csv&quot;)
+pdl1_nonamp_csv &lt;- read_csv(&quot;data/NIH_PDL1_nonamp_cases.csv&quot;)
+pdl1_nonamp_cases &lt;- pdl1_nonamp_csv %&gt;% 
+  dplyr::select(key) %&gt;% 
+  dplyr::rename(cases = key) %&gt;%
+  mutate(status = rep(&quot;non-amplified&quot;, length = nrow(pdl1_nonamp_csv))) %&gt;%
+  print()
+pdl1_amp_cases &lt;- pdl1_amp_csv %&gt;%
+  dplyr::rename(cases = key) %&gt;%
+  mutate(status = ifelse(value == 1, &quot;low_amplified&quot;, 
+                         ifelse(value == 2, &quot;high_amplified&quot;, NA))) %&gt;%
+  dplyr::select(cases, status) %&gt;%
+  print()
+summary(as.factor(pdl1_amp_cases$status))
+all_pdl1_status &lt;- bind_rows(pdl1_amp_cases, pdl1_nonamp_cases) %&gt;%
+  mutate(pdl1_status = as.factor(status)) %&gt;%
+  dplyr::rename(case_submitter_id = cases) %&gt;%
+  dplyr::select(case_submitter_id, pdl1_status)
+summary(all_pdl1_status$pdl1_status)
+
+# add to pheno_data
+pheno_data_pdl1 &lt;- pheno_data %&gt;%
+  left_join(all_pdl1_status) %&gt;%
+  dplyr::select(case_submitter_id, case_id, pdl1_status, everything()) %&gt;%
+  print()
+summary(pheno_data_pdl1$pdl1_status)
+
+# pull in temporary sample names
+nci_dlbcl_pheno
+
+pheno_data_samples &lt;- pheno_data_pdl1 %&gt;%
+  rename(filename = file_name) %&gt;%
+  left_join(nci_dlbcl_pheno, by = &quot;filename&quot;) %&gt;%
+  dplyr::select(case_submitter_id, sample, everything()) %&gt;%
+  print()</code></pre>
+<pre class="r"><code># rename the expression matrix columns with meaningful sample names
+pheno_data_ids &lt;- pheno_data_samples %&gt;%
+  dplyr::select(case_submitter_id, sample)
+id_frame &lt;- (colnames(nci_dlbcl_df)) %&gt;%
+  enframe() %&gt;%
+  dplyr::select(sample = value) %&gt;%
+  left_join(pheno_data_ids) %&gt;%
+  print()
+id_frame$case_submitter_id[1] &lt;- &quot;gene&quot;
+id_frame
+cnames &lt;- id_frame %&gt;% pull(case_submitter_id)
+
+colnames(nci_dlbcl_df) &lt;- cnames</code></pre>
+</div>
 <div id="save-for-later-use" class="section level2">
 <h2>Save for later use</h2>
 <pre class="r"><code>write_csv(nci_dlbcl_df, &quot;output/nci_dlbcl_unprocessed_counts.csv&quot;)
-write_csv(nci_dlbcl_annotation, &quot;output/nci_dlbcl_annotation.csv&quot;)</code></pre>
+write_csv(pheno_data_samples, &quot;output/nci_dlbcl_annotation.csv&quot;)</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
