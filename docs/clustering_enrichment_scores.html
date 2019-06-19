@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="mleukam" />
+
+<meta name="date" content="2019-06-17" />
+
+<title>Forming Immune Clusters</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Immune Landscape of DLBCL</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Forming Immune Clusters</h1>
+<h4 class="author">mleukam</h4>
+<h4 class="date">2019-06-17</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2019-06-19
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.4.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20190613code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20190613)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20190613code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20190613)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree462269b665324dd87754cdb559d1f67a2108cb29targetblank462269ba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/462269b665324dd87754cdb559d1f67a2108cb29" target="_blank">462269b</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree462269b665324dd87754cdb559d1f67a2108cb29targetblank462269ba" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+
+Untracked files:
+    Untracked:  analysis/enrichment.Rmd
+    Untracked:  code/gsva1.r
+    Untracked:  code/gsva1.sh
+    Untracked:  code/run_gsva1.pbs
+    Untracked:  data/NIH_PDL1_amp_cases.csv
+    Untracked:  data/NIH_PDL1_nonamp_cases.csv
+    Untracked:  data/aliquot.tsv
+    Untracked:  data/c2_human_immune_genesets.gmt
+    Untracked:  data/dlbcl_total_immune_gset_v1_results.rds
+    Untracked:  data/gdc_clinical_data.json
+    Untracked:  data/gdc_files_and_case_ids.json
+    Untracked:  data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Untracked:  data/gset_ids_complete.rds
+    Untracked:  data/htseq_counts/
+    Untracked:  data/sample.tsv
+    Untracked:  output/dlbcl_expr_matrix.csv
+    Untracked:  output/expr_matrix.csv
+    Untracked:  output/nci_dlbcl_annotation.csv
+    Untracked:  output/nci_dlbcl_unprocessed_counts.csv
+    Untracked:  output/total_immune_gset_v1.rds
+
+Unstaged changes:
+    Modified:   analysis/preprocessing_count_data.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/462269b665324dd87754cdb559d1f67a2108cb29/analysis/clustering_enrichment_scores.Rmd" target="_blank">462269b</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-19
+</td>
+<td>
+PCA plot of not so successful GSVA
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>Clear the workspace</p>
+<pre class="r"><code>rm(list = ls())</code></pre>
+<p>Load packages</p>
+<pre class="r"><code>library(&quot;tidyverse&quot;)</code></pre>
+<pre><code>── Attaching packages ──────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>✔ ggplot2 3.1.1     ✔ purrr   0.3.2
+✔ tibble  2.1.3     ✔ dplyr   0.8.1
+✔ tidyr   0.8.3     ✔ stringr 1.4.0
+✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
+<pre><code>── Conflicts ─────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(&quot;factoextra&quot;)</code></pre>
+<pre><code>Welcome! Related Books: `Practical Guide To Cluster Analysis in R` at https://goo.gl/13EFCZ</code></pre>
+<pre class="r"><code>library(&quot;FactoMineR&quot;)</code></pre>
+<p>Load data</p>
+<pre class="r"><code># read in data from cluster
+nci_dlbcl_es &lt;- readRDS(&quot;data/dlbcl_total_immune_gset_v1_results.rds&quot;)
+
+# transpose matrix to standard format
+nci_es &lt;- t(nci_dlbcl_es)
+
+# read in phenotype data
+pheno_data &lt;- read_csv(&quot;output/nci_dlbcl_annotation.csv&quot;)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character(),
+  days_to_last_follow_up = col_double(),
+  updated_datetime = col_datetime(format = &quot;&quot;),
+  age_at_diagnosis = col_double(),
+  created_datetime = col_datetime(format = &quot;&quot;),
+  demographic.updated_datetime = col_datetime(format = &quot;&quot;),
+  demographic.created_datetime = col_datetime(format = &quot;&quot;),
+  size = col_double()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+</div>
+<div id="set-up-groups" class="section level2">
+<h2>Set up groups</h2>
+<pre class="r"><code>str(pheno_data)</code></pre>
+<pre><code>Classes &#39;spec_tbl_df&#39;, &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    481 obs. of  67 variables:
+ $ case_submitter_id                 : chr  &quot;DLBCL11667&quot; &quot;DLBCL10501&quot; &quot;DLBCL10954&quot; &quot;DLBCL10984&quot; ...
+ $ sample                            : chr  &quot;nci_dlbcl_1&quot; &quot;nci_dlbcl_2&quot; &quot;nci_dlbcl_3&quot; &quot;nci_dlbcl_4&quot; ...
+ $ case_id                           : chr  &quot;3e164d5d-afa0-4e96-b177-ea9fdf69da7a&quot; &quot;678acbbd-3f1b-4464-ba21-a59606cf19ae&quot; &quot;c1b07bfa-d234-42d6-8a41-97b7a7924f0d&quot; &quot;15b380e1-d220-42b9-8613-18fcefccb0a4&quot; ...
+ $ pdl1_status                       : chr  &quot;non-amplified&quot; &quot;non-amplified&quot; &quot;non-amplified&quot; &quot;low_amplified&quot; ...
+ $ filename                          : chr  &quot;b384270b-0315-49c6-bb46-d155d8d41fec.htseq_counts.txt.gz&quot; &quot;ab3f9584-f27f-4d6e-a5de-ac0d0c20de13.htseq_counts.txt.gz&quot; &quot;92fbf689-0c26-4664-9dde-c41534f7b390.htseq_counts.txt.gz&quot; &quot;dc44d3ba-5c4d-40a1-b8a2-f27b88325d0b.htseq_counts.txt.gz&quot; ...
+ $ sample_id                         : chr  &quot;608e5a37-da88-4c7b-ba56-e096954521c6&quot; &quot;ed5c027b-1d1b-44df-84b0-fdf9e0290dbf&quot; &quot;e5341594-3828-426b-b619-f8187029de31&quot; &quot;d5ef7640-9e05-4b34-875e-7c99f125fe4b&quot; ...
+ $ sample_submitter_id               : chr  &quot;DLBCL11667-sample&quot; &quot;DLBCL10501-sample&quot; &quot;DLBCL10954-sample&quot; &quot;DLBCL10984-sample&quot; ...
+ $ project_id                        : chr  &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; ...
+ $ sample_type_id                    : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ time_between_excision_and_freezing: chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ oct_embedded                      : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ tumor_code_id                     : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ intermediate_dimension            : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ is_ffpe                           : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ pathology_report_uuid             : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ tumor_descriptor                  : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ sample_type                       : chr  &quot;Tumor&quot; &quot;Tumor&quot; &quot;Tumor&quot; &quot;Tumor&quot; ...
+ $ distance_normal_to_tumor          : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ biospecimen_anatomic_site         : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ state.x                           : chr  &quot;released&quot; &quot;released&quot; &quot;released&quot; &quot;released&quot; ...
+ $ diagnosis_pathologically_confirmed: chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ current_weight                    : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ composition                       : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ time_between_clamping_and_freezing: chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ distributor_reference             : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ shortest_dimension                : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ method_of_sample_procurement      : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ tumor_code                        : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ passage_count                     : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ tissue_type                       : chr  &quot;Not Reported&quot; &quot;Not Reported&quot; &quot;Not Reported&quot; &quot;Not Reported&quot; ...
+ $ biospecimen_laterality            : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ days_to_sample_procurement        : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ freezing_method                   : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ preservation_method               : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ growth_rate                       : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ days_to_collection                : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ catalog_reference                 : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ initial_weight                    : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ longest_dimension                 : chr  &quot;--&quot; &quot;--&quot; &quot;--&quot; &quot;--&quot; ...
+ $ submitter_id                      : chr  &quot;DLBCL11667-diagnosis&quot; &quot;DLBCL10501-diagnosis&quot; &quot;DLBCL10954-diagnosis&quot; &quot;DLBCL10984-diagnosis&quot; ...
+ $ morphology                        : chr  &quot;Not Reported&quot; &quot;Not Reported&quot; &quot;Not Reported&quot; &quot;Not Reported&quot; ...
+ $ days_to_last_follow_up            : num  633 674 425 NA 2299 ...
+ $ updated_datetime                  : POSIXct, format: &quot;2018-08-31 20:09:50&quot; &quot;2018-08-31 20:09:50&quot; ...
+ $ tumor_stage                       : chr  &quot;IPI:1&quot; &quot;IPI:1&quot; &quot;IPI:13&quot; &quot;IPI:12&quot; ...
+ $ age_at_diagnosis                  : num  17520 15330 17155 27375 27740 ...
+ $ created_datetime                  : POSIXct, format: &quot;2018-02-23 21:38:26&quot; &quot;2018-02-23 21:38:26&quot; ...
+ $ diagnosis_id                      : chr  &quot;a070b960-d0db-4763-98e8-b2af15c67af4&quot; &quot;6c84264c-6d68-4a9c-aae6-74fab32d4049&quot; &quot;23d9401d-80d5-41b4-b04c-b628432ae512&quot; &quot;b94c4b2f-f551-41d8-b0df-cb99bf4a0a42&quot; ...
+ $ tissue_or_organ_of_origin         : chr  &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; ...
+ $ ann_arbor_clinical_stage          : chr  &quot;Stage III&quot; &quot;Stage II&quot; &quot;Stage I&quot; &quot;Stage I&quot; ...
+ $ progression_or_recurrence         : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ last_known_disease_status         : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ primary_diagnosis                 : chr  &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; ...
+ $ tumor_grade                       : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ site_of_resection_or_biopsy       : chr  &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; ...
+ $ demographic.updated_datetime      : POSIXct, format: &quot;2019-04-29 15:48:27&quot; &quot;2019-04-29 15:48:27&quot; ...
+ $ demographic.created_datetime      : POSIXct, format: &quot;2018-02-23 19:16:31&quot; &quot;2018-02-23 19:16:31&quot; ...
+ $ demographic.gender                : chr  &quot;female&quot; &quot;male&quot; &quot;male&quot; &quot;female&quot; ...
+ $ demographic.state                 : chr  &quot;released&quot; &quot;released&quot; &quot;released&quot; &quot;released&quot; ...
+ $ demographic.submitter_id          : chr  &quot;DLBCL11667-demographic&quot; &quot;DLBCL10501-demographic&quot; &quot;DLBCL10954-demographic&quot; &quot;DLBCL10984-demographic&quot; ...
+ $ demographic.race                  : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ demographic.ethnicity             : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ demographic.vital_status          : chr  &quot;Dead&quot; &quot;Alive&quot; &quot;Dead&quot; &quot;Alive&quot; ...
+ $ demographic.demographic_id        : chr  &quot;049c7480-2932-491d-b708-b6722e9bdd19&quot; &quot;ea0674a8-3363-460a-b331-b60f3ad62ca4&quot; &quot;c8caf6bf-2cea-41f4-986a-4206c8173739&quot; &quot;705db031-d2f8-42ac-84c3-82e90cc9d5cb&quot; ...
+ $ id                                : chr  &quot;eeee5aab-8b4e-48bc-9d66-d1682920eb5f&quot; &quot;6a9fd6fe-326a-4578-9e61-a123cc8d9c53&quot; &quot;d15d4347-4a8a-48ce-bec1-c188072e2e05&quot; &quot;cb18f318-0bfa-409a-b855-424e66f9747e&quot; ...
+ $ md5                               : chr  &quot;1198da0bc19b2ae801b6150acfbb0c59&quot; &quot;7ce9b779255ee36716f3927c26137f9c&quot; &quot;593b75db5953d519492f1a74770622a3&quot; &quot;b26c7aa239a3aa6fd561e5deef94ef45&quot; ...
+ $ size                              : num  235439 232896 248096 245979 246899 ...
+ $ state.y                           : chr  &quot;released&quot; &quot;released&quot; &quot;released&quot; &quot;released&quot; ...
+ - attr(*, &quot;spec&quot;)=
+  .. cols(
+  ..   case_submitter_id = col_character(),
+  ..   sample = col_character(),
+  ..   case_id = col_character(),
+  ..   pdl1_status = col_character(),
+  ..   filename = col_character(),
+  ..   sample_id = col_character(),
+  ..   sample_submitter_id = col_character(),
+  ..   project_id = col_character(),
+  ..   sample_type_id = col_character(),
+  ..   time_between_excision_and_freezing = col_character(),
+  ..   oct_embedded = col_character(),
+  ..   tumor_code_id = col_character(),
+  ..   intermediate_dimension = col_character(),
+  ..   is_ffpe = col_character(),
+  ..   pathology_report_uuid = col_character(),
+  ..   tumor_descriptor = col_character(),
+  ..   sample_type = col_character(),
+  ..   distance_normal_to_tumor = col_character(),
+  ..   biospecimen_anatomic_site = col_character(),
+  ..   state.x = col_character(),
+  ..   diagnosis_pathologically_confirmed = col_character(),
+  ..   current_weight = col_character(),
+  ..   composition = col_character(),
+  ..   time_between_clamping_and_freezing = col_character(),
+  ..   distributor_reference = col_character(),
+  ..   shortest_dimension = col_character(),
+  ..   method_of_sample_procurement = col_character(),
+  ..   tumor_code = col_character(),
+  ..   passage_count = col_character(),
+  ..   tissue_type = col_character(),
+  ..   biospecimen_laterality = col_character(),
+  ..   days_to_sample_procurement = col_character(),
+  ..   freezing_method = col_character(),
+  ..   preservation_method = col_character(),
+  ..   growth_rate = col_character(),
+  ..   days_to_collection = col_character(),
+  ..   catalog_reference = col_character(),
+  ..   initial_weight = col_character(),
+  ..   longest_dimension = col_character(),
+  ..   submitter_id = col_character(),
+  ..   morphology = col_character(),
+  ..   days_to_last_follow_up = col_double(),
+  ..   updated_datetime = col_datetime(format = &quot;&quot;),
+  ..   tumor_stage = col_character(),
+  ..   age_at_diagnosis = col_double(),
+  ..   created_datetime = col_datetime(format = &quot;&quot;),
+  ..   diagnosis_id = col_character(),
+  ..   tissue_or_organ_of_origin = col_character(),
+  ..   ann_arbor_clinical_stage = col_character(),
+  ..   progression_or_recurrence = col_character(),
+  ..   last_known_disease_status = col_character(),
+  ..   primary_diagnosis = col_character(),
+  ..   tumor_grade = col_character(),
+  ..   site_of_resection_or_biopsy = col_character(),
+  ..   demographic.updated_datetime = col_datetime(format = &quot;&quot;),
+  ..   demographic.created_datetime = col_datetime(format = &quot;&quot;),
+  ..   demographic.gender = col_character(),
+  ..   demographic.state = col_character(),
+  ..   demographic.submitter_id = col_character(),
+  ..   demographic.race = col_character(),
+  ..   demographic.ethnicity = col_character(),
+  ..   demographic.vital_status = col_character(),
+  ..   demographic.demographic_id = col_character(),
+  ..   id = col_character(),
+  ..   md5 = col_character(),
+  ..   size = col_double(),
+  ..   state.y = col_character()
+  .. )</code></pre>
+<pre class="r"><code>summary(as.factor(pheno_data$pdl1_status))</code></pre>
+<pre><code>high_amplified  low_amplified  non-amplified           NA&#39;s 
+            20             45            406             10 </code></pre>
+<pre class="r"><code>pheno_data &lt;- pheno_data %&gt;%
+  mutate(pdl1_status = replace_na(pdl1_status, &quot;not_assessed&quot;)) %&gt;%
+  mutate(pdl1_status = ifelse(pdl1_status == &quot;non-amplified&quot;, &quot;non_amplified&quot;, pdl1_status))
+
+summary(as.factor(pheno_data$pdl1_status))</code></pre>
+<pre><code>high_amplified  low_amplified  non_amplified   not_assessed 
+            20             45            406             10 </code></pre>
+<pre class="r"><code>group_table &lt;- pheno_data %&gt;%
+  dplyr::select(samples = case_submitter_id, pdl1_status)
+
+nci_es_groups &lt;- as.data.frame(nci_es) %&gt;%
+  rownames_to_column(var = &quot;samples&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(group_table) %&gt;%
+  dplyr::select(samples, pdl1_status, everything()) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;samples&quot;) %&gt;%
+  mutate(pdl1_status = as.factor(pdl1_status))</code></pre>
+<pre><code>Joining, by = &quot;samples&quot;</code></pre>
+</div>
+<div id="pca-plot-of-results" class="section level2">
+<h2>PCA plot of results</h2>
+<pre class="r"><code># remove low amplified and samples not assessed
+nrow(nci_es_groups)</code></pre>
+<pre><code>[1] 481</code></pre>
+<pre class="r"><code>nci_es_filtered &lt;- nci_es_groups %&gt;%
+  dplyr::filter(pdl1_status %in% c(&quot;high_amplified&quot;, &quot;non_amplified&quot;))
+nrow(nci_es_filtered)</code></pre>
+<pre><code>[1] 426</code></pre>
+<pre class="r"><code># get PCA values
+dlbcl_pca &lt;- PCA(nci_es_filtered[-1], scale.unit = TRUE, graph = FALSE)
+
+# get eigenvalues
+eig_val &lt;- get_eigenvalue(dlbcl_pca)
+eig_val</code></pre>
+<pre><code>         eigenvalue variance.percent cumulative.variance.percent
+Dim.1  23.450812812     47.858801657                    47.85880
+Dim.2   7.154626387     14.601278341                    62.46008
+Dim.3   2.890630484      5.899245886                    68.35933
+Dim.4   2.320665682      4.736052413                    73.09538
+Dim.5   1.927115042      3.932887840                    77.02827
+Dim.6   1.530613611      3.123701247                    80.15197
+Dim.7   1.082408338      2.208996608                    82.36096
+Dim.8   0.937145933      1.912542721                    84.27351
+Dim.9   0.879032058      1.793942975                    86.06745
+Dim.10  0.664196534      1.355503131                    87.42295
+Dim.11  0.578922228      1.181473934                    88.60443
+Dim.12  0.504019316      1.028610849                    89.63304
+Dim.13  0.463829928      0.946591689                    90.57963
+Dim.14  0.402121743      0.820656618                    91.40029
+Dim.15  0.382080734      0.779756600                    92.18004
+Dim.16  0.332367714      0.678301458                    92.85834
+Dim.17  0.320448716      0.653976971                    93.51232
+Dim.18  0.304785018      0.622010242                    94.13433
+Dim.19  0.271766443      0.554625394                    94.68896
+Dim.20  0.240391660      0.490595224                    95.17955
+Dim.21  0.210603597      0.429803260                    95.60936
+Dim.22  0.202479914      0.413224314                    96.02258
+Dim.23  0.175907186      0.358994258                    96.38157
+Dim.24  0.153540521      0.313348003                    96.69492
+Dim.25  0.150154867      0.306438504                    97.00136
+Dim.26  0.131852824      0.269087396                    97.27045
+Dim.27  0.129270246      0.263816829                    97.53426
+Dim.28  0.114596640      0.233870693                    97.76814
+Dim.29  0.107372846      0.219128257                    97.98726
+Dim.30  0.097557421      0.199096777                    98.18636
+Dim.31  0.094920464      0.193715232                    98.38008
+Dim.32  0.077701997      0.158575505                    98.53865
+Dim.33  0.072972662      0.148923800                    98.68757
+Dim.34  0.068550016      0.139897991                    98.82747
+Dim.35  0.063809819      0.130224120                    98.95770
+Dim.36  0.061650039      0.125816405                    99.08351
+Dim.37  0.056493296      0.115292441                    99.19881
+Dim.38  0.051542301      0.105188369                    99.30399
+Dim.39  0.046845045      0.095602132                    99.39960
+Dim.40  0.044057054      0.089912355                    99.48951
+Dim.41  0.042468286      0.086669971                    99.57618
+Dim.42  0.037540166      0.076612585                    99.65279
+Dim.43  0.035828871      0.073120144                    99.72591
+Dim.44  0.034011197      0.069410606                    99.79532
+Dim.45  0.029872745      0.060964786                    99.85629
+Dim.46  0.027187626      0.055484951                    99.91177
+Dim.47  0.022335398      0.045582445                    99.95735
+Dim.48  0.016356208      0.033380016                    99.99073
+Dim.49  0.004540368      0.009266057                   100.00000</code></pre>
+<pre class="r"><code>fviz_eig(dlbcl_pca, addlabels = TRUE, ylim = c(0, 50))</code></pre>
+<p><img src="figure/clustering_enrichment_scores.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ind &lt;- get_pca_ind(dlbcl_pca)
+
+pdl1_status &lt;- nci_es_filtered$pdl1_status
+
+# visualize PCA
+fviz_pca_ind(dlbcl_pca,
+             label = &quot;none&quot;,
+             habillage = nci_es_filtered$pdl1_status,
+             palette = &quot;igv&quot;,
+             addEllipses = TRUE)</code></pre>
+<p><img src="figure/clustering_enrichment_scores.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fviz_pca_var(dlbcl_pca, col.var=&quot;contrib&quot;,
+             gradient.cols = &quot;rickandmorty&quot;,
+             label = &quot;none&quot;)</code></pre>
+<p><img src="figure/clustering_enrichment_scores.Rmd/unnamed-chunk-5-3.png" width="672" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.5.3 (2019-03-11)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Mojave 10.14.4
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] FactoMineR_1.41  factoextra_1.0.5 forcats_0.4.0    stringr_1.4.0   
+ [5] dplyr_0.8.1      purrr_0.3.2      readr_1.3.1      tidyr_0.8.3     
+ [9] tibble_2.1.3     ggplot2_3.1.1    tidyverse_1.2.1 
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_0.2.5     xfun_0.7             haven_2.1.0         
+ [4] lattice_0.20-38      colorspace_1.4-1     generics_0.0.2      
+ [7] htmltools_0.3.6      yaml_2.2.0           rlang_0.3.4         
+[10] ggpubr_0.2           pillar_1.4.1         glue_1.3.1          
+[13] withr_2.1.2          modelr_0.1.4         readxl_1.3.1        
+[16] plyr_1.8.4           munsell_0.5.0        gtable_0.3.0        
+[19] workflowr_1.4.0      cellranger_1.1.0     ggsci_2.9           
+[22] rvest_0.3.4          leaps_3.0            evaluate_0.14       
+[25] labeling_0.3         knitr_1.23           broom_0.5.2         
+[28] Rcpp_1.0.1           flashClust_1.01-2    scales_1.0.0        
+[31] backports_1.1.4      scatterplot3d_0.3-41 jsonlite_1.6        
+[34] fs_1.3.1             hms_0.4.2            digest_0.6.19       
+[37] stringi_1.4.3        ggrepel_0.8.1        grid_3.5.3          
+[40] rprojroot_1.3-2      cli_1.1.0            tools_3.5.3         
+[43] magrittr_1.5         lazyeval_0.2.2       cluster_2.0.9       
+[46] crayon_1.3.4         whisker_0.3-2        pkgconfig_2.0.2     
+[49] MASS_7.3-51.4        xml2_1.2.0           lubridate_1.7.4     
+[52] assertthat_0.2.1     rmarkdown_1.13       httr_1.4.0          
+[55] rstudioapi_0.10      R6_2.4.0             nlme_3.1-140        
+[58] git2r_0.25.2         compiler_3.5.3      </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
