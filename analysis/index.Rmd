@@ -22,6 +22,8 @@ The over-arching questions are:
 * Pseudoalign and count Duke RNAseq sequence data (source code for cluster-based processing in `/code/`)
 * Data cleaning and pre-processing
 
-## Prepare gene sets for enrichment analysis
+## Gene set variation analysis
 
-## Gene set enrichment analysis
+* [Preprocessing counts](preprocessing_count_data.html)
+* [GSVA](enrichment.html)
+* [Clustering GSVA results](clustering_enrichment_scores.html)
