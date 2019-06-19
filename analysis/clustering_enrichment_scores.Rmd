@@ -1,0 +1,88 @@
+---
+title: "Forming Immune Clusters"
+author: "mleukam"
+date: "2019-06-17"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Setup
+
+Clear the workspace
+```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+library("tidyverse")
+library("factoextra")
+library("FactoMineR")
+```
+
+Load data
+```{r}
+# read in data from cluster
+nci_dlbcl_es <- readRDS("data/dlbcl_total_immune_gset_v1_results.rds")
+
+# transpose matrix to standard format
+nci_es <- t(nci_dlbcl_es)
+
+# read in phenotype data
+pheno_data <- read_csv("output/nci_dlbcl_annotation.csv")
+```
+
+## Set up groups
+```{r}
+str(pheno_data)
+summary(as.factor(pheno_data$pdl1_status))
+pheno_data <- pheno_data %>%
+  mutate(pdl1_status = replace_na(pdl1_status, "not_assessed")) %>%
+  mutate(pdl1_status = ifelse(pdl1_status == "non-amplified", "non_amplified", pdl1_status))
+
+summary(as.factor(pheno_data$pdl1_status))
+
+group_table <- pheno_data %>%
+  dplyr::select(samples = case_submitter_id, pdl1_status)
+
+nci_es_groups <- as.data.frame(nci_es) %>%
+  rownames_to_column(var = "samples") %>%
+  as_tibble() %>%
+  left_join(group_table) %>%
+  dplyr::select(samples, pdl1_status, everything()) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "samples") %>%
+  mutate(pdl1_status = as.factor(pdl1_status))
+```
+
+## PCA plot of results
+```{r}
+# remove low amplified and samples not assessed
+nrow(nci_es_groups)
+nci_es_filtered <- nci_es_groups %>%
+  dplyr::filter(pdl1_status %in% c("high_amplified", "non_amplified"))
+nrow(nci_es_filtered)
+
+# get PCA values
+dlbcl_pca <- PCA(nci_es_filtered[-1], scale.unit = TRUE, graph = FALSE)
+
+# get eigenvalues
+eig_val <- get_eigenvalue(dlbcl_pca)
+eig_val
+fviz_eig(dlbcl_pca, addlabels = TRUE, ylim = c(0, 50))
+ind <- get_pca_ind(dlbcl_pca)
+
+pdl1_status <- nci_es_filtered$pdl1_status
+
+# visualize PCA
+fviz_pca_ind(dlbcl_pca,
+             label = "none",
+             habillage = nci_es_filtered$pdl1_status,
+             palette = "igv",
+             addEllipses = TRUE)
+
+fviz_pca_var(dlbcl_pca, col.var="contrib",
+             gradient.cols = "rickandmorty",
+             label = "none")
+```
