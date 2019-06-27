@@ -1,0 +1,371 @@
+---
+title: "dukedata"
+author: "mleukam"
+date: "2019-06-26"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Data sources
+
+* Original publication: Reddy et al. Cell. 2017 Oct 5;171(2):481-494 Link: https://www.ncbi.nlm.nih.gov/pubmed/28985567
+* 776 out of a total of 1001 samples underwent RNA sequencing:
+
+> RNaseq libraries were hybridized to Human All Exon V6 + 3′ UTR capture baits (Agilent, Cat. #5190-9306) as described previously (Cieslik et al., 2015). Each capture pool contained 24 libraries at 50 ng each for a total of 1200 ng of DNA. The pools were lyophilized using the speed vacuum technique. The libraries were first denatured and blocked at 95 C for 5 minutes, followed by holding at 65 C. The capture baits were mixed with RNase OUT and incubated for 2 minutes at 65 C. Hybridization buffer was mixed with the baits, followed by addition of the denatured libraries. The hybridization reaction was held at 65 C for 24 hours, followed by washing and amplification. These sequencing libraries were assessed for quality with the Bioanalyzer 2100 (Agilent) using the Agilent DNA 1000 Kit per manufacturer’s instructions. Libraries of high quality (e.g., with size distribution between 120-400bp and sufficient quantity for sequencing) were subjected to high throughput sequencing using the Illumina HiSeq 2500 platform per manufacturer’s instructions using HiSeq V4 125 PE, to generate an average of 10 million reads per sample.
+
+* Raw sequences were downloaded using from the European Genome/Phenome Archive (EGA) using IBM Aspera file transfer software. 
+
+The following processing steps were carried out on the Gardner Supercomputing Cluster due to system requirements:
+
+* RNAseq BAM files deconstructed to FASTQ
+* FastQC completed for RNAseq files
+* Read counts for RNAseq quantified with Kallisto (reverse strand)
+* Read counts combined with tximport into a single data structure
+* Counts and metadata extracted from txi structure as a EdgeR "dgelist" object
+* Dgelist object transferred off cluster for local processing in this notebook
+
+Parameters set for downstream analysis with limma voom following examples here: https://bioconductor.org/packages/release/bioc/vignettes/tximport/inst/doc/tximport.html
+
+## Setup
+
+Clear workspace
+```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+library("tidyverse")
+library("edgeR")
+library("limma")
+library("Biobase")
+```
+
+From the cluster:
+```{r eval = FALSE}
+# txi <- readRDS("txi.limma.rds")
+# > str(txi)
+#List of 5
+# $ abundance          : num [1:58721, 1:771] 1.89 0.687 150.765 14.069 51.961 ...
+#  ..- attr(*, "dimnames")=List of 2
+#  .. ..$ : chr [1:58721] "ENSG00000000003.14" "ENSG00000000005.5" "ENSG00000000419.12" #"ENSG00000000457.13" ...
+#  .. ..$ : chr [1:771] "648.a.1kDLBCL.DLBCL.SL137547.RNA" "658.a.1kDLBCL.DLBCL.SL137175.RNA" #"683.a.1kDLBCL.DLBCL.SL137187.RNA" "684.a.1kDLBCL.DLBCL.SL137583.RNA" ...
+# $ counts             : num [1:58721, 1:771] 18.04 3.02 502.55 231.24 653.92 ...
+#  ..- attr(*, "dimnames")=List of 2
+#  .. ..$ : chr [1:58721] "ENSG00000000003.14" "ENSG00000000005.5" "ENSG00000000419.12" #"ENSG00000000457.13" ...
+#  .. ..$ : chr [1:771] "648.a.1kDLBCL.DLBCL.SL137547.RNA" "658.a.1kDLBCL.DLBCL.SL137175.RNA" #"683.a.1kDLBCL.DLBCL.SL137187.RNA" "684.a.1kDLBCL.DLBCL.SL137583.RNA" ...
+# $ infReps            :List of 771
+#  ..$ 648.a.1kDLBCL.DLBCL.SL137547.RNA : num [1:58721, 1:100] 16 4 461 229 559 ...
+#  .. ..- attr(*, "dimnames")=List of 2
+#  .. .. ..$ : chr [1:58721] "ENSG00000000003.14" "ENSG00000000005.5" "ENSG00000000419.12" #"ENSG00000000457.13" ...
+#  .. .. ..$ : NULL
+
+# dgelist <- txi$counts
+  
+# str(dgelist)
+# Formal class 'DGEList' [package "edgeR"] with 1 slot
+#  ..@ .Data:List of 3
+#  .. ..$ : num [1:16178, 1:771] 18.04 3.02 502.55 231.24 653.92 ...
+#  .. .. ..- attr(*, "dimnames")=List of 2
+#  .. .. .. ..$ : chr [1:16178] "ENSG00000000003" "ENSG00000000005" "ENSG00000000419" #"ENSG00000000457" ...
+#  .. .. .. ..$ : chr [1:771] "648.a.1kDLBCL.DLBCL.SL137547.RNA" #"658.a.1kDLBCL.DLBCL.SL137175.RNA" "683.a.1kDLBCL.DLBCL.SL137187.RNA" #"684.a.1kDLBCL.DLBCL.SL137583.RNA" ...
+#  .. ..$ :'data.frame':	771 obs. of  4 variables:
+#  .. .. ..$ group       : Factor w/ 1 level "1": 1 1 1 1 1 1 1 1 1 1 ...
+#  .. .. ..$ lib.size    : num [1:771] 7664006 13270246 8620210 5512745 8874452 ...
+#  .. .. ..$ norm.factors: num [1:771] 1.014 0.952 0.947 0.843 0.938 ...
+#  .. .. ..$ lane        : Factor w/ 7 levels "C7FYAANXX","C7U9KANXX",..: 7 5 5 7 7 7 7 7 7 7 #...
+#  .. ..$ :'data.frame':	16178 obs. of  4 variables:
+#  .. .. ..$ ensembl_gene_id: chr [1:16178] "ENSG00000000003" "ENSG00000000005" #"ENSG00000000419" "ENSG00000000457" ...
+#  .. .. ..$ hgnc_symbol    : chr [1:16178] "TSPAN6" "TNMD" "DPM1" "SCYL3" ...
+#  .. .. ..$ chromosome_name: chr [1:16178] "X" "X" "20" "1" ...
+#  .. .. ..$ gene_biotype   : chr [1:16178] "protein_coding" "protein_coding" "protein_coding" #"protein_coding" ...
+```
+
+Read in data
+```{r}
+dgelist <- readRDS("data/temp.dgelist_limma.rds")
+str(dgelist)
+
+# read in conversion table for gene IDs
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
+```
+
+## Data cleaning
+
+Convert GENCODE v29 to v22 gene ids to match GDC standard
+```{r}
+# get expression matrix
+expr_duke <- dgelist[[1]]
+expr_duke[1:5, 1:5]
+col__names <- colnames(expr_duke)
+col_names_rep <- str_split(col__names, pattern = "\\.", simplify = TRUE) %>% 
+  as_tibble() %>%
+  pull(V1) %>%
+  paste0("duke_", .) %>%
+  print()
+colnames(expr_duke) <- col_names_rep
+expr_duke[1:5, 1:5]
+
+# gencode v29 was used to generate rownames of expr_duke matrix
+# GDC standard is gencode v22, which is source of NCI data
+# will convert to gencode v22 to match rows of NCI data
+geneID_split <- str_split(gencode_gtf$gene_id, pattern = "\\.", simplify = TRUE) %>% 
+  as_tibble() %>%
+  dplyr::select(geneID_split = V1)
+
+gencode_gtf_split <- gencode_gtf %>% 
+  bind_cols(geneID_split) %>%
+  dplyr::select(gene_id_v22 = gene_id, geneID_split, everything()) %>%
+  print()
+
+row__names <- rownames(expr_duke) %>%
+  enframe() %>%
+  dplyr::select(geneID_split = value)
+
+# check how many gene ids are missing in v22 that are named in v29
+setdiff(row__names$geneID_split, gencode_gtf_split$geneID_split)
+# 55, not terrible, spot check with google finds that many of these are not protein-coding
+
+# merge gene name data with expression matrix
+expr_duke_df <- expr_duke %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id_v29") %>%
+  as_tibble() %>%
+  mutate(geneID_split = str_replace(gene_id_v29, pattern = "\\.*", "")) %>%
+  dplyr::select(gene_id_v29, geneID_split, everything()) %>%
+  left_join(gencode_gtf_split) %>%
+  dplyr::select(gene_id_v29, gene_id_v22, geneID_split, gene_type, everything()) %>%
+  dplyr::select(-gene_status, -gene_name, -level, -havana_gene) %>%
+  print()
+
+# check how many gene ids are missing from version 22  
+summary(is.na(expr_duke_df$gene_id_v22))
+
+# check the gene types in the expression matrix
+summary(as.factor(expr_duke_df$gene_type))
+
+# filter for protein coding genes only
+expr_duke_filtered <- expr_duke_df %>% 
+  dplyr::filter(gene_type == "protein_coding")
+  
+# any missing gene ids also protein coding genes?
+summary(is.na(expr_duke_filtered$gene_id_v22))
+# NO
+```
+
+#### Filter for protein coding
+```{r}
+expr_duke_protcoding <- expr_duke_filtered %>%
+  dplyr::select(-gene_id_v29, -geneID_split, -gene_type) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_id_v22") %>%
+  as.matrix()
+
+str(expr_duke_protcoding)
+expr_duke_protcoding[1:5, 1:5]
+```
+
+#### Convert to CPM
+```{r}
+# correct for library size with cpm using EdgeR
+expr_duke_cpm <- cpm(expr_duke_protcoding, log = FALSE)
+str(expr_duke_cpm)
+expr_duke_cpm[1:5, 1:5]
+```
+
+#### Initial density plots
+```{r}
+# Density plots
+# tidy data
+tidy_cpm <- t(expr_duke_cpm) %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  gather(key = "gene_id", value = "intensity", -sample_id) %>%
+  print()
+
+# plots
+dplot_duke <- ggplot(tidy_cpm, aes(intensity)) +
+  geom_density() + 
+  theme(legend.position = "none")
+dplot_duke +
+  xlim(-5, 20)
+
+# plot with log and small offset
+dplot_duke_log <- ggplot(tidy_cpm, aes(log(intensity + 0.5))) +
+  geom_density() + 
+  theme(legend.position = "none")
+dplot_duke_log +
+  xlim(-10, 10)
+
+```
+
+#### Filtering by expression
+```{r}
+# will use "soft cutoff" based on library size:
+
+
+# expression cutoff: 1
+cutoff <- 1
+# must be expressed in at least: half
+min_sm_frac <- 0.5
+filter_frac <- min_sm_frac * ncol(expr_duke_cpm)
+filter_frac
+
+# apply cutoffs
+total_cpm_stats <- data.frame(
+  total = apply(expr_duke_cpm, 1, function(x){
+    sum(x > cutoff, na.rm = TRUE) 
+    } ))
+keep <- which(total_cpm_stats$total >= filter_frac)
+
+# check results
+dim(expr_duke_cpm)
+expr_duke_cpm_filtered = expr_duke_cpm[keep,]
+dim(expr_duke_cpm_filtered)
+```
+
+#### Post-filtering density plots
+```{r}
+# Density plots
+# tidy data
+tidy_cpm_filtered <- t(expr_duke_cpm_filtered) %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  gather(key = "gene_id", value = "intensity", -sample_id) %>%
+  print()
+
+# plots
+dplot_duke_2 <- ggplot(tidy_cpm_filtered, aes(intensity)) +
+  geom_density() + 
+  theme(legend.position = "none")
+dplot_duke_2 +
+  xlim(-5, 20)
+
+# plot with log and small offset
+dplot_duke_log_2 <- ggplot(tidy_cpm_filtered, aes(log(intensity + 0.5))) +
+  geom_density() + 
+  theme(legend.position = "none")
+dplot_duke_log_2 +
+  xlim(-10, 10)
+```
+
+#### Normalize gene expression distributions
+Normalization by the method of trimmed mean of M-values (TMM) is performed using the calcNormFactors function in edgeR. The normalisation factors calculated here are used as a scaling factor for the library sizes. 
+
+```{r}
+# get normalization factors
+norm_factors <- calcNormFactors(expr_duke_cpm_filtered, method = "TMM")
+
+# convert expression matrix to dataframe
+expr_duke_cpm_df <- as.data.frame(expr_duke_cpm_filtered)
+
+# apply factor to each column
+duke_cpm_norm <- map2_dfc(expr_duke_cpm_df, norm_factors, `*`)
+duke_cpm_norm <- as.data.frame(duke_cpm_norm)
+rownames(duke_cpm_norm) <- rownames(expr_duke_cpm_filtered)
+duke_cpm_norm[1:5, 1:5]
+```
+
+#### Log transformation
+```{r}
+# introduce offset to prevent -Inf
+offset_duke_cpm_norm <- duke_cpm_norm + 0.5
+offset_duke_cpm_norm[1:5, 1:5]
+
+# log transformation
+duke_log_cpm_filtered_norm <- log2(offset_duke_cpm_norm)
+duke_log_cpm_filtered_norm[1:5, 1:5]
+```
+
+Final density plot
+```{r}
+duke_log_cpm_filtered_tbl <- duke_log_cpm_filtered_norm %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene") %>%
+  as_tibble()
+
+tidy_log_cpm <- duke_log_cpm_filtered_tbl %>% 
+  gather(key = "sampleID", value = "intensity", -gene)
+
+dplot3 <- ggplot(tidy_log_cpm, aes(intensity)) +
+  geom_density() +
+  theme(legend.position = "none") +
+  xlim(-20, 20) +
+  ggtitle("Final density plot of log(CPM) for Duke DLBCL")
+dplot3
+```
+
+## Prepare phenotype data
+```{r}
+pheno_data <- dgelist[[2]] 
+pheno_data_split <- as.data.frame(pheno_data) %>%
+  rownames_to_column(var = "sample_long") %>%
+  as_tibble()
+
+sample_id <- str_split(pheno_data_split$sample_long, 
+                       pattern = "\\.", 
+                       simplify = TRUE) %>% 
+  as_tibble() %>%
+  pull(V1) %>%
+  paste0("duke_", .) %>%
+  print()
+
+sample_id_df <- sample_id %>%
+  enframe() %>%
+  dplyr::select(sample_id = value, -name)
+  
+pheno_data_joined <- pheno_data_split %>%
+  bind_cols(sample_id_df) %>%
+  dplyr::select(sample_id, everything()) %>%
+  dplyr::select(-group, -norm.factors, -sample_long) %>%
+  dplyr::rename(lib_size = lib.size) %>%
+  mutate(lib_size = as.integer(lib_size)) %>%
+  print()
+
+# Ensure that samples in expression matrix matches pheno data
+sample_exprs <- colnames(duke_log_cpm_filtered_norm)
+sample_pheno <- pheno_data_joined %>% pull(sample_id)
+identical(sample_exprs, sample_pheno)
+```
+
+## Write out files for later use
+
+Following ExpressionSet vignette in Biobase package
+
+```{r}
+# make expression set
+# first need variable annotation
+v_metadata <- data.frame(
+  labelDescription = c("original library size","Sequencing lane for batch correction"),
+  row.names = c("lib_size", "lane"))
+
+# make annotated phenoData
+pheno_data_df <- as.data.frame(pheno_data_joined) %>%
+  column_to_rownames(var = "sample_id")
+  
+phenoData <- new("AnnotatedDataFrame", 
+                 data = pheno_data_df, 
+                 varMetadata = v_metadata)
+phenoData
+
+# convert expression data to matrix format
+duke_exprs <- duke_log_cpm_filtered_norm %>% as.matrix()
+
+# create global annotation
+annotation <- as.character("RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed.")
+
+# assemble expressionset
+duke_es <- ExpressionSet(
+  assayData = duke_exprs,
+  phenoData = phenoData,
+  annotation = annotation)
+duke_es
+```
+
+```{r}
+saveRDS(duke_es, "output/duke_expression_set_cleaned_log.rds")
+
+```
