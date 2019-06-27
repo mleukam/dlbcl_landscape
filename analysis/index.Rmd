@@ -16,14 +16,32 @@ The over-arching questions are:
 
 2. What is the influence of tumor gene mutations on immune phenotypes in DLBCL?
 
-## Prepare RNAseq data for analysis
+## Aim 1: Identify Recurrent Immune Phenotypes using RNAseq Data
+
+### Prepare RNAseq data for analysis
 
 * [Download raw RNAseq counts in NCI lymphoma dataset from GDC](gdc_download.html)
-* Pseudoalign and count Duke RNAseq sequence data (source code for cluster-based processing in `/code/`)
-* Data cleaning and pre-processing
+* [Preprocessing NCI counts](preprocessing_count_data.html)
+* Pseudoalign and count Duke RNAseq sequence data (source code for processing done on cluster in `/code/`)
+* [Preprocessing Duke counts](dukedata.html)
+* [Merge datasets]()
 
-## Gene set variation analysis
+### Gene set variation analysis
 
-* [Preprocessing counts](preprocessing_count_data.html)
+#### First try at gene list collection:
+
+Gene lists selected from work-in-progress analyis of TCGA macrophage signatures and from immune-related C2 "curated" gene sets from MSigDB. Also included T-cell inflamed signature from prior publications (Riyue Bao). No additional filtering was done after selection of candidate gene lists.
+
 * [GSVA](enrichment.html)
 * [Clustering GSVA results](clustering_enrichment_scores.html)
+
+#### Gene set collection refinement:
+
+* [New gene set collection](newgs.html)
+
+## Aim 2: Link Immune Phenotype Clusters to Oncogenes
+
+### Mutation calls
+
+## Aim 3: Visualize the Immune Phenotype with Multi-Channel IHC
+
