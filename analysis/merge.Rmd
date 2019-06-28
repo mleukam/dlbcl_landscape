@@ -1,0 +1,33 @@
+---
+title: "Merge Duke and NCI datasets"
+author: "mleukam"
+date: "2019-06-27"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+The purpose of this notebook is to merge the RNAseq data from NCI (downloaded as raw counts from GDC) and Duke (processed from sequence data) into a single gene expression matrix. 
+
+## Setup
+
+Clear workspace
+```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+library("tidyverse")
+library("sva")
+```
+
+Read in data
+```{r}
+duke_es <- readRDS("output/duke_expression_set_cleaned_log.rds")
+# nci_es <- 
+```
+
+
+
+

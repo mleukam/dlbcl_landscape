@@ -7,7 +7,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-
 ## Setup
 
 Clear workspace
@@ -20,7 +19,7 @@ Load packages
 library("tidyverse")
 library("edgeR")
 library("limma")
-library("GSVA")
+library("Biobase")
 ```
 
 Read in data
@@ -46,6 +45,7 @@ total_counts_prcode <- total_counts %>%
   dplyr::filter(gene_type == "protein_coding") %>%
   dplyr::select(-gene_name, -gene_type, -gene_status, -level, -havana_gene) %>%
   dplyr::select(gene_id, everything())
+total_counts_prcode[1:5, 1:5]
 
 nrow(total_counts)
 nrow(total_counts_prcode)
@@ -88,15 +88,54 @@ totcounts_prcode_cpm_matrix <- total_counts_prcode_cpm %>%
   as.data.frame() %>%
   column_to_rownames(var = "gene_id")
 totcounts_prcode_cpm_matrix[1:5, 1:5]
+dim(totcounts_prcode_cpm_matrix)
 
-# filter out genes that aren't at least expressed greater than 1 in at least 45 cases (45 being about the size of the smallest group)
+# apply hard cutoffs 
+# filter out genes that aren't at least expressed greater than 1 in at least half of cases
+# set filter fraction
+min_sm_frac = 0.5
+filter_frac = min_sm_frac * ncol(totcounts_prcode_cpm_matrix)
+filter_frac
 total_cpm_stats <- data.frame(
-  total = apply(totcounts_prcode_cpm_matrix, 1, function(x) sum(x > 1, na.rm = TRUE)))
-keep <- which(total_cpm_stats$total >= 50) 
+  total = apply(totcounts_prcode_cpm_matrix, 
+                1, 
+               function(x) {sum(x > 1, na.rm = TRUE) } ))
+keep <- which(total_cpm_stats$total >= filter_frac)
 
+#---------------------
+#### DECIDED NOT TO USE
+## apply soft cutoffs
+# set CPM threshold based on library size
+# cpm_thres = 10 / min(colSums(totcounts_prcode_cpm_matrix)) * 10^6
+# set minimum sample size
+# keep <- rowSums(cpm(totcounts_prcode_cpm_matrix) > cpm_thres) # >= as.integer(ncol(totcounts_prcode_cpm_matrix) / 2)
+#---------------------
+
+# apply keep criteria and check results
 dim(totcounts_prcode_cpm_matrix)
 total_cpm_filtered = totcounts_prcode_cpm_matrix[keep,]
 dim(total_cpm_filtered)
+```
+
+#### Density plots of filtered CPM values
+```{r}
+tidy_cpm_filtered <- total_cpm_filtered %>% 
+  rownames_to_column(var = "gene_id") %>%
+  gather(key = "sampleID", value = "intensity", -gene_id) 
+
+dplot1 <- ggplot(tidy_cpm_filtered, aes(intensity)) +
+  geom_density() + 
+  theme(legend.position = "none") +
+  xlim(-5, 100) +
+  ggtitle("Density plot of CPM for NCI DLBCL")
+dplot1
+
+dplot2 <- ggplot(tidy_cpm_filtered, aes(log(intensity))) +
+  geom_density() +
+  theme(legend.position = "none") +
+  xlim(-20, 20) +
+  ggtitle("Density plot of log(CPM) for NCI DLBCL")
+dplot2
 ```
 
 #### Normalize gene expression distributions
@@ -115,20 +154,24 @@ total_cpm_norm[1:5, 1:5]
 
 #### Log transformation
 ```{r}
-total_log_cpm_filtered_norm <- log2(total_cpm_norm)
+# introduce offset to prevent -Inf
+offset_total_cpm_norm <- total_cpm_norm + 0.5
+offset_total_cpm_norm[1:5, 1:5]
+
+# log transformation
+total_log_cpm_filtered_norm <- log2(offset_total_cpm_norm)
 total_log_cpm_filtered_norm[1:5, 1:5]
 ```
 
+Final density plot
 ```{r}
 total_log_cpm_filtered_tbl <- total_log_cpm_filtered_norm %>%
   as.data.frame() %>%
   rownames_to_column(var = "gene") %>%
-  as_tibble() %>% 
-  print()
+  as_tibble()
 
 tidy_log_cpm <- total_log_cpm_filtered_tbl %>% 
-  gather(key = "sampleID", value = "intensity", -gene) %>% 
-  print()
+  gather(key = "sampleID", value = "intensity", -gene)
 
 dplot3 <- ggplot(tidy_log_cpm, aes(intensity)) +
   geom_density() +
@@ -138,7 +181,119 @@ dplot3 <- ggplot(tidy_log_cpm, aes(intensity)) +
 dplot3
 ```
 
-## Write out for later use
+## Add in phenotype data
+
+Read in file and do some prelim cleaning
 ```{r}
-write_csv(total_log_cpm_filtered_norm, "output/expr_matrix.csv")
+nci_phenotype_data <- read_csv("output/nci_dlbcl_annotation.csv")
+nci_phenotype_data
+
+# clean up variables
+nci_pheno_data <- nci_phenotype_data %>%
+  dplyr::select(case_submitter_id,
+                pdl1_status, 
+                -sample, 
+                case_id, 
+                filename,
+                -sample_id,
+                -sample_submitter_id,
+                project_id, 
+                -sample_type_id,
+                -time_between_excision_and_freezing,
+                -oct_embedded, 
+                -tumor_code_id,
+                -intermediate_dimension,
+                -is_ffpe,
+                -pathology_report_uuid,
+                -sample_type,
+                -distance_normal_to_tumor,
+                -biospecimen_anatomic_site,
+                -state.x,
+                -diagnosis_pathologically_confirmed,
+                -current_weight,
+                -composition,
+                -time_between_clamping_and_freezing,
+                -distributor_reference,
+                -shortest_dimension,
+                -method_of_sample_procurement,
+                -tumor_code,
+                -passage_count,
+                -tissue_type,
+                -biospecimen_laterality,
+                -days_to_sample_procurement,
+                -freezing_method,
+                -preservation_method,
+                -growth_rate,
+                -days_to_collection,
+                -catalog_reference,
+                -initial_weight,
+                -longest_dimension,
+                -submitter_id,
+                -morphology,
+                days_to_last_follow_up,
+                updated_datetime,
+                tumor_stage,
+                age_at_diagnosis,
+                -created_datetime,
+                -diagnosis_id,
+                tissue_or_organ_of_origin,
+                ann_arbor_clinical_stage,
+                progression_or_recurrence,
+                last_known_disease_status,
+                primary_diagnosis,
+                tumor_grade,
+                -site_of_resection_or_biopsy,
+                -demographic.updated_datetime,
+                -demographic.created_datetime,
+                demographic.gender,
+                demographic.submitter_id,
+                demographic.race,
+                demographic.ethnicity,
+                demographic.vital_status,
+                -demographic.demographic_id,
+                -id,
+                -md5,
+                size,
+                -state.y
+                ) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "case_submitter_id")
+
+str(nci_pheno_data)
+nci_pheno_data[1:5,1:5]
 ```
+
+## Write out for later use
+Following ExpressionSet vignette in Biobase package
+
+```{r}
+# make expression set
+# first need variable annotation
+v_metadata <- data.frame(
+  labelDescription = colnames(nci_pheno_data),
+  row.names = colnames(nci_pheno_data))
+
+# make annotated phenoData
+phenoData <- new("AnnotatedDataFrame", 
+                 data = nci_pheno_data, 
+                 varMetadata = v_metadata)
+phenoData
+
+# convert expression data to matrix format
+nci_exprs <- total_log_cpm_filtered_norm %>% as.matrix()
+
+# create global annotation
+annotation <- as.character("RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed.")
+
+# assemble expressionset
+nci_es <- ExpressionSet(
+  assayData = nci_exprs,
+  phenoData = phenoData,
+  annotation = annotation)
+nci_es
+```
+
+```{r}
+saveRDS(nci_es, "output/nci_expressionset.rds")
+```
+

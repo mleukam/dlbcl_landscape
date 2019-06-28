@@ -1,0 +1,18 @@
+---
+title: "ext_pheno"
+author: "mleukam"
+date: "2019-06-28"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+The purpose of this notebook is to get extended phenotype data for the Duke and NCI datasets from supplemental tables published with each paper and to add this clinical and metadata to the expressionset for each dataset.
+
+## Setup
+
+Clear workspace
+```{r}
+rm(list = ls())
+```
+

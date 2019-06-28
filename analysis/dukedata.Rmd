@@ -144,7 +144,10 @@ summary(is.na(expr_duke_df$gene_id_v22))
 
 # check the gene types in the expression matrix
 summary(as.factor(expr_duke_df$gene_type))
+```
 
+#### Filter for protein coding
+```{r}
 # filter for protein coding genes only
 expr_duke_filtered <- expr_duke_df %>% 
   dplyr::filter(gene_type == "protein_coding")
@@ -152,10 +155,7 @@ expr_duke_filtered <- expr_duke_df %>%
 # any missing gene ids also protein coding genes?
 summary(is.na(expr_duke_filtered$gene_id_v22))
 # NO
-```
 
-#### Filter for protein coding
-```{r}
 expr_duke_protcoding <- expr_duke_filtered %>%
   dplyr::select(-gene_id_v29, -geneID_split, -gene_type) %>%
   as.data.frame() %>%
@@ -166,10 +166,23 @@ str(expr_duke_protcoding)
 expr_duke_protcoding[1:5, 1:5]
 ```
 
+#### Subset cases based on protein coding library coverage
+```{r}
+expr_duke_protcoding[1:5, 1:5]
+
+gene_coverage_threshold <- 12000
+
+ncol(expr_duke_protcoding)
+expr_duke_subset <- expr_duke_protcoding[, colSums(expr_duke_protcoding != 0) > gene_coverage_threshold]
+
+expr_duke_subset[1:5, 1:5]
+ncol(expr_duke_subset)
+```
+
 #### Convert to CPM
 ```{r}
 # correct for library size with cpm using EdgeR
-expr_duke_cpm <- cpm(expr_duke_protcoding, log = FALSE)
+expr_duke_cpm <- cpm(expr_duke_subset, log = FALSE)
 str(expr_duke_cpm)
 expr_duke_cpm[1:5, 1:5]
 ```
@@ -203,26 +216,33 @@ dplot_duke_log +
 
 #### Filtering by expression
 ```{r}
-# will use "soft cutoff" based on library size:
-
-
-# expression cutoff: 1
+# apply hard cutoffs
+# cpm expression cutoff: 1
 cutoff <- 1
 # must be expressed in at least: half
 min_sm_frac <- 0.5
 filter_frac <- min_sm_frac * ncol(expr_duke_cpm)
-filter_frac
-
-# apply cutoffs
-total_cpm_stats <- data.frame(
-  total = apply(expr_duke_cpm, 1, function(x){
-    sum(x > cutoff, na.rm = TRUE) 
-    } ))
+ filter_frac
+ total_cpm_stats <- data.frame(
+   total = apply(expr_duke_cpm, 1, function(x){
+     sum(x > cutoff, na.rm = TRUE) 
+     } ))
 keep <- which(total_cpm_stats$total >= filter_frac)
 
+# convert to data frame for subsetting
+expr_duke_cpm_df <- expr_duke_cpm %>% as.data.frame()
+
+# apply soft cutoffs
+# decided not to use
+#expr_duke_cpm_df <- as.data.frame(expr_duke_cpm)
+# set CPM threshold based on library size
+#cpm_thres <- 10 / min(colSums(expr_duke)) * 10^6
+# apply CPM threshold to at least half of all samples
+#keep <- rowSums(expr_duke_cpm_df > cpm_thres) >= #as.integer(ncol(expr_duke_cpm_df) / 2)
+
 # check results
-dim(expr_duke_cpm)
-expr_duke_cpm_filtered = expr_duke_cpm[keep,]
+dim(expr_duke_cpm_df)
+expr_duke_cpm_filtered <- expr_duke_cpm_df[keep,]
 dim(expr_duke_cpm_filtered)
 ```
 
@@ -325,9 +345,14 @@ pheno_data_joined <- pheno_data_split %>%
   mutate(lib_size = as.integer(lib_size)) %>%
   print()
 
+# select rows based on columns in expression matrix
+pheno_data_filtered <- pheno_data_joined %>%
+  dplyr::filter(sample_id %in% colnames(duke_log_cpm_filtered_norm))
+nrow(pheno_data_filtered)
+
 # Ensure that samples in expression matrix matches pheno data
 sample_exprs <- colnames(duke_log_cpm_filtered_norm)
-sample_pheno <- pheno_data_joined %>% pull(sample_id)
+sample_pheno <- pheno_data_filtered %>% pull(sample_id)
 identical(sample_exprs, sample_pheno)
 ```
 
@@ -343,7 +368,7 @@ v_metadata <- data.frame(
   row.names = c("lib_size", "lane"))
 
 # make annotated phenoData
-pheno_data_df <- as.data.frame(pheno_data_joined) %>%
+pheno_data_df <- as.data.frame(pheno_data_filtered) %>%
   column_to_rownames(var = "sample_id")
   
 phenoData <- new("AnnotatedDataFrame", 
@@ -355,7 +380,7 @@ phenoData
 duke_exprs <- duke_log_cpm_filtered_norm %>% as.matrix()
 
 # create global annotation
-annotation <- as.character("RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed.")
+annotation <- as.character("RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in >12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed.")
 
 # assemble expressionset
 duke_es <- ExpressionSet(
@@ -366,6 +391,5 @@ duke_es
 ```
 
 ```{r}
-saveRDS(duke_es, "output/duke_expression_set_cleaned_log.rds")
-
+saveRDS(duke_es, "output/duke_expressionset.rds")
 ```
