@@ -437,7 +437,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-06-13
+<strong>Last updated:</strong> 2019-06-28
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -528,25 +528,46 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree5ae4f4765761d496ad037a59b6cb502764cd2893targetblank5ae4f47a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/5ae4f4765761d496ad037a59b6cb502764cd2893" target="_blank">5ae4f47</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree42da9d5893be09775a582da78b8bec151d4ea9bftargetblank42da9d5a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/42da9d5893be09775a582da78b8bec151d4ea9bf" target="_blank">42da9d5</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree5ae4f4765761d496ad037a59b6cb502764cd2893targetblank5ae4f47a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree42da9d5893be09775a582da78b8bec151d4ea9bftargetblank42da9d5a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 </p>
 <pre><code>
 Ignored files:
+    Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
 
 Untracked files:
+    Untracked:  analysis/enrichment.Rmd
+    Untracked:  analysis/newgs.Rmd
+    Untracked:  code/gsva1.r
+    Untracked:  code/gsva1.sh
+    Untracked:  code/run_gsva1.pbs
+    Untracked:  data/NIH_PDL1_amp_cases.csv
+    Untracked:  data/NIH_PDL1_nonamp_cases.csv
+    Untracked:  data/aliquot.tsv
+    Untracked:  data/c2_human_immune_genesets.gmt
+    Untracked:  data/dlbcl_total_immune_gset_v1_results.rds
+    Untracked:  data/gdc_clinical_data.json
+    Untracked:  data/gdc_files_and_case_ids.json
     Untracked:  data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Untracked:  data/gset_ids_complete.rds
     Untracked:  data/htseq_counts/
+    Untracked:  data/sample.tsv
+    Untracked:  data/temp.dgelist_limma.rds
+    Untracked:  output/dlbcl_expr_matrix.csv
+    Untracked:  output/duke_expression_set_cleaned_log.rds
+    Untracked:  output/duke_expressionset.rds
     Untracked:  output/expr_matrix.csv
     Untracked:  output/nci_dlbcl_annotation.csv
     Untracked:  output/nci_dlbcl_unprocessed_counts.csv
+    Untracked:  output/nci_expressionset.rds
+    Untracked:  output/total_immune_gset_v1.rds
 
 </code></pre>
 <p>
@@ -590,6 +611,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/42da9d5893be09775a582da78b8bec151d4ea9bf/analysis/preprocessing_count_data.Rmd" target="_blank">42da9d5</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-28
+</td>
+<td>
+major overhaul of Duke count processing, updates of NCI pheno data
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/768753ff0d3080e2b6170b9487510dbbd1aea778/docs/preprocessing_count_data.html" target="_blank">768753f</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-13
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/mleukam/dlbcl_landscape/blob/5ae4f4765761d496ad037a59b6cb502764cd2893/analysis/preprocessing_count_data.Rmd" target="_blank">5ae4f47</a>
 </td>
 <td>
@@ -615,18 +670,51 @@ working preprocessing notebook
 <pre class="r"><code>rm(list = ls())</code></pre>
 <p>Load packages</p>
 <pre class="r"><code>library(&quot;tidyverse&quot;)</code></pre>
-<pre><code>── Attaching packages ──────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>── Attaching packages ─────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
 <pre><code>✔ ggplot2 3.1.1     ✔ purrr   0.3.2
 ✔ tibble  2.1.3     ✔ dplyr   0.8.1
 ✔ tidyr   0.8.3     ✔ stringr 1.4.0
 ✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
-<pre><code>── Conflicts ─────────────────────────────────────────── tidyverse_conflicts() ──
+<pre><code>── Conflicts ────────────────────────────────────────────────── tidyverse_conflicts() ──
 ✖ dplyr::filter() masks stats::filter()
 ✖ dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>library(&quot;edgeR&quot;)</code></pre>
 <pre><code>Loading required package: limma</code></pre>
 <pre class="r"><code>library(&quot;limma&quot;)
-library(&quot;GSVA&quot;)</code></pre>
+library(&quot;Biobase&quot;)</code></pre>
+<pre><code>Loading required package: BiocGenerics</code></pre>
+<pre><code>Loading required package: parallel</code></pre>
+<pre><code>
+Attaching package: &#39;BiocGenerics&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:parallel&#39;:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB</code></pre>
+<pre><code>The following object is masked from &#39;package:limma&#39;:
+
+    plotMA</code></pre>
+<pre><code>The following objects are masked from &#39;package:dplyr&#39;:
+
+    combine, intersect, setdiff, union</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
+
+    IQR, mad, sd, var, xtabs</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
+
+    anyDuplicated, append, as.data.frame, basename, cbind,
+    colMeans, colnames, colSums, dirname, do.call, duplicated,
+    eval, evalq, Filter, Find, get, grep, grepl, intersect,
+    is.unsorted, lapply, lengths, Map, mapply, match, mget, order,
+    paste, pmax, pmax.int, pmin, pmin.int, Position, rank, rbind,
+    Reduce, rowMeans, rownames, rowSums, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which, which.max,
+    which.min</code></pre>
+<pre><code>Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    &#39;browseVignettes()&#39;. To cite Bioconductor, see
+    &#39;citation(&quot;Biobase&quot;)&#39;, and for packages &#39;citation(&quot;pkgname&quot;)&#39;.</code></pre>
 <p>Read in data</p>
 <pre class="r"><code>total_counts &lt;- read_csv(&quot;output/nci_dlbcl_unprocessed_counts.csv&quot;)</code></pre>
 <pre><code>Parsed with column specification:
@@ -668,8 +756,16 @@ total_counts_prcode &lt;- total_counts %&gt;%
   dplyr::filter(gene_type == &quot;protein_coding&quot;) %&gt;%
   dplyr::select(-gene_name, -gene_type, -gene_status, -level, -havana_gene) %&gt;%
   dplyr::select(gene_id, everything())
-
-nrow(total_counts)</code></pre>
+total_counts_prcode[1:5, 1:5]</code></pre>
+<pre><code># A tibble: 5 x 5
+  gene_id            DLBCL11667 DLBCL10501 DLBCL10954 DLBCL10984
+  &lt;chr&gt;                   &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1 ENSG00000000003.13         51         73        137        121
+2 ENSG00000000005.5           1          0          0          0
+3 ENSG00000000419.11       1087       1284       1500       1993
+4 ENSG00000000457.12        172        118       1613       1355
+5 ENSG00000000460.15        162        413       1069        837</code></pre>
+<pre class="r"><code>nrow(total_counts)</code></pre>
 <pre><code>[1] 60488</code></pre>
 <pre class="r"><code>nrow(total_counts_prcode)</code></pre>
 <pre><code>[1] 19814</code></pre>
@@ -696,6 +792,43 @@ dplot1 &lt;- ggplot(tidy_cpm, aes(intensity)) +
 dplot1</code></pre>
 <pre><code>Warning: Removed 920063 rows containing non-finite values (stat_density).</code></pre>
 <p><img src="figure/preprocessing_count_data.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-1">
+Past versions of unnamed-chunk-7-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/768753ff0d3080e2b6170b9487510dbbd1aea778/docs/figure/preprocessing_count_data.Rmd/unnamed-chunk-7-1.png" target="_blank">768753f</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>dplot2 &lt;- ggplot(tidy_cpm, aes(log(intensity))) +
   geom_density() +
   theme(legend.position = &quot;none&quot;) +
@@ -704,6 +837,43 @@ dplot1</code></pre>
 dplot2</code></pre>
 <pre><code>Warning: Removed 1402676 rows containing non-finite values (stat_density).</code></pre>
 <p><img src="figure/preprocessing_count_data.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-2">
+Past versions of unnamed-chunk-7-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/768753ff0d3080e2b6170b9487510dbbd1aea778/docs/figure/preprocessing_count_data.Rmd/unnamed-chunk-7-2.png" target="_blank">768753f</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="filter-by-expression-levels" class="section level4">
 <h4>Filter by expression levels</h4>
@@ -712,28 +882,65 @@ totcounts_prcode_cpm_matrix &lt;- total_counts_prcode_cpm %&gt;%
   as.data.frame() %&gt;%
   column_to_rownames(var = &quot;gene_id&quot;)
 totcounts_prcode_cpm_matrix[1:5, 1:5]</code></pre>
-<pre><code>                   nci_dlbcl_1 nci_dlbcl_2 nci_dlbcl_3 nci_dlbcl_4
-ENSG00000000003.13   2.1464827    4.206426    2.416628    2.456197
-ENSG00000000005.5    0.0420879    0.000000    0.000000    0.000000
-ENSG00000000419.11  45.7495433   73.986992   26.459434   40.456209
-ENSG00000000457.12   7.2391182    6.799428   28.452712   27.505350
-ENSG00000000460.15   6.8182392   23.797997   18.856757   16.990390
-                   nci_dlbcl_5
-ENSG00000000003.13 10.72324364
-ENSG00000000005.5   0.02082183
-ENSG00000000419.11 41.81023927
-ENSG00000000457.12 23.19552119
-ENSG00000000460.15 18.01088495</code></pre>
-<pre class="r"><code># filter out genes that aren&#39;t at least expressed greater than 1 in at least 45 cases (45 being about the size of the smallest group)
-total_cpm_stats &lt;- data.frame(
-  total = apply(totcounts_prcode_cpm_matrix, 1, function(x) sum(x &gt; 1, na.rm = TRUE)))
-keep &lt;- which(total_cpm_stats$total &gt;= 50) 
+<pre><code>                   DLBCL11667 DLBCL10501 DLBCL10954 DLBCL10984  DLBCL11206
+ENSG00000000003.13  2.1464827   4.206426   2.416628   2.456197 10.72324364
+ENSG00000000005.5   0.0420879   0.000000   0.000000   0.000000  0.02082183
+ENSG00000000419.11 45.7495433  73.986992  26.459434  40.456209 41.81023927
+ENSG00000000457.12  7.2391182   6.799428  28.452712  27.505350 23.19552119
+ENSG00000000460.15  6.8182392  23.797997  18.856757  16.990390 18.01088495</code></pre>
+<pre class="r"><code>dim(totcounts_prcode_cpm_matrix)</code></pre>
+<pre><code>[1] 19814   481</code></pre>
+<pre class="r"><code># apply hard cutoffs 
+# filter out genes that aren&#39;t at least expressed greater than 1 in at least half of cases
+# set filter fraction
+min_sm_frac = 0.5
+filter_frac = min_sm_frac * ncol(totcounts_prcode_cpm_matrix)
+filter_frac</code></pre>
+<pre><code>[1] 240.5</code></pre>
+<pre class="r"><code>total_cpm_stats &lt;- data.frame(
+  total = apply(totcounts_prcode_cpm_matrix, 
+                1, 
+               function(x) {sum(x &gt; 1, na.rm = TRUE) } ))
+keep &lt;- which(total_cpm_stats$total &gt;= filter_frac)
 
+#---------------------
+#### DECIDED NOT TO USE
+## apply soft cutoffs
+# set CPM threshold based on library size
+# cpm_thres = 10 / min(colSums(totcounts_prcode_cpm_matrix)) * 10^6
+# set minimum sample size
+# keep &lt;- rowSums(cpm(totcounts_prcode_cpm_matrix) &gt; cpm_thres) # &gt;= as.integer(ncol(totcounts_prcode_cpm_matrix) / 2)
+#---------------------
+
+# apply keep criteria and check results
 dim(totcounts_prcode_cpm_matrix)</code></pre>
 <pre><code>[1] 19814   481</code></pre>
 <pre class="r"><code>total_cpm_filtered = totcounts_prcode_cpm_matrix[keep,]
 dim(total_cpm_filtered)</code></pre>
-<pre><code>[1] 14575   481</code></pre>
+<pre><code>[1] 12858   481</code></pre>
+</div>
+<div id="density-plots-of-filtered-cpm-values" class="section level4">
+<h4>Density plots of filtered CPM values</h4>
+<pre class="r"><code>tidy_cpm_filtered &lt;- total_cpm_filtered %&gt;% 
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  gather(key = &quot;sampleID&quot;, value = &quot;intensity&quot;, -gene_id) 
+
+dplot1 &lt;- ggplot(tidy_cpm_filtered, aes(intensity)) +
+  geom_density() + 
+  theme(legend.position = &quot;none&quot;) +
+  xlim(-5, 100) +
+  ggtitle(&quot;Density plot of CPM for NCI DLBCL&quot;)
+dplot1</code></pre>
+<pre><code>Warning: Removed 918433 rows containing non-finite values (stat_density).</code></pre>
+<p><img src="figure/preprocessing_count_data.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>dplot2 &lt;- ggplot(tidy_cpm_filtered, aes(log(intensity))) +
+  geom_density() +
+  theme(legend.position = &quot;none&quot;) +
+  xlim(-20, 20) +
+  ggtitle(&quot;Density plot of log(CPM) for NCI DLBCL&quot;)
+dplot2</code></pre>
+<pre><code>Warning: Removed 3117 rows containing non-finite values (stat_density).</code></pre>
+<p><img src="figure/preprocessing_count_data.Rmd/unnamed-chunk-9-2.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="normalize-gene-expression-distributions" class="section level4">
 <h4>Normalize gene expression distributions</h4>
@@ -746,117 +953,335 @@ total_cpm_norm &lt;- map2_dfc(total_cpm_filtered, norm_factors, `*`)
 total_cpm_norm &lt;- as.data.frame(total_cpm_norm)
 rownames(total_cpm_norm) &lt;- rownames(total_cpm_filtered)
 total_cpm_norm[1:5, 1:5]</code></pre>
-<pre><code>                   nci_dlbcl_1 nci_dlbcl_2 nci_dlbcl_3 nci_dlbcl_4
-ENSG00000000003.13    1.567512    4.081409    2.815118    2.796125
-ENSG00000000419.11   33.409514   71.788078   30.822463   46.055177
-ENSG00000000457.12    5.286510    6.597347   33.144422   31.311974
-ENSG00000000460.15    4.979155   23.090714   21.966142   19.341788
-ENSG00000000938.11   25.418278   32.036269   50.507743   92.110354
-                   nci_dlbcl_5
-ENSG00000000003.13    13.12324
-ENSG00000000419.11    51.16789
-ENSG00000000457.12    28.38697
-ENSG00000000460.15    22.04195
-ENSG00000000938.11    61.13136</code></pre>
+<pre><code>                   DLBCL11667 DLBCL10501 DLBCL10954 DLBCL10984 DLBCL11206
+ENSG00000000003.13   1.526803   4.079266   2.715566   2.765948   13.13607
+ENSG00000000419.11  32.541866  71.750371  29.732473  45.558137   51.21792
+ENSG00000000457.12   5.149219   6.593881  31.972319  30.974047   28.41472
+ENSG00000000460.15   4.849846  23.078585  21.189342  19.133046   22.06350
+ENSG00000000938.11  24.758163  32.019441  48.721612  91.116274   61.19113</code></pre>
 </div>
 <div id="log-transformation" class="section level4">
 <h4>Log transformation</h4>
-<pre class="r"><code>total_log_cpm_filtered_norm &lt;- log2(total_cpm_norm)
+<pre class="r"><code># introduce offset to prevent -Inf
+offset_total_cpm_norm &lt;- total_cpm_norm + 0.5
+offset_total_cpm_norm[1:5, 1:5]</code></pre>
+<pre><code>                   DLBCL11667 DLBCL10501 DLBCL10954 DLBCL10984 DLBCL11206
+ENSG00000000003.13   2.026803   4.579266   3.215566   3.265948   13.63607
+ENSG00000000419.11  33.041866  72.250371  30.232473  46.058137   51.71792
+ENSG00000000457.12   5.649219   7.093881  32.472319  31.474047   28.91472
+ENSG00000000460.15   5.349846  23.578585  21.689342  19.633046   22.56350
+ENSG00000000938.11  25.258163  32.519441  49.221612  91.616274   61.69113</code></pre>
+<pre class="r"><code># log transformation
+total_log_cpm_filtered_norm &lt;- log2(offset_total_cpm_norm)
 total_log_cpm_filtered_norm[1:5, 1:5]</code></pre>
-<pre><code>                   nci_dlbcl_1 nci_dlbcl_2 nci_dlbcl_3 nci_dlbcl_4
-ENSG00000000003.13   0.6484762    2.029067    1.493196    1.483429
-ENSG00000000419.11   5.0621871    6.165672    4.945910    5.525291
-ENSG00000000457.12   2.4023156    2.721886    5.050694    4.968643
-ENSG00000000460.15   2.3159009    4.529241    4.457210    4.273649
-ENSG00000000938.11   4.6677944    5.001634    5.658433    6.525291
-                   nci_dlbcl_5
-ENSG00000000003.13    3.714052
-ENSG00000000419.11    5.677167
-ENSG00000000457.12    4.827157
-ENSG00000000460.15    4.462180
-ENSG00000000938.11    5.933841</code></pre>
+<pre><code>                   DLBCL11667 DLBCL10501 DLBCL10954 DLBCL10984 DLBCL11206
+ENSG00000000003.13   1.019206   2.195116   1.685073   1.707502   3.769356
+ENSG00000000419.11   5.046223   6.174933   4.918027   5.525384   5.692592
+ENSG00000000457.12   2.498051   2.826575   5.021139   4.976091   4.853732
+ENSG00000000460.15   2.419497   4.559405   4.438914   4.295212   4.495919
+ENSG00000000938.11   4.658678   5.023231   5.621220   6.517532   5.946991</code></pre>
+<p>Final density plot</p>
 <pre class="r"><code>total_log_cpm_filtered_tbl &lt;- total_log_cpm_filtered_norm %&gt;%
   as.data.frame() %&gt;%
   rownames_to_column(var = &quot;gene&quot;) %&gt;%
-  as_tibble() %&gt;% 
-  print()</code></pre>
-<pre><code># A tibble: 14,575 x 482
-   gene  nci_dlbcl_1 nci_dlbcl_2 nci_dlbcl_3 nci_dlbcl_4 nci_dlbcl_5
-   &lt;chr&gt;       &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
- 1 ENSG…       0.648        2.03        1.49        1.48        3.71
- 2 ENSG…       5.06         6.17        4.95        5.53        5.68
- 3 ENSG…       2.40         2.72        5.05        4.97        4.83
- 4 ENSG…       2.32         4.53        4.46        4.27        4.46
- 5 ENSG…       4.67         5.00        5.66        6.53        5.93
- 6 ENSG…       4.44         5.66        5.50        5.28        5.70
- 7 ENSG…       4.70         4.62        6.08        5.41        5.79
- 8 ENSG…       3.94         5.23        6.04        5.85        6.15
- 9 ENSG…       4.78         6.46        5.84        6.07        5.73
-10 ENSG…       2.30         3.35        4.15        3.35        3.91
-# … with 14,565 more rows, and 476 more variables: nci_dlbcl_6 &lt;dbl&gt;,
-#   nci_dlbcl_7 &lt;dbl&gt;, nci_dlbcl_8 &lt;dbl&gt;, nci_dlbcl_9 &lt;dbl&gt;,
-#   nci_dlbcl_10 &lt;dbl&gt;, nci_dlbcl_11 &lt;dbl&gt;, nci_dlbcl_12 &lt;dbl&gt;,
-#   nci_dlbcl_13 &lt;dbl&gt;, nci_dlbcl_14 &lt;dbl&gt;, nci_dlbcl_15 &lt;dbl&gt;,
-#   nci_dlbcl_16 &lt;dbl&gt;, nci_dlbcl_17 &lt;dbl&gt;, nci_dlbcl_18 &lt;dbl&gt;,
-#   nci_dlbcl_19 &lt;dbl&gt;, nci_dlbcl_20 &lt;dbl&gt;, nci_dlbcl_21 &lt;dbl&gt;,
-#   nci_dlbcl_22 &lt;dbl&gt;, nci_dlbcl_23 &lt;dbl&gt;, nci_dlbcl_24 &lt;dbl&gt;,
-#   nci_dlbcl_25 &lt;dbl&gt;, nci_dlbcl_26 &lt;dbl&gt;, nci_dlbcl_27 &lt;dbl&gt;,
-#   nci_dlbcl_28 &lt;dbl&gt;, nci_dlbcl_29 &lt;dbl&gt;, nci_dlbcl_30 &lt;dbl&gt;,
-#   nci_dlbcl_31 &lt;dbl&gt;, nci_dlbcl_32 &lt;dbl&gt;, nci_dlbcl_33 &lt;dbl&gt;,
-#   nci_dlbcl_34 &lt;dbl&gt;, nci_dlbcl_35 &lt;dbl&gt;, nci_dlbcl_36 &lt;dbl&gt;,
-#   nci_dlbcl_37 &lt;dbl&gt;, nci_dlbcl_38 &lt;dbl&gt;, nci_dlbcl_39 &lt;dbl&gt;,
-#   nci_dlbcl_40 &lt;dbl&gt;, nci_dlbcl_41 &lt;dbl&gt;, nci_dlbcl_42 &lt;dbl&gt;,
-#   nci_dlbcl_43 &lt;dbl&gt;, nci_dlbcl_44 &lt;dbl&gt;, nci_dlbcl_45 &lt;dbl&gt;,
-#   nci_dlbcl_46 &lt;dbl&gt;, nci_dlbcl_47 &lt;dbl&gt;, nci_dlbcl_48 &lt;dbl&gt;,
-#   nci_dlbcl_49 &lt;dbl&gt;, nci_dlbcl_50 &lt;dbl&gt;, nci_dlbcl_51 &lt;dbl&gt;,
-#   nci_dlbcl_52 &lt;dbl&gt;, nci_dlbcl_53 &lt;dbl&gt;, nci_dlbcl_54 &lt;dbl&gt;,
-#   nci_dlbcl_55 &lt;dbl&gt;, nci_dlbcl_56 &lt;dbl&gt;, nci_dlbcl_57 &lt;dbl&gt;,
-#   nci_dlbcl_58 &lt;dbl&gt;, nci_dlbcl_59 &lt;dbl&gt;, nci_dlbcl_60 &lt;dbl&gt;,
-#   nci_dlbcl_61 &lt;dbl&gt;, nci_dlbcl_62 &lt;dbl&gt;, nci_dlbcl_63 &lt;dbl&gt;,
-#   nci_dlbcl_64 &lt;dbl&gt;, nci_dlbcl_65 &lt;dbl&gt;, nci_dlbcl_66 &lt;dbl&gt;,
-#   nci_dlbcl_67 &lt;dbl&gt;, nci_dlbcl_68 &lt;dbl&gt;, nci_dlbcl_69 &lt;dbl&gt;,
-#   nci_dlbcl_70 &lt;dbl&gt;, nci_dlbcl_71 &lt;dbl&gt;, nci_dlbcl_72 &lt;dbl&gt;,
-#   nci_dlbcl_73 &lt;dbl&gt;, nci_dlbcl_74 &lt;dbl&gt;, nci_dlbcl_75 &lt;dbl&gt;,
-#   nci_dlbcl_76 &lt;dbl&gt;, nci_dlbcl_77 &lt;dbl&gt;, nci_dlbcl_78 &lt;dbl&gt;,
-#   nci_dlbcl_79 &lt;dbl&gt;, nci_dlbcl_80 &lt;dbl&gt;, nci_dlbcl_81 &lt;dbl&gt;,
-#   nci_dlbcl_82 &lt;dbl&gt;, nci_dlbcl_83 &lt;dbl&gt;, nci_dlbcl_84 &lt;dbl&gt;,
-#   nci_dlbcl_85 &lt;dbl&gt;, nci_dlbcl_86 &lt;dbl&gt;, nci_dlbcl_87 &lt;dbl&gt;,
-#   nci_dlbcl_88 &lt;dbl&gt;, nci_dlbcl_89 &lt;dbl&gt;, nci_dlbcl_90 &lt;dbl&gt;,
-#   nci_dlbcl_91 &lt;dbl&gt;, nci_dlbcl_92 &lt;dbl&gt;, nci_dlbcl_93 &lt;dbl&gt;,
-#   nci_dlbcl_94 &lt;dbl&gt;, nci_dlbcl_95 &lt;dbl&gt;, nci_dlbcl_96 &lt;dbl&gt;,
-#   nci_dlbcl_97 &lt;dbl&gt;, nci_dlbcl_98 &lt;dbl&gt;, nci_dlbcl_99 &lt;dbl&gt;,
-#   nci_dlbcl_100 &lt;dbl&gt;, nci_dlbcl_101 &lt;dbl&gt;, nci_dlbcl_102 &lt;dbl&gt;,
-#   nci_dlbcl_103 &lt;dbl&gt;, nci_dlbcl_104 &lt;dbl&gt;, nci_dlbcl_105 &lt;dbl&gt;, …</code></pre>
-<pre class="r"><code>tidy_log_cpm &lt;- total_log_cpm_filtered_tbl %&gt;% 
-  gather(key = &quot;sampleID&quot;, value = &quot;intensity&quot;, -gene) %&gt;% 
-  print()</code></pre>
-<pre><code># A tibble: 7,010,575 x 3
-   gene               sampleID    intensity
-   &lt;chr&gt;              &lt;chr&gt;           &lt;dbl&gt;
- 1 ENSG00000000003.13 nci_dlbcl_1     0.648
- 2 ENSG00000000419.11 nci_dlbcl_1     5.06 
- 3 ENSG00000000457.12 nci_dlbcl_1     2.40 
- 4 ENSG00000000460.15 nci_dlbcl_1     2.32 
- 5 ENSG00000000938.11 nci_dlbcl_1     4.67 
- 6 ENSG00000000971.14 nci_dlbcl_1     4.44 
- 7 ENSG00000001036.12 nci_dlbcl_1     4.70 
- 8 ENSG00000001084.9  nci_dlbcl_1     3.94 
- 9 ENSG00000001167.13 nci_dlbcl_1     4.78 
-10 ENSG00000001460.16 nci_dlbcl_1     2.30 
-# … with 7,010,565 more rows</code></pre>
-<pre class="r"><code>dplot3 &lt;- ggplot(tidy_log_cpm, aes(intensity)) +
+  as_tibble()
+
+tidy_log_cpm &lt;- total_log_cpm_filtered_tbl %&gt;% 
+  gather(key = &quot;sampleID&quot;, value = &quot;intensity&quot;, -gene)
+
+dplot3 &lt;- ggplot(tidy_log_cpm, aes(intensity)) +
   geom_density() +
   theme(legend.position = &quot;none&quot;) +
   xlim(-20, 20) +
   ggtitle(&quot;Final density plot of log(CPM) for NCI DLBCL&quot;)
 dplot3</code></pre>
-<pre><code>Warning: Removed 42970 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/preprocessing_count_data.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/preprocessing_count_data.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
+</div>
+<div id="add-in-phenotype-data" class="section level2">
+<h2>Add in phenotype data</h2>
+<p>Read in file and do some prelim cleaning</p>
+<pre class="r"><code>nci_phenotype_data &lt;- read_csv(&quot;output/nci_dlbcl_annotation.csv&quot;)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character(),
+  days_to_last_follow_up = col_double(),
+  updated_datetime = col_datetime(format = &quot;&quot;),
+  age_at_diagnosis = col_double(),
+  created_datetime = col_datetime(format = &quot;&quot;),
+  demographic.updated_datetime = col_datetime(format = &quot;&quot;),
+  demographic.created_datetime = col_datetime(format = &quot;&quot;),
+  size = col_double()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre class="r"><code>nci_phenotype_data</code></pre>
+<pre><code># A tibble: 481 x 67
+   case_submitter_… sample case_id pdl1_status filename sample_id
+   &lt;chr&gt;            &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;       &lt;chr&gt;    &lt;chr&gt;    
+ 1 DLBCL11667       nci_d… 3e164d… non-amplif… b384270… 608e5a37…
+ 2 DLBCL10501       nci_d… 678acb… non-amplif… ab3f958… ed5c027b…
+ 3 DLBCL10954       nci_d… c1b07b… non-amplif… 92fbf68… e5341594…
+ 4 DLBCL10984       nci_d… 15b380… low_amplif… dc44d3b… d5ef7640…
+ 5 DLBCL11206       nci_d… 7ac79d… non-amplif… 717d067… c39bb161…
+ 6 DLBCL10959       nci_d… 94d33a… low_amplif… 9765c55… 2654c7f3…
+ 7 DLBCL10985       nci_d… fa7ae8… non-amplif… 93f0175… 0c677fef…
+ 8 DLBCL11533       nci_d… 18134e… non-amplif… cd23ffe… 6fb786ee…
+ 9 DLBCL11519       nci_d… 3fe9ec… low_amplif… 03cb176… 72f51808…
+10 DLBCL10921       nci_d… b31ef3… non-amplif… bd2bf78… d0a34b13…
+# … with 471 more rows, and 61 more variables: sample_submitter_id &lt;chr&gt;,
+#   project_id &lt;chr&gt;, sample_type_id &lt;chr&gt;,
+#   time_between_excision_and_freezing &lt;chr&gt;, oct_embedded &lt;chr&gt;,
+#   tumor_code_id &lt;chr&gt;, intermediate_dimension &lt;chr&gt;, is_ffpe &lt;chr&gt;,
+#   pathology_report_uuid &lt;chr&gt;, tumor_descriptor &lt;chr&gt;,
+#   sample_type &lt;chr&gt;, distance_normal_to_tumor &lt;chr&gt;,
+#   biospecimen_anatomic_site &lt;chr&gt;, state.x &lt;chr&gt;,
+#   diagnosis_pathologically_confirmed &lt;chr&gt;, current_weight &lt;chr&gt;,
+#   composition &lt;chr&gt;, time_between_clamping_and_freezing &lt;chr&gt;,
+#   distributor_reference &lt;chr&gt;, shortest_dimension &lt;chr&gt;,
+#   method_of_sample_procurement &lt;chr&gt;, tumor_code &lt;chr&gt;,
+#   passage_count &lt;chr&gt;, tissue_type &lt;chr&gt;, biospecimen_laterality &lt;chr&gt;,
+#   days_to_sample_procurement &lt;chr&gt;, freezing_method &lt;chr&gt;,
+#   preservation_method &lt;chr&gt;, growth_rate &lt;chr&gt;,
+#   days_to_collection &lt;chr&gt;, catalog_reference &lt;chr&gt;,
+#   initial_weight &lt;chr&gt;, longest_dimension &lt;chr&gt;, submitter_id &lt;chr&gt;,
+#   morphology &lt;chr&gt;, days_to_last_follow_up &lt;dbl&gt;,
+#   updated_datetime &lt;dttm&gt;, tumor_stage &lt;chr&gt;, age_at_diagnosis &lt;dbl&gt;,
+#   created_datetime &lt;dttm&gt;, diagnosis_id &lt;chr&gt;,
+#   tissue_or_organ_of_origin &lt;chr&gt;, ann_arbor_clinical_stage &lt;chr&gt;,
+#   progression_or_recurrence &lt;chr&gt;, last_known_disease_status &lt;chr&gt;,
+#   primary_diagnosis &lt;chr&gt;, tumor_grade &lt;chr&gt;,
+#   site_of_resection_or_biopsy &lt;chr&gt;,
+#   demographic.updated_datetime &lt;dttm&gt;,
+#   demographic.created_datetime &lt;dttm&gt;, demographic.gender &lt;chr&gt;,
+#   demographic.state &lt;chr&gt;, demographic.submitter_id &lt;chr&gt;,
+#   demographic.race &lt;chr&gt;, demographic.ethnicity &lt;chr&gt;,
+#   demographic.vital_status &lt;chr&gt;, demographic.demographic_id &lt;chr&gt;,
+#   id &lt;chr&gt;, md5 &lt;chr&gt;, size &lt;dbl&gt;, state.y &lt;chr&gt;</code></pre>
+<pre class="r"><code># clean up variables
+nci_pheno_data &lt;- nci_phenotype_data %&gt;%
+  dplyr::select(case_submitter_id,
+                pdl1_status, 
+                -sample, 
+                case_id, 
+                filename,
+                -sample_id,
+                -sample_submitter_id,
+                project_id, 
+                -sample_type_id,
+                -time_between_excision_and_freezing,
+                -oct_embedded, 
+                -tumor_code_id,
+                -intermediate_dimension,
+                -is_ffpe,
+                -pathology_report_uuid,
+                -sample_type,
+                -distance_normal_to_tumor,
+                -biospecimen_anatomic_site,
+                -state.x,
+                -diagnosis_pathologically_confirmed,
+                -current_weight,
+                -composition,
+                -time_between_clamping_and_freezing,
+                -distributor_reference,
+                -shortest_dimension,
+                -method_of_sample_procurement,
+                -tumor_code,
+                -passage_count,
+                -tissue_type,
+                -biospecimen_laterality,
+                -days_to_sample_procurement,
+                -freezing_method,
+                -preservation_method,
+                -growth_rate,
+                -days_to_collection,
+                -catalog_reference,
+                -initial_weight,
+                -longest_dimension,
+                -submitter_id,
+                -morphology,
+                days_to_last_follow_up,
+                updated_datetime,
+                tumor_stage,
+                age_at_diagnosis,
+                -created_datetime,
+                -diagnosis_id,
+                tissue_or_organ_of_origin,
+                ann_arbor_clinical_stage,
+                progression_or_recurrence,
+                last_known_disease_status,
+                primary_diagnosis,
+                tumor_grade,
+                -site_of_resection_or_biopsy,
+                -demographic.updated_datetime,
+                -demographic.created_datetime,
+                demographic.gender,
+                demographic.submitter_id,
+                demographic.race,
+                demographic.ethnicity,
+                demographic.vital_status,
+                -demographic.demographic_id,
+                -id,
+                -md5,
+                size,
+                -state.y
+                ) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;case_submitter_id&quot;)
+
+str(nci_pheno_data)</code></pre>
+<pre><code>&#39;data.frame&#39;:   481 obs. of  20 variables:
+ $ pdl1_status              : chr  &quot;non-amplified&quot; &quot;non-amplified&quot; &quot;non-amplified&quot; &quot;low_amplified&quot; ...
+ $ case_id                  : chr  &quot;3e164d5d-afa0-4e96-b177-ea9fdf69da7a&quot; &quot;678acbbd-3f1b-4464-ba21-a59606cf19ae&quot; &quot;c1b07bfa-d234-42d6-8a41-97b7a7924f0d&quot; &quot;15b380e1-d220-42b9-8613-18fcefccb0a4&quot; ...
+ $ filename                 : chr  &quot;b384270b-0315-49c6-bb46-d155d8d41fec.htseq_counts.txt.gz&quot; &quot;ab3f9584-f27f-4d6e-a5de-ac0d0c20de13.htseq_counts.txt.gz&quot; &quot;92fbf689-0c26-4664-9dde-c41534f7b390.htseq_counts.txt.gz&quot; &quot;dc44d3ba-5c4d-40a1-b8a2-f27b88325d0b.htseq_counts.txt.gz&quot; ...
+ $ project_id               : chr  &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; ...
+ $ days_to_last_follow_up   : num  633 674 425 NA 2299 ...
+ $ updated_datetime         : POSIXct, format: &quot;2018-08-31 20:09:50&quot; &quot;2018-08-31 20:09:50&quot; ...
+ $ tumor_stage              : chr  &quot;IPI:1&quot; &quot;IPI:1&quot; &quot;IPI:13&quot; &quot;IPI:12&quot; ...
+ $ age_at_diagnosis         : num  17520 15330 17155 27375 27740 ...
+ $ tissue_or_organ_of_origin: chr  &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; ...
+ $ ann_arbor_clinical_stage : chr  &quot;Stage III&quot; &quot;Stage II&quot; &quot;Stage I&quot; &quot;Stage I&quot; ...
+ $ progression_or_recurrence: chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ last_known_disease_status: chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ primary_diagnosis        : chr  &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; ...
+ $ tumor_grade              : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ demographic.gender       : chr  &quot;female&quot; &quot;male&quot; &quot;male&quot; &quot;female&quot; ...
+ $ demographic.submitter_id : chr  &quot;DLBCL11667-demographic&quot; &quot;DLBCL10501-demographic&quot; &quot;DLBCL10954-demographic&quot; &quot;DLBCL10984-demographic&quot; ...
+ $ demographic.race         : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ demographic.ethnicity    : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ demographic.vital_status : chr  &quot;Dead&quot; &quot;Alive&quot; &quot;Dead&quot; &quot;Alive&quot; ...
+ $ size                     : num  235439 232896 248096 245979 246899 ...
+ - attr(*, &quot;spec&quot;)=
+  .. cols(
+  ..   case_submitter_id = col_character(),
+  ..   sample = col_character(),
+  ..   case_id = col_character(),
+  ..   pdl1_status = col_character(),
+  ..   filename = col_character(),
+  ..   sample_id = col_character(),
+  ..   sample_submitter_id = col_character(),
+  ..   project_id = col_character(),
+  ..   sample_type_id = col_character(),
+  ..   time_between_excision_and_freezing = col_character(),
+  ..   oct_embedded = col_character(),
+  ..   tumor_code_id = col_character(),
+  ..   intermediate_dimension = col_character(),
+  ..   is_ffpe = col_character(),
+  ..   pathology_report_uuid = col_character(),
+  ..   tumor_descriptor = col_character(),
+  ..   sample_type = col_character(),
+  ..   distance_normal_to_tumor = col_character(),
+  ..   biospecimen_anatomic_site = col_character(),
+  ..   state.x = col_character(),
+  ..   diagnosis_pathologically_confirmed = col_character(),
+  ..   current_weight = col_character(),
+  ..   composition = col_character(),
+  ..   time_between_clamping_and_freezing = col_character(),
+  ..   distributor_reference = col_character(),
+  ..   shortest_dimension = col_character(),
+  ..   method_of_sample_procurement = col_character(),
+  ..   tumor_code = col_character(),
+  ..   passage_count = col_character(),
+  ..   tissue_type = col_character(),
+  ..   biospecimen_laterality = col_character(),
+  ..   days_to_sample_procurement = col_character(),
+  ..   freezing_method = col_character(),
+  ..   preservation_method = col_character(),
+  ..   growth_rate = col_character(),
+  ..   days_to_collection = col_character(),
+  ..   catalog_reference = col_character(),
+  ..   initial_weight = col_character(),
+  ..   longest_dimension = col_character(),
+  ..   submitter_id = col_character(),
+  ..   morphology = col_character(),
+  ..   days_to_last_follow_up = col_double(),
+  ..   updated_datetime = col_datetime(format = &quot;&quot;),
+  ..   tumor_stage = col_character(),
+  ..   age_at_diagnosis = col_double(),
+  ..   created_datetime = col_datetime(format = &quot;&quot;),
+  ..   diagnosis_id = col_character(),
+  ..   tissue_or_organ_of_origin = col_character(),
+  ..   ann_arbor_clinical_stage = col_character(),
+  ..   progression_or_recurrence = col_character(),
+  ..   last_known_disease_status = col_character(),
+  ..   primary_diagnosis = col_character(),
+  ..   tumor_grade = col_character(),
+  ..   site_of_resection_or_biopsy = col_character(),
+  ..   demographic.updated_datetime = col_datetime(format = &quot;&quot;),
+  ..   demographic.created_datetime = col_datetime(format = &quot;&quot;),
+  ..   demographic.gender = col_character(),
+  ..   demographic.state = col_character(),
+  ..   demographic.submitter_id = col_character(),
+  ..   demographic.race = col_character(),
+  ..   demographic.ethnicity = col_character(),
+  ..   demographic.vital_status = col_character(),
+  ..   demographic.demographic_id = col_character(),
+  ..   id = col_character(),
+  ..   md5 = col_character(),
+  ..   size = col_double(),
+  ..   state.y = col_character()
+  .. )</code></pre>
+<pre class="r"><code>nci_pheno_data[1:5,1:5]</code></pre>
+<pre><code>             pdl1_status                              case_id
+DLBCL11667 non-amplified 3e164d5d-afa0-4e96-b177-ea9fdf69da7a
+DLBCL10501 non-amplified 678acbbd-3f1b-4464-ba21-a59606cf19ae
+DLBCL10954 non-amplified c1b07bfa-d234-42d6-8a41-97b7a7924f0d
+DLBCL10984 low_amplified 15b380e1-d220-42b9-8613-18fcefccb0a4
+DLBCL11206 non-amplified 7ac79db4-b307-46be-ba2c-b1731c7f97f0
+                                                           filename
+DLBCL11667 b384270b-0315-49c6-bb46-d155d8d41fec.htseq_counts.txt.gz
+DLBCL10501 ab3f9584-f27f-4d6e-a5de-ac0d0c20de13.htseq_counts.txt.gz
+DLBCL10954 92fbf689-0c26-4664-9dde-c41534f7b390.htseq_counts.txt.gz
+DLBCL10984 dc44d3ba-5c4d-40a1-b8a2-f27b88325d0b.htseq_counts.txt.gz
+DLBCL11206 717d067b-5cea-407d-9546-72fe4e4feba5.htseq_counts.txt.gz
+             project_id days_to_last_follow_up
+DLBCL11667 NCICCR-DLBCL                    633
+DLBCL10501 NCICCR-DLBCL                    674
+DLBCL10954 NCICCR-DLBCL                    425
+DLBCL10984 NCICCR-DLBCL                     NA
+DLBCL11206 NCICCR-DLBCL                   2299</code></pre>
 </div>
 <div id="write-out-for-later-use" class="section level2">
 <h2>Write out for later use</h2>
-<pre class="r"><code>write_csv(total_log_cpm_filtered_norm, &quot;output/expr_matrix.csv&quot;)</code></pre>
+<p>Following ExpressionSet vignette in Biobase package</p>
+<pre class="r"><code># make expression set
+# first need variable annotation
+v_metadata &lt;- data.frame(
+  labelDescription = colnames(nci_pheno_data),
+  row.names = colnames(nci_pheno_data))
+
+# make annotated phenoData
+phenoData &lt;- new(&quot;AnnotatedDataFrame&quot;, 
+                 data = nci_pheno_data, 
+                 varMetadata = v_metadata)
+phenoData</code></pre>
+<pre><code>An object of class &#39;AnnotatedDataFrame&#39;
+  rowNames: DLBCL11667 DLBCL10501 ... DLBCL11665 (481 total)
+  varLabels: pdl1_status case_id ... size (20 total)
+  varMetadata: labelDescription</code></pre>
+<pre class="r"><code># convert expression data to matrix format
+nci_exprs &lt;- total_log_cpm_filtered_norm %&gt;% as.matrix()
+
+# create global annotation
+annotation &lt;- as.character(&quot;RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed.&quot;)
+
+# assemble expressionset
+nci_es &lt;- ExpressionSet(
+  assayData = nci_exprs,
+  phenoData = phenoData,
+  annotation = annotation)
+nci_es</code></pre>
+<pre><code>ExpressionSet (storageMode: lockedEnvironment)
+assayData: 12858 features, 481 samples 
+  element names: exprs 
+protocolData: none
+phenoData
+  sampleNames: DLBCL11667 DLBCL10501 ... DLBCL11665 (481 total)
+  varLabels: pdl1_status case_id ... size (20 total)
+  varMetadata: labelDescription
+featureData: none
+experimentData: use &#39;experimentData(object)&#39;
+Annotation: RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. </code></pre>
+<pre class="r"><code>saveRDS(nci_es, &quot;output/nci_expressionset.rds&quot;)</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -877,42 +1302,31 @@ locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 
 attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
 
 other attached packages:
- [1] GSVA_1.30.0     edgeR_3.24.3    limma_3.38.3    forcats_0.4.0  
- [5] stringr_1.4.0   dplyr_0.8.1     purrr_0.3.2     readr_1.3.1    
- [9] tidyr_0.8.3     tibble_2.1.3    ggplot2_3.1.1   tidyverse_1.2.1
+ [1] Biobase_2.42.0      BiocGenerics_0.28.0 edgeR_3.24.3       
+ [4] limma_3.38.3        forcats_0.4.0       stringr_1.4.0      
+ [7] dplyr_0.8.1         purrr_0.3.2         readr_1.3.1        
+[10] tidyr_0.8.3         tibble_2.1.3        ggplot2_3.1.1      
+[13] tidyverse_1.2.1    
 
 loaded via a namespace (and not attached):
- [1] nlme_3.1-140         bitops_1.0-6         fs_1.3.1            
- [4] lubridate_1.7.4      bit64_0.9-7          RColorBrewer_1.1-2  
- [7] httr_1.4.0           rprojroot_1.3-2      tools_3.5.3         
-[10] backports_1.1.4      utf8_1.1.4           R6_2.4.0            
-[13] DBI_1.0.0            lazyeval_0.2.2       BiocGenerics_0.28.0 
-[16] colorspace_1.4-1     withr_2.1.2          tidyselect_0.2.5    
-[19] bit_1.1-14           compiler_3.5.3       git2r_0.25.2        
-[22] graph_1.60.0         cli_1.1.0            rvest_0.3.4         
-[25] Biobase_2.42.0       xml2_1.2.0           labeling_0.3        
-[28] scales_1.0.0         digest_0.6.19        rmarkdown_1.13      
-[31] pkgconfig_2.0.2      htmltools_0.3.6      rlang_0.3.4         
-[34] readxl_1.3.1         rstudioapi_0.10      RSQLite_2.1.1       
-[37] shiny_1.3.2          generics_0.0.2       jsonlite_1.6        
-[40] RCurl_1.95-4.12      magrittr_1.5         Rcpp_1.0.1          
-[43] munsell_0.5.0        S4Vectors_0.20.1     fansi_0.4.0         
-[46] stringi_1.4.3        whisker_0.3-2        yaml_2.2.0          
-[49] plyr_1.8.4           grid_3.5.3           blob_1.1.1          
-[52] parallel_3.5.3       promises_1.0.1       crayon_1.3.4        
-[55] lattice_0.20-38      haven_2.1.0          annotate_1.60.1     
-[58] hms_0.4.2            locfit_1.5-9.1       zeallot_0.1.0       
-[61] knitr_1.23           pillar_1.4.1         geneplotter_1.60.0  
-[64] stats4_3.5.3         XML_3.98-1.20        glue_1.3.1          
-[67] evaluate_0.14        modelr_0.1.4         vctrs_0.1.0         
-[70] httpuv_1.5.1         cellranger_1.1.0     gtable_0.3.0        
-[73] assertthat_0.2.1     xfun_0.7             mime_0.6            
-[76] xtable_1.8-4         broom_0.5.2          later_0.8.0         
-[79] shinythemes_1.1.2    AnnotationDbi_1.44.0 memoise_1.1.0       
-[82] IRanges_2.16.0       workflowr_1.4.0      GSEABase_1.44.0     </code></pre>
+ [1] tidyselect_0.2.5 locfit_1.5-9.1   xfun_0.7         haven_2.1.0     
+ [5] lattice_0.20-38  vctrs_0.1.0      colorspace_1.4-1 generics_0.0.2  
+ [9] htmltools_0.3.6  yaml_2.2.0       utf8_1.1.4       rlang_0.3.4     
+[13] pillar_1.4.1     glue_1.3.1       withr_2.1.2      modelr_0.1.4    
+[17] readxl_1.3.1     plyr_1.8.4       munsell_0.5.0    gtable_0.3.0    
+[21] workflowr_1.4.0  cellranger_1.1.0 rvest_0.3.4      evaluate_0.14   
+[25] labeling_0.3     knitr_1.23       fansi_0.4.0      broom_0.5.2     
+[29] Rcpp_1.0.1       scales_1.0.0     backports_1.1.4  jsonlite_1.6    
+[33] fs_1.3.1         hms_0.4.2        digest_0.6.19    stringi_1.4.3   
+[37] grid_3.5.3       rprojroot_1.3-2  cli_1.1.0        tools_3.5.3     
+[41] magrittr_1.5     lazyeval_0.2.2   zeallot_0.1.0    crayon_1.3.4    
+[45] whisker_0.3-2    pkgconfig_2.0.2  xml2_1.2.0       lubridate_1.7.4 
+[49] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.10 
+[53] R6_2.4.0         nlme_3.1-140     git2r_0.25.2     compiler_3.5.3  </code></pre>
 </div>
 </div>
 

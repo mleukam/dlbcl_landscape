@@ -437,7 +437,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-06-27
+<strong>Last updated:</strong> 2019-06-28
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -528,10 +528,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree107e89bfb9707ced9be9d531835f5d656f622f5dtargetblank107e89ba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/107e89bfb9707ced9be9d531835f5d656f622f5d" target="_blank">107e89b</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree42da9d5893be09775a582da78b8bec151d4ea9bftargetblank42da9d5a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/42da9d5893be09775a582da78b8bec151d4ea9bf" target="_blank">42da9d5</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree107e89bfb9707ced9be9d531835f5d656f622f5dtargetblank107e89ba" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree42da9d5893be09775a582da78b8bec151d4ea9bftargetblank42da9d5a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -544,7 +544,6 @@ Ignored files:
 
 Untracked files:
     Untracked:  analysis/enrichment.Rmd
-    Untracked:  analysis/merge.Rmd
     Untracked:  analysis/newgs.Rmd
     Untracked:  code/gsva1.r
     Untracked:  code/gsva1.sh
@@ -563,14 +562,12 @@ Untracked files:
     Untracked:  data/temp.dgelist_limma.rds
     Untracked:  output/dlbcl_expr_matrix.csv
     Untracked:  output/duke_expression_set_cleaned_log.rds
+    Untracked:  output/duke_expressionset.rds
     Untracked:  output/expr_matrix.csv
     Untracked:  output/nci_dlbcl_annotation.csv
     Untracked:  output/nci_dlbcl_unprocessed_counts.csv
+    Untracked:  output/nci_expressionset.rds
     Untracked:  output/total_immune_gset_v1.rds
-
-Unstaged changes:
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/preprocessing_count_data.Rmd
 
 </code></pre>
 <p>
@@ -609,6 +606,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/3cee826038da6f1bd23b82e184f1f26e99fe574d/docs/dukedata.html" target="_blank">3cee826</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-27
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1124,6 +1138,8 @@ transcribed_unprocessed_pseudogene  translated_unprocessed_pseudogene
                                  9                                 50 
                               NA&#39;s 
                                 69 </code></pre>
+<div id="filter-for-protein-coding" class="section level4">
+<h4>Filter for protein coding</h4>
 <pre class="r"><code># filter for protein coding genes only
 expr_duke_filtered &lt;- expr_duke_df %&gt;% 
   dplyr::filter(gene_type == &quot;protein_coding&quot;)
@@ -1132,10 +1148,9 @@ expr_duke_filtered &lt;- expr_duke_df %&gt;%
 summary(is.na(expr_duke_filtered$gene_id_v22))</code></pre>
 <pre><code>   Mode   FALSE 
 logical   15495 </code></pre>
-<pre class="r"><code># NO</code></pre>
-<div id="filter-for-protein-coding" class="section level4">
-<h4>Filter for protein coding</h4>
-<pre class="r"><code>expr_duke_protcoding &lt;- expr_duke_filtered %&gt;%
+<pre class="r"><code># NO
+
+expr_duke_protcoding &lt;- expr_duke_filtered %&gt;%
   dplyr::select(-gene_id_v29, -geneID_split, -gene_type) %&gt;%
   as.data.frame() %&gt;%
   column_to_rownames(var = &quot;gene_id_v22&quot;) %&gt;%
@@ -1154,15 +1169,40 @@ ENSG00000000419.11 502.551508  879.08074 150.61949 287.679769 191.18755
 ENSG00000000457.12 231.243100  333.21953 387.19099 207.392488 304.50997
 ENSG00000000460.15 653.920429 1144.52933 534.36886 625.864030 419.88944</code></pre>
 </div>
+<div id="subset-cases-based-on-protein-coding-library-coverage" class="section level4">
+<h4>Subset cases based on protein coding library coverage</h4>
+<pre class="r"><code>expr_duke_protcoding[1:5, 1:5]</code></pre>
+<pre><code>                     duke_648   duke_658  duke_683   duke_684  duke_689
+ENSG00000000003.13  18.036060   56.52077  57.04855   7.290646  85.59033
+ENSG00000000005.5    3.022655    0.00000   0.00000   0.000000   0.00000
+ENSG00000000419.11 502.551508  879.08074 150.61949 287.679769 191.18755
+ENSG00000000457.12 231.243100  333.21953 387.19099 207.392488 304.50997
+ENSG00000000460.15 653.920429 1144.52933 534.36886 625.864030 419.88944</code></pre>
+<pre class="r"><code>gene_coverage_threshold &lt;- 12000
+
+ncol(expr_duke_protcoding)</code></pre>
+<pre><code>[1] 771</code></pre>
+<pre class="r"><code>expr_duke_subset &lt;- expr_duke_protcoding[, colSums(expr_duke_protcoding != 0) &gt; gene_coverage_threshold]
+
+expr_duke_subset[1:5, 1:5]</code></pre>
+<pre><code>                     duke_648   duke_658  duke_683   duke_684  duke_689
+ENSG00000000003.13  18.036060   56.52077  57.04855   7.290646  85.59033
+ENSG00000000005.5    3.022655    0.00000   0.00000   0.000000   0.00000
+ENSG00000000419.11 502.551508  879.08074 150.61949 287.679769 191.18755
+ENSG00000000457.12 231.243100  333.21953 387.19099 207.392488 304.50997
+ENSG00000000460.15 653.920429 1144.52933 534.36886 625.864030 419.88944</code></pre>
+<pre class="r"><code>ncol(expr_duke_subset)</code></pre>
+<pre><code>[1] 665</code></pre>
+</div>
 <div id="convert-to-cpm" class="section level4">
 <h4>Convert to CPM</h4>
 <pre class="r"><code># correct for library size with cpm using EdgeR
-expr_duke_cpm &lt;- cpm(expr_duke_protcoding, log = FALSE)
+expr_duke_cpm &lt;- cpm(expr_duke_subset, log = FALSE)
 str(expr_duke_cpm)</code></pre>
-<pre><code> num [1:15495, 1:771] 2.362 0.396 65.82 30.286 85.645 ...
+<pre><code> num [1:15495, 1:665] 2.362 0.396 65.82 30.286 85.645 ...
  - attr(*, &quot;dimnames&quot;)=List of 2
   ..$ : chr [1:15495] &quot;ENSG00000000003.13&quot; &quot;ENSG00000000005.5&quot; &quot;ENSG00000000419.11&quot; &quot;ENSG00000000457.12&quot; ...
-  ..$ : chr [1:771] &quot;duke_648&quot; &quot;duke_658&quot; &quot;duke_683&quot; &quot;duke_684&quot; ...</code></pre>
+  ..$ : chr [1:665] &quot;duke_648&quot; &quot;duke_658&quot; &quot;duke_683&quot; &quot;duke_684&quot; ...</code></pre>
 <pre class="r"><code>expr_duke_cpm[1:5, 1:5]</code></pre>
 <pre><code>                     duke_648 duke_658  duke_683   duke_684  duke_689
 ENSG00000000003.13  2.3622214  4.27268  6.641871   1.326269  9.689145
@@ -1181,7 +1221,7 @@ tidy_cpm &lt;- t(expr_duke_cpm) %&gt;%
   as_tibble() %&gt;%
   gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id) %&gt;%
   print()</code></pre>
-<pre><code># A tibble: 11,946,645 x 3
+<pre><code># A tibble: 10,304,175 x 3
    sample_id gene_id            intensity
    &lt;chr&gt;     &lt;chr&gt;                  &lt;dbl&gt;
  1 duke_648  ENSG00000000003.13      2.36
@@ -1191,52 +1231,60 @@ tidy_cpm &lt;- t(expr_duke_cpm) %&gt;%
  5 duke_689  ENSG00000000003.13      9.69
  6 duke_690  ENSG00000000003.13     17.9 
  7 duke_695  ENSG00000000003.13      1.73
- 8 duke_702  ENSG00000000003.13      0   
- 9 duke_704  ENSG00000000003.13      0   
-10 duke_705  ENSG00000000003.13      5.48
-# … with 11,946,635 more rows</code></pre>
+ 8 duke_704  ENSG00000000003.13      0   
+ 9 duke_705  ENSG00000000003.13      5.48
+10 duke_759  ENSG00000000003.13      2.71
+# … with 10,304,165 more rows</code></pre>
 <pre class="r"><code># plots
 dplot_duke &lt;- ggplot(tidy_cpm, aes(intensity)) +
   geom_density() + 
   theme(legend.position = &quot;none&quot;)
 dplot_duke +
   xlim(-5, 20)</code></pre>
-<pre><code>Warning: Removed 5914779 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/dukedata.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Warning: Removed 5170211 rows containing non-finite values (stat_density).</code></pre>
+<p><img src="figure/dukedata.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code># plot with log and small offset
 dplot_duke_log &lt;- ggplot(tidy_cpm, aes(log(intensity + 0.5))) +
   geom_density() + 
   theme(legend.position = &quot;none&quot;)
 dplot_duke_log +
   xlim(-10, 10)</code></pre>
-<pre><code>Warning: Removed 48 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/dukedata.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Warning: Removed 39 rows containing non-finite values (stat_density).</code></pre>
+<p><img src="figure/dukedata.Rmd/unnamed-chunk-9-2.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="filtering-by-expression" class="section level4">
 <h4>Filtering by expression</h4>
-<pre class="r"><code># will use &quot;soft cutoff&quot; based on library size:
-
-
-# expression cutoff: 1
+<pre class="r"><code># apply hard cutoffs
+# cpm expression cutoff: 1
 cutoff &lt;- 1
 # must be expressed in at least: half
 min_sm_frac &lt;- 0.5
 filter_frac &lt;- min_sm_frac * ncol(expr_duke_cpm)
-filter_frac</code></pre>
-<pre><code>[1] 385.5</code></pre>
-<pre class="r"><code># apply cutoffs
-total_cpm_stats &lt;- data.frame(
-  total = apply(expr_duke_cpm, 1, function(x){
-    sum(x &gt; cutoff, na.rm = TRUE) 
-    } ))
+ filter_frac</code></pre>
+<pre><code>[1] 332.5</code></pre>
+<pre class="r"><code> total_cpm_stats &lt;- data.frame(
+   total = apply(expr_duke_cpm, 1, function(x){
+     sum(x &gt; cutoff, na.rm = TRUE) 
+     } ))
 keep &lt;- which(total_cpm_stats$total &gt;= filter_frac)
 
+# convert to data frame for subsetting
+expr_duke_cpm_df &lt;- expr_duke_cpm %&gt;% as.data.frame()
+
+# apply soft cutoffs
+# decided not to use
+#expr_duke_cpm_df &lt;- as.data.frame(expr_duke_cpm)
+# set CPM threshold based on library size
+#cpm_thres &lt;- 10 / min(colSums(expr_duke)) * 10^6
+# apply CPM threshold to at least half of all samples
+#keep &lt;- rowSums(expr_duke_cpm_df &gt; cpm_thres) &gt;= #as.integer(ncol(expr_duke_cpm_df) / 2)
+
 # check results
-dim(expr_duke_cpm)</code></pre>
-<pre><code>[1] 15495   771</code></pre>
-<pre class="r"><code>expr_duke_cpm_filtered = expr_duke_cpm[keep,]
+dim(expr_duke_cpm_df)</code></pre>
+<pre><code>[1] 15495   665</code></pre>
+<pre class="r"><code>expr_duke_cpm_filtered &lt;- expr_duke_cpm_df[keep,]
 dim(expr_duke_cpm_filtered)</code></pre>
-<pre><code>[1] 12299   771</code></pre>
+<pre><code>[1] 12414   665</code></pre>
 </div>
 <div id="post-filtering-density-plots" class="section level4">
 <h4>Post-filtering density plots</h4>
@@ -1248,7 +1296,7 @@ tidy_cpm_filtered &lt;- t(expr_duke_cpm_filtered) %&gt;%
   as_tibble() %&gt;%
   gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id) %&gt;%
   print()</code></pre>
-<pre><code># A tibble: 9,482,529 x 3
+<pre><code># A tibble: 8,255,310 x 3
    sample_id gene_id            intensity
    &lt;chr&gt;     &lt;chr&gt;                  &lt;dbl&gt;
  1 duke_648  ENSG00000000003.13      2.36
@@ -1258,26 +1306,26 @@ tidy_cpm_filtered &lt;- t(expr_duke_cpm_filtered) %&gt;%
  5 duke_689  ENSG00000000003.13      9.69
  6 duke_690  ENSG00000000003.13     17.9 
  7 duke_695  ENSG00000000003.13      1.73
- 8 duke_702  ENSG00000000003.13      0   
- 9 duke_704  ENSG00000000003.13      0   
-10 duke_705  ENSG00000000003.13      5.48
-# … with 9,482,519 more rows</code></pre>
+ 8 duke_704  ENSG00000000003.13      0   
+ 9 duke_705  ENSG00000000003.13      5.48
+10 duke_759  ENSG00000000003.13      2.71
+# … with 8,255,300 more rows</code></pre>
 <pre class="r"><code># plots
 dplot_duke_2 &lt;- ggplot(tidy_cpm_filtered, aes(intensity)) +
   geom_density() + 
   theme(legend.position = &quot;none&quot;)
 dplot_duke_2 +
   xlim(-5, 20)</code></pre>
-<pre><code>Warning: Removed 5877228 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/dukedata.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Warning: Removed 5148798 rows containing non-finite values (stat_density).</code></pre>
+<p><img src="figure/dukedata.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code># plot with log and small offset
 dplot_duke_log_2 &lt;- ggplot(tidy_cpm_filtered, aes(log(intensity + 0.5))) +
   geom_density() + 
   theme(legend.position = &quot;none&quot;)
 dplot_duke_log_2 +
   xlim(-10, 10)</code></pre>
-<pre><code>Warning: Removed 35 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/dukedata.Rmd/unnamed-chunk-10-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Warning: Removed 27 rows containing non-finite values (stat_density).</code></pre>
+<p><img src="figure/dukedata.Rmd/unnamed-chunk-11-2.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="normalize-gene-expression-distributions" class="section level4">
 <h4>Normalize gene expression distributions</h4>
@@ -1293,33 +1341,33 @@ duke_cpm_norm &lt;- map2_dfc(expr_duke_cpm_df, norm_factors, `*`)
 duke_cpm_norm &lt;- as.data.frame(duke_cpm_norm)
 rownames(duke_cpm_norm) &lt;- rownames(expr_duke_cpm_filtered)
 duke_cpm_norm[1:5, 1:5]</code></pre>
-<pre><code>                    duke_648  duke_658  duke_683   duke_684  duke_689
-ENSG00000000003.13  2.512797  4.194116  6.259463   1.170354  9.146552
-ENSG00000000419.11 70.015853 65.232064 16.526224  46.180715 20.431125
-ENSG00000000457.12 32.216962 24.726508 42.483249  33.292342 32.541247
-ENSG00000000460.15 91.104685 84.929639 58.631853 100.468825 44.871195
-ENSG00000000938.11 33.841507 19.401592 31.207546   8.713189 13.576759</code></pre>
+<pre><code>                    duke_648  duke_658  duke_683  duke_684  duke_689
+ENSG00000000003.13  2.490157  4.213576  6.289349  1.155982  9.146129
+ENSG00000000419.11 69.384999 65.534730 16.605128 45.613624 20.430181
+ENSG00000000457.12 31.926682 24.841236 42.686084 32.883519 32.539743
+ENSG00000000460.15 90.283816 85.323699 58.911789 99.235086 44.869121
+ENSG00000000938.11 33.536589 19.491612 31.356546  8.606193 13.576131</code></pre>
 </div>
 <div id="log-transformation" class="section level4">
 <h4>Log transformation</h4>
 <pre class="r"><code># introduce offset to prevent -Inf
 offset_duke_cpm_norm &lt;- duke_cpm_norm + 0.5
 offset_duke_cpm_norm[1:5, 1:5]</code></pre>
-<pre><code>                    duke_648  duke_658  duke_683   duke_684  duke_689
-ENSG00000000003.13  3.012797  4.694116  6.759463   1.670354  9.646552
-ENSG00000000419.11 70.515853 65.732064 17.026224  46.680715 20.931125
-ENSG00000000457.12 32.716962 25.226508 42.983249  33.792342 33.041247
-ENSG00000000460.15 91.604685 85.429639 59.131853 100.968825 45.371195
-ENSG00000000938.11 34.341507 19.901592 31.707546   9.213189 14.076759</code></pre>
+<pre><code>                    duke_648  duke_658  duke_683  duke_684  duke_689
+ENSG00000000003.13  2.990157  4.713576  6.789349  1.655982  9.646129
+ENSG00000000419.11 69.884999 66.034730 17.105128 46.113624 20.930181
+ENSG00000000457.12 32.426682 25.341236 43.186084 33.383519 33.039743
+ENSG00000000460.15 90.783816 85.823699 59.411789 99.735086 45.369121
+ENSG00000000938.11 34.036589 19.991612 31.856546  9.106193 14.076131</code></pre>
 <pre class="r"><code># log transformation
 duke_log_cpm_filtered_norm &lt;- log2(offset_duke_cpm_norm)
 duke_log_cpm_filtered_norm[1:5, 1:5]</code></pre>
 <pre><code>                   duke_648 duke_658 duke_683  duke_684 duke_689
-ENSG00000000003.13 1.591104 2.230853 2.756909 0.7401541 3.270013
-ENSG00000000419.11 6.139876 6.038525 4.089687 5.5447548 4.387578
-ENSG00000000457.12 5.031967 4.656869 5.425703 5.0786245 5.046196
-ENSG00000000460.15 6.517349 6.416665 5.885864 6.6577661 5.503705
-ENSG00000000938.11 5.101881 4.314812 4.986754 3.2037006 3.815243</code></pre>
+ENSG00000000003.13 1.580221 2.236822 2.763273 0.7276874 3.269950
+ENSG00000000419.11 6.126911 6.045153 4.096357 5.5271212 4.387513
+ENSG00000000457.12 5.019110 4.663415 5.432495 5.0610641 5.046131
+ENSG00000000460.15 6.504363 6.423304 5.892677 6.6400292 5.503639
+ENSG00000000938.11 5.089015 4.321323 4.993518 3.1868480 3.815179</code></pre>
 <p>Final density plot</p>
 <pre class="r"><code>duke_log_cpm_filtered_tbl &lt;- duke_log_cpm_filtered_norm %&gt;%
   as.data.frame() %&gt;%
@@ -1335,7 +1383,7 @@ dplot3 &lt;- ggplot(tidy_log_cpm, aes(intensity)) +
   xlim(-20, 20) +
   ggtitle(&quot;Final density plot of log(CPM) for Duke DLBCL&quot;)
 dplot3</code></pre>
-<p><img src="figure/dukedata.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/dukedata.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="prepare-phenotype-data" class="section level2">
@@ -1532,9 +1580,14 @@ pheno_data_joined &lt;- pheno_data_split %&gt;%
  9 duke_704    399772 C85CBANXX
 10 duke_705   4856641 C85CBANXX
 # … with 761 more rows</code></pre>
+<pre class="r"><code># select rows based on columns in expression matrix
+pheno_data_filtered &lt;- pheno_data_joined %&gt;%
+  dplyr::filter(sample_id %in% colnames(duke_log_cpm_filtered_norm))
+nrow(pheno_data_filtered)</code></pre>
+<pre><code>[1] 665</code></pre>
 <pre class="r"><code># Ensure that samples in expression matrix matches pheno data
 sample_exprs &lt;- colnames(duke_log_cpm_filtered_norm)
-sample_pheno &lt;- pheno_data_joined %&gt;% pull(sample_id)
+sample_pheno &lt;- pheno_data_filtered %&gt;% pull(sample_id)
 identical(sample_exprs, sample_pheno)</code></pre>
 <pre><code>[1] TRUE</code></pre>
 </div>
@@ -1548,7 +1601,7 @@ v_metadata &lt;- data.frame(
   row.names = c(&quot;lib_size&quot;, &quot;lane&quot;))
 
 # make annotated phenoData
-pheno_data_df &lt;- as.data.frame(pheno_data_joined) %&gt;%
+pheno_data_df &lt;- as.data.frame(pheno_data_filtered) %&gt;%
   column_to_rownames(var = &quot;sample_id&quot;)
   
 phenoData &lt;- new(&quot;AnnotatedDataFrame&quot;, 
@@ -1556,14 +1609,14 @@ phenoData &lt;- new(&quot;AnnotatedDataFrame&quot;,
                  varMetadata = v_metadata)
 phenoData</code></pre>
 <pre><code>An object of class &#39;AnnotatedDataFrame&#39;
-  rowNames: duke_648 duke_658 ... duke_3999 (771 total)
+  rowNames: duke_648 duke_658 ... duke_3999 (665 total)
   varLabels: lib_size lane
   varMetadata: labelDescription</code></pre>
 <pre class="r"><code># convert expression data to matrix format
 duke_exprs &lt;- duke_log_cpm_filtered_norm %&gt;% as.matrix()
 
 # create global annotation
-annotation &lt;- as.character(&quot;RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed.&quot;)
+annotation &lt;- as.character(&quot;RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in &gt;12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed.&quot;)
 
 # assemble expressionset
 duke_es &lt;- ExpressionSet(
@@ -1572,17 +1625,17 @@ duke_es &lt;- ExpressionSet(
   annotation = annotation)
 duke_es</code></pre>
 <pre><code>ExpressionSet (storageMode: lockedEnvironment)
-assayData: 12299 features, 771 samples 
+assayData: 12414 features, 665 samples 
   element names: exprs 
 protocolData: none
 phenoData
-  sampleNames: duke_648 duke_658 ... duke_3999 (771 total)
+  sampleNames: duke_648 duke_658 ... duke_3999 (665 total)
   varLabels: lib_size lane
   varMetadata: labelDescription
 featureData: none
 experimentData: use &#39;experimentData(object)&#39;
-Annotation: RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. </code></pre>
-<pre class="r"><code>saveRDS(duke_es, &quot;output/duke_expression_set_cleaned_log.rds&quot;)</code></pre>
+Annotation: RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in &gt;12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. </code></pre>
+<pre class="r"><code>saveRDS(duke_es, &quot;output/duke_expressionset.rds&quot;)</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

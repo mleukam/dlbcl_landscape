@@ -9,9 +9,11 @@
 <meta name="generator" content="pandoc" />
 
 
+<meta name="author" content="mleukam" />
 
+<meta name="date" content="2019-06-27" />
 
-<title>Immune Landscape of DLBCL</title>
+<title>Merge Duke and NCI datasets</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,6 +21,9 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -260,6 +265,90 @@ $(document).ready(function () {
 
 
 
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -267,6 +356,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -311,7 +410,9 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Immune Landscape of DLBCL</h1>
+<h1 class="title toc-ignore">Merge Duke and NCI datasets</h1>
+<h4 class="author">mleukam</h4>
+<h4 class="date">2019-06-27</h4>
 
 </div>
 
@@ -339,7 +440,7 @@ div.section {
 <strong>Last updated:</strong> 2019-06-28
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
@@ -361,6 +462,66 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
 <div class="panel-body">
 <p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20190613code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20190613)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20190613code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20190613)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
 </div>
 </div>
 </div>
@@ -419,356 +580,101 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
-
 <p>
-These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+There are no past versions. Publish this analysis with <code>wflow_publish()</code> to start tracking its development.
 </p>
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-File
-</th>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-<th>
-Message
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/42da9d5893be09775a582da78b8bec151d4ea9bf/analysis/index.Rmd" target="_blank">42da9d5</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-28
-</td>
-<td>
-major overhaul of Duke count processing, updates of NCI pheno data
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/afd41f8a903eb6c87869616709a00cac81ecf545/docs/index.html" target="_blank">afd41f8</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-27
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/a1df19d8d6eafa38667f58737de22a01c88bbff3/analysis/index.Rmd" target="_blank">a1df19d</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-27
-</td>
-<td>
-updated homepage
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/a566468c2e368ab5001aa9d93dffb82bd831349a/docs/index.html" target="_blank">a566468</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-19
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/ff61a74b9b7400ba96a6dd2548123f915f1ddcae/analysis/index.Rmd" target="_blank">ff61a74</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-19
-</td>
-<td>
-updated links to notebooks
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/1cfd6533ee179611329cf2e876b07a91722aaaef/docs/index.html" target="_blank">1cfd653</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-13
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/d87cb437c131c87fa6ad8f947b608f1b8413a62f/analysis/index.Rmd" target="_blank">d87cb43</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-13
-</td>
-<td>
-wflow_publish(“analysis/index.Rmd”)
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/a3fea9cdc07c65623dfe9a37c68a8610f895e840/docs/index.html" target="_blank">a3fea9c</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-13
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/275aead0cc6b8c4f5fdbbec934af4036875148cc/analysis/index.Rmd" target="_blank">275aead</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-13
-</td>
-<td>
-wflow_publish(“analysis/index.Rmd”)
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/4c6b59d40c5973962b3750482dd92624fe1e3304/docs/index.html" target="_blank">4c6b59d</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-13
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/6d82275e30ce9994a8784f66a546f90ffc2cb281/docs/index.html" target="_blank">6d82275</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-13
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/b42800d1b3a63f1d82fbab3409e7e6f7409af15f/analysis/index.Rmd" target="_blank">b42800d</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-13
-</td>
-<td>
-update title
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/02539e99e7c6fbe6aa9e60b77e8e8c69f987ca4f/docs/index.html" target="_blank">02539e9</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-13
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/a254509286997206e85255831484905ab3f3862e/analysis/index.Rmd" target="_blank">a254509</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-13
-</td>
-<td>
-wflow_publish(“analysis/index.Rmd”)
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/8582b744481b5df2fdb3929e2950a5f27e5388cb/analysis/index.Rmd" target="_blank">8582b74</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-13
-</td>
-<td>
-Start workflowr project.
-</td>
-</tr>
-</tbody>
-</table>
-</div>
 <hr>
 </div>
 </div>
 </div>
-<p>Welcome to the computational lab notebook for our research project focused on profiling the immune microenvironment of DLBCL using gene expression data and multi-channel immunohistochemistry, then linking clusters of similar immune signatures with mutations in tumors.</p>
-<p>The over-arching questions are:</p>
-<ol style="list-style-type: decimal">
-<li><p>Are there recurrent immune phenotypes in DLBCL?</p></li>
-<li><p>What is the influence of tumor gene mutations on immune phenotypes in DLBCL?</p></li>
-</ol>
-<p>The primary data sources are:</p>
-<ol style="list-style-type: decimal">
-<li><p>Duke dataset from Reddy et al</p></li>
-<li><p>NCI dataset from Schmitz et al</p></li>
-</ol>
-<div id="aim-1-identify-recurrent-immune-phenotypes-using-rnaseq-data" class="section level2">
-<h2>Aim 1: Identify Recurrent Immune Phenotypes using RNAseq Data</h2>
-<div id="prepare-rnaseq-data-for-analysis" class="section level3">
-<h3>Prepare RNAseq data for analysis</h3>
-<ul>
-<li><a href="gdc_download.html">Download raw RNAseq counts in NCI lymphoma dataset from GDC</a></li>
-<li><a href="preprocessing_count_data.html">Preprocessing NCI counts</a></li>
-<li>Pseudoalign and count Duke RNAseq sequence data
-<ul>
-<li>Run on Gardner HPC cluster</li>
-<li>Source code in <code>/code/</code>)</li>
-</ul></li>
-<li><a href="dukedata.html">Preprocessing Duke counts</a></li>
-<li><a href="ext_pheno.html">Expanded phenotype data for Duke and NCI datasets</a></li>
-<li><a href="merge.html">Batch correction and merge datasets</a></li>
-</ul>
-</div>
-<div id="gene-set-variation-analysis" class="section level3">
-<h3>Gene set variation analysis</h3>
-<div id="first-try-at-gene-list-collection" class="section level4">
-<h4>First try at gene list collection:</h4>
-<p>Gene lists selected from work-in-progress analyis of TCGA macrophage signatures and from immune-related C2 “curated” gene sets from MSigDB. Also included T-cell inflamed signature from prior publications (Riyue Bao). No additional filtering was done after selection of candidate gene lists.</p>
-<ul>
-<li><a href="enrichment.html">GSVA</a></li>
-<li><a href="clustering_enrichment_scores.html">Clustering GSVA results</a></li>
-</ul>
-</div>
-<div id="gene-set-collection-refinement" class="section level4">
-<h4>Gene set collection refinement:</h4>
-<ul>
-<li><a href="newgs.html">New gene set collection</a></li>
-</ul>
-</div>
-</div>
-</div>
-<div id="aim-2-link-immune-phenotype-clusters-to-oncogenes" class="section level2">
-<h2>Aim 2: Link Immune Phenotype Clusters to Oncogenes</h2>
-<div id="mutation-calls" class="section level3">
-<h3>Mutation calls</h3>
-</div>
-</div>
-<div id="aim-3-visualize-the-immune-phenotype-with-multi-channel-ihc" class="section level2">
-<h2>Aim 3: Visualize the Immune Phenotype with Multi-Channel IHC</h2>
-</div>
-<div id="sub-aims" class="section level2">
-<h2>Sub-aims:</h2>
-<div id="sub-aim-1-pd-l1-amplified-cohort" class="section level4">
-<h4>Sub-aim 1: PD-L1 amplified cohort</h4>
-</div>
-<div id="sub-aim-2-additional-gene-signatures-cytolytic-and-double-hit" class="section level4">
-<h4>Sub-aim 2: Additional gene signatures: cytolytic and double hit</h4>
+<p>The purpose of this notebook is to merge the RNAseq data from NCI (downloaded as raw counts from GDC) and Duke (processed from sequence data) into a single gene expression matrix.</p>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>Clear workspace</p>
+<pre class="r"><code>rm(list = ls())</code></pre>
+<p>Load packages</p>
+<pre class="r"><code>library(&quot;tidyverse&quot;)</code></pre>
+<pre><code>── Attaching packages ─────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>✔ ggplot2 3.1.1     ✔ purrr   0.3.2
+✔ tibble  2.1.3     ✔ dplyr   0.8.1
+✔ tidyr   0.8.3     ✔ stringr 1.4.0
+✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
+<pre><code>── Conflicts ────────────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(&quot;sva&quot;)</code></pre>
+<pre><code>Loading required package: mgcv</code></pre>
+<pre><code>Loading required package: nlme</code></pre>
+<pre><code>
+Attaching package: &#39;nlme&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:dplyr&#39;:
+
+    collapse</code></pre>
+<pre><code>This is mgcv 1.8-28. For overview type &#39;help(&quot;mgcv-package&quot;)&#39;.</code></pre>
+<pre><code>Loading required package: genefilter</code></pre>
+<pre><code>
+Attaching package: &#39;genefilter&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:readr&#39;:
+
+    spec</code></pre>
+<pre><code>Loading required package: BiocParallel</code></pre>
+<p>Read in data</p>
+<pre class="r"><code>duke_es &lt;- readRDS(&quot;output/duke_expression_set_cleaned_log.rds&quot;)
+# nci_es &lt;- </code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.5.3 (2019-03-11)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Mojave 10.14.4
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] sva_3.30.1          BiocParallel_1.16.6 genefilter_1.64.0  
+ [4] mgcv_1.8-28         nlme_3.1-140        forcats_0.4.0      
+ [7] stringr_1.4.0       dplyr_0.8.1         purrr_0.3.2        
+[10] readr_1.3.1         tidyr_0.8.3         tibble_2.1.3       
+[13] ggplot2_3.1.1       tidyverse_1.2.1    
+
+loaded via a namespace (and not attached):
+ [1] Biobase_2.42.0       httr_1.4.0           bit64_0.9-7         
+ [4] jsonlite_1.6         splines_3.5.3        modelr_0.1.4        
+ [7] assertthat_0.2.1     stats4_3.5.3         blob_1.1.1          
+[10] cellranger_1.1.0     yaml_2.2.0           pillar_1.4.1        
+[13] RSQLite_2.1.1        backports_1.1.4      lattice_0.20-38     
+[16] limma_3.38.3         glue_1.3.1           digest_0.6.19       
+[19] rvest_0.3.4          colorspace_1.4-1     htmltools_0.3.6     
+[22] Matrix_1.2-17        plyr_1.8.4           XML_3.98-1.20       
+[25] pkgconfig_2.0.2      broom_0.5.2          haven_2.1.0         
+[28] xtable_1.8-4         scales_1.0.0         git2r_0.25.2        
+[31] annotate_1.60.1      generics_0.0.2       IRanges_2.16.0      
+[34] withr_2.1.2          BiocGenerics_0.28.0  lazyeval_0.2.2      
+[37] cli_1.1.0            survival_2.44-1.1    magrittr_1.5        
+[40] crayon_1.3.4         readxl_1.3.1         memoise_1.1.0       
+[43] evaluate_0.14        fs_1.3.1             xml2_1.2.0          
+[46] tools_3.5.3          hms_0.4.2            matrixStats_0.54.0  
+[49] S4Vectors_0.20.1     munsell_0.5.0        AnnotationDbi_1.44.0
+[52] compiler_3.5.3       rlang_0.3.4          grid_3.5.3          
+[55] RCurl_1.95-4.12      rstudioapi_0.10      bitops_1.0-6        
+[58] rmarkdown_1.13       gtable_0.3.0         DBI_1.0.0           
+[61] R6_2.4.0             lubridate_1.7.4      knitr_1.23          
+[64] bit_1.1-14           workflowr_1.4.0      rprojroot_1.3-2     
+[67] stringi_1.4.3        parallel_3.5.3       Rcpp_1.0.1          
+[70] tidyselect_0.2.5     xfun_0.7            </code></pre>
 </div>
 </div>
 
@@ -786,6 +692,8 @@ footer is added to webpages before the MathJax javascript. -->
 </script>
 
 
+</div>
+</div>
 
 </div>
 
