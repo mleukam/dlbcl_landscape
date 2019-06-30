@@ -1,0 +1,261 @@
+---
+title: "enrichment"
+author: "mleukam"
+date: "2019-06-14"
+output: workflowr::wflow_html
+---
+
+## Setup
+
+Clear workspace
+```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+library("tidyverse")
+library("GSVA")
+library("msigdbr")
+library("GSA")
+library("limma")
+library("EnhancedVolcano")
+```
+
+Read in data 
+```{r}
+# expression matrix from preprocessing_count_data.Rmd
+total_counts <- read_csv("output/dlbcl_expr_matrix.csv")
+
+rownames <- total_counts %>% pull(gene)
+expr_matrix <- total_counts %>%
+  dplyr::select(-gene) %>%
+  as.matrix()
+rownames(expr_matrix) <- rownames
+
+expr_matrix[1:5, 1:5]
+dim(expr_matrix)
+
+# gene sets from TCGA macrophage experiment
+gset <- readRDS("data/gset_ids_complete.rds")
+str(gset)
+
+# clean up structure and names
+# drop downregulated genes for now
+upreg <- gset[1:7]
+downreg <- gset[8:14]
+t <- gset[15]
+mac_and_t_gset <- c(upreg, t)
+str(mac_and_t_gset)
+names(mac_and_t_gset) <- (c("uchi_macrophage_cluster_1", "uchi_macrophage_cluster_2", "uchi_macrophage_cluster_3", "uchi_macrophage_cluster_4", "uchi_macrophage_cluster_5", "uchi_macrophage_cluster_6", "uchi_macrophage_cluster_7", "uchi_t_cell_inflammation"))
+str(mac_and_t_gset)
+
+# Read in lookup table for features, gencode v22 (used by GDC to label features)
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
+```
+
+Download additional gene sets
+https://cran.r-project.org/web/packages/msigdbr/vignettes/msigdbr-intro.html
+
+```{r}
+# use msigdbr to retreive all "C2" curated gene sets from MSigDB
+m_df = msigdbr(species = "Homo sapiens", category = "C2")
+
+# review subcategories
+summary(as.factor(m_df$gs_subcat))
+```
+
+
+#### MSigDB Gene Sets
+Searched MSigDB website for C2 curated human gene sets unambiguously assocaited with immune function
+
+http://software.broadinstitute.org/gsea/msigdb/search.jsp
+
+```{r}
+# read in GMT file as a set of lists
+c2_immune_gsets <- GSA.read.gmt("data/c2_human_immune_genesets.gmt")
+
+# get names of gene sets
+gsetnames <- c2_immune_gsets$geneset.names
+
+# select gene sets from msigdbr-retreived gene list with vector of gene set names
+my_gsets <- m_df %>%
+  dplyr::filter(gs_name %in% gsetnames)
+summary(as.factor(my_gsets$gs_name))
+
+# convert gene symbols to gencode v22 names
+gencode_table <- gencode_gtf %>%
+  dplyr::select(gene_id, gene_name) %>%
+  dplyr::rename(human_gene_symbol = gene_name)
+my_gsets_w_id <- my_gsets %>%
+  left_join(gencode_table)
+
+# how many failed to map?
+x <- my_gsets_w_id$gene_id
+x[is.na(x)]
+length(x[!is.na(x)]) / nrow(my_gsets_w_id)
+# just over 96% success rate - acceptable 
+# which gene sets have the most missing genes?
+missing_genes <- my_gsets_w_id %>% group_by(gs_name) %>% summarise(na_count = sum(is.na(gene_id))) %>% arrange(desc(na_count))
+# which gene sets have the highest percentage of missing genes?
+totals <- my_gsets_w_id %>% group_by(gs_name) %>% tally() %>% rename(total = n)
+gs_table <- totals %>% 
+  left_join(missing_genes) %>% 
+  mutate(percentage = na_count / total) %>%
+  arrange(desc(percentage)) %>%
+  print()
+# based on these findings, I won't remove any gene sets from further consideration
+my_gsets_cleaned <- my_gsets_w_id %>%
+  drop_na(gene_id)
+
+# make a list of gene id vectors for each gene set
+gsets_msig <- my_gsets_cleaned %>%
+  dplyr::select(gs_name, gene_id) %>%
+  nest(key = "gene_id") %>%
+  print()
+gsets_msig_list <- map(gsets_msig, as.list)
+gsets_vectors <- gsets_msig_list$data %>%
+  map(pull)
+names(gsets_vectors) <- gsets_msig %>% pull(gs_name)
+gsets_vectors
+str(gsets_vectors)
+```
+
+#### Combine Gene Sets, save for outside use
+```{r}
+total_immune_gset_v1 <- c(mac_and_t_gset, gsets_vectors)
+str(total_immune_gset_v1)
+saveRDS(total_immune_gset_v1, "output/total_immune_gset_v1.rds")
+```
+
+
+## GSVA scores for macrophage and T-cell inflamed gene sets
+Run on cluster using scripts:
+
+* run_gsva1.pbs
+* gsva1.sh
+* gsva1.r
+
+See code folder in GitHub repository for source code for scripts. 
+
+## Limma for Gene Set Enrichment
+```{r}
+# read in data from cluster
+nci_dlbcl_es <- readRDS("data/dlbcl_total_immune_gset_v1_results.rds")
+
+# read in pheno_data from previous notebook
+pheno_data <- read_csv("output/nci_dlbcl_annotation.csv")
+```
+
+```{r}
+nci_dlbcl_tbl <- nci_dlbcl_es %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_set") %>%
+  as_tibble() %>%
+  print()
+```
+
+Set up groups for contrast matrix
+```{r}
+# Need design matrix that specifies groups
+samples <- colnames(nci_dlbcl_tbl)
+
+# remove "gene_set" from vector
+samples <- samples[-c(1)]
+sample_tibble <- enframe(samples) %>%
+  dplyr::select(samples = value)
+
+# pull out sample names from pheno_data
+highamp_samp <- pheno_data %>%
+  dplyr::filter(pdl1_status == "high_amplified") %>%
+  pull(case_submitter_id)
+
+nonamp_samp <- pheno_data %>%
+  filter(pdl1_status == "non-amplified") %>%
+  pull(case_submitter_id)
+
+pdl1_table <- pheno_data %>% 
+  dplyr::select(case_submitter_id, pdl1_status) %>%
+  mutate(pdl1_status = ifelse(pdl1_status == "non-amplified", 
+                              "non_amplified", 
+                              pdl1_status)) %>%
+  mutate(pdl1_status = replace_na(pdl1_status, "not_assesed")) %>%
+  dplyr::rename(samples = case_submitter_id)
+summary(as.factor(pdl1_table$pdl1_status))
+```
+
+The order of samples for the design matrix and the fpkm matrix have to be identical
+```{r}
+# pull column names in order and join group assignment by sample name
+sampleorder <- colnames(nci_dlbcl_es) %>% 
+  enframe() %>% 
+  dplyr::rename(samples = value)
+pdl1_groups_sorted <- left_join(sampleorder, pdl1_table)
+pdl1_groups_sorted$pdl1_status <- replace_na(pdl1_groups_sorted$pdl1_status, 
+                                             "not_assessed")
+
+print(all.equal(colnames(nci_dlbcl_es), pdl1_groups_sorted$samples))
+
+# set up design matrix
+rnames <- pdl1_groups_sorted$samples
+groups <- as.factor(pdl1_groups_sorted$pdl1_status)
+design <- model.matrix(~ 0 + groups)
+colnames(design) <- gsub("groups", "", colnames(design))
+rownames(design) <- rnames
+head(design)
+
+contr.matrix <- makeContrasts(high_amplified - non_amplified, levels = colnames(design))
+contr.matrix
+```
+
+
+#### Tests of functional enrichment
+```{r}
+adjPvalueCutoff <- 0.05
+logFCcutoff <- log2(2)
+fit <- lmFit(nci_dlbcl_es, design)
+fit2 <- contrasts.fit(fit, contr.matrix)
+fit2 <- eBayes(fit2)
+allGeneSets <- topTable(fit2, 
+                        coef = "high_amplified - non_amplified", 
+                        number = Inf)
+DEgeneSets <- topTable(fit2, coef = "high_amplified - non_amplified",
+                       number = Inf,
+                       p.value = adjPvalueCutoff, 
+                       adjust.method = "BH")
+DEgeneSets
+res <- decideTests(fit2, p.value = adjPvalueCutoff)
+summary(res)
+```
+
+```{r fig.height=3, fig.width=3}
+DE_geneset_df <- as.data.frame(DEgeneSets)
+
+GS_volcano <- EnhancedVolcano(DE_geneset_df, 
+                lab = rownames(DE_geneset_df),
+                x = "logFC", 
+                xlab = bquote(~ Log[2]~ "FC"),
+                xlim = c(-0.5, 0.5),
+                y = "P.Value", 
+                ylab = bquote(~ -Log[10] ~ italic(P)),
+                ylim = c(0, 7),
+                FCcutoff = 0.15,
+                pCutoff = 0.001,
+                col = c('grey', 'grey', 'grey', 'red'),
+                colAlpha = 1,
+                title = "",
+                titleLabSize = 18,
+                transcriptPointSize = 2,
+                transcriptLabSize = 2.0,
+                DrawConnectors = FALSE,
+                widthConnectors = 0.2,
+                colConnectors = "grey30",
+                axisLabSize = 20,
+                legend = c("", "", "", ""), legendLabSize = -1, legendIconSize = -1,
+                border = "full",
+                borderWidth = 1.5,
+                borderColour = "black",
+                gridlines.major = FALSE,
+                gridlines.minor = FALSE)
+GS_volcano
+```

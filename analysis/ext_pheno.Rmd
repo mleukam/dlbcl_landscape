@@ -16,3 +16,112 @@ Clear workspace
 rm(list = ls())
 ```
 
+Load packages
+```{r}
+library("tidyverse")
+library("sva")
+library("readxl")
+library("Biobase")
+```
+
+Read in data
+```{r}
+duke_es <- readRDS("output/duke_expressionset.rds")
+nci_es <- readRDS("output/nci_expressionset.rds")
+```
+
+## Duke 
+
+Read in additional external metadata
+
+Additional Duke clinical data (table S1) downloaded from publication on [Cell journal website](https://www.cell.com/cell/fulltext/S0092-8674(17)31121-2?_returnURL=https%3A%2F%2Flinkinghub.elsevier.com%2Fretrieve%2Fpii%2FS0092867417311212%3Fshowall%3Dtrue#secsectitle0260).
+
+```{r}
+duke_xls <- read_excel("data/mmc1.xlsx", 
+                      sheet = "Clinical Information", 
+                      skip = 3) %>%
+  print()
+```
+
+Reformat sample names to match existing pheno data table
+
+```{r}
+duke_clindata <- duke_xls %>%
+  dplyr::rename(sample_id = `Sample  ID`) %>%
+  mutate(sample_id = paste0("duke_", sample_id)) %>%
+  print()
+```
+
+Get existing pheno data table from expressionset, join tables
+```{r}
+pheno_d <- pData(duke_es)
+head(pheno_d)
+pheno_data <- pheno_d %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  left_join(duke_clindata) %>%
+  print()
+```
+
+Write out for later use
+```{r}
+# write as CSV to share with collaborators
+write_csv(pheno_data, "output/duke_extended_pheno_data.csv")
+
+# add to expressionset 
+pheno_data_df <- as.data.frame(pheno_data) %>%
+  column_to_rownames(var = "sample_id")
+
+pData(duke_es) <- pheno_data_df
+pData(duke_es)
+
+# write out expressionset with extended pheno data
+saveRDS(duke_es, "output/duke_expressionset_pext.rds")
+```
+
+
+## NCI
+
+Read in additional clinical/metadata from Schmitz et al 2018 Supplementary Appendix 2 on [NEJM website](https://www-nejm-org.proxy.uchicago.edu/doi/10.1056/NEJMoa1801445#article_supplementary_material)
+
+```{r}
+nci_xls <- read_excel("data/nejmoa1801445_appendix_2.xlsx", 
+    sheet = "Tab S9 Characteristics DLBCL") %>%
+  print()
+
+# get name of sample ID column
+col1 <- names(nci_xls[1])
+
+# rename for leftjoin
+nci_clindata <- nci_xls %>%
+  dplyr::rename(sample_id = col1) %>% print()
+```
+
+Get existing pheno data table from expressionset, join tables
+```{r}
+pheno_d <- pData(nci_es)
+head(pheno_d)
+pheno_data <- pheno_d %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  left_join(nci_clindata) %>%
+  print()
+```
+
+Write out for later use
+```{r}
+# write as CSV to share with collaborators
+write_csv(pheno_data, "output/nci_extended_pheno_data.csv")
+
+# add to expressionset 
+pheno_data_df <- as.data.frame(pheno_data) %>%
+  column_to_rownames(var = "sample_id")
+
+pData(nci_es) <- pheno_data_df
+pData(nci_es)
+
+# write out expressionset with extended pheno data
+saveRDS(nci_es, "output/nci_expressionset_pext.rds")
+```
