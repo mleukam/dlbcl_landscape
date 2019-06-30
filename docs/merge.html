@@ -437,7 +437,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-06-28
+<strong>Last updated:</strong> 2019-06-30
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -528,10 +528,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree42da9d5893be09775a582da78b8bec151d4ea9bftargetblank42da9d5a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/42da9d5893be09775a582da78b8bec151d4ea9bf" target="_blank">42da9d5</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreed9718424cb00f80972c6f9255b3db01b0c1f815atargetblankd971842a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/d9718424cb00f80972c6f9255b3db01b0c1f815a" target="_blank">d971842</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree42da9d5893be09775a582da78b8bec151d4ea9bftargetblank42da9d5a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreed9718424cb00f80972c6f9255b3db01b0c1f815atargetblankd971842a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -558,16 +558,27 @@ Untracked files:
     Untracked:  data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
     Untracked:  data/gset_ids_complete.rds
     Untracked:  data/htseq_counts/
+    Untracked:  data/mmc1.xlsx
+    Untracked:  data/nejmoa1801445_appendix_2.xlsx
     Untracked:  data/sample.tsv
     Untracked:  data/temp.dgelist_limma.rds
+    Untracked:  output/combined_clin_data.xlsx
     Untracked:  output/dlbcl_expr_matrix.csv
     Untracked:  output/duke_expression_set_cleaned_log.rds
     Untracked:  output/duke_expressionset.rds
+    Untracked:  output/duke_expressionset_pext.rds
+    Untracked:  output/duke_extended_pheno_data.csv
     Untracked:  output/expr_matrix.csv
     Untracked:  output/nci_dlbcl_annotation.csv
     Untracked:  output/nci_dlbcl_unprocessed_counts.csv
     Untracked:  output/nci_expressionset.rds
+    Untracked:  output/nci_expressionset_pext.rds
+    Untracked:  output/nci_extended_pheno_data.csv
     Untracked:  output/total_immune_gset_v1.rds
+
+Unstaged changes:
+    Modified:   analysis/ext_pheno.Rmd
+    Modified:   analysis/index.Rmd
 
 </code></pre>
 <p>
@@ -580,9 +591,69 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with <code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/d9718424cb00f80972c6f9255b3db01b0c1f815a/analysis/merge.Rmd" target="_blank">d971842</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-30
+</td>
+<td>
+working notebook for merging expression and phenotype
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/5a57ec091786bd8b0362d31767fd966d90be89cd/docs/merge.html" target="_blank">5a57ec0</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-28
+</td>
+<td>
+Build site.
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -594,12 +665,12 @@ There are no past versions. Publish this analysis with <code>wflow_publish()</co
 <pre class="r"><code>rm(list = ls())</code></pre>
 <p>Load packages</p>
 <pre class="r"><code>library(&quot;tidyverse&quot;)</code></pre>
-<pre><code>── Attaching packages ─────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>── Attaching packages ────────────────────── tidyverse 1.2.1 ──</code></pre>
 <pre><code>✔ ggplot2 3.1.1     ✔ purrr   0.3.2
 ✔ tibble  2.1.3     ✔ dplyr   0.8.1
 ✔ tidyr   0.8.3     ✔ stringr 1.4.0
 ✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
-<pre><code>── Conflicts ────────────────────────────────────────────────── tidyverse_conflicts() ──
+<pre><code>── Conflicts ───────────────────────── tidyverse_conflicts() ──
 ✖ dplyr::filter() masks stats::filter()
 ✖ dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>library(&quot;sva&quot;)</code></pre>
@@ -618,9 +689,811 @@ Attaching package: &#39;genefilter&#39;</code></pre>
 
     spec</code></pre>
 <pre><code>Loading required package: BiocParallel</code></pre>
-<p>Read in data</p>
-<pre class="r"><code>duke_es &lt;- readRDS(&quot;output/duke_expression_set_cleaned_log.rds&quot;)
-# nci_es &lt;- </code></pre>
+<pre class="r"><code>library(&quot;Biobase&quot;)</code></pre>
+<pre><code>Loading required package: BiocGenerics</code></pre>
+<pre><code>Loading required package: parallel</code></pre>
+<pre><code>
+Attaching package: &#39;BiocGenerics&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:parallel&#39;:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB</code></pre>
+<pre><code>The following objects are masked from &#39;package:dplyr&#39;:
+
+    combine, intersect, setdiff, union</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
+
+    IQR, mad, sd, var, xtabs</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
+
+    anyDuplicated, append, as.data.frame, basename, cbind,
+    colMeans, colnames, colSums, dirname, do.call, duplicated,
+    eval, evalq, Filter, Find, get, grep, grepl, intersect,
+    is.unsorted, lapply, lengths, Map, mapply, match, mget, order,
+    paste, pmax, pmax.int, pmin, pmin.int, Position, rank, rbind,
+    Reduce, rowMeans, rownames, rowSums, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which, which.max,
+    which.min</code></pre>
+<pre><code>Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    &#39;browseVignettes()&#39;. To cite Bioconductor, see
+    &#39;citation(&quot;Biobase&quot;)&#39;, and for packages &#39;citation(&quot;pkgname&quot;)&#39;.</code></pre>
+<p>Read in expressionsets</p>
+<pre class="r"><code>duke_es &lt;- readRDS(&quot;output/duke_expressionset_pext.rds&quot;)
+
+nci_es &lt;- readRDS(&quot;output/nci_expressionset_pext.rds&quot;)</code></pre>
+</div>
+<div id="batch-correction-duke-expression-data" class="section level2">
+<h2>Batch correction Duke expression data</h2>
+<p>Following examples and suggestions in vignette here: <a href="https://bioconductor.org/packages/release/bioc/vignettes/sva/inst/doc/sva.pdf" class="uri">https://bioconductor.org/packages/release/bioc/vignettes/sva/inst/doc/sva.pdf</a> and examples here: <a href="http://jtleek.com/genstats/inst/doc/02_13_batch-effects.html" class="uri">http://jtleek.com/genstats/inst/doc/02_13_batch-effects.html</a></p>
+<p>Duke expression data did not go through GDC pipeline and may contain batch effects carried over from raw sequence data. Duke pheno data includes lanes, which will be examined for batch effect using SVA ComBat function</p>
+<pre class="r"><code>pheno &lt;- pData(duke_es)
+edata &lt;- exprs(duke_es)
+
+# There is a single &quot;NA&quot; value in the lane assignments. Will review and decide whether to keep or not for further analysis
+which(is.na(pheno$lane))</code></pre>
+<pre><code>[1] 214</code></pre>
+<pre class="r"><code>pheno[214,]</code></pre>
+<pre><code>          lib_size lane Gender IPI IPI groups ECOG IPI AnnArbor stage IPI
+duke_2699 11074556 &lt;NA&gt;      F   4       High        0                  1
+          LDH IPI multiple extranodal IPI AGE IPI B symptoms at diagnosis
+duke_2699       1                       1       1                      no
+          Response to initial therapy Testicular involvement
+duke_2699           Complete response                 Female
+          CNS Involvement CNS Relapse age at diagnosis
+duke_2699              no          no             83.8
+          Overall Survival years Censored log2 MYC expr log2 BCL2 expr
+duke_2699                   0.97        0       4.77914       5.931078
+          log2 BCL6 expr MYC high expr BCL2 high expr BCL6 high expr
+duke_2699       4.529577             0              0              0
+          MYC IHC BCL2 IHC BCL6 IHC BCL2 translocation (FISH)
+duke_2699    &lt;NA&gt; positive positive                      &lt;NA&gt;
+          MYC translocation (FISH) BCL6 translocation (FISH)
+duke_2699                     &lt;NA&gt;                      &lt;NA&gt;
+          ABC GCB (RNAseq) ABC GCB ratio (RNAseq) Nanostring ABC GCB
+duke_2699              ABC              0.4032663               &lt;NA&gt;
+          Nanostring LPS Hans GCB NonGCB Genomic Risk Model
+duke_2699             NA             GCB          High risk</code></pre>
+<pre class="r"><code># The sample looks otherwise complete and with a large enough library size compared to others (though small overall). Will set to &quot;unknown&quot; and keep. Because one batch now will only have one member, will have to adjust means only and not variance (cannot calculate variance from one sample)
+
+# The ComBat function adjusts for known batches using an empirical Bayesian framework. In order to use the function, you must have a known batch variable in your dataset.
+batch = pheno$lane %&gt;% as.data.frame() %&gt;%
+  dplyr::rename(lane = 1) %&gt;%
+  mutate(lane = as.character(lane)) %&gt;%
+  replace(is.na(.), &quot;unknown&quot;) %&gt;%
+  mutate(lane = as.factor(lane)) %&gt;%
+  pull(lane)
+summary(batch)</code></pre>
+<pre><code>C7FYAANXX C7U9KANXX C7V65ANXX C80R5ANXX C80RHANXX C81YPANXX C85CBANXX 
+       32       130       132       134       137        53        46 
+  unknown 
+        1 </code></pre>
+<pre class="r"><code># Note that adjustment variables will be treated as given to the ComBat function. This means if you are trying to adjust for a categorical variable with p different levels, you will need to give ComBat p-1 indicator variables for this covariate.
+modlane &lt;- model.matrix(~ lane, data = pheno)
+
+# We need to create a model matrix for the adjustment variables, including the variable of interest. Note that you do not include batch in creating this model matrix - it will be included later in the ComBat function. In this case there are no other adjustment variables so we simply fit an intercept term.
+modcombat &lt;- model.matrix(~ 1, data = pheno)
+
+# apply combat to get &quot;cleaned data matrix&quot;
+# will use the mean.only=TRUE option for correction for lanes that only adjusts the mean of the batch effects across batches (default adjusts the mean and variance). This option is recommended for cases where milder batch effects are expected (so no need to adjust the variance), or in cases where the variances are expected to be different across batches due to the biology.
+
+# plot the before
+batch_df &lt;- enframe(batch) %&gt;%
+  dplyr::select(lane = value)
+edata_df &lt;- as.data.frame(t(edata)) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  bind_cols(batch_df) %&gt;%
+  dplyr::select(sample_id, lane, everything()) %&gt;%
+  gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id, -lane) %&gt;%
+  group_by(lane) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 8,255,310 x 4
+# Groups:   lane [8]
+   sample_id lane      gene_id            intensity
+   &lt;chr&gt;     &lt;fct&gt;     &lt;chr&gt;                  &lt;dbl&gt;
+ 1 duke_648  C85CBANXX ENSG00000000003.13     1.58 
+ 2 duke_658  C80RHANXX ENSG00000000003.13     2.24 
+ 3 duke_683  C80RHANXX ENSG00000000003.13     2.76 
+ 4 duke_684  C85CBANXX ENSG00000000003.13     0.728
+ 5 duke_689  C85CBANXX ENSG00000000003.13     3.27 
+ 6 duke_690  C85CBANXX ENSG00000000003.13     4.37 
+ 7 duke_695  C85CBANXX ENSG00000000003.13     0.873
+ 8 duke_704  C85CBANXX ENSG00000000003.13    -1    
+ 9 duke_705  C85CBANXX ENSG00000000003.13     2.71 
+10 duke_759  C85CBANXX ENSG00000000003.13     1.64 
+# … with 8,255,300 more rows</code></pre>
+<pre class="r"><code>before_box &lt;- ggplot(edata_df, aes(x = lane, y = intensity, group = lane)) +
+  geom_boxplot()
+before_box</code></pre>
+<p><img src="figure/merge.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># pretty minimal differences in mean and distribution
+
+# apply batch correction
+combat_edata &lt;- ComBat(dat = edata,
+                       batch = batch,
+                       mod = modcombat,
+                       mean.only = TRUE,
+                       par.prior = TRUE, 
+                       prior.plots = FALSE)</code></pre>
+<pre><code>Using the &#39;mean only&#39; version of ComBat</code></pre>
+<pre><code>Found8batches</code></pre>
+<pre><code>Note: one batch has only one sample, setting mean.only=TRUE</code></pre>
+<pre><code>Adjusting for0covariate(s) or covariate level(s)</code></pre>
+<pre><code>Standardizing Data across genes</code></pre>
+<pre><code>Fitting L/S model and finding priors</code></pre>
+<pre><code>Finding parametric adjustments</code></pre>
+<pre><code>Adjusting the Data</code></pre>
+<pre class="r"><code># plot the after
+batch_df &lt;- enframe(batch) %&gt;%
+  dplyr::select(lane = value)
+combat_edata_df &lt;- as.data.frame(t(combat_edata)) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  bind_cols(batch_df) %&gt;%
+  dplyr::select(sample_id, lane, everything()) %&gt;%
+  gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id, -lane) %&gt;%
+  group_by(lane) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 8,255,310 x 4
+# Groups:   lane [8]
+   sample_id lane      gene_id            intensity
+   &lt;chr&gt;     &lt;fct&gt;     &lt;chr&gt;                  &lt;dbl&gt;
+ 1 duke_648  C85CBANXX ENSG00000000003.13     1.62 
+ 2 duke_658  C80RHANXX ENSG00000000003.13     2.24 
+ 3 duke_683  C80RHANXX ENSG00000000003.13     2.76 
+ 4 duke_684  C85CBANXX ENSG00000000003.13     0.769
+ 5 duke_689  C85CBANXX ENSG00000000003.13     3.31 
+ 6 duke_690  C85CBANXX ENSG00000000003.13     4.41 
+ 7 duke_695  C85CBANXX ENSG00000000003.13     0.914
+ 8 duke_704  C85CBANXX ENSG00000000003.13    -0.959
+ 9 duke_705  C85CBANXX ENSG00000000003.13     2.76 
+10 duke_759  C85CBANXX ENSG00000000003.13     1.68 
+# … with 8,255,300 more rows</code></pre>
+<pre class="r"><code>after_box &lt;- ggplot(combat_edata_df, aes(x = lane, y = intensity, group = lane)) +
+  geom_boxplot()
+after_box</code></pre>
+<p><img src="figure/merge.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># even more better :-)</code></pre>
+</div>
+<div id="combine-expression-data" class="section level2">
+<h2>Combine expression data</h2>
+<p>Use Duke expression data that is batch-corrected for lanes</p>
+<pre class="r"><code>duke_exprs &lt;- combat_edata %&gt;% 
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(gene_id, everything()) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 12,414 x 666
+   gene_id duke_648 duke_658 duke_683 duke_684 duke_689 duke_690 duke_695
+   &lt;chr&gt;      &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+ 1 ENSG00…     1.62     2.24     2.76    0.769     3.31     4.41    0.914
+ 2 ENSG00…     6.14     6.05     4.10    5.54      4.41     5.56    5.82 
+ 3 ENSG00…     5.03     4.66     5.43    5.08      5.06     5.75    5.81 
+ 4 ENSG00…     6.53     6.42     5.89    6.66      5.53     8.18    5.68 
+ 5 ENSG00…     5.13     4.32     4.99    3.23      3.86     3.86    3.00 
+ 6 ENSG00…     7.44     6.45     6.62    4.40      5.91     7.28    2.84 
+ 7 ENSG00…     4.64     4.78     5.06    4.33      4.78     4.65    3.39 
+ 8 ENSG00…     6.11     6.51     6.50    5.29      5.65     6.47    6.26 
+ 9 ENSG00…     6.88     6.70     6.65    6.27      6.88     7.23    6.73 
+10 ENSG00…     3.59     2.88     2.39    1.58      2.06     4.07    2.35 
+# … with 12,404 more rows, and 658 more variables: duke_704 &lt;dbl&gt;,
+#   duke_705 &lt;dbl&gt;, duke_759 &lt;dbl&gt;, duke_787 &lt;dbl&gt;, duke_793 &lt;dbl&gt;,
+#   duke_799 &lt;dbl&gt;, duke_800 &lt;dbl&gt;, duke_813 &lt;dbl&gt;, duke_816 &lt;dbl&gt;,
+#   duke_823 &lt;dbl&gt;, duke_829 &lt;dbl&gt;, duke_830 &lt;dbl&gt;, duke_831 &lt;dbl&gt;,
+#   duke_1008 &lt;dbl&gt;, duke_1016 &lt;dbl&gt;, duke_2043 &lt;dbl&gt;, duke_2044 &lt;dbl&gt;,
+#   duke_2045 &lt;dbl&gt;, duke_2046 &lt;dbl&gt;, duke_2047 &lt;dbl&gt;, duke_2048 &lt;dbl&gt;,
+#   duke_2057 &lt;dbl&gt;, duke_2060 &lt;dbl&gt;, duke_2072 &lt;dbl&gt;, duke_2074 &lt;dbl&gt;,
+#   duke_2075 &lt;dbl&gt;, duke_2076 &lt;dbl&gt;, duke_2079 &lt;dbl&gt;, duke_2080 &lt;dbl&gt;,
+#   duke_2081 &lt;dbl&gt;, duke_2084 &lt;dbl&gt;, duke_2085 &lt;dbl&gt;, duke_2087 &lt;dbl&gt;,
+#   duke_2088 &lt;dbl&gt;, duke_2089 &lt;dbl&gt;, duke_2091 &lt;dbl&gt;, duke_2092 &lt;dbl&gt;,
+#   duke_2093 &lt;dbl&gt;, duke_2095 &lt;dbl&gt;, duke_2097 &lt;dbl&gt;, duke_2110 &lt;dbl&gt;,
+#   duke_2112 &lt;dbl&gt;, duke_2114 &lt;dbl&gt;, duke_2115 &lt;dbl&gt;, duke_2121 &lt;dbl&gt;,
+#   duke_2122 &lt;dbl&gt;, duke_2125 &lt;dbl&gt;, duke_2126 &lt;dbl&gt;, duke_2128 &lt;dbl&gt;,
+#   duke_2130 &lt;dbl&gt;, duke_2141 &lt;dbl&gt;, duke_2142 &lt;dbl&gt;, duke_2144 &lt;dbl&gt;,
+#   duke_2145 &lt;dbl&gt;, duke_2146 &lt;dbl&gt;, duke_2147 &lt;dbl&gt;, duke_2150 &lt;dbl&gt;,
+#   duke_2153 &lt;dbl&gt;, duke_2154 &lt;dbl&gt;, duke_2155 &lt;dbl&gt;, duke_2159 &lt;dbl&gt;,
+#   duke_2160 &lt;dbl&gt;, duke_2190 &lt;dbl&gt;, duke_2191 &lt;dbl&gt;, duke_2192 &lt;dbl&gt;,
+#   duke_2193 &lt;dbl&gt;, duke_2194 &lt;dbl&gt;, duke_2196 &lt;dbl&gt;, duke_2199 &lt;dbl&gt;,
+#   duke_2205 &lt;dbl&gt;, duke_2206 &lt;dbl&gt;, duke_2209 &lt;dbl&gt;, duke_2210 &lt;dbl&gt;,
+#   duke_2211 &lt;dbl&gt;, duke_2213 &lt;dbl&gt;, duke_2214 &lt;dbl&gt;, duke_2217 &lt;dbl&gt;,
+#   duke_2219 &lt;dbl&gt;, duke_2220 &lt;dbl&gt;, duke_2221 &lt;dbl&gt;, duke_2223 &lt;dbl&gt;,
+#   duke_2224 &lt;dbl&gt;, duke_2225 &lt;dbl&gt;, duke_2226 &lt;dbl&gt;, duke_2228 &lt;dbl&gt;,
+#   duke_2229 &lt;dbl&gt;, duke_2230 &lt;dbl&gt;, duke_2232 &lt;dbl&gt;, duke_2233 &lt;dbl&gt;,
+#   duke_2234 &lt;dbl&gt;, duke_2235 &lt;dbl&gt;, duke_2242 &lt;dbl&gt;, duke_2243 &lt;dbl&gt;,
+#   duke_2244 &lt;dbl&gt;, duke_2247 &lt;dbl&gt;, duke_2248 &lt;dbl&gt;, duke_2249 &lt;dbl&gt;,
+#   duke_2250 &lt;dbl&gt;, duke_2251 &lt;dbl&gt;, duke_2252 &lt;dbl&gt;, …</code></pre>
+<pre class="r"><code>nci_exprs &lt;- exprs(nci_es) %&gt;% 
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(gene_id, everything()) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 12,858 x 482
+   gene_id DLBCL11667 DLBCL10501 DLBCL10954 DLBCL10984 DLBCL11206
+   &lt;chr&gt;        &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+ 1 ENSG00…       1.02       2.20       1.69       1.71       3.77
+ 2 ENSG00…       5.05       6.17       4.92       5.53       5.69
+ 3 ENSG00…       2.50       2.83       5.02       4.98       4.85
+ 4 ENSG00…       2.42       4.56       4.44       4.30       4.50
+ 5 ENSG00…       4.66       5.02       5.62       6.52       5.95
+ 6 ENSG00…       4.43       5.67       5.47       5.28       5.71
+ 7 ENSG00…       4.69       4.65       6.04       5.41       5.81
+ 8 ENSG00…       3.95       5.25       6.00       5.85       6.16
+ 9 ENSG00…       4.77       6.47       5.80       6.06       5.74
+10 ENSG00…       2.40       3.42       4.14       3.40       3.96
+# … with 12,848 more rows, and 476 more variables: DLBCL10959 &lt;dbl&gt;,
+#   DLBCL10985 &lt;dbl&gt;, DLBCL11533 &lt;dbl&gt;, DLBCL11519 &lt;dbl&gt;,
+#   DLBCL10921 &lt;dbl&gt;, DLBCL11462 &lt;dbl&gt;, DLBCL10960 &lt;dbl&gt;,
+#   DLBCL10943 &lt;dbl&gt;, DLBCL11503 &lt;dbl&gt;, DLBCL11674 &lt;dbl&gt;,
+#   DLBCL10969 &lt;dbl&gt;, DLBCL11481 &lt;dbl&gt;, DLBCL10946 &lt;dbl&gt;,
+#   DLBCL11538 &lt;dbl&gt;, DLBCL11000 &lt;dbl&gt;, DLBCL10972 &lt;dbl&gt;,
+#   DLBCL11537 &lt;dbl&gt;, DLBCL10902 &lt;dbl&gt;, DLBCL10555 &lt;dbl&gt;,
+#   DLBCL10918 &lt;dbl&gt;, DLBCL11573 &lt;dbl&gt;, DLBCL11559 &lt;dbl&gt;,
+#   DLBCL11590 &lt;dbl&gt;, DLBCL11528 &lt;dbl&gt;, DLBCL10881 &lt;dbl&gt;,
+#   DLBCL10539 &lt;dbl&gt;, DLBCL10890 &lt;dbl&gt;, DLBCL11571 &lt;dbl&gt;,
+#   DLBCL10945 &lt;dbl&gt;, DLBCL11456 &lt;dbl&gt;, DLBCL11517 &lt;dbl&gt;,
+#   DLBCL11474 &lt;dbl&gt;, DLBCL11492 &lt;dbl&gt;, DLBCL10924 &lt;dbl&gt;,
+#   DLBCL11208 &lt;dbl&gt;, DLBCL10899 &lt;dbl&gt;, DLBCL11575 &lt;dbl&gt;,
+#   DLBCL11353 &lt;dbl&gt;, DLBCL11495 &lt;dbl&gt;, DLBCL11180 &lt;dbl&gt;,
+#   DLBCL10466 &lt;dbl&gt;, DLBCL10529 &lt;dbl&gt;, DLBCL11181 &lt;dbl&gt;,
+#   DLBCL11261 &lt;dbl&gt;, DLBCL11441 &lt;dbl&gt;, DLBCL10116 &lt;dbl&gt;,
+#   DLBCL10478 &lt;dbl&gt;, DLBCL10986 &lt;dbl&gt;, DLBCL10862 &lt;dbl&gt;,
+#   DLBCL11454 &lt;dbl&gt;, DLBCL11428 &lt;dbl&gt;, DLBCL11196 &lt;dbl&gt;,
+#   DLBCL10534 &lt;dbl&gt;, DLBCL10515 &lt;dbl&gt;, DLBCL10965 &lt;dbl&gt;,
+#   DLBCL10462 &lt;dbl&gt;, DLBCL11259 &lt;dbl&gt;, DLBCL11576 &lt;dbl&gt;,
+#   DLBCL11439 &lt;dbl&gt;, DLBCL10967 &lt;dbl&gt;, DLBCL10917 &lt;dbl&gt;,
+#   DLBCL11448 &lt;dbl&gt;, DLBCL11512 &lt;dbl&gt;, DLBCL11662 &lt;dbl&gt;,
+#   DLBCL10873 &lt;dbl&gt;, DLBCL10538 &lt;dbl&gt;, DLBCL11685 &lt;dbl&gt;,
+#   DLBCL10893 &lt;dbl&gt;, DLBCL11508 &lt;dbl&gt;, DLBCL10992 &lt;dbl&gt;,
+#   DLBCL10545 &lt;dbl&gt;, DLBCL10915 &lt;dbl&gt;, DLBCL11657 &lt;dbl&gt;,
+#   DLBCL10496 &lt;dbl&gt;, DLBCL11191 &lt;dbl&gt;, DLBCL10864 &lt;dbl&gt;,
+#   DLBCL11535 &lt;dbl&gt;, DLBCL10502 &lt;dbl&gt;, DLBCL10492 &lt;dbl&gt;,
+#   DLBCL10876 &lt;dbl&gt;, DLBCL10500 &lt;dbl&gt;, DLBCL11677 &lt;dbl&gt;,
+#   DLBCL10835 &lt;dbl&gt;, DLBCL11490 &lt;dbl&gt;, DLBCL10896 &lt;dbl&gt;,
+#   DLBCL10525 &lt;dbl&gt;, DLBCL11672 &lt;dbl&gt;, DLBCL10488 &lt;dbl&gt;,
+#   DLBCL10504 &lt;dbl&gt;, DLBCL11531 &lt;dbl&gt;, DLBCL10451 &lt;dbl&gt;,
+#   DLBCL10457 &lt;dbl&gt;, DLBCL11430 &lt;dbl&gt;, DLBCL11477 &lt;dbl&gt;,
+#   DLBCL11300 &lt;dbl&gt;, DLBCL10961 &lt;dbl&gt;, DLBCL11655 &lt;dbl&gt;,
+#   DLBCL11434 &lt;dbl&gt;, DLBCL11515 &lt;dbl&gt;, DLBCL10834 &lt;dbl&gt;, …</code></pre>
+<pre class="r"><code># filter rownames to only keep intersecting rows
+duke_genes &lt;- duke_exprs %&gt;% pull(gene_id)
+length(duke_genes)</code></pre>
+<pre><code>[1] 12414</code></pre>
+<pre class="r"><code>nci_genes &lt;- nci_exprs %&gt;% pull(gene_id)
+length(nci_genes)</code></pre>
+<pre><code>[1] 12858</code></pre>
+<pre class="r"><code>combined_genes &lt;- intersect(duke_genes, nci_genes)
+length(combined_genes)</code></pre>
+<pre><code>[1] 11589</code></pre>
+<pre class="r"><code>head(combined_genes)</code></pre>
+<pre><code>[1] &quot;ENSG00000000003.13&quot; &quot;ENSG00000000419.11&quot; &quot;ENSG00000000457.12&quot;
+[4] &quot;ENSG00000000460.15&quot; &quot;ENSG00000000938.11&quot; &quot;ENSG00000000971.14&quot;</code></pre>
+<pre class="r"><code>duke_exprs_filt &lt;- duke_exprs %&gt;%
+  dplyr::filter(gene_id %in% combined_genes)
+nrow(duke_exprs_filt)</code></pre>
+<pre><code>[1] 11589</code></pre>
+<pre class="r"><code>nci_exprs_filt &lt;- nci_exprs %&gt;%
+  dplyr::filter(gene_id %in% combined_genes)
+nrow(nci_exprs_filt)</code></pre>
+<pre><code>[1] 11589</code></pre>
+<pre class="r"><code>combined_exprs &lt;- nci_exprs_filt %&gt;%
+  left_join(duke_exprs_filt, by = &quot;gene_id&quot;) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;gene_id&quot;) %&gt;%
+  as.matrix()
+dim(combined_exprs)</code></pre>
+<pre><code>[1] 11589  1146</code></pre>
+<pre class="r"><code>combined_exprs[1:10, 1:6]</code></pre>
+<pre><code>                   DLBCL11667 DLBCL10501 DLBCL10954 DLBCL10984 DLBCL11206
+ENSG00000000003.13   1.019206   2.195116   1.685073   1.707502   3.769356
+ENSG00000000419.11   5.046223   6.174933   4.918027   5.525384   5.692592
+ENSG00000000457.12   2.498051   2.826575   5.021139   4.976091   4.853732
+ENSG00000000460.15   2.419497   4.559405   4.438914   4.295212   4.495919
+ENSG00000000938.11   4.658678   5.023231   5.621220   6.517532   5.946991
+ENSG00000000971.14   4.433347   5.672873   5.465547   5.279273   5.714483
+ENSG00000001036.12   4.692478   4.652098   6.038982   5.409123   5.807434
+ENSG00000001084.9    3.945681   5.245642   5.996167   5.847474   6.159070
+ENSG00000001167.13   4.765752   6.470524   5.801230   6.062576   5.742934
+ENSG00000001460.16   2.403260   3.415519   4.139625   3.403384   3.961123
+                   DLBCL10959
+ENSG00000000003.13   1.059588
+ENSG00000000419.11   6.083286
+ENSG00000000457.12   4.398922
+ENSG00000000460.15   4.881210
+ENSG00000000938.11   3.322795
+ENSG00000000971.14   4.641812
+ENSG00000001036.12   4.244619
+ENSG00000001084.9    5.385279
+ENSG00000001167.13   5.362371
+ENSG00000001460.16   3.659892</code></pre>
+</div>
+<div id="combine-phenotype-data" class="section level2">
+<h2>Combine phenotype data</h2>
+<p>Overlapping data (NCI = Duke)</p>
+<ul>
+<li><code>Gene Expression Subgroup</code> = <code>ABC GCB (RNAseq)</code> – no reformatting</li>
+<li><code>IPI range</code> = <code>IPI</code> – NCI dataset split into two numbers and save both high and low IPI. Merge Duke data with low IPI (presumably at diagnosis?)</li>
+<li><code>IPI Group</code> = <code>IPI groups</code> – no reformatting</li>
+<li><code>Status at Follow_up_ 0 Alive_ 1 Dead</code> = <code>Censored</code> – no reformatting</li>
+<li><code>Follow_up Time _yrs</code> = <code>Overall Survival years</code> – no reformatting</li>
+<li><code>Gender</code> = <code>Gender</code></li>
+<li><code>Age</code> = <code>Age at diagnosis</code> - Duke dataset, remove decimals, remove <code>age_at_diagnosis</code> from NCI dataset</li>
+<li><code>ann_arbor_clinical_stage</code> = <code>AnnArbor stage IPI</code> - NCI dataset to be converted to numeric and then converted to indicator for stage 3/4 per IPI</li>
+<li><code>ECOG Performance Status</code> = <code>ECOG IPI</code> - NCI dataset to be converted to indicator for ECOG 2+ vs ECOG 0-1 per IPI</li>
+<li><code>Number of Extranodal Sites</code> = <code>multiple extranodal IPI</code> - NCI dataset to be converted to indicator for &gt;1 extranodal sites</li>
+<li><code>LDH Ratio</code> = <code>LDH IPI</code> - NCI dataset to be converted to indicator for raio &gt;1 per IPI</li>
+</ul>
+<pre class="r"><code># pull out pheno_data
+nci_pheno &lt;- pData(nci_es) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 481 x 40
+   sample_id pdl1_status case_id filename project_id days_to_last_fo…
+   &lt;chr&gt;     &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;                 &lt;dbl&gt;
+ 1 DLBCL116… non-amplif… 3e164d… b384270… NCICCR-DL…              633
+ 2 DLBCL105… non-amplif… 678acb… ab3f958… NCICCR-DL…              674
+ 3 DLBCL109… non-amplif… c1b07b… 92fbf68… NCICCR-DL…              425
+ 4 DLBCL109… low_amplif… 15b380… dc44d3b… NCICCR-DL…               NA
+ 5 DLBCL112… non-amplif… 7ac79d… 717d067… NCICCR-DL…             2299
+ 6 DLBCL109… low_amplif… 94d33a… 9765c55… NCICCR-DL…               NA
+ 7 DLBCL109… non-amplif… fa7ae8… 93f0175… NCICCR-DL…               NA
+ 8 DLBCL115… non-amplif… 18134e… cd23ffe… NCICCR-DL…             3461
+ 9 DLBCL115… low_amplif… 3fe9ec… 03cb176… NCICCR-DL…               NA
+10 DLBCL109… non-amplif… b31ef3… bd2bf78… NCICCR-DL…               NA
+# … with 471 more rows, and 34 more variables: updated_datetime &lt;dttm&gt;,
+#   tumor_stage &lt;chr&gt;, age_at_diagnosis &lt;dbl&gt;,
+#   tissue_or_organ_of_origin &lt;chr&gt;, ann_arbor_clinical_stage &lt;chr&gt;,
+#   progression_or_recurrence &lt;chr&gt;, last_known_disease_status &lt;chr&gt;,
+#   primary_diagnosis &lt;chr&gt;, tumor_grade &lt;chr&gt;, demographic.gender &lt;chr&gt;,
+#   demographic.submitter_id &lt;chr&gt;, demographic.race &lt;chr&gt;,
+#   demographic.ethnicity &lt;chr&gt;, demographic.vital_status &lt;chr&gt;,
+#   size &lt;dbl&gt;, `dbGaP accession` &lt;chr&gt;, Diagnosis &lt;chr&gt;, `Gene Expression
+#   Subgroup` &lt;chr&gt;, `Genetic Subtype` &lt;chr&gt;, `Biopsy Type` &lt;chr&gt;,
+#   Treatment__ &lt;chr&gt;, Gender &lt;chr&gt;, Age &lt;dbl&gt;, `Ann Arbor Stage` &lt;dbl&gt;,
+#   `LDH Ratio` &lt;dbl&gt;, `ECOG Performance Status` &lt;dbl&gt;, `Number of
+#   Extranodal Sites` &lt;dbl&gt;, `IPI Group` &lt;chr&gt;, `IPI Range` &lt;dbl&gt;, `Status
+#   at Follow_up_ 0 Alive_ 1 Dead` &lt;dbl&gt;, `Follow_up Time _yrs` &lt;dbl&gt;,
+#   `Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1
+#   Progression` &lt;dbl&gt;, `Progression_Free Survival _PFS_ Time _yrs` &lt;dbl&gt;,
+#   `Included in Survival Analysis` &lt;chr&gt;</code></pre>
+<pre class="r"><code>duke_pheno &lt;- pData(duke_es) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 665 x 37
+   sample_id lib_size lane  Gender   IPI `IPI groups` `ECOG IPI`
+   &lt;chr&gt;        &lt;int&gt; &lt;fct&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;             &lt;dbl&gt;
+ 1 duke_648   7664005 C85C… F          3 Medium                0
+ 2 duke_658  13270245 C80R… M         NA &lt;NA&gt;                 NA
+ 3 duke_683   8620210 C80R… M          3 Medium                1
+ 4 duke_684   5512745 C85C… F          1 Low                   0
+ 5 duke_689   8874451 C85C… F          3 Medium                0
+ 6 duke_690   9633770 C85C… M          0 Low                   0
+ 7 duke_695   8313974 C85C… F          2 Medium                1
+ 8 duke_704    399772 C85C… F          1 Low                   0
+ 9 duke_705   4856641 C85C… M          4 High                  1
+10 duke_759   5364952 C85C… M          2 Medium                0
+# … with 655 more rows, and 30 more variables: `AnnArbor stage IPI` &lt;dbl&gt;,
+#   `LDH IPI` &lt;dbl&gt;, `multiple extranodal IPI` &lt;dbl&gt;, `AGE IPI` &lt;dbl&gt;, `B
+#   symptoms at diagnosis` &lt;chr&gt;, `Response to initial therapy` &lt;chr&gt;,
+#   `Testicular involvement` &lt;chr&gt;, `CNS Involvement` &lt;chr&gt;, `CNS
+#   Relapse` &lt;chr&gt;, `age at diagnosis` &lt;dbl&gt;, `Overall Survival
+#   years` &lt;dbl&gt;, Censored &lt;dbl&gt;, `log2 MYC expr` &lt;dbl&gt;, `log2 BCL2
+#   expr` &lt;dbl&gt;, `log2 BCL6 expr` &lt;dbl&gt;, `MYC high expr` &lt;dbl&gt;, `BCL2 high
+#   expr` &lt;dbl&gt;, `BCL6 high expr` &lt;dbl&gt;, `MYC IHC` &lt;chr&gt;, `BCL2
+#   IHC` &lt;chr&gt;, `BCL6 IHC` &lt;chr&gt;, `BCL2 translocation (FISH)` &lt;chr&gt;, `MYC
+#   translocation (FISH)` &lt;chr&gt;, `BCL6 translocation (FISH)` &lt;chr&gt;, `ABC
+#   GCB (RNAseq)` &lt;chr&gt;, `ABC GCB ratio (RNAseq)` &lt;dbl&gt;, `Nanostring ABC
+#   GCB` &lt;chr&gt;, `Nanostring LPS` &lt;dbl&gt;, `Hans GCB NonGCB` &lt;chr&gt;, `Genomic
+#   Risk Model` &lt;chr&gt;</code></pre>
+<div id="format-nci-data-for-merge" class="section level4">
+<h4>Format NCI data for merge</h4>
+<pre class="r"><code>ipi_highlow &lt;- nci_pheno$`IPI Range` %&gt;%
+  str_split_fixed(pattern = &quot;&quot;, n = 2) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::rename(ipi_low = V1) %&gt;%
+  mutate(ipi_high = ifelse(V2 == &quot;&quot;, ipi_low, V2)) %&gt;%
+  dplyr::select(-V2) %&gt;%
+  print()</code></pre>
+<pre><code>Warning: `as_tibble.matrix()` requires a matrix with column names or a `.name_repair` argument. Using compatibility `.name_repair`.
+This warning is displayed once per session.</code></pre>
+<pre><code># A tibble: 481 x 2
+   ipi_low ipi_high
+   &lt;chr&gt;   &lt;chr&gt;   
+ 1 1       1       
+ 2 1       1       
+ 3 1       3       
+ 4 1       2       
+ 5 2       2       
+ 6 2       2       
+ 7 3       4       
+ 8 3       3       
+ 9 2       3       
+10 2       2       
+# … with 471 more rows</code></pre>
+<pre class="r"><code>nci_pheno_ipi &lt;- nci_pheno %&gt;% 
+  bind_cols(ipi_highlow) %&gt;%
+  dplyr::select(sample_id, ipi_initial = ipi_low, ipi_high, everything()) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 481 x 42
+   sample_id ipi_initial ipi_high pdl1_status case_id filename project_id
+   &lt;chr&gt;     &lt;chr&gt;       &lt;chr&gt;    &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;     
+ 1 DLBCL116… 1           1        non-amplif… 3e164d… b384270… NCICCR-DL…
+ 2 DLBCL105… 1           1        non-amplif… 678acb… ab3f958… NCICCR-DL…
+ 3 DLBCL109… 1           3        non-amplif… c1b07b… 92fbf68… NCICCR-DL…
+ 4 DLBCL109… 1           2        low_amplif… 15b380… dc44d3b… NCICCR-DL…
+ 5 DLBCL112… 2           2        non-amplif… 7ac79d… 717d067… NCICCR-DL…
+ 6 DLBCL109… 2           2        low_amplif… 94d33a… 9765c55… NCICCR-DL…
+ 7 DLBCL109… 3           4        non-amplif… fa7ae8… 93f0175… NCICCR-DL…
+ 8 DLBCL115… 3           3        non-amplif… 18134e… cd23ffe… NCICCR-DL…
+ 9 DLBCL115… 2           3        low_amplif… 3fe9ec… 03cb176… NCICCR-DL…
+10 DLBCL109… 2           2        non-amplif… b31ef3… bd2bf78… NCICCR-DL…
+# … with 471 more rows, and 35 more variables:
+#   days_to_last_follow_up &lt;dbl&gt;, updated_datetime &lt;dttm&gt;,
+#   tumor_stage &lt;chr&gt;, age_at_diagnosis &lt;dbl&gt;,
+#   tissue_or_organ_of_origin &lt;chr&gt;, ann_arbor_clinical_stage &lt;chr&gt;,
+#   progression_or_recurrence &lt;chr&gt;, last_known_disease_status &lt;chr&gt;,
+#   primary_diagnosis &lt;chr&gt;, tumor_grade &lt;chr&gt;, demographic.gender &lt;chr&gt;,
+#   demographic.submitter_id &lt;chr&gt;, demographic.race &lt;chr&gt;,
+#   demographic.ethnicity &lt;chr&gt;, demographic.vital_status &lt;chr&gt;,
+#   size &lt;dbl&gt;, `dbGaP accession` &lt;chr&gt;, Diagnosis &lt;chr&gt;, `Gene Expression
+#   Subgroup` &lt;chr&gt;, `Genetic Subtype` &lt;chr&gt;, `Biopsy Type` &lt;chr&gt;,
+#   Treatment__ &lt;chr&gt;, Gender &lt;chr&gt;, Age &lt;dbl&gt;, `Ann Arbor Stage` &lt;dbl&gt;,
+#   `LDH Ratio` &lt;dbl&gt;, `ECOG Performance Status` &lt;dbl&gt;, `Number of
+#   Extranodal Sites` &lt;dbl&gt;, `IPI Group` &lt;chr&gt;, `IPI Range` &lt;dbl&gt;, `Status
+#   at Follow_up_ 0 Alive_ 1 Dead` &lt;dbl&gt;, `Follow_up Time _yrs` &lt;dbl&gt;,
+#   `Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1
+#   Progression` &lt;dbl&gt;, `Progression_Free Survival _PFS_ Time _yrs` &lt;dbl&gt;,
+#   `Included in Survival Analysis` &lt;chr&gt;</code></pre>
+<pre class="r"><code>nci_pheno_formatted &lt;- nci_pheno_ipi %&gt;%
+  dplyr::rename(abc_gcb_rna = `Gene Expression Subgroup`,
+                ipi_group = `IPI Group`,
+                os_status = `Status at Follow_up_ 0 Alive_ 1 Dead`,
+                os_years = `Follow_up Time _yrs`,
+                gender = Gender, 
+                age = Age) %&gt;%
+  dplyr::select(sample_id, abc_gcb_rna, ipi_group, os_status, os_years, gender, age, everything()) %&gt;%
+  mutate(ann_arbor_stage_3plus = as.factor(ann_arbor_clinical_stage)) %&gt;%
+  mutate(ann_arbor_stage_3plus = fct_recode(ann_arbor_stage_3plus,
+                                            &quot;1&quot; = &quot;Stage III&quot;,
+                                            &quot;1&quot; = &quot;Stage IV&quot;,
+                                            &quot;0&quot; = &quot;Stage I&quot;,
+                                            &quot;0&quot; = &quot;Stage II&quot;,
+                                            &quot;NA&quot; = &quot;Not Reported&quot;)) %&gt;%
+  dplyr::select(sample_id, ann_arbor_stage_3plus, everything()) %&gt;%
+  mutate(ps_2plus = as.numeric(`ECOG Performance Status`)) %&gt;%
+  mutate(ps_2plus = ifelse(ps_2plus &gt; 1, 1, 0),
+         ps_2plus = as.factor(ps_2plus)) %&gt;%
+  dplyr::select(sample_id, ps_2plus, everything()) %&gt;%
+  mutate(extranodal_sites_2plus = as.numeric(`Number of Extranodal Sites`)) %&gt;%
+  mutate(extranodal_sites_2plus = ifelse(extranodal_sites_2plus &gt; 1, 1, 0)) %&gt;%
+  dplyr::select(sample_id, extranodal_sites_2plus, everything()) %&gt;%
+  mutate(extranodal_sites_2plus = as.factor(extranodal_sites_2plus)) %&gt;%
+  mutate(ldh_abnormal = ifelse(`LDH Ratio` &gt; 1, 1, 0),
+         ldh_abnormal = as.factor(ldh_abnormal),
+         ipi_initial = as.factor(ipi_initial)) %&gt;%
+  dplyr::select(sample_id, ldh_abnormal, everything()) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 481 x 46
+   sample_id ldh_abnormal extranodal_site… ps_2plus ann_arbor_stage…
+   &lt;chr&gt;     &lt;fct&gt;        &lt;fct&gt;            &lt;fct&gt;    &lt;fct&gt;           
+ 1 DLBCL116… 0            0                0        1               
+ 2 DLBCL105… 0            0                1        0               
+ 3 DLBCL109… 1            &lt;NA&gt;             &lt;NA&gt;     0               
+ 4 DLBCL109… &lt;NA&gt;         0                0        0               
+ 5 DLBCL112… 0            0                1        0               
+ 6 DLBCL109… &lt;NA&gt;         0                &lt;NA&gt;     0               
+ 7 DLBCL109… 1            &lt;NA&gt;             1        1               
+ 8 DLBCL115… 1            0                1        1               
+ 9 DLBCL115… &lt;NA&gt;         0                1        1               
+10 DLBCL109… 1            0                1        0               
+# … with 471 more rows, and 41 more variables: abc_gcb_rna &lt;chr&gt;,
+#   ipi_group &lt;chr&gt;, os_status &lt;dbl&gt;, os_years &lt;dbl&gt;, gender &lt;chr&gt;,
+#   age &lt;dbl&gt;, ipi_initial &lt;fct&gt;, ipi_high &lt;chr&gt;, pdl1_status &lt;chr&gt;,
+#   case_id &lt;chr&gt;, filename &lt;chr&gt;, project_id &lt;chr&gt;,
+#   days_to_last_follow_up &lt;dbl&gt;, updated_datetime &lt;dttm&gt;,
+#   tumor_stage &lt;chr&gt;, age_at_diagnosis &lt;dbl&gt;,
+#   tissue_or_organ_of_origin &lt;chr&gt;, ann_arbor_clinical_stage &lt;chr&gt;,
+#   progression_or_recurrence &lt;chr&gt;, last_known_disease_status &lt;chr&gt;,
+#   primary_diagnosis &lt;chr&gt;, tumor_grade &lt;chr&gt;, demographic.gender &lt;chr&gt;,
+#   demographic.submitter_id &lt;chr&gt;, demographic.race &lt;chr&gt;,
+#   demographic.ethnicity &lt;chr&gt;, demographic.vital_status &lt;chr&gt;,
+#   size &lt;dbl&gt;, `dbGaP accession` &lt;chr&gt;, Diagnosis &lt;chr&gt;, `Genetic
+#   Subtype` &lt;chr&gt;, `Biopsy Type` &lt;chr&gt;, Treatment__ &lt;chr&gt;, `Ann Arbor
+#   Stage` &lt;dbl&gt;, `LDH Ratio` &lt;dbl&gt;, `ECOG Performance Status` &lt;dbl&gt;,
+#   `Number of Extranodal Sites` &lt;dbl&gt;, `IPI Range` &lt;dbl&gt;,
+#   `Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1
+#   Progression` &lt;dbl&gt;, `Progression_Free Survival _PFS_ Time _yrs` &lt;dbl&gt;,
+#   `Included in Survival Analysis` &lt;chr&gt;</code></pre>
+</div>
+<div id="format-duke-data-for-merge" class="section level4">
+<h4>Format Duke data for merge</h4>
+<pre class="r"><code>duke_pheno_formatted &lt;- duke_pheno %&gt;%
+  dplyr::rename(abc_gcb_rna = `ABC GCB (RNAseq)`,
+                ipi_group = `IPI groups`,
+                os_status = `Censored`,
+                os_years = `Overall Survival years`,
+                gender = Gender) %&gt;%
+  mutate(age = (str_split_fixed(`age at diagnosis`, &quot;\\.&quot;, n = 2))[,1]) %&gt;%
+  dplyr::select(sample_id, age, abc_gcb_rna, ipi_group, os_status, os_years, gender, everything()) %&gt;%
+  dplyr::rename(ann_arbor_stage_3plus = `AnnArbor stage IPI`,
+                ps_2plus = `ECOG IPI`,
+                extranodal_sites_2plus = `multiple extranodal IPI`,
+                ldh_abnormal = `LDH IPI`,
+                ipi_initial = IPI) %&gt;%
+  mutate(ps_2plus = as.factor(ps_2plus),
+         ann_arbor_stage_3plus = as.factor(ann_arbor_stage_3plus),
+         extranodal_sites_2plus = as.factor(extranodal_sites_2plus),
+         ldh_abnormal = as.factor(ldh_abnormal),
+         ipi_initial = as.factor(ipi_initial)) %&gt;%
+  mutate(age = as.numeric(age)) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 665 x 38
+   sample_id   age abc_gcb_rna ipi_group os_status os_years gender lib_size
+   &lt;chr&gt;     &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;         &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;     &lt;int&gt;
+ 1 duke_648     31 Unclassifi… Medium            1     0.59 F       7664005
+ 2 duke_658     50 GCB         &lt;NA&gt;             NA    NA    M      13270245
+ 3 duke_683     55 ABC         Medium            1     2.62 M       8620210
+ 4 duke_684     53 GCB         Low               1     1.87 F       5512745
+ 5 duke_689     15 ABC         Medium            1     2.29 F       8874451
+ 6 duke_690     51 Unclassifi… Low               1     2.83 M       9633770
+ 7 duke_695     54 GCB         Medium           NA    NA    F       8313974
+ 8 duke_704     79 ABC         Low               1     4.1  F        399772
+ 9 duke_705     89 GCB         High              0    NA    M       4856641
+10 duke_759     57 ABC         Medium            0     6.55 M       5364952
+# … with 655 more rows, and 30 more variables: lane &lt;fct&gt;,
+#   ipi_initial &lt;fct&gt;, ps_2plus &lt;fct&gt;, ann_arbor_stage_3plus &lt;fct&gt;,
+#   ldh_abnormal &lt;fct&gt;, extranodal_sites_2plus &lt;fct&gt;, `AGE IPI` &lt;dbl&gt;, `B
+#   symptoms at diagnosis` &lt;chr&gt;, `Response to initial therapy` &lt;chr&gt;,
+#   `Testicular involvement` &lt;chr&gt;, `CNS Involvement` &lt;chr&gt;, `CNS
+#   Relapse` &lt;chr&gt;, `age at diagnosis` &lt;dbl&gt;, `log2 MYC expr` &lt;dbl&gt;, `log2
+#   BCL2 expr` &lt;dbl&gt;, `log2 BCL6 expr` &lt;dbl&gt;, `MYC high expr` &lt;dbl&gt;, `BCL2
+#   high expr` &lt;dbl&gt;, `BCL6 high expr` &lt;dbl&gt;, `MYC IHC` &lt;chr&gt;, `BCL2
+#   IHC` &lt;chr&gt;, `BCL6 IHC` &lt;chr&gt;, `BCL2 translocation (FISH)` &lt;chr&gt;, `MYC
+#   translocation (FISH)` &lt;chr&gt;, `BCL6 translocation (FISH)` &lt;chr&gt;, `ABC
+#   GCB ratio (RNAseq)` &lt;dbl&gt;, `Nanostring ABC GCB` &lt;chr&gt;, `Nanostring
+#   LPS` &lt;dbl&gt;, `Hans GCB NonGCB` &lt;chr&gt;, `Genomic Risk Model` &lt;chr&gt;</code></pre>
+</div>
+<div id="merge-pheno-data" class="section level4">
+<h4>Merge pheno data</h4>
+<pre class="r"><code>combined_pheno &lt;- nci_pheno_formatted %&gt;%
+  bind_rows(duke_pheno_formatted) %&gt;%
+  dplyr::select(sample_id, abc_gcb_rna, ipi_group, os_status, os_years, age, gender, ipi_initial, pdl1_status, everything())</code></pre>
+<pre><code>Warning in bind_rows_(x, .id): Unequal factor levels: coercing to character</code></pre>
+<pre><code>Warning in bind_rows_(x, .id): binding character and factor vector,
+coercing into character vector
+
+Warning in bind_rows_(x, .id): binding character and factor vector,
+coercing into character vector</code></pre>
+</div>
+</div>
+<div id="remake-expressionset" class="section level2">
+<h2>Remake expressionset</h2>
+<pre class="r"><code>pheno_data_df &lt;- as.data.frame(combined_pheno) %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;)
+
+v_metadata &lt;- data.frame(
+  labelDescription = colnames(pheno_data_df),
+  row.names = colnames(pheno_data_df) )
+  
+phenoData &lt;- new(&quot;AnnotatedDataFrame&quot;, 
+                 data = pheno_data_df, 
+                 varMetadata = v_metadata)
+phenoData</code></pre>
+<pre><code>An object of class &#39;AnnotatedDataFrame&#39;
+  rowNames: DLBCL11667 DLBCL10501 ... duke_3999 (1146 total)
+  varLabels: abc_gcb_rna ipi_group ... Genomic Risk Model (71
+    total)
+  varMetadata: labelDescription</code></pre>
+<pre class="r"><code>annotation &lt;- as.character(&quot;Duke RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in &gt;12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. NCI RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed.&quot;)
+
+# assemble expressionset
+combined_es &lt;- ExpressionSet(
+  assayData = combined_exprs,
+  phenoData = phenoData,
+  annotation = annotation)
+combined_es</code></pre>
+<pre><code>ExpressionSet (storageMode: lockedEnvironment)
+assayData: 11589 features, 1146 samples 
+  element names: exprs 
+protocolData: none
+phenoData
+  sampleNames: DLBCL11667 DLBCL10501 ... duke_3999 (1146 total)
+  varLabels: abc_gcb_rna ipi_group ... Genomic Risk Model (71
+    total)
+  varMetadata: labelDescription
+featureData: none
+experimentData: use &#39;experimentData(object)&#39;
+Annotation: Duke RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in &gt;12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. NCI RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. </code></pre>
+</div>
+<div id="batch-correction-between-dukenci" class="section level2">
+<h2>Batch correction between Duke/NCI</h2>
+<p>Following documentation as above</p>
+<pre class="r"><code># create marker variable for Duke vs NCI in pheno data
+pheno_df &lt;- pData(combined_es) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  mutate(source = ifelse(grepl(&quot;duke_&quot;, sample_id),&quot;duke&quot;,&quot;nci&quot;)) %&gt;%
+  mutate(source = as.factor(source)) %&gt;%
+  dplyr::select(sample_id, source, everything()) %&gt;%
+  # also fix gcb_abc column factors
+  mutate(abc_gcb_rna = as.character(abc_gcb_rna)) %&gt;%
+  mutate(abc_gcb_rna = ifelse(abc_gcb_rna == &quot;Unclass&quot;, &quot;Unclassified&quot;, abc_gcb_rna)) %&gt;%
+  mutate(abc_gcb_rna = as.factor(abc_gcb_rna)) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 1,146 x 73
+   sample_id source abc_gcb_rna ipi_group os_status os_years   age gender
+   &lt;chr&gt;     &lt;fct&gt;  &lt;fct&gt;       &lt;chr&gt;         &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; 
+ 1 DLBCL116… nci    GCB         Low               1     1.73    48 F     
+ 2 DLBCL105… nci    GCB         Low               0     1.85    42 M     
+ 3 DLBCL109… nci    ABC         &lt;NA&gt;              1     1.16    47 M     
+ 4 DLBCL109… nci    ABC         &lt;NA&gt;              0     0       75 F     
+ 5 DLBCL112… nci    Unclassifi… Intermed…         1     6.30    76 M     
+ 6 DLBCL109… nci    ABC         &lt;NA&gt;              0     0       41 M     
+ 7 DLBCL109… nci    ABC         &lt;NA&gt;              0     0       54 M     
+ 8 DLBCL115… nci    GCB         Intermed…         0     9.48    57 F     
+ 9 DLBCL115… nci    GCB         Intermed…         0     0       32 M     
+10 DLBCL109… nci    ABC         Intermed…         0     0       56 M     
+# … with 1,136 more rows, and 65 more variables: ipi_initial &lt;fct&gt;,
+#   pdl1_status &lt;chr&gt;, ldh_abnormal &lt;fct&gt;, extranodal_sites_2plus &lt;fct&gt;,
+#   ps_2plus &lt;fct&gt;, ann_arbor_stage_3plus &lt;chr&gt;, ipi_high &lt;chr&gt;,
+#   case_id &lt;chr&gt;, filename &lt;chr&gt;, project_id &lt;chr&gt;,
+#   days_to_last_follow_up &lt;dbl&gt;, updated_datetime &lt;dttm&gt;,
+#   tumor_stage &lt;chr&gt;, age_at_diagnosis &lt;dbl&gt;,
+#   tissue_or_organ_of_origin &lt;chr&gt;, ann_arbor_clinical_stage &lt;chr&gt;,
+#   progression_or_recurrence &lt;chr&gt;, last_known_disease_status &lt;chr&gt;,
+#   primary_diagnosis &lt;chr&gt;, tumor_grade &lt;chr&gt;, demographic.gender &lt;chr&gt;,
+#   demographic.submitter_id &lt;chr&gt;, demographic.race &lt;chr&gt;,
+#   demographic.ethnicity &lt;chr&gt;, demographic.vital_status &lt;chr&gt;,
+#   size &lt;dbl&gt;, `dbGaP accession` &lt;chr&gt;, Diagnosis &lt;chr&gt;, `Genetic
+#   Subtype` &lt;chr&gt;, `Biopsy Type` &lt;chr&gt;, Treatment__ &lt;chr&gt;, `Ann Arbor
+#   Stage` &lt;dbl&gt;, `LDH Ratio` &lt;dbl&gt;, `ECOG Performance Status` &lt;dbl&gt;,
+#   `Number of Extranodal Sites` &lt;dbl&gt;, `IPI Range` &lt;dbl&gt;,
+#   `Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1
+#   Progression` &lt;dbl&gt;, `Progression_Free Survival _PFS_ Time _yrs` &lt;dbl&gt;,
+#   `Included in Survival Analysis` &lt;chr&gt;, lib_size &lt;int&gt;, lane &lt;fct&gt;,
+#   `AGE IPI` &lt;dbl&gt;, `B symptoms at diagnosis` &lt;chr&gt;, `Response to initial
+#   therapy` &lt;chr&gt;, `Testicular involvement` &lt;chr&gt;, `CNS
+#   Involvement` &lt;chr&gt;, `CNS Relapse` &lt;chr&gt;, `age at diagnosis` &lt;dbl&gt;,
+#   `log2 MYC expr` &lt;dbl&gt;, `log2 BCL2 expr` &lt;dbl&gt;, `log2 BCL6 expr` &lt;dbl&gt;,
+#   `MYC high expr` &lt;dbl&gt;, `BCL2 high expr` &lt;dbl&gt;, `BCL6 high expr` &lt;dbl&gt;,
+#   `MYC IHC` &lt;chr&gt;, `BCL2 IHC` &lt;chr&gt;, `BCL6 IHC` &lt;chr&gt;, `BCL2
+#   translocation (FISH)` &lt;chr&gt;, `MYC translocation (FISH)` &lt;chr&gt;, `BCL6
+#   translocation (FISH)` &lt;chr&gt;, `ABC GCB ratio (RNAseq)` &lt;dbl&gt;,
+#   `Nanostring ABC GCB` &lt;chr&gt;, `Nanostring LPS` &lt;dbl&gt;, `Hans GCB
+#   NonGCB` &lt;chr&gt;, `Genomic Risk Model` &lt;chr&gt;</code></pre>
+<pre class="r"><code># convert back to regular dataframe with rownames for downstream processing
+pheno_d &lt;- as.data.frame(pheno_df) %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;)
+
+# define batch as source marker
+batch = pheno_df$source
+summary(batch)</code></pre>
+<pre><code>duke  nci 
+ 665  481 </code></pre>
+<pre class="r"><code># boxplot by data source
+# plot the before
+batch_df &lt;- enframe(batch) %&gt;%
+  dplyr::select(source = value)
+edata_df &lt;- as.data.frame(t(exprs(combined_es))) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  bind_cols(batch_df) %&gt;%
+  dplyr::select(sample_id, source, everything()) %&gt;%
+  gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id, -source) %&gt;%
+  group_by(source) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 13,280,994 x 4
+# Groups:   source [2]
+   sample_id  source gene_id            intensity
+   &lt;chr&gt;      &lt;fct&gt;  &lt;chr&gt;                  &lt;dbl&gt;
+ 1 DLBCL11667 nci    ENSG00000000003.13     1.02 
+ 2 DLBCL10501 nci    ENSG00000000003.13     2.20 
+ 3 DLBCL10954 nci    ENSG00000000003.13     1.69 
+ 4 DLBCL10984 nci    ENSG00000000003.13     1.71 
+ 5 DLBCL11206 nci    ENSG00000000003.13     3.77 
+ 6 DLBCL10959 nci    ENSG00000000003.13     1.06 
+ 7 DLBCL10985 nci    ENSG00000000003.13     0.411
+ 8 DLBCL11533 nci    ENSG00000000003.13     2.57 
+ 9 DLBCL11519 nci    ENSG00000000003.13     1.41 
+10 DLBCL10921 nci    ENSG00000000003.13     2.47 
+# … with 13,280,984 more rows</code></pre>
+<pre class="r"><code>before_box &lt;- ggplot(edata_df, aes(x = source, y = intensity, group = source)) +
+  geom_boxplot()
+before_box</code></pre>
+<p><img src="figure/merge.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># small but norable differences in mean and distribution
+# will use the NCI data as the &quot;ground truth&quot; for normalization given higher read counts overall and standardized count pipeline through GDC
+
+# Note that adjustment variables will be treated as given to the ComBat function. This means if you are trying to adjust for a categorical variable with p different levels, you will need to give ComBat p-1 indicator variables for this covariate.
+modsource &lt;- model.matrix(~ source, data = pheno_d)
+
+# We need to create a model matrix for the adjustment variables, including the variable of interest. Note that you do not include batch in creating this model matrix - it will be included later in the ComBat function. In this case there are no other adjustment variables so we simply fit an intercept term.
+modcombat &lt;- model.matrix(~ 1, data = pheno_d)
+
+# apply batch correction
+combined_combat_edata &lt;- ComBat(dat = exprs(combined_es),
+                       batch = batch,
+                       mod = modcombat,
+                       par.prior = TRUE,
+                       prior.plots = FALSE,
+                       mean.only = FALSE,
+                       ref.batch = &quot;nci&quot;)</code></pre>
+<pre><code>Using batch = nci as a reference batch (this batch won&#39;t change)</code></pre>
+<pre><code>Found2batches</code></pre>
+<pre><code>Adjusting for0covariate(s) or covariate level(s)</code></pre>
+<pre><code>Standardizing Data across genes</code></pre>
+<pre><code>Fitting L/S model and finding priors</code></pre>
+<pre><code>Finding parametric adjustments</code></pre>
+<pre><code>Adjusting the Data</code></pre>
+<pre class="r"><code>after_df &lt;- as.data.frame(t(combined_combat_edata)) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  bind_cols(batch_df) %&gt;%
+  dplyr::select(sample_id, source, everything()) %&gt;%
+  gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id, -source) %&gt;%
+  group_by(source) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 13,280,994 x 4
+# Groups:   source [2]
+   sample_id  source gene_id            intensity
+   &lt;chr&gt;      &lt;fct&gt;  &lt;chr&gt;                  &lt;dbl&gt;
+ 1 DLBCL11667 nci    ENSG00000000003.13     1.02 
+ 2 DLBCL10501 nci    ENSG00000000003.13     2.20 
+ 3 DLBCL10954 nci    ENSG00000000003.13     1.69 
+ 4 DLBCL10984 nci    ENSG00000000003.13     1.71 
+ 5 DLBCL11206 nci    ENSG00000000003.13     3.77 
+ 6 DLBCL10959 nci    ENSG00000000003.13     1.06 
+ 7 DLBCL10985 nci    ENSG00000000003.13     0.411
+ 8 DLBCL11533 nci    ENSG00000000003.13     2.57 
+ 9 DLBCL11519 nci    ENSG00000000003.13     1.41 
+10 DLBCL10921 nci    ENSG00000000003.13     2.47 
+# … with 13,280,984 more rows</code></pre>
+<pre class="r"><code>after_box &lt;- ggplot(after_df, 
+                    aes(x = source, y = intensity, group = source)) +
+  geom_boxplot()
+after_box</code></pre>
+<p><img src="figure/merge.Rmd/unnamed-chunk-11-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="final-expressionset" class="section level2">
+<h2>Final Expressionset</h2>
+<pre class="r"><code># use updated pheno data frame from last chunk
+v_metadata &lt;- data.frame(
+  labelDescription = colnames(pheno_d),
+  row.names = colnames(pheno_d) )
+  
+phenoData &lt;- new(&quot;AnnotatedDataFrame&quot;, 
+                 data = pheno_d, 
+                 varMetadata = v_metadata)
+phenoData</code></pre>
+<pre><code>An object of class &#39;AnnotatedDataFrame&#39;
+  rowNames: DLBCL11667 DLBCL10501 ... duke_3999 (1146 total)
+  varLabels: source abc_gcb_rna ... Genomic Risk Model (72 total)
+  varMetadata: labelDescription</code></pre>
+<pre class="r"><code>annotation &lt;- as.character(&quot;Duke RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in &gt;12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected using ComBat by sequencing lane. NCI RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected for NCI vs Duke source using ComBat&quot;)
+
+# assemble expressionset
+combined_es &lt;- ExpressionSet(
+  assayData = combined_combat_edata,
+  phenoData = phenoData,
+  annotation = annotation)
+combined_es</code></pre>
+<pre><code>ExpressionSet (storageMode: lockedEnvironment)
+assayData: 11589 features, 1146 samples 
+  element names: exprs 
+protocolData: none
+phenoData
+  sampleNames: DLBCL11667 DLBCL10501 ... duke_3999 (1146 total)
+  varLabels: source abc_gcb_rna ... Genomic Risk Model (72 total)
+  varMetadata: labelDescription
+featureData: none
+experimentData: use &#39;experimentData(object)&#39;
+Annotation: Duke RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in &gt;12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected using ComBat by sequencing lane. NCI RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected for NCI vs Duke source using ComBat </code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -641,40 +1514,43 @@ locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 
 attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
 
 other attached packages:
- [1] sva_3.30.1          BiocParallel_1.16.6 genefilter_1.64.0  
- [4] mgcv_1.8-28         nlme_3.1-140        forcats_0.4.0      
- [7] stringr_1.4.0       dplyr_0.8.1         purrr_0.3.2        
-[10] readr_1.3.1         tidyr_0.8.3         tibble_2.1.3       
-[13] ggplot2_3.1.1       tidyverse_1.2.1    
+ [1] Biobase_2.42.0      BiocGenerics_0.28.0 sva_3.30.1         
+ [4] BiocParallel_1.16.6 genefilter_1.64.0   mgcv_1.8-28        
+ [7] nlme_3.1-140        forcats_0.4.0       stringr_1.4.0      
+[10] dplyr_0.8.1         purrr_0.3.2         readr_1.3.1        
+[13] tidyr_0.8.3         tibble_2.1.3        ggplot2_3.1.1      
+[16] tidyverse_1.2.1    
 
 loaded via a namespace (and not attached):
- [1] Biobase_2.42.0       httr_1.4.0           bit64_0.9-7         
- [4] jsonlite_1.6         splines_3.5.3        modelr_0.1.4        
- [7] assertthat_0.2.1     stats4_3.5.3         blob_1.1.1          
-[10] cellranger_1.1.0     yaml_2.2.0           pillar_1.4.1        
-[13] RSQLite_2.1.1        backports_1.1.4      lattice_0.20-38     
-[16] limma_3.38.3         glue_1.3.1           digest_0.6.19       
-[19] rvest_0.3.4          colorspace_1.4-1     htmltools_0.3.6     
-[22] Matrix_1.2-17        plyr_1.8.4           XML_3.98-1.20       
-[25] pkgconfig_2.0.2      broom_0.5.2          haven_2.1.0         
-[28] xtable_1.8-4         scales_1.0.0         git2r_0.25.2        
+ [1] httr_1.4.0           bit64_0.9-7          jsonlite_1.6        
+ [4] splines_3.5.3        modelr_0.1.4         assertthat_0.2.1    
+ [7] stats4_3.5.3         blob_1.1.1           cellranger_1.1.0    
+[10] yaml_2.2.0           pillar_1.4.1         RSQLite_2.1.1       
+[13] backports_1.1.4      lattice_0.20-38      limma_3.38.3        
+[16] glue_1.3.1           digest_0.6.19        rvest_0.3.4         
+[19] colorspace_1.4-1     htmltools_0.3.6      Matrix_1.2-17       
+[22] plyr_1.8.4           XML_3.98-1.20        pkgconfig_2.0.2     
+[25] broom_0.5.2          haven_2.1.0          xtable_1.8-4        
+[28] scales_1.0.0         whisker_0.3-2        git2r_0.25.2        
 [31] annotate_1.60.1      generics_0.0.2       IRanges_2.16.0      
-[34] withr_2.1.2          BiocGenerics_0.28.0  lazyeval_0.2.2      
-[37] cli_1.1.0            survival_2.44-1.1    magrittr_1.5        
-[40] crayon_1.3.4         readxl_1.3.1         memoise_1.1.0       
-[43] evaluate_0.14        fs_1.3.1             xml2_1.2.0          
+[34] withr_2.1.2          lazyeval_0.2.2       cli_1.1.0           
+[37] survival_2.44-1.1    magrittr_1.5         crayon_1.3.4        
+[40] readxl_1.3.1         memoise_1.1.0        evaluate_0.14       
+[43] fansi_0.4.0          fs_1.3.1             xml2_1.2.0          
 [46] tools_3.5.3          hms_0.4.2            matrixStats_0.54.0  
 [49] S4Vectors_0.20.1     munsell_0.5.0        AnnotationDbi_1.44.0
 [52] compiler_3.5.3       rlang_0.3.4          grid_3.5.3          
-[55] RCurl_1.95-4.12      rstudioapi_0.10      bitops_1.0-6        
-[58] rmarkdown_1.13       gtable_0.3.0         DBI_1.0.0           
-[61] R6_2.4.0             lubridate_1.7.4      knitr_1.23          
-[64] bit_1.1-14           workflowr_1.4.0      rprojroot_1.3-2     
-[67] stringi_1.4.3        parallel_3.5.3       Rcpp_1.0.1          
-[70] tidyselect_0.2.5     xfun_0.7            </code></pre>
+[55] RCurl_1.95-4.12      rstudioapi_0.10      labeling_0.3        
+[58] bitops_1.0-6         rmarkdown_1.13       gtable_0.3.0        
+[61] DBI_1.0.0            R6_2.4.0             lubridate_1.7.4     
+[64] knitr_1.23           zeallot_0.1.0        utf8_1.1.4          
+[67] bit_1.1-14           workflowr_1.4.0      rprojroot_1.3-2     
+[70] stringi_1.4.3        Rcpp_1.0.1           vctrs_0.1.0         
+[73] tidyselect_0.2.5     xfun_0.7            </code></pre>
 </div>
 </div>
 
