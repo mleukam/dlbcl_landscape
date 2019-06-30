@@ -13,14 +13,16 @@ Welcome to the computational lab notebook for our research project focused on pr
 The over-arching questions are:
 
 1. Are there recurrent immune phenotypes in DLBCL?
-
 2. What is the influence of tumor gene mutations on immune phenotypes in DLBCL?
 
 The primary data sources are:
 
-1. Duke dataset from Reddy et al
-
-2. NCI dataset from Schmitz et al
+1. Duke dataset
+    * From [Reddy et al Cell. 2017 Oct 5;171(2):481](https://www.ncbi.nlm.nih.gov/pubmed/28985567)
+    * Hosted at the European Genome-phenome Archive [EGAD00001003600](https://www.ebi.ac.uk/ega/datasets/EGAD00001003600)
+2. NCI dataset 
+    * From [Schmitz et al N Engl J Med. 2018 Apr 12;378(15):1396](https://www.ncbi.nlm.nih.gov/pubmed/?term=29641966)  
+    * Hosted at the Genomic Data Commons project ID [NCICCR-DLBCL](https://portal.gdc.cancer.gov/projects/NCICCR-DLBCL)
 
 ## Aim 1: Identify Recurrent Immune Phenotypes using RNAseq Data
 
@@ -33,18 +35,28 @@ The primary data sources are:
   * Source code in `/code/`)
 * [Preprocessing Duke counts](dukedata.html)
 * [Expanded phenotype data for Duke and NCI datasets](ext_pheno.html)
-* [Batch correction and merge datasets](merge.html)
+* [Merge expression and associated clinical/metadata, batch correction](merge.html)
 
 ### Gene set variation analysis
 
 #### First try at gene list collection:
 
-Gene lists selected from work-in-progress analyis of TCGA macrophage signatures and from immune-related C2 "curated" gene sets from MSigDB. Also included T-cell inflamed signature from prior publications (Riyue Bao). No additional filtering was done after selection of candidate gene lists.
+Gene lists selected from work-in-progress analyis of TCGA macrophage signatures and from immune-related C2 "curated" gene sets from MSigDB. Also included T-cell inflamed signature from prior publications (Riyue Bao). No additional filtering was done after selection of candidate gene lists. GSVA run on expression data from NCI only to see how well it recapitulates known _PD-L1_ amplified immune phenotype.
 
 * [GSVA](enrichment.html)
 * [Clustering GSVA results](clustering_enrichment_scores.html)
 
+There is poor separation, especially on PCA2, of the known immune phenotype _PD-L1_ amplified in NCI data.
+
+![](assets/first_gsva_pca_samples.png)
+
+This is because the gene sets are highly clustered in the same axis on the PCA analysis. There is too much co-variation among the immune gene sets I initially selected, and the overall analysis is not able to find meaningul differences in immune phenotype.
+
+![](assets/first_gsva_pca_variables.png)
+
 #### Gene set collection refinement:
+
+We will need better-separating gene sets to proceed.
 
 * [New gene set collection](newgs.html)
 
