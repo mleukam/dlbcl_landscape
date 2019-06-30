@@ -20,14 +20,360 @@ Load packages
 ```{r}
 library("tidyverse")
 library("sva")
+library("Biobase")
 ```
 
-Read in data
+Read in expressionsets
 ```{r}
-duke_es <- readRDS("output/duke_expression_set_cleaned_log.rds")
-# nci_es <- 
+duke_es <- readRDS("output/duke_expressionset_pext.rds")
+
+nci_es <- readRDS("output/nci_expressionset_pext.rds")
 ```
 
+## Batch correction Duke expression data
+Following examples and suggestions in vignette here:
+https://bioconductor.org/packages/release/bioc/vignettes/sva/inst/doc/sva.pdf and examples here: http://jtleek.com/genstats/inst/doc/02_13_batch-effects.html
 
+Duke expression data did not go through GDC pipeline and may contain batch effects carried over from raw sequence data. Duke pheno data includes lanes, which will be examined for batch effect using SVA ComBat function
 
+```{r}
+pheno <- pData(duke_es)
+edata <- exprs(duke_es)
 
+# There is a single "NA" value in the lane assignments. Will review and decide whether to keep or not for further analysis
+which(is.na(pheno$lane))
+pheno[214,]
+
+# The sample looks otherwise complete and with a large enough library size compared to others (though small overall). Will set to "unknown" and keep. Because one batch now will only have one member, will have to adjust means only and not variance (cannot calculate variance from one sample)
+
+# The ComBat function adjusts for known batches using an empirical Bayesian framework. In order to use the function, you must have a known batch variable in your dataset.
+batch = pheno$lane %>% as.data.frame() %>%
+  dplyr::rename(lane = 1) %>%
+  mutate(lane = as.character(lane)) %>%
+  replace(is.na(.), "unknown") %>%
+  mutate(lane = as.factor(lane)) %>%
+  pull(lane)
+summary(batch)
+# Note that adjustment variables will be treated as given to the ComBat function. This means if you are trying to adjust for a categorical variable with p different levels, you will need to give ComBat p-1 indicator variables for this covariate.
+modlane <- model.matrix(~ lane, data = pheno)
+
+# We need to create a model matrix for the adjustment variables, including the variable of interest. Note that you do not include batch in creating this model matrix - it will be included later in the ComBat function. In this case there are no other adjustment variables so we simply fit an intercept term.
+modcombat <- model.matrix(~ 1, data = pheno)
+
+# apply combat to get "cleaned data matrix"
+# will use the mean.only=TRUE option for correction for lanes that only adjusts the mean of the batch effects across batches (default adjusts the mean and variance). This option is recommended for cases where milder batch effects are expected (so no need to adjust the variance), or in cases where the variances are expected to be different across batches due to the biology.
+
+# plot the before
+batch_df <- enframe(batch) %>%
+  dplyr::select(lane = value)
+edata_df <- as.data.frame(t(edata)) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  bind_cols(batch_df) %>%
+  dplyr::select(sample_id, lane, everything()) %>%
+  gather(key = "gene_id", value = "intensity", -sample_id, -lane) %>%
+  group_by(lane) %>%
+  print()
+before_box <- ggplot(edata_df, aes(x = lane, y = intensity, group = lane)) +
+  geom_boxplot()
+before_box
+
+# pretty minimal differences in mean and distribution
+
+# apply batch correction
+combat_edata <- ComBat(dat = edata,
+                       batch = batch,
+                       mod = modcombat,
+                       mean.only = TRUE,
+                       par.prior = TRUE, 
+                       prior.plots = FALSE)
+
+# plot the after
+batch_df <- enframe(batch) %>%
+  dplyr::select(lane = value)
+combat_edata_df <- as.data.frame(t(combat_edata)) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  bind_cols(batch_df) %>%
+  dplyr::select(sample_id, lane, everything()) %>%
+  gather(key = "gene_id", value = "intensity", -sample_id, -lane) %>%
+  group_by(lane) %>%
+  print()
+after_box <- ggplot(combat_edata_df, aes(x = lane, y = intensity, group = lane)) +
+  geom_boxplot()
+after_box
+
+# even more better :-)
+```
+
+## Combine expression data
+
+Use Duke expression data that is batch-corrected for lanes
+
+```{r}
+duke_exprs <- combat_edata %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  dplyr::select(gene_id, everything()) %>%
+  print()
+
+nci_exprs <- exprs(nci_es) %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  dplyr::select(gene_id, everything()) %>%
+  print()
+
+# filter rownames to only keep intersecting rows
+duke_genes <- duke_exprs %>% pull(gene_id)
+length(duke_genes)
+nci_genes <- nci_exprs %>% pull(gene_id)
+length(nci_genes)
+
+combined_genes <- intersect(duke_genes, nci_genes)
+length(combined_genes)
+head(combined_genes)
+
+duke_exprs_filt <- duke_exprs %>%
+  dplyr::filter(gene_id %in% combined_genes)
+nrow(duke_exprs_filt)
+
+nci_exprs_filt <- nci_exprs %>%
+  dplyr::filter(gene_id %in% combined_genes)
+nrow(nci_exprs_filt)
+
+combined_exprs <- nci_exprs_filt %>%
+  left_join(duke_exprs_filt, by = "gene_id") %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_id") %>%
+  as.matrix()
+dim(combined_exprs)
+combined_exprs[1:10, 1:6]
+```
+
+## Combine phenotype data
+
+Overlapping data (NCI = Duke)
+
+* `Gene Expression Subgroup` = `ABC GCB (RNAseq)` -- no reformatting 
+* `IPI range` =  `IPI` -- NCI dataset split into two numbers and save both high and low IPI. Merge Duke data with low IPI (presumably at diagnosis?)
+* `IPI Group` = `IPI groups` -- no reformatting
+* `Status at Follow_up_ 0 Alive_ 1 Dead` = `Censored` -- no reformatting
+* `Follow_up Time _yrs` = `Overall Survival years` -- no reformatting
+* `Gender` = `Gender`
+* `Age` = `Age at diagnosis` - Duke dataset, remove decimals, remove `age_at_diagnosis` from NCI dataset
+* `ann_arbor_clinical_stage` = `AnnArbor stage IPI` - NCI dataset to be converted to numeric and then converted to indicator for stage 3/4 per IPI
+* `ECOG Performance Status` = `ECOG IPI` - NCI dataset to be converted to indicator for ECOG 2+ vs ECOG 0-1 per IPI
+* `Number of Extranodal Sites` = `multiple extranodal IPI` - NCI dataset to be converted to indicator for >1 extranodal sites
+* `LDH Ratio` = `LDH IPI` - NCI dataset to be converted to indicator for raio >1 per IPI
+
+```{r}
+# pull out pheno_data
+nci_pheno <- pData(nci_es) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+duke_pheno <- pData(duke_es) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+```
+
+#### Format NCI data for merge
+```{r}
+ipi_highlow <- nci_pheno$`IPI Range` %>%
+  str_split_fixed(pattern = "", n = 2) %>%
+  as_tibble() %>%
+  dplyr::rename(ipi_low = V1) %>%
+  mutate(ipi_high = ifelse(V2 == "", ipi_low, V2)) %>%
+  dplyr::select(-V2) %>%
+  print()
+
+nci_pheno_ipi <- nci_pheno %>% 
+  bind_cols(ipi_highlow) %>%
+  dplyr::select(sample_id, ipi_initial = ipi_low, ipi_high, everything()) %>%
+  print()
+
+nci_pheno_formatted <- nci_pheno_ipi %>%
+  dplyr::rename(abc_gcb_rna = `Gene Expression Subgroup`,
+                ipi_group = `IPI Group`,
+                os_status = `Status at Follow_up_ 0 Alive_ 1 Dead`,
+                os_years = `Follow_up Time _yrs`,
+                gender = Gender, 
+                age = Age) %>%
+  dplyr::select(sample_id, abc_gcb_rna, ipi_group, os_status, os_years, gender, age, everything()) %>%
+  mutate(ann_arbor_stage_3plus = as.factor(ann_arbor_clinical_stage)) %>%
+  mutate(ann_arbor_stage_3plus = fct_recode(ann_arbor_stage_3plus,
+                                            "1" = "Stage III",
+                                            "1" = "Stage IV",
+                                            "0" = "Stage I",
+                                            "0" = "Stage II",
+                                            "NA" = "Not Reported")) %>%
+  dplyr::select(sample_id, ann_arbor_stage_3plus, everything()) %>%
+  mutate(ps_2plus = as.numeric(`ECOG Performance Status`)) %>%
+  mutate(ps_2plus = ifelse(ps_2plus > 1, 1, 0),
+         ps_2plus = as.factor(ps_2plus)) %>%
+  dplyr::select(sample_id, ps_2plus, everything()) %>%
+  mutate(extranodal_sites_2plus = as.numeric(`Number of Extranodal Sites`)) %>%
+  mutate(extranodal_sites_2plus = ifelse(extranodal_sites_2plus > 1, 1, 0)) %>%
+  dplyr::select(sample_id, extranodal_sites_2plus, everything()) %>%
+  mutate(extranodal_sites_2plus = as.factor(extranodal_sites_2plus)) %>%
+  mutate(ldh_abnormal = ifelse(`LDH Ratio` > 1, 1, 0),
+         ldh_abnormal = as.factor(ldh_abnormal),
+         ipi_initial = as.factor(ipi_initial)) %>%
+  dplyr::select(sample_id, ldh_abnormal, everything()) %>%
+  print()
+  
+```
+
+#### Format Duke data for merge
+```{r}
+duke_pheno_formatted <- duke_pheno %>%
+  dplyr::rename(abc_gcb_rna = `ABC GCB (RNAseq)`,
+                ipi_group = `IPI groups`,
+                os_status = `Censored`,
+                os_years = `Overall Survival years`,
+                gender = Gender) %>%
+  mutate(age = (str_split_fixed(`age at diagnosis`, "\\.", n = 2))[,1]) %>%
+  dplyr::select(sample_id, age, abc_gcb_rna, ipi_group, os_status, os_years, gender, everything()) %>%
+  dplyr::rename(ann_arbor_stage_3plus = `AnnArbor stage IPI`,
+                ps_2plus = `ECOG IPI`,
+                extranodal_sites_2plus = `multiple extranodal IPI`,
+                ldh_abnormal = `LDH IPI`,
+                ipi_initial = IPI) %>%
+  mutate(ps_2plus = as.factor(ps_2plus),
+         ann_arbor_stage_3plus = as.factor(ann_arbor_stage_3plus),
+         extranodal_sites_2plus = as.factor(extranodal_sites_2plus),
+         ldh_abnormal = as.factor(ldh_abnormal),
+         ipi_initial = as.factor(ipi_initial)) %>%
+  mutate(age = as.numeric(age)) %>%
+  print()
+```
+
+#### Merge pheno data
+```{r}
+combined_pheno <- nci_pheno_formatted %>%
+  bind_rows(duke_pheno_formatted) %>%
+  dplyr::select(sample_id, abc_gcb_rna, ipi_group, os_status, os_years, age, gender, ipi_initial, pdl1_status, everything())
+```
+
+## Remake expressionset
+```{r}
+pheno_data_df <- as.data.frame(combined_pheno) %>%
+  column_to_rownames(var = "sample_id")
+
+v_metadata <- data.frame(
+  labelDescription = colnames(pheno_data_df),
+  row.names = colnames(pheno_data_df) )
+  
+phenoData <- new("AnnotatedDataFrame", 
+                 data = pheno_data_df, 
+                 varMetadata = v_metadata)
+phenoData
+
+annotation <- as.character("Duke RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in >12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. NCI RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed.")
+
+# assemble expressionset
+combined_es <- ExpressionSet(
+  assayData = combined_exprs,
+  phenoData = phenoData,
+  annotation = annotation)
+combined_es
+```
+
+## Batch correction between Duke/NCI
+
+Following documentation as above
+
+```{r}
+# create marker variable for Duke vs NCI in pheno data
+pheno_df <- pData(combined_es) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  mutate(source = ifelse(grepl("duke_", sample_id),"duke","nci")) %>%
+  mutate(source = as.factor(source)) %>%
+  dplyr::select(sample_id, source, everything()) %>%
+  # also fix gcb_abc column factors
+  mutate(abc_gcb_rna = as.character(abc_gcb_rna)) %>%
+  mutate(abc_gcb_rna = ifelse(abc_gcb_rna == "Unclass", "Unclassified", abc_gcb_rna)) %>%
+  mutate(abc_gcb_rna = as.factor(abc_gcb_rna)) %>%
+  print()
+
+# convert back to regular dataframe with rownames for downstream processing
+pheno_d <- as.data.frame(pheno_df) %>%
+  column_to_rownames(var = "sample_id")
+
+# define batch as source marker
+batch = pheno_df$source
+summary(batch)
+
+# boxplot by data source
+# plot the before
+batch_df <- enframe(batch) %>%
+  dplyr::select(source = value)
+edata_df <- as.data.frame(t(exprs(combined_es))) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  bind_cols(batch_df) %>%
+  dplyr::select(sample_id, source, everything()) %>%
+  gather(key = "gene_id", value = "intensity", -sample_id, -source) %>%
+  group_by(source) %>%
+  print()
+before_box <- ggplot(edata_df, aes(x = source, y = intensity, group = source)) +
+  geom_boxplot()
+before_box
+# small but norable differences in mean and distribution
+# will use the NCI data as the "ground truth" for normalization given higher read counts overall and standardized count pipeline through GDC
+
+# Note that adjustment variables will be treated as given to the ComBat function. This means if you are trying to adjust for a categorical variable with p different levels, you will need to give ComBat p-1 indicator variables for this covariate.
+modsource <- model.matrix(~ source, data = pheno_d)
+
+# We need to create a model matrix for the adjustment variables, including the variable of interest. Note that you do not include batch in creating this model matrix - it will be included later in the ComBat function. In this case there are no other adjustment variables so we simply fit an intercept term.
+modcombat <- model.matrix(~ 1, data = pheno_d)
+
+# apply batch correction
+combined_combat_edata <- ComBat(dat = exprs(combined_es),
+                       batch = batch,
+                       mod = modcombat,
+                       par.prior = TRUE,
+                       prior.plots = FALSE,
+                       mean.only = FALSE,
+                       ref.batch = "nci")
+
+after_df <- as.data.frame(t(combined_combat_edata)) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  bind_cols(batch_df) %>%
+  dplyr::select(sample_id, source, everything()) %>%
+  gather(key = "gene_id", value = "intensity", -sample_id, -source) %>%
+  group_by(source) %>%
+  print()
+after_box <- ggplot(after_df, 
+                    aes(x = source, y = intensity, group = source)) +
+  geom_boxplot()
+after_box
+```
+
+## Final Expressionset
+```{r}
+# use updated pheno data frame from last chunk
+v_metadata <- data.frame(
+  labelDescription = colnames(pheno_d),
+  row.names = colnames(pheno_d) )
+  
+phenoData <- new("AnnotatedDataFrame", 
+                 data = pheno_d, 
+                 varMetadata = v_metadata)
+phenoData
+
+annotation <- as.character("Duke RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in >12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected using ComBat by sequencing lane. NCI RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected for NCI vs Duke source using ComBat")
+
+# assemble expressionset
+combined_es <- ExpressionSet(
+  assayData = combined_combat_edata,
+  phenoData = phenoData,
+  annotation = annotation)
+combined_es
+```
