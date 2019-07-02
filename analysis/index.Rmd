@@ -24,6 +24,18 @@ The primary data sources are:
     * From [Schmitz et al N Engl J Med. 2018 Apr 12;378(15):1396](https://www.ncbi.nlm.nih.gov/pubmed/?term=29641966)  
     * Hosted at the Genomic Data Commons project ID [NCICCR-DLBCL](https://portal.gdc.cancer.gov/projects/NCICCR-DLBCL)
 
+Short-term to-do list:
+
+* New gene lists - re-run GSVA on all samples and re-cluster
+* Evaluate new gene lists in NCI data, PD-L1amp vs non
+* Inverse correction for tumor purity?
+* Download GDC mutation data
+* Combined mutation calls pipeline
+
+Major questions:
+
+* How to account for malignant B-cells vs immune response B-cells?
+
 ## Aim 1: Identify Recurrent Immune Phenotypes using RNAseq Data
 
 ### Prepare RNAseq data for analysis
