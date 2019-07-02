@@ -1,0 +1,35 @@
+---
+title: "visualizing_gsva_scores_2"
+author: "mleukam"
+date: "2019-07-02"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Setup
+
+Clear the workspace
+```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+library("tidyverse")
+```
+
+NB: need to transfer scripts to `/code/`:
+
+* run_gsva2.pbs
+* gsva2.sh
+* gsva2.r
+
+Read in data
+```{r}
+gs_matrix <- readRDS("output/dlbcl_total_immune_gset_v2_results.rds")
+gs_matrix[, 1:5]
+```
+
+
+
