@@ -377,3 +377,11 @@ combined_es <- ExpressionSet(
   annotation = annotation)
 combined_es
 ```
+
+## Write out for cluster
+```{r}
+# write expression data as csv for large file transfer/reading on the cluster
+combined_exprs <- exprs(combined_es)
+combined_csv <- as.data.frame(combined_exprs) %>% rownames_to_column(var = "gene") %>% as_tibble() %>% select(gene, everything()) %>% print() 
+write_csv(combined_csv, "output/combined_dlbcl_expr_matrix.csv")
+```

@@ -1,5 +1,5 @@
 ---
-title: "newgs"
+title: "Expanded search for immune gene sets"
 author: "mleukam"
 date: "2019-06-23"
 output: workflowr::wflow_html
@@ -7,9 +7,304 @@ editor_options:
   chunk_output_type: console
 ---
 
+## Data Sources
+
+#### Gene sets from prior publications of immune landscape
+
+Gene sets referenced in [Thorssen et al Cell 2018](https://www.cell.com/immunity/fulltext/S1074-7613(18)30121-3?_returnURL=https%3A%2F%2Flinkinghub.elsevier.com%2Fretrieve%2Fpii%2FS1074761318301213%3Fshowall%3Dtrue#secsectitle0095)
+
+* [Wolf et al PLOS One 2014](https://www.ncbi.nlm.nih.gov/pubmed/24516633?dopt=Abstract). Gene sets obtained from xls [File S1](https://doi.org/10.1371/journal.pone.0088309.s001) at PLOS One website. Interestingly, while Thorssen et al cite 68 immune gene sets, only 3 immune summary "modules" are published out of a total 11 published modules. These were derived from ~5500 cases of breast cancer profiled with microarrays.
+* [Chan et al 2013](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1002920). LYM gene set described here in doctoral dissertation by Chan: `data/CHENG_columbia_0054D_11748.pdf`. Reference in Thorssen et al points to breast cancer paper, including only one immune gene set, not 9. Additional support for LYM gene set found  [here](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1002920) in TCGA analysis by the same author.
+* For the ICR gene sets, two citations ([Galon et al Immunity 2013](https://www.sciencedirect.com/science/article/pii/S1074761313002926) and [Bedognetti et al Curr Opin Immunol 2016](https://www.sciencedirect.com/science/article/pii/S0952791516300012#bib0355)) are reviews that provide no additional data. The third, [Hendrickx et al OncoImmunology 2017] contains a single 15-gene ICR gene set that is a mix of both activation and regulation genes.
+
+_None of the above yeilded a list of usable gene sets, and none take into account recent findings with single-cell RNA seq experiments._
+
+#### Additional gene sets considered 
+
+Broad literature search, focused on gene signatures linked to known immune phenotypes in oncology
+
+_NB: all of the following signatures were downloaded on 7/1/2019_
+
+* Simple 2 gene set of CYT score: `log-average of GZMA and PRF1 expression in TPMs` from [Rooney et al Cell 2015](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4856474/). This has been associated with somatic mutations in 34 genes. 
+* DHIT signature as a marker of immune exclusion [Ennishi et al JCO 2019](https://ascopubs.org/doi/full/10.1200/JCO.18.01583) -- ranked gene list in table S9
+* Cell-type-specific immune signatures for oncology derived from tissue experiements in [Nirmal et al CIR 2018](http://cancerimmunolres.aacrjournals.org/content/6/11/1388.figures-only), downloaded as RDA file from github: https://github.com/ajitjohnson/imsig/blob/master/data/sig.rda 
+* Differentially expressed genes used for immune-related clustering in breast cancer single-cell RNAseq experiments published by MSKCC group in [Azizi et al Cell 2018](https://www.cell.com/cell/fulltext/S0092-8674(18)30723-2#%20). Gene lists downloaded as xlsx file from table S4. 
+* Detailed single cell T-cell profiling with RNAseq published in [Guo et al Nature Medicine 2018](https://www.nature.com/articles/s41591-018-0045-3). T-cell cluster representative genes as xls file (supplemental table 3) downloaded from journal site. 
+* Treg signatures in NSCLC and CRC https://www.ncbi.nlm.nih.gov/pubmed/27851914 published in [De Simone et al Immunity 2016](https://www.sciencedirect.com/science/article/pii/S1074761316304320?via%3Dihub#app3) 
+    * Description of tables here: https://ars.els-cdn.com/content/image/1-s2.0-S1074761316304320-mmc1.pdf. Gene signature in table S4 for Treg signatures and table S5 for immune checkpoint signatures. 
+* T-cell inflammation signature from Spranger, Bao, Gajewski (UChicago).
+* Macrophage signatures from TCGA macs project (UChicago).
+  
 ## Setup
 
+Clear the workspace
 ```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+library("tidyverse")
+library("readxl")
+```
+
+## Reformat gene sets for GSVA 
+The final output needs to be a list of character vectors, each containing a set of Gencode v22 gene ids. Following the order of literature search and downloads above. 
+
+Read in Gencode v22 (GDC standard) conversion table with gene symbols
+
+```{r}
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
+gencode_gtf
+```
+
+CYT gene set
+```{r}
+# make list of gene symbols
+# convert to gencode v22 gene id
+cyt_gs = list(gene_name = c("GZMA", "PRF1")) %>%
+  as_tibble() %>%
+  left_join(gencode_gtf) %>%
+  pull(gene_id) %>%
+  print()
+```
+
+DHIT (Double hit-like) gene set
+```{r}
+# read in excel table
+ds_JCO_18_01583_2 <- read_excel("data/ds_JCO.18.01583-2.xlsx", 
+                                sheet = "Table S9", 
+                                skip = 1)
+ds_JCO_18_01583_2
+
+# convert to gencode v22 gene id
+dhit_gs <- ds_JCO_18_01583_2 %>%
+  select(gene_name = `Gene name`) %>%
+  left_join(gencode_gtf) %>%
+  drop_na(gene_id) %>%
+  pull(gene_id) %>%
+  print()
+```
+
+imsig cell=specific gene set
+```{r}
+# read in RDA file from imsig github
+load("data/sig.rda")
+sig[1:10, 1:2]
+
+# convert to named list of gene sets, each a 1-column tibble
+sig_list <- as_tibble(sig) %>%
+  nest(key = gene) %>%
+  as.list() %>%
+  print()
+sig_dfs <- sig_list$data
+names(sig_dfs) <- sig_list$cell
+str(sig_dfs)
+sig_dfs
+
+sig_gs <- sig_dfs %>%
+  map(function(df){dplyr::rename(df, gene_name = gene)}) %>%
+  map(function(df){mutate(df, gene_name = as.character(gene_name))}) %>%
+  map(function(df){left_join(df, gencode_gtf)}) %>%
+  map(function(df){drop_na(df, gene_id)}) %>%
+  map(function(df){pull(df, gene_id)}) %>%
+  print()
+
+names <- paste0("imsig_", 
+                c("bcells", "proliferation", "interferon", "macrophages", "monocytes", "neutrophils", "nkcells", "plasmacells", "translation","tcells"),
+                "_gs")
+names
+names(sig_gs) <- names
+sig_gs
+```
+
+Azizi et al MSKCC single cell breast cancer profiling paper
+```{r}
+# read in curated gene sets from figure S4
+mskcc_curated <- read_excel("data/azizi_curated.xlsx", 
+    sheet = "Tcell Signatures", skip = 2)
+
+mskcc_list <- mskcc_curated %>%
+  as.list() %>%
+  map(function(x){x[!is.na(x)]}) 
+
+mskcc_gs <- mskcc_list %>%
+  map(function(df){enframe(df)}) %>%
+  map(function(df){dplyr::select(df, gene_name = value)}) %>%
+  map(function(df){left_join(df, gencode_gtf)}) %>%
+  map(function(df){drop_na(df, gene_id)}) %>%
+  map(function(df){pull(df, gene_id)}) %>%
+  print()
+
+names <- paste0("mskcc_",
+                c("treg", "cd8activation", "antiinflammatory", "anergy", "proinflammatory", "lipid mediators", "glycolysis", "tcacycle", "pentosephosphatepathway", "glycogenmetabolism", "glucosedeprivation", "m1macrophage", "m2macrophage", "cytolyticeffector", "type1ifn_response", "type2ifn_response", "hypoxia_regulated", "tcellterminal_diff", "cycle_g1s", "cycle_g2m"),
+                "_gs")
+names
+names(mskcc_gs) <- names
+mskcc_gs
+```
+
+Guo et al T-cell profiling in lung adenocarcinoma
+```{r}
+#--------------------------------------------
+## CD8
+
+beijing_cd8source <- read_excel("data/41591_2018_45_MOESM5_ESM.xlsx", 
+    sheet = "CD8", skip = 1) %>%
+  dplyr::select(gene_name = `Gene Symbol`, cluster = Cluster) %>%
+  nest(key = gene_name) %>%
+  drop_na(cluster)
+
+beijing_cd8list <- beijing_cd8source %>%
+  as.list() 
+beijing_cd8list <- beijing_cd8list$data
+
+names <- beijing_cd8source$cluster
+names <- names %>%
+  str_replace_all(., "-", "_") %>%
+  str_to_lower()
+names <- paste0("beijing_", names, "_gs") %>%
+  print()
+names(beijing_cd8list) <- names
+beijing_cd8list
+
+#--------------------------------------------
+## CD4
+
+beijing_cd4convsource <- read_excel("data/41591_2018_45_MOESM5_ESM.xlsx", 
+    sheet = "CD4 Tconv", skip = 1)  %>%
+  dplyr::select(gene_name = `Gene Symbol`, cluster = Cluster) %>%
+  nest(key = gene_name) %>%
+  drop_na(cluster) %>%
+  print()
+
+beijing_cd4convlist <- beijing_cd4convsource %>%
+  as.list() 
+beijing_cd4convlist <- beijing_cd4convlist$data
+
+names <- beijing_cd4convsource$cluster
+names <- names %>%
+  str_replace_all(., "-", "_") %>%
+  str_to_lower()
+names <- paste0("beijing_", names, "_gs") %>%
+  print()
+names(beijing_cd4convlist) <- names
+beijing_cd4convlist
+
+#--------------------------------------------
+## TREGS
+
+beijing_treg_source <- read_excel("data/41591_2018_45_MOESM5_ESM.xlsx", 
+    sheet = "CD4 Treg", skip = 1) %>%
+  dplyr::select(gene_name = `Gene Symbol`, cluster = Cluster) %>%
+  nest(key = gene_name) %>%
+  drop_na(cluster) %>%
+  print()
+
+beijing_treg_list <- beijing_treg_source %>%
+  as.list() 
+beijing_treg_list <- beijing_treg_list$data
+
+names <- beijing_treg_source$cluster
+names <- names %>%
+  str_replace_all(., "-", "_") %>%
+  str_to_lower()
+names <- paste0("beijing_", names, "_gs") %>%
+  print()
+names(beijing_treg_list) <- names
+beijing_treg_list
+
+#--------------------------------------------
+## TREGS - TNFPRS +/-
+
+beijing_tnfrsf9_source <- read_excel("data/41591_2018_45_MOESM5_ESM.xlsx", 
+    sheet = "CD4-C9-CTLA4 (TNFRSF9+ or -)", 
+    skip = 1) %>%
+  dplyr::select(gene_name = `Gene Symbol`, cluster = Cluster) %>%
+  nest(key = gene_name) %>%
+  drop_na(cluster) %>%
+  print()
+
+beijing_tnfrsf9_list <- beijing_tnfrsf9_source %>%
+  as.list() 
+beijing_tnfrsf9_list <- beijing_tnfrsf9_list$data
+
+names <- c("beijing_cd4_c9_ctla4_tnfrsf9_neg_gs", "beijing_cd4_c9_ctla4_tnfrsf9_pos_gs")
+names(beijing_tnfrsf9_list) <- names
+beijing_tnfrsf9_list
+
+#--------------------------------------------
+## Collect to a single list
+
+beijing_list <- c(beijing_cd8list, beijing_cd4convlist, beijing_treg_list, beijing_tnfrsf9_list) %>%
+  as.list() %>%
+  map(function(df){pull(df, gene_name)})
+str(beijing_list)
+
+beijing_gs <- beijing_list %>%
+  map(function(df){enframe(df)}) %>%
+  map(function(df){dplyr::select(df, gene_name = value)}) %>%
+  map(function(df){left_join(df, gencode_gtf)}) %>%
+  map(function(df){drop_na(df, gene_id)}) %>%
+  map(function(df){pull(df, gene_id)}) %>%
+  print()
+```
+
+Treg and checkpoint signatures in NSCLC and CRC from De Simone et al Immunity 2016
+```{r}
+italy_checkpoint <- read_excel("data/1-s2.0-S1074761316304320-mmc2.xlsx", 
+    sheet = "Table S5", skip = 1) %>%
+  dplyr::select(1) %>%
+  dplyr::rename(gene_name = 1) %>%
+  separate(gene_name, into = c("gene_name", "alt_name"), sep = " ", remove = TRUE) %>%
+  dplyr::select(gene_name) %>%
+  as.list() %>%
+  print()
+
+italy_treg <- read_excel("data/1-s2.0-S1074761316304320-mmc2.xlsx", 
+    sheet = "Table S4", skip = 5) %>% 
+  dplyr::select(gene_name = 1) %>%
+  as.list() %>%
+  print()
+
+italy_list <- c(italy_checkpoint, italy_treg)
+names(italy_list) <- c("italy_checkpoint_gs", "italy_treg_gs")
+italy_list
+
+italy_gs <- italy_list %>%
+  map(function(df){enframe(df)}) %>%
+  map(function(df){dplyr::select(df, gene_name = value)}) %>%
+  map(function(df){left_join(df, gencode_gtf)}) %>%
+  map(function(df){drop_na(df, gene_id)}) %>%
+  map(function(df){pull(df, gene_id)}) %>%
+  print()
 
 ```
 
+Import UChicago gene sets from prior studies
+```{r}
+uchicago_gs_source <- readRDS("data/gset_ids_complete.rds")
+uchicago_gs_mac_up <- uchicago_gs_source[1:7]
+uchicago_gs_tinflamed <- uchicago_gs_source[15]
+uchicago_gs <- c(uchicago_gs_mac_up, uchicago_gs_tinflamed)
+uchicago_gs
+names(uchicago_gs) <- c("uchi_mac_c1_gs", "uchi_mac_c2_gs", "uchi_mac_c3_gs", "uchi_mac_c4_gs", "uchi_mac_c5_gs", "uchi_mac_c6_gs", "uchi_mac_c7_gs", "uchi_t_inflamed_gs")
+```
+
+
+#### Assemble list of gene sets
+```{r}
+gset_ids_complete_2 <- c(list("cyt_gs" = cyt_gs), 
+                         list("dhit_gs" = dhit_gs),
+                         sig_gs,
+                         mskcc_gs,
+                         beijing_gs,
+                         italy_gs,
+                         uchicago_gs)
+str(gset_ids_complete_2)
+```
+
+## Write out for GSVA on cluster
+```{r}
+saveRDS(gset_ids_complete_2, "output/gset_ids_complete_2.rds")
+```
