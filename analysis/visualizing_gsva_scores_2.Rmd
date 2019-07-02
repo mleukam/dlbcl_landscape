@@ -1,5 +1,5 @@
 ---
-title: "visualizing_gsva_scores_2"
+title: "Visualizing results of GSVA with version 2 gene lists"
 author: "mleukam"
 date: "2019-07-02"
 output: workflowr::wflow_html

@@ -71,6 +71,7 @@ This is because the gene sets are highly clustered in the same axis on the PCA a
 We will need better-separating gene sets to proceed.
 
 * [New gene set collection](newgs.html)
+* [Visualizing and clustering new GSVA results](clustering_enrichment_scores.html)
 
 ## Aim 2: Link Immune Phenotype Clusters to Oncogenes
 
