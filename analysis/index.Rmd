@@ -73,6 +73,23 @@ We will need better-separating gene sets to proceed.
 * [New gene set collection](newgs.html)
 * [Visualizing and clustering new GSVA results](clustering_enrichment_scores.html)
 
+Looking at the PCA plot of new immune gene signature enrichment of only PD-L1 amplified and non-amplified (NCI samples only), there is some separation on both PCA1 and PCA2 with a preponderance of samples in the southeast quadrant, though the effect is not marked.
+
+![](assets/second_gsva_pca_individuals.png)
+
+There are still many correlated gene sets in the NCI sample, but a better distribution than previously.
+
+![](assets/second_gsva_pca_variables.png)
+
+This PCA plot collapses immune gene set enrichment in all analyzed samples, and compares all NCI samples (enriched in ABC) to all Duke samples. There is no significant difference in distribution between the NCI and Duke data, and there is good scatter on the two PCA axis (though the contribution of PCA2 is fairly small).
+![](assets/second_gsva_pca_individuals_dukenci.png)
+
+The contribution of each of the gene sets to this distribution shows better distribution overall.
+![](assets/second_gsva_pca_variables_dukenci.png)
+
+A heatmap of gene set expression by sample is clustered with heirarchical clustering for both samples and gene sets
+![](assets/second_gsva_heatmap.png)
+
 ## Aim 2: Link Immune Phenotype Clusters to Oncogenes
 
 ### Mutation calls
