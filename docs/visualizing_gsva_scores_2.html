@@ -437,7 +437,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-07-02
+<strong>Last updated:</strong> 2019-07-03
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -528,10 +528,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree1453a6cecf91ea4aee54c16b64ff1dfcd2d532a8targetblank1453a6ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/1453a6cecf91ea4aee54c16b64ff1dfcd2d532a8" target="_blank">1453a6c</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreed27c601cd1c99ea53dfdbb01b5fcb572c36ec2eatargetblankd27c601a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/d27c601cd1c99ea53dfdbb01b5fcb572c36ec2ea" target="_blank">d27c601</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree1453a6cecf91ea4aee54c16b64ff1dfcd2d532a8targetblank1453a6ca" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreed27c601cd1c99ea53dfdbb01b5fcb572c36ec2eatargetblankd27c601a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -561,7 +561,7 @@ Ignored files:
     Ignored:    data/sample.tsv
     Ignored:    data/sig.rda
     Ignored:    data/temp.dgelist_limma.rds
-    Ignored:    data/~$1-s2.0-S1074761316304320-mmc2.xlsx
+    Ignored:    docs/.DS_Store
     Ignored:    output/combined_clin_data.xlsx
     Ignored:    output/combined_dlbcl_expr_matrix.csv
     Ignored:    output/dlbcl_expr_matrix.csv
@@ -578,6 +578,12 @@ Ignored files:
     Ignored:    output/nci_expressionset_pext.rds
     Ignored:    output/nci_extended_pheno_data.csv
     Ignored:    output/total_immune_gset_v1.rds
+
+Untracked files:
+    Untracked:  output/combined_expressionset.rds
+
+Unstaged changes:
+    Modified:   analysis/merge.Rmd
 
 </code></pre>
 <p>
@@ -616,6 +622,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/d27c601cd1c99ea53dfdbb01b5fcb572c36ec2ea/analysis/visualizing_gsva_scores_2.Rmd" target="_blank">d27c601</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-03
+</td>
+<td>
+wflow_publish(“analysis/visualizing_gsva_scores_2.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/28102e4b3f0566cd16eee8eabc29e4858db98476/docs/visualizing_gsva_scores_2.html" target="_blank">28102e4</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-02
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -680,14 +720,71 @@ start of clustering with new gene sets v2
 <pre class="r"><code>rm(list = ls())</code></pre>
 <p>Load packages</p>
 <pre class="r"><code>library(&quot;tidyverse&quot;)</code></pre>
-<pre><code>── Attaching packages ─────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>── Attaching packages ────────────────────── tidyverse 1.2.1 ──</code></pre>
 <pre><code>✔ ggplot2 3.1.1     ✔ purrr   0.3.2
 ✔ tibble  2.1.3     ✔ dplyr   0.8.1
 ✔ tidyr   0.8.3     ✔ stringr 1.4.0
 ✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
-<pre><code>── Conflicts ────────────────────────────────── tidyverse_conflicts() ──
+<pre><code>── Conflicts ───────────────────────── tidyverse_conflicts() ──
 ✖ dplyr::filter() masks stats::filter()
 ✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(&quot;factoextra&quot;)</code></pre>
+<pre><code>Welcome! Related Books: `Practical Guide To Cluster Analysis in R` at https://goo.gl/13EFCZ</code></pre>
+<pre class="r"><code>library(&quot;FactoMineR&quot;)
+library(&quot;ggpubr&quot;)</code></pre>
+<pre><code>Loading required package: magrittr</code></pre>
+<pre><code>
+Attaching package: &#39;magrittr&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:purrr&#39;:
+
+    set_names</code></pre>
+<pre><code>The following object is masked from &#39;package:tidyr&#39;:
+
+    extract</code></pre>
+<pre class="r"><code>library(&quot;ggsci&quot;)
+library(&quot;Biobase&quot;)</code></pre>
+<pre><code>Loading required package: BiocGenerics</code></pre>
+<pre><code>Loading required package: parallel</code></pre>
+<pre><code>
+Attaching package: &#39;BiocGenerics&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:parallel&#39;:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB</code></pre>
+<pre><code>The following objects are masked from &#39;package:dplyr&#39;:
+
+    combine, intersect, setdiff, union</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
+
+    IQR, mad, sd, var, xtabs</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
+
+    anyDuplicated, append, as.data.frame, basename, cbind,
+    colMeans, colnames, colSums, dirname, do.call, duplicated,
+    eval, evalq, Filter, Find, get, grep, grepl, intersect,
+    is.unsorted, lapply, lengths, Map, mapply, match, mget, order,
+    paste, pmax, pmax.int, pmin, pmin.int, Position, rank, rbind,
+    Reduce, rowMeans, rownames, rowSums, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which, which.max,
+    which.min</code></pre>
+<pre><code>Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    &#39;browseVignettes()&#39;. To cite Bioconductor, see
+    &#39;citation(&quot;Biobase&quot;)&#39;, and for packages &#39;citation(&quot;pkgname&quot;)&#39;.</code></pre>
+<pre class="r"><code>library(&quot;ComplexHeatmap&quot;)</code></pre>
+<pre><code>Loading required package: grid</code></pre>
+<pre><code>========================================
+ComplexHeatmap version 1.20.0
+Bioconductor page: http://bioconductor.org/packages/ComplexHeatmap/
+Github page: https://github.com/jokergoo/ComplexHeatmap
+Documentation: http://bioconductor.org/packages/ComplexHeatmap/
+
+If you use it in published research, please cite:
+Gu, Z. Complex heatmaps reveal patterns and correlations in multidimensional 
+  genomic data. Bioinformatics 2016.
+========================================</code></pre>
 <p>NB: need to transfer scripts to <code>/code/</code>:</p>
 <ul>
 <li>run_gsva2.pbs</li>
@@ -819,6 +916,396 @@ upreg_c5                             0.06688220 -0.314107721
 upreg_c6                            -0.10712152 -0.048634137
 upreg_c7                             0.18721022 -0.485196956
 tcell_gset                           0.39872487 -0.454359017</code></pre>
+<pre class="r"><code>combined_es &lt;- readRDS(&quot;output/combined_expressionset.rds&quot;)
+pheno_data &lt;- pData(combined_es)</code></pre>
+</div>
+<div id="set-up-pd-l1-groups" class="section level2">
+<h2>Set up PD-L1 groups</h2>
+<pre class="r"><code>str(pheno_data)</code></pre>
+<pre><code>&#39;data.frame&#39;:   1146 obs. of  72 variables:
+ $ source                                                                 : Factor w/ 2 levels &quot;duke&quot;,&quot;nci&quot;: 2 2 2 2 2 2 2 2 2 2 ...
+ $ abc_gcb_rna                                                            : Factor w/ 3 levels &quot;ABC&quot;,&quot;GCB&quot;,&quot;Unclassified&quot;: 2 2 1 1 3 1 1 2 2 1 ...
+ $ ipi_group                                                              : chr  &quot;Low&quot; &quot;Low&quot; NA NA ...
+ $ os_status                                                              : num  1 0 1 0 1 0 0 0 0 0 ...
+ $ os_years                                                               : num  1.73 1.85 1.16 0 6.3 ...
+ $ age                                                                    : num  48 42 47 75 76 41 54 57 32 56 ...
+ $ gender                                                                 : chr  &quot;F&quot; &quot;M&quot; &quot;M&quot; &quot;F&quot; ...
+ $ ipi_initial                                                            : Factor w/ 6 levels &quot;0&quot;,&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,..: 2 2 2 2 3 3 4 4 3 3 ...
+ $ pdl1_status                                                            : chr  &quot;non-amplified&quot; &quot;non-amplified&quot; &quot;non-amplified&quot; &quot;low_amplified&quot; ...
+ $ ldh_abnormal                                                           : Factor w/ 2 levels &quot;0&quot;,&quot;1&quot;: 1 1 2 NA 1 NA 2 2 NA 2 ...
+ $ extranodal_sites_2plus                                                 : Factor w/ 2 levels &quot;0&quot;,&quot;1&quot;: 1 1 NA 1 1 1 NA 1 1 1 ...
+ $ ps_2plus                                                               : Factor w/ 2 levels &quot;0&quot;,&quot;1&quot;: 1 2 NA 1 2 NA 2 2 2 2 ...
+ $ ann_arbor_stage_3plus                                                  : chr  &quot;1&quot; &quot;0&quot; &quot;0&quot; &quot;0&quot; ...
+ $ ipi_high                                                               : chr  &quot;1&quot; &quot;1&quot; &quot;3&quot; &quot;2&quot; ...
+ $ case_id                                                                : chr  &quot;3e164d5d-afa0-4e96-b177-ea9fdf69da7a&quot; &quot;678acbbd-3f1b-4464-ba21-a59606cf19ae&quot; &quot;c1b07bfa-d234-42d6-8a41-97b7a7924f0d&quot; &quot;15b380e1-d220-42b9-8613-18fcefccb0a4&quot; ...
+ $ filename                                                               : chr  &quot;b384270b-0315-49c6-bb46-d155d8d41fec.htseq_counts.txt.gz&quot; &quot;ab3f9584-f27f-4d6e-a5de-ac0d0c20de13.htseq_counts.txt.gz&quot; &quot;92fbf689-0c26-4664-9dde-c41534f7b390.htseq_counts.txt.gz&quot; &quot;dc44d3ba-5c4d-40a1-b8a2-f27b88325d0b.htseq_counts.txt.gz&quot; ...
+ $ project_id                                                             : chr  &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; ...
+ $ days_to_last_follow_up                                                 : num  633 674 425 NA 2299 ...
+ $ updated_datetime                                                       : POSIXct, format: &quot;2018-08-31 20:09:50&quot; &quot;2018-08-31 20:09:50&quot; ...
+ $ tumor_stage                                                            : chr  &quot;IPI:1&quot; &quot;IPI:1&quot; &quot;IPI:13&quot; &quot;IPI:12&quot; ...
+ $ age_at_diagnosis                                                       : num  17520 15330 17155 27375 27740 ...
+ $ tissue_or_organ_of_origin                                              : chr  &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; ...
+ $ ann_arbor_clinical_stage                                               : chr  &quot;Stage III&quot; &quot;Stage II&quot; &quot;Stage I&quot; &quot;Stage I&quot; ...
+ $ progression_or_recurrence                                              : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ last_known_disease_status                                              : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ primary_diagnosis                                                      : chr  &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; ...
+ $ tumor_grade                                                            : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ demographic.gender                                                     : chr  &quot;female&quot; &quot;male&quot; &quot;male&quot; &quot;female&quot; ...
+ $ demographic.submitter_id                                               : chr  &quot;DLBCL11667-demographic&quot; &quot;DLBCL10501-demographic&quot; &quot;DLBCL10954-demographic&quot; &quot;DLBCL10984-demographic&quot; ...
+ $ demographic.race                                                       : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ demographic.ethnicity                                                  : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ demographic.vital_status                                               : chr  &quot;Dead&quot; &quot;Alive&quot; &quot;Dead&quot; &quot;Alive&quot; ...
+ $ size                                                                   : num  235439 232896 248096 245979 246899 ...
+ $ dbGaP accession                                                        : chr  &quot;phs001444&quot; &quot;phs001444&quot; &quot;phs001444&quot; &quot;phs001444&quot; ...
+ $ Diagnosis                                                              : chr  &quot;Diffuse large B cell lymphoma&quot; &quot;Diffuse large B cell lymphoma&quot; &quot;Diffuse large B cell lymphoma&quot; &quot;Diffuse large B cell lymphoma&quot; ...
+ $ Genetic Subtype                                                        : chr  &quot;EZB&quot; &quot;EZB&quot; &quot;Other&quot; &quot;Other&quot; ...
+ $ Biopsy Type                                                            : chr  &quot;Pre-treatment&quot; &quot;Pre-treatment&quot; &quot;Pre-treatment&quot; &quot;Pre-treatment&quot; ...
+ $ Treatment__                                                            : chr  &quot;Immunochemotherapy&quot; &quot;Immunochemotherapy&quot; &quot;Immunochemotherapy&quot; &quot;NA&quot; ...
+ $ Ann Arbor Stage                                                        : num  3 2 1 1 1 2 3 3 3 2 ...
+ $ LDH Ratio                                                              : num  0.79 0.6 1.23 NA 0.78 NA 2.2 1.2 NA 1.7 ...
+ $ ECOG Performance Status                                                : num  1 2 NA 0 2 NA 2 2 2 2 ...
+ $ Number of Extranodal Sites                                             : num  0 1 NA 0 1 0 NA 1 0 0 ...
+ $ IPI Range                                                              : num  1 1 13 12 2 2 34 3 23 2 ...
+ $ Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1 Progression: num  1 0 1 0 1 0 0 0 0 0 ...
+ $ Progression_Free Survival _PFS_ Time _yrs                              : num  0.977 1.845 0.611 0 6.3 ...
+ $ Included in Survival Analysis                                          : chr  &quot;Yes&quot; &quot;Yes&quot; &quot;Yes&quot; &quot;No&quot; ...
+ $ lib_size                                                               : int  NA NA NA NA NA NA NA NA NA NA ...
+ $ lane                                                                   : Factor w/ 7 levels &quot;C7FYAANXX&quot;,&quot;C7U9KANXX&quot;,..: NA NA NA NA NA NA NA NA NA NA ...
+ $ AGE IPI                                                                : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ B symptoms at diagnosis                                                : chr  NA NA NA NA ...
+ $ Response to initial therapy                                            : chr  NA NA NA NA ...
+ $ Testicular involvement                                                 : chr  NA NA NA NA ...
+ $ CNS Involvement                                                        : chr  NA NA NA NA ...
+ $ CNS Relapse                                                            : chr  NA NA NA NA ...
+ $ age at diagnosis                                                       : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ log2 MYC expr                                                          : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ log2 BCL2 expr                                                         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ log2 BCL6 expr                                                         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ MYC high expr                                                          : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ BCL2 high expr                                                         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ BCL6 high expr                                                         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ MYC IHC                                                                : chr  NA NA NA NA ...
+ $ BCL2 IHC                                                               : chr  NA NA NA NA ...
+ $ BCL6 IHC                                                               : chr  NA NA NA NA ...
+ $ BCL2 translocation (FISH)                                              : chr  NA NA NA NA ...
+ $ MYC translocation (FISH)                                               : chr  NA NA NA NA ...
+ $ BCL6 translocation (FISH)                                              : chr  NA NA NA NA ...
+ $ ABC GCB ratio (RNAseq)                                                 : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ Nanostring ABC GCB                                                     : chr  NA NA NA NA ...
+ $ Nanostring LPS                                                         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ Hans GCB NonGCB                                                        : chr  NA NA NA NA ...
+ $ Genomic Risk Model                                                     : chr  NA NA NA NA ...</code></pre>
+<pre class="r"><code>summary(as.factor(pheno_data$pdl1_status))</code></pre>
+<pre><code>high_amplified  low_amplified  non-amplified           NA&#39;s 
+            20             45            406            675 </code></pre>
+<pre class="r"><code>pheno_data_tbl &lt;- as.data.frame(pheno_data) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  mutate(pdl1_status = replace_na(pdl1_status, &quot;not_assessed&quot;)) %&gt;%
+  mutate(pdl1_status = ifelse(pdl1_status == &quot;non-amplified&quot;, 
+                              &quot;non_amplified&quot;, pdl1_status))
+
+summary(as.factor(pheno_data_tbl$pdl1_status))</code></pre>
+<pre><code>high_amplified  low_amplified  non_amplified   not_assessed 
+            20             45            406            675 </code></pre>
+<pre class="r"><code>group_table &lt;- pheno_data_tbl %&gt;%
+  dplyr::select(sample_id, pdl1_status)
+
+# merge group data into gsva matrix
+pdl1_comb_exprs &lt;- as.data.frame(t(gs_matrix)) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(group_table) %&gt;%
+  dplyr::select(sample_id, pdl1_status, everything()) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  mutate(pdl1_status = as.factor(pdl1_status))</code></pre>
+<pre><code>Joining, by = &quot;sample_id&quot;</code></pre>
+<div id="pca-plot-of-results" class="section level4">
+<h4>PCA plot of results</h4>
+<pre class="r"><code># remove low amplified and samples not assessed
+nrow(pdl1_comb_exprs)</code></pre>
+<pre><code>[1] 1146</code></pre>
+<pre class="r"><code>pdl1_comb_exprs_filt &lt;- pdl1_comb_exprs %&gt;%
+  dplyr::filter(pdl1_status %in% c(&quot;high_amplified&quot;, &quot;non_amplified&quot;))
+nrow(pdl1_comb_exprs_filt)</code></pre>
+<pre><code>[1] 426</code></pre>
+<pre class="r"><code># get PCA values
+dlbcl_pca &lt;- PCA(pdl1_comb_exprs_filt[-1], scale.unit = TRUE, graph = FALSE)
+
+# get eigenvalues
+eig_val &lt;- get_eigenvalue(dlbcl_pca)
+eig_val</code></pre>
+<pre><code>         eigenvalue variance.percent cumulative.variance.percent
+Dim.1  29.994484281     49.990807135                    49.99081
+Dim.2   6.391020374     10.651700624                    60.64251
+Dim.3   5.918240168      9.863733613                    70.50624
+Dim.4   2.994179357      4.990298928                    75.49654
+Dim.5   1.724459099      2.874098499                    78.37064
+Dim.6   1.316438481      2.194064135                    80.56470
+Dim.7   1.112667276      1.854445460                    82.41915
+Dim.8   0.939159519      1.565265865                    83.98441
+Dim.9   0.864413258      1.440688764                    85.42510
+Dim.10  0.800556965      1.334261608                    86.75936
+Dim.11  0.686627399      1.144378998                    87.90374
+Dim.12  0.650147789      1.083579649                    88.98732
+Dim.13  0.601841145      1.003068575                    89.99039
+Dim.14  0.516565666      0.860942777                    90.85133
+Dim.15  0.510409768      0.850682947                    91.70202
+Dim.16  0.436020685      0.726701141                    92.42872
+Dim.17  0.395238162      0.658730270                    93.08745
+Dim.18  0.338362397      0.563937328                    93.65139
+Dim.19  0.306161029      0.510268381                    94.16165
+Dim.20  0.266743657      0.444572762                    94.60623
+Dim.21  0.255066863      0.425111438                    95.03134
+Dim.22  0.237186251      0.395310418                    95.42665
+Dim.23  0.227500359      0.379167265                    95.80582
+Dim.24  0.202272736      0.337121227                    96.14294
+Dim.25  0.183518720      0.305864533                    96.44880
+Dim.26  0.169352120      0.282253533                    96.73106
+Dim.27  0.165838033      0.276396721                    97.00745
+Dim.28  0.151429091      0.252381819                    97.25983
+Dim.29  0.137615482      0.229359136                    97.48919
+Dim.30  0.127756866      0.212928110                    97.70212
+Dim.31  0.109458601      0.182431001                    97.88455
+Dim.32  0.098052431      0.163420718                    98.04797
+Dim.33  0.090397096      0.150661827                    98.19864
+Dim.34  0.089099880      0.148499800                    98.34714
+Dim.35  0.085825819      0.143043031                    98.49018
+Dim.36  0.081552895      0.135921492                    98.62610
+Dim.37  0.073649890      0.122749817                    98.74885
+Dim.38  0.070315848      0.117193080                    98.86604
+Dim.39  0.064944934      0.108241556                    98.97428
+Dim.40  0.058894253      0.098157088                    99.07244
+Dim.41  0.058172189      0.096953649                    99.16939
+Dim.42  0.051756344      0.086260574                    99.25566
+Dim.43  0.043601581      0.072669301                    99.32832
+Dim.44  0.042145826      0.070243044                    99.39857
+Dim.45  0.039515183      0.065858638                    99.46443
+Dim.46  0.037493268      0.062488781                    99.52692
+Dim.47  0.033285041      0.055475068                    99.58239
+Dim.48  0.031883668      0.053139447                    99.63553
+Dim.49  0.028087618      0.046812697                    99.68234
+Dim.50  0.026489199      0.044148664                    99.72649
+Dim.51  0.025099641      0.041832735                    99.76832
+Dim.52  0.022568897      0.037614828                    99.80594
+Dim.53  0.021180526      0.035300876                    99.84124
+Dim.54  0.017949943      0.029916572                    99.87116
+Dim.55  0.017250041      0.028750069                    99.89991
+Dim.56  0.016128054      0.026880091                    99.92679
+Dim.57  0.015470674      0.025784457                    99.95257
+Dim.58  0.014160073      0.023600122                    99.97617
+Dim.59  0.010066553      0.016777589                    99.99295
+Dim.60  0.004231037      0.007051728                   100.00000</code></pre>
+<pre class="r"><code>fviz_eig(dlbcl_pca, addlabels = TRUE, ylim = c(0, 50))</code></pre>
+<p><img src="figure/visualizing_gsva_scores_2.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ind &lt;- get_pca_ind(dlbcl_pca)
+
+pdl1_status &lt;- pdl1_comb_exprs_filt$pdl1_status
+
+# visualize PCA
+fviz_pca_ind(dlbcl_pca,
+             label = &quot;none&quot;,
+             habillage = pdl1_comb_exprs_filt$pdl1_status,
+             palette = &quot;igv&quot;,
+             addEllipses = TRUE)</code></pre>
+<p><img src="figure/visualizing_gsva_scores_2.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fviz_pca_var(dlbcl_pca, col.var = &quot;contrib&quot;,
+             gradient.cols = &quot;rickandmorty&quot;,
+             label = &quot;none&quot;)</code></pre>
+<p><img src="figure/visualizing_gsva_scores_2.Rmd/unnamed-chunk-5-3.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="set-up-dukenci-groups" class="section level2">
+<h2>Set up Duke/NCI groups</h2>
+<pre class="r"><code>str(pheno_data)</code></pre>
+<pre><code>&#39;data.frame&#39;:   1146 obs. of  72 variables:
+ $ source                                                                 : Factor w/ 2 levels &quot;duke&quot;,&quot;nci&quot;: 2 2 2 2 2 2 2 2 2 2 ...
+ $ abc_gcb_rna                                                            : Factor w/ 3 levels &quot;ABC&quot;,&quot;GCB&quot;,&quot;Unclassified&quot;: 2 2 1 1 3 1 1 2 2 1 ...
+ $ ipi_group                                                              : chr  &quot;Low&quot; &quot;Low&quot; NA NA ...
+ $ os_status                                                              : num  1 0 1 0 1 0 0 0 0 0 ...
+ $ os_years                                                               : num  1.73 1.85 1.16 0 6.3 ...
+ $ age                                                                    : num  48 42 47 75 76 41 54 57 32 56 ...
+ $ gender                                                                 : chr  &quot;F&quot; &quot;M&quot; &quot;M&quot; &quot;F&quot; ...
+ $ ipi_initial                                                            : Factor w/ 6 levels &quot;0&quot;,&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,..: 2 2 2 2 3 3 4 4 3 3 ...
+ $ pdl1_status                                                            : chr  &quot;non-amplified&quot; &quot;non-amplified&quot; &quot;non-amplified&quot; &quot;low_amplified&quot; ...
+ $ ldh_abnormal                                                           : Factor w/ 2 levels &quot;0&quot;,&quot;1&quot;: 1 1 2 NA 1 NA 2 2 NA 2 ...
+ $ extranodal_sites_2plus                                                 : Factor w/ 2 levels &quot;0&quot;,&quot;1&quot;: 1 1 NA 1 1 1 NA 1 1 1 ...
+ $ ps_2plus                                                               : Factor w/ 2 levels &quot;0&quot;,&quot;1&quot;: 1 2 NA 1 2 NA 2 2 2 2 ...
+ $ ann_arbor_stage_3plus                                                  : chr  &quot;1&quot; &quot;0&quot; &quot;0&quot; &quot;0&quot; ...
+ $ ipi_high                                                               : chr  &quot;1&quot; &quot;1&quot; &quot;3&quot; &quot;2&quot; ...
+ $ case_id                                                                : chr  &quot;3e164d5d-afa0-4e96-b177-ea9fdf69da7a&quot; &quot;678acbbd-3f1b-4464-ba21-a59606cf19ae&quot; &quot;c1b07bfa-d234-42d6-8a41-97b7a7924f0d&quot; &quot;15b380e1-d220-42b9-8613-18fcefccb0a4&quot; ...
+ $ filename                                                               : chr  &quot;b384270b-0315-49c6-bb46-d155d8d41fec.htseq_counts.txt.gz&quot; &quot;ab3f9584-f27f-4d6e-a5de-ac0d0c20de13.htseq_counts.txt.gz&quot; &quot;92fbf689-0c26-4664-9dde-c41534f7b390.htseq_counts.txt.gz&quot; &quot;dc44d3ba-5c4d-40a1-b8a2-f27b88325d0b.htseq_counts.txt.gz&quot; ...
+ $ project_id                                                             : chr  &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; &quot;NCICCR-DLBCL&quot; ...
+ $ days_to_last_follow_up                                                 : num  633 674 425 NA 2299 ...
+ $ updated_datetime                                                       : POSIXct, format: &quot;2018-08-31 20:09:50&quot; &quot;2018-08-31 20:09:50&quot; ...
+ $ tumor_stage                                                            : chr  &quot;IPI:1&quot; &quot;IPI:1&quot; &quot;IPI:13&quot; &quot;IPI:12&quot; ...
+ $ age_at_diagnosis                                                       : num  17520 15330 17155 27375 27740 ...
+ $ tissue_or_organ_of_origin                                              : chr  &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; &quot;Lymph node, NOS&quot; ...
+ $ ann_arbor_clinical_stage                                               : chr  &quot;Stage III&quot; &quot;Stage II&quot; &quot;Stage I&quot; &quot;Stage I&quot; ...
+ $ progression_or_recurrence                                              : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ last_known_disease_status                                              : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ primary_diagnosis                                                      : chr  &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; &quot;Diffuse large B-cell lymphoma, NOS&quot; ...
+ $ tumor_grade                                                            : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ demographic.gender                                                     : chr  &quot;female&quot; &quot;male&quot; &quot;male&quot; &quot;female&quot; ...
+ $ demographic.submitter_id                                               : chr  &quot;DLBCL11667-demographic&quot; &quot;DLBCL10501-demographic&quot; &quot;DLBCL10954-demographic&quot; &quot;DLBCL10984-demographic&quot; ...
+ $ demographic.race                                                       : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ demographic.ethnicity                                                  : chr  &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; &quot;not reported&quot; ...
+ $ demographic.vital_status                                               : chr  &quot;Dead&quot; &quot;Alive&quot; &quot;Dead&quot; &quot;Alive&quot; ...
+ $ size                                                                   : num  235439 232896 248096 245979 246899 ...
+ $ dbGaP accession                                                        : chr  &quot;phs001444&quot; &quot;phs001444&quot; &quot;phs001444&quot; &quot;phs001444&quot; ...
+ $ Diagnosis                                                              : chr  &quot;Diffuse large B cell lymphoma&quot; &quot;Diffuse large B cell lymphoma&quot; &quot;Diffuse large B cell lymphoma&quot; &quot;Diffuse large B cell lymphoma&quot; ...
+ $ Genetic Subtype                                                        : chr  &quot;EZB&quot; &quot;EZB&quot; &quot;Other&quot; &quot;Other&quot; ...
+ $ Biopsy Type                                                            : chr  &quot;Pre-treatment&quot; &quot;Pre-treatment&quot; &quot;Pre-treatment&quot; &quot;Pre-treatment&quot; ...
+ $ Treatment__                                                            : chr  &quot;Immunochemotherapy&quot; &quot;Immunochemotherapy&quot; &quot;Immunochemotherapy&quot; &quot;NA&quot; ...
+ $ Ann Arbor Stage                                                        : num  3 2 1 1 1 2 3 3 3 2 ...
+ $ LDH Ratio                                                              : num  0.79 0.6 1.23 NA 0.78 NA 2.2 1.2 NA 1.7 ...
+ $ ECOG Performance Status                                                : num  1 2 NA 0 2 NA 2 2 2 2 ...
+ $ Number of Extranodal Sites                                             : num  0 1 NA 0 1 0 NA 1 0 0 ...
+ $ IPI Range                                                              : num  1 1 13 12 2 2 34 3 23 2 ...
+ $ Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1 Progression: num  1 0 1 0 1 0 0 0 0 0 ...
+ $ Progression_Free Survival _PFS_ Time _yrs                              : num  0.977 1.845 0.611 0 6.3 ...
+ $ Included in Survival Analysis                                          : chr  &quot;Yes&quot; &quot;Yes&quot; &quot;Yes&quot; &quot;No&quot; ...
+ $ lib_size                                                               : int  NA NA NA NA NA NA NA NA NA NA ...
+ $ lane                                                                   : Factor w/ 7 levels &quot;C7FYAANXX&quot;,&quot;C7U9KANXX&quot;,..: NA NA NA NA NA NA NA NA NA NA ...
+ $ AGE IPI                                                                : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ B symptoms at diagnosis                                                : chr  NA NA NA NA ...
+ $ Response to initial therapy                                            : chr  NA NA NA NA ...
+ $ Testicular involvement                                                 : chr  NA NA NA NA ...
+ $ CNS Involvement                                                        : chr  NA NA NA NA ...
+ $ CNS Relapse                                                            : chr  NA NA NA NA ...
+ $ age at diagnosis                                                       : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ log2 MYC expr                                                          : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ log2 BCL2 expr                                                         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ log2 BCL6 expr                                                         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ MYC high expr                                                          : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ BCL2 high expr                                                         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ BCL6 high expr                                                         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ MYC IHC                                                                : chr  NA NA NA NA ...
+ $ BCL2 IHC                                                               : chr  NA NA NA NA ...
+ $ BCL6 IHC                                                               : chr  NA NA NA NA ...
+ $ BCL2 translocation (FISH)                                              : chr  NA NA NA NA ...
+ $ MYC translocation (FISH)                                               : chr  NA NA NA NA ...
+ $ BCL6 translocation (FISH)                                              : chr  NA NA NA NA ...
+ $ ABC GCB ratio (RNAseq)                                                 : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ Nanostring ABC GCB                                                     : chr  NA NA NA NA ...
+ $ Nanostring LPS                                                         : num  NA NA NA NA NA NA NA NA NA NA ...
+ $ Hans GCB NonGCB                                                        : chr  NA NA NA NA ...
+ $ Genomic Risk Model                                                     : chr  NA NA NA NA ...</code></pre>
+<pre class="r"><code>summary(as.factor(pheno_data$source))</code></pre>
+<pre><code>duke  nci 
+ 665  481 </code></pre>
+<pre class="r"><code>group_table &lt;- as.data.frame(pheno_data) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  dplyr::select(sample_id, source)
+
+# merge group data into gsva matrix
+dukenci_comb_exprs &lt;- as.data.frame(t(gs_matrix)) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(group_table) %&gt;%
+  dplyr::select(sample_id, source, everything()) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  mutate(source = as.factor(source))</code></pre>
+<pre><code>Joining, by = &quot;sample_id&quot;</code></pre>
+<div id="pca-plot-of-results-1" class="section level4">
+<h4>PCA Plot of results</h4>
+<pre class="r"><code># get PCA values
+dlbcl_pca &lt;- PCA(dukenci_comb_exprs[-1], scale.unit = TRUE, graph = FALSE)
+
+# get eigenvalues
+eig_val &lt;- get_eigenvalue(dlbcl_pca)
+eig_val</code></pre>
+<pre><code>         eigenvalue variance.percent cumulative.variance.percent
+Dim.1  28.232064075      47.05344012                    47.05344
+Dim.2   6.357252985      10.59542164                    57.64886
+Dim.3   5.732635463       9.55439244                    67.20325
+Dim.4   2.903485920       4.83914320                    72.04240
+Dim.5   1.859078712       3.09846452                    75.14086
+Dim.6   1.584250677       2.64041779                    77.78128
+Dim.7   1.378474121       2.29745687                    80.07874
+Dim.8   0.990796468       1.65132745                    81.73006
+Dim.9   0.923721862       1.53953644                    83.26960
+Dim.10  0.872103565       1.45350594                    84.72311
+Dim.11  0.786577603       1.31096267                    86.03407
+Dim.12  0.737161689       1.22860282                    87.26267
+Dim.13  0.701075469       1.16845911                    88.43113
+Dim.14  0.575225466       0.95870911                    89.38984
+Dim.15  0.558446588       0.93074431                    90.32058
+Dim.16  0.504588425       0.84098071                    91.16157
+Dim.17  0.419930610       0.69988435                    91.86145
+Dim.18  0.369618396       0.61603066                    92.47748
+Dim.19  0.333540300       0.55590050                    93.03338
+Dim.20  0.291085104       0.48514184                    93.51852
+Dim.21  0.270380846       0.45063474                    93.96916
+Dim.22  0.260105365       0.43350894                    94.40267
+Dim.23  0.253372831       0.42228805                    94.82495
+Dim.24  0.237880392       0.39646732                    95.22142
+Dim.25  0.219726056       0.36621009                    95.58763
+Dim.26  0.203858662       0.33976444                    95.92740
+Dim.27  0.183781975       0.30630329                    96.23370
+Dim.28  0.179637341       0.29939557                    96.53309
+Dim.29  0.155876782       0.25979464                    96.79289
+Dim.30  0.149993420       0.24998903                    97.04288
+Dim.31  0.136627329       0.22771221                    97.27059
+Dim.32  0.131448500       0.21908083                    97.48967
+Dim.33  0.118800381       0.19800063                    97.68767
+Dim.34  0.117536790       0.19589465                    97.88357
+Dim.35  0.108649126       0.18108188                    98.06465
+Dim.36  0.098216244       0.16369374                    98.22834
+Dim.37  0.090968798       0.15161466                    98.37996
+Dim.38  0.086575290       0.14429215                    98.52425
+Dim.39  0.080291322       0.13381887                    98.65807
+Dim.40  0.074017773       0.12336296                    98.78143
+Dim.41  0.069529072       0.11588179                    98.89731
+Dim.42  0.067239010       0.11206502                    99.00938
+Dim.43  0.058175321       0.09695887                    99.10634
+Dim.44  0.055331337       0.09221889                    99.19856
+Dim.45  0.050565151       0.08427525                    99.28283
+Dim.46  0.044953779       0.07492296                    99.35775
+Dim.47  0.042560682       0.07093447                    99.42869
+Dim.48  0.040529020       0.06754837                    99.49624
+Dim.49  0.038936851       0.06489475                    99.56113
+Dim.50  0.036249963       0.06041661                    99.62155
+Dim.51  0.034567745       0.05761291                    99.67916
+Dim.52  0.032985622       0.05497604                    99.73414
+Dim.53  0.028289227       0.04714871                    99.78129
+Dim.54  0.026235556       0.04372593                    99.82501
+Dim.55  0.023770927       0.03961821                    99.86463
+Dim.56  0.021433194       0.03572199                    99.90035
+Dim.57  0.019352973       0.03225495                    99.93261
+Dim.58  0.017736129       0.02956021                    99.96217
+Dim.59  0.016362069       0.02727012                    99.98944
+Dim.60  0.006337652       0.01056275                   100.00000</code></pre>
+<pre class="r"><code>fviz_eig(dlbcl_pca, addlabels = TRUE, ylim = c(0, 50))</code></pre>
+<p><img src="figure/visualizing_gsva_scores_2.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ind &lt;- get_pca_ind(dlbcl_pca)
+
+pdl1_status &lt;- dukenci_comb_exprs$pdl1_status
+
+# visualize PCA
+fviz_pca_ind(dlbcl_pca,
+             label = &quot;none&quot;,
+             habillage = dukenci_comb_exprs$source,
+             palette = &quot;igv&quot;,
+             addEllipses = TRUE)</code></pre>
+<p><img src="figure/visualizing_gsva_scores_2.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fviz_pca_var(dlbcl_pca, col.var = &quot;contrib&quot;,
+             gradient.cols = &quot;rickandmorty&quot;,
+             label = &quot;none&quot;)</code></pre>
+<p><img src="figure/visualizing_gsva_scores_2.Rmd/unnamed-chunk-7-3.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="heatmap-of-results" class="section level4">
+<h4>Heatmap of results</h4>
+<pre class="r"><code>ht &lt;- Heatmap(gs_matrix, name = &quot;GSVA Score&quot;, 
+                row_title = &quot;Gene Sets&quot;,
+                show_row_names = TRUE,
+                column_title = paste0(&quot;GSVA scores for Duke and NCI samples&quot;), 
+                show_column_names = FALSE,
+                column_title_side = &quot;bottom&quot;)
+ht</code></pre>
+<p><img src="figure/visualizing_gsva_scores_2.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -839,27 +1326,40 @@ locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 
 attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
+[1] grid      parallel  stats     graphics  grDevices utils     datasets 
+[8] methods   base     
 
 other attached packages:
-[1] forcats_0.4.0   stringr_1.4.0   dplyr_0.8.1     purrr_0.3.2    
-[5] readr_1.3.1     tidyr_0.8.3     tibble_2.1.3    ggplot2_3.1.1  
-[9] tidyverse_1.2.1
+ [1] ComplexHeatmap_1.20.0 Biobase_2.42.0        BiocGenerics_0.28.0  
+ [4] ggsci_2.9             ggpubr_0.2            magrittr_1.5         
+ [7] FactoMineR_1.41       factoextra_1.0.5      forcats_0.4.0        
+[10] stringr_1.4.0         dplyr_0.8.1           purrr_0.3.2          
+[13] readr_1.3.1           tidyr_0.8.3           tibble_2.1.3         
+[16] ggplot2_3.1.1         tidyverse_1.2.1      
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.1       cellranger_1.1.0 plyr_1.8.4       pillar_1.4.1    
- [5] compiler_3.5.3   git2r_0.25.2     workflowr_1.4.0  tools_3.5.3     
- [9] digest_0.6.19    lubridate_1.7.4  jsonlite_1.6     evaluate_0.14   
-[13] nlme_3.1-140     gtable_0.3.0     lattice_0.20-38  pkgconfig_2.0.2 
-[17] rlang_0.3.4      cli_1.1.0        rstudioapi_0.10  yaml_2.2.0      
-[21] haven_2.1.0      xfun_0.7         withr_2.1.2      xml2_1.2.0      
-[25] httr_1.4.0       knitr_1.23       hms_0.4.2        generics_0.0.2  
-[29] fs_1.3.1         rprojroot_1.3-2  grid_3.5.3       tidyselect_0.2.5
-[33] glue_1.3.1       R6_2.4.0         readxl_1.3.1     rmarkdown_1.13  
-[37] modelr_0.1.4     magrittr_1.5     whisker_0.3-2    backports_1.1.4 
-[41] scales_1.0.0     htmltools_0.3.6  rvest_0.3.4      assertthat_0.2.1
-[45] colorspace_1.4-1 stringi_1.4.3    lazyeval_0.2.2   munsell_0.5.0   
-[49] broom_0.5.2      crayon_1.3.4    </code></pre>
+ [1] ggrepel_0.8.1        Rcpp_1.0.1           circlize_0.4.6      
+ [4] lubridate_1.7.4      lattice_0.20-38      assertthat_0.2.1    
+ [7] rprojroot_1.3-2      digest_0.6.19        R6_2.4.0            
+[10] cellranger_1.1.0     plyr_1.8.4           backports_1.1.4     
+[13] evaluate_0.14        httr_1.4.0           pillar_1.4.1        
+[16] GlobalOptions_0.1.0  rlang_0.3.4          lazyeval_0.2.2      
+[19] readxl_1.3.1         rstudioapi_0.10      whisker_0.3-2       
+[22] GetoptLong_0.1.7     rmarkdown_1.13       labeling_0.3        
+[25] munsell_0.5.0        broom_0.5.2          compiler_3.5.3      
+[28] modelr_0.1.4         xfun_0.7             pkgconfig_2.0.2     
+[31] shape_1.4.4          htmltools_0.3.6      flashClust_1.01-2   
+[34] tidyselect_0.2.5     workflowr_1.4.0      crayon_1.3.4        
+[37] withr_2.1.2          MASS_7.3-51.4        leaps_3.0           
+[40] nlme_3.1-140         jsonlite_1.6         gtable_0.3.0        
+[43] git2r_0.25.2         scales_1.0.0         cli_1.1.0           
+[46] stringi_1.4.3        fs_1.3.1             scatterplot3d_0.3-41
+[49] xml2_1.2.0           generics_0.0.2       rjson_0.2.20        
+[52] RColorBrewer_1.1-2   tools_3.5.3          glue_1.3.1          
+[55] hms_0.4.2            yaml_2.2.0           colorspace_1.4-1    
+[58] cluster_2.0.9        rvest_0.3.4          knitr_1.23          
+[61] haven_2.1.0         </code></pre>
+</div>
 </div>
 </div>
 
