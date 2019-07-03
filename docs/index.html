@@ -336,7 +336,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-07-02
+<strong>Last updated:</strong> 2019-07-03
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -367,10 +367,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree1453a6cecf91ea4aee54c16b64ff1dfcd2d532a8targetblank1453a6ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/1453a6cecf91ea4aee54c16b64ff1dfcd2d532a8" target="_blank">1453a6c</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree803095951a60c73e0fe43e51336f6e014908fbaatargetblank8030959a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/803095951a60c73e0fe43e51336f6e014908fbaa" target="_blank">8030959</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree1453a6cecf91ea4aee54c16b64ff1dfcd2d532a8targetblank1453a6ca" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree803095951a60c73e0fe43e51336f6e014908fbaatargetblank8030959a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -400,7 +400,7 @@ Ignored files:
     Ignored:    data/sample.tsv
     Ignored:    data/sig.rda
     Ignored:    data/temp.dgelist_limma.rds
-    Ignored:    data/~$1-s2.0-S1074761316304320-mmc2.xlsx
+    Ignored:    docs/.DS_Store
     Ignored:    output/combined_clin_data.xlsx
     Ignored:    output/combined_dlbcl_expr_matrix.csv
     Ignored:    output/dlbcl_expr_matrix.csv
@@ -417,6 +417,13 @@ Ignored files:
     Ignored:    output/nci_expressionset_pext.rds
     Ignored:    output/nci_extended_pheno_data.csv
     Ignored:    output/total_immune_gset_v1.rds
+
+Untracked files:
+    Untracked:  output/combined_expressionset.rds
+
+Unstaged changes:
+    Modified:   analysis/merge.Rmd
+    Modified:   analysis/visualizing_gsva_scores_2.Rmd
 
 </code></pre>
 <p>
@@ -455,6 +462,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/803095951a60c73e0fe43e51336f6e014908fbaa/analysis/index.Rmd" target="_blank">8030959</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-03
+</td>
+<td>
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/28102e4b3f0566cd16eee8eabc29e4858db98476/docs/index.html" target="_blank">28102e4</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-02
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -889,6 +930,13 @@ Start workflowr project.
 <li><a href="newgs.html">New gene set collection</a></li>
 <li><a href="clustering_enrichment_scores.html">Visualizing and clustering new GSVA results</a></li>
 </ul>
+<p>Looking at the PCA plot of new immune gene signature enrichment of only PD-L1 amplified and non-amplified (NCI samples only), there is some separation on both PCA1 and PCA2 with a preponderance of samples in the southeast quadrant, though the effect is not marked.</p>
+<p><img src="assets/second_gsva_pca_individuals.png" /></p>
+<p>There are still many correlated gene sets in the NCI sample, but a better distribution than previously.</p>
+<p><img src="assets/second_gsva_pca_variables.png" /></p>
+<p>This PCA plot collapses immune gene set enrichment in all analyzed samples, and compares all NCI samples (enriched in ABC) to all Duke samples. There is no significant difference in distribution between the NCI and Duke data, and there is good scatter on the two PCA axis (though the contribution of PCA2 is fairly small). <img src="assets/second_gsva_pca_individuals_dukenci.png" /></p>
+<p>The contribution of each of the gene sets to this distribution shows better distribution overall. <img src="assets/second_gsva_pca_variables_dukenci.png" /></p>
+<p>A heatmap of gene set expression by sample is clustered with heirarchical clustering for both samples and gene sets <img src="assets/second_gsva_heatmap.png" /></p>
 </div>
 </div>
 </div>
