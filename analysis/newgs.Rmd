@@ -11,17 +11,20 @@ editor_options:
 
 #### Gene sets from prior publications of immune landscape
 
-Gene sets referenced in [Thorssen et al Cell 2018](https://www.cell.com/immunity/fulltext/S1074-7613(18)30121-3?_returnURL=https%3A%2F%2Flinkinghub.elsevier.com%2Fretrieve%2Fpii%2FS1074761318301213%3Fshowall%3Dtrue#secsectitle0095)
+Gene sets referenced in [Thorssen et al Cell 2018](https://www.cell.com/immunity/fulltext/S1074-7613(18)30121-3?_returnURL=https%3A%2F%2Flinkinghub.elsevier.com%2Fretrieve%2Fpii%2FS1074761318301213%3Fshowall%3Dtrue#secsectitle0095) all obtained from [GDC website here](https://gdc.cancer.gov/about-data/publications/panimmune)
 
-* [Wolf et al PLOS One 2014](https://www.ncbi.nlm.nih.gov/pubmed/24516633?dopt=Abstract). Gene sets obtained from xls [File S1](https://doi.org/10.1371/journal.pone.0088309.s001) at PLOS One website. Interestingly, while Thorssen et al cite 68 immune gene sets, only 3 immune summary "modules" are published out of a total 11 published modules. These were derived from ~5500 cases of breast cancer profiled with microarrays.
-* [Chan et al 2013](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1002920). LYM gene set described here in doctoral dissertation by Chan: `data/CHENG_columbia_0054D_11748.pdf`. Reference in Thorssen et al points to breast cancer paper, including only one immune gene set, not 9. Additional support for LYM gene set found  [here](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1002920) in TCGA analysis by the same author.
-* For the ICR gene sets, two citations ([Galon et al Immunity 2013](https://www.sciencedirect.com/science/article/pii/S1074761313002926) and [Bedognetti et al Curr Opin Immunol 2016](https://www.sciencedirect.com/science/article/pii/S0952791516300012#bib0355)) are reviews that provide no additional data. The third, [Hendrickx et al OncoImmunology 2017] contains a single 15-gene ICR gene set that is a mix of both activation and regulation genes.
+_Gene signatures were downloaded from GDC on 7/5/2019_
 
-_None of the above yeilded a list of usable gene sets, and none take into account recent findings with single-cell RNA seq experiments._
+Original sources:
+* [Wolf et al PLOS One 2014](https://www.ncbi.nlm.nih.gov/pubmed/24516633?dopt=Abstract). Gene sets obtained from xls [File S1](https://doi.org/10.1371/journal.pone.0088309.s001) at PLOS One website
+  * Source of interferon signature used in Wolf: [Hu et al Bmc Genomics 2006]()
+  * Source of B and T cell signatures used in Wolf: [Palmer et al BMC Genomics 2006](https://bmcgenomics.biomedcentral.com/articles/10.1186/1471-2164-7-115)
+* [Chan et al 2013](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1002920). Additional support for LYM gene set found  [here](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1002920) in TCGA analysis by the same author.
+* For the ICR gene sets, three citations are given: ([Galon et al Immunity 2013](https://www.sciencedirect.com/science/article/pii/S1074761313002926), [Bedognetti et al Curr Opin Immunol 2016](https://www.sciencedirect.com/science/article/pii/S0952791516300012#bib0355)), and [Hendrickx et al OncoImmunology 2017].
 
 #### Additional gene sets considered 
 
-Broad literature search, focused on gene signatures linked to known immune phenotypes in oncology
+The goal is to find new, single-cell derived immune gene sets. A broad literature search, focused on gene signatures linked to known immune phenotypes in oncology found the following sources:
 
 _NB: all of the following signatures were downloaded on 7/1/2019_
 
@@ -48,15 +51,17 @@ library("tidyverse")
 library("readxl")
 ```
 
-## Reformat gene sets for GSVA 
-The final output needs to be a list of character vectors, each containing a set of Gencode v22 gene ids. Following the order of literature search and downloads above. 
-
 Read in Gencode v22 (GDC standard) conversion table with gene symbols
 
 ```{r}
 gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
 gencode_gtf
 ```
+
+## GSVA gene sets version 2 (my literature-derived gene sets)
+
+#### Reformat gene sets for GSVA 
+The final output needs to be a list of character vectors, each containing a set of Gencode v22 gene ids. Following the order of literature search and downloads above. 
 
 CYT gene set
 ```{r}
@@ -287,8 +292,8 @@ uchicago_gs_source <- readRDS("data/gset_ids_complete.rds")
 uchicago_gs_mac_up <- uchicago_gs_source[1:7]
 uchicago_gs_tinflamed <- uchicago_gs_source[15]
 uchicago_gs <- c(uchicago_gs_mac_up, uchicago_gs_tinflamed)
-uchicago_gs
 names(uchicago_gs) <- c("uchi_mac_c1_gs", "uchi_mac_c2_gs", "uchi_mac_c3_gs", "uchi_mac_c4_gs", "uchi_mac_c5_gs", "uchi_mac_c6_gs", "uchi_mac_c7_gs", "uchi_t_inflamed_gs")
+uchicago_gs
 ```
 
 
@@ -304,7 +309,135 @@ gset_ids_complete_2 <- c(list("cyt_gs" = cyt_gs),
 str(gset_ids_complete_2)
 ```
 
-## Write out for GSVA on cluster
+#### Write out for GSVA on cluster
 ```{r}
 saveRDS(gset_ids_complete_2, "output/gset_ids_complete_2.rds")
+```
+
+## GSVA gene sets version 3 (Thorsson et al)
+
+Read in data
+```{r}
+thorsson_genesets <- read_excel("data/PanImmune_GeneSet_Definitions.xlsx", 
+    sheet = "Genes")
+
+# after review of data in spreadsheet viewer, the first 83 gene sets in column 2 of sheet setSources are the genesets used in Thorsson clustering
+thorsson_genesets_names <- read_excel("data/PanImmune_GeneSet_Definitions.xlsx", 
+    sheet = "setSources") %>% 
+  pull(SetName) %>%
+  .[1:83]
+
+# convert to named list of gene sets, each a 1-column tibble
+thorsson_genesets_list <- as_tibble(thorsson_genesets) %>%
+  nest(key = Gene) %>%
+  # keep only the gene sets 
+  filter(SetName %in% thorsson_genesets_names) %>%
+  as.list() %>%
+  print()
+thorsson_genesets_df <- thorsson_genesets_list$data
+names(thorsson_genesets_df) <- thorsson_genesets_list$SetName
+str(thorsson_genesets_df)
+thorsson_genesets_df
+
+thor_gs <- thorsson_genesets_df %>%
+  map(function(df){dplyr::rename(df, gene_name = Gene)}) %>%
+  map(function(df){mutate(df, gene_name = as.character(gene_name))}) %>%
+  map(function(df){left_join(df, gencode_gtf)}) %>%
+  map(function(df){drop_na(df, gene_id)}) %>%
+  map(function(df){pull(df, gene_id)}) %>%
+  print()
+
+# reformat names
+thornames <- names(thor_gs) %>%
+  paste("thor_", .) %>%
+  str_to_lower() %>% 
+  str_replace_all(" ", "") %>%
+  print()
+names(thor_gs) <- thornames
+
+str(thor_gs)
+```
+
+Missing data:
+thor_gp2_immunetcellbcell_score
+thor_gp11_immune_ifn
+thor_cd103pos_cd103neg_ratio_25446897 -- is this one calculated?
+
+Following links in Wolf et al shows immune ifn score is cited out to [Hu et al BMC genomics 2006](https://bmcgenomics.biomedcentral.com/articles/10.1186/1471-2164-7-96). Genes input manually from list in Figure 2.
+
+```{r}
+# note: hypothetical protein FLJ10700 was discontinued by NCBI in 2006
+thor_gp11_immune_ifn_df <- c("IFI30", "IFITM1", "ISGF3G", "IFI6", "IFNA2", "STAT1", "ISG20", "CXCL9", "CASP1", "NMI", "LYN", "SOD2") %>%
+  enframe() %>%
+  dplyr::rename(gene_name = value) %>%
+  dplyr::select(gene_name) %>%
+  left_join(gencode_gtf) %>%
+  drop_na(gene_id) %>%
+  pull(gene_id) %>%
+  print()
+
+thor_gp11_immune_ifn_gs <- list("thor_gp11_immune_ifn" = thor_gp11_immune_ifn_df)
+```
+
+Following links in Wolf et al shows T cell B cell score is cited out to [Palmer et al BMC Genomics 2006](https://bmcgenomics.biomedcentral.com/articles/10.1186/1471-2164-7-115). Additional File 2.
+
+```{r}
+bandt_source <- read_excel("data/12864_2005_498_MOESM2_ESM.xls", 
+    sheet = "Sheet1")
+
+thor_gp2_immune_bcell <- bandt_source %>%
+  dplyr::filter(`Cell Type` == "B") %>%
+  dplyr::select(Symbol) %>%
+  print()
+
+thor_gp2_immune_tell <- bandt_source %>%
+  dplyr::filter(`Cell Type` == "T") %>%
+  dplyr::select(Symbol) %>%
+  print()
+
+thorsson_bandt_df <- list(thor_gp2_immune_bcell, thor_gp2_immune_tell)
+
+thor_bandt_gs <- thorsson_bandt_df %>%
+  map(function(df){dplyr::rename(df, gene_name = Symbol)}) %>%
+  map(function(df){mutate(df, gene_name = as.character(gene_name))}) %>%
+  map(function(df){left_join(df, gencode_gtf)}) %>%
+  map(function(df){drop_na(df, gene_id)}) %>%
+  map(function(df){pull(df, gene_id)}) 
+
+names(thor_bandt_gs) <- c("thor_gp2_immune_bcell_score", "thor_gp2_immune_tcell_score")
+
+thor_bandt_gs
+```
+
+#### Combine missing data back into gene set list
+```{r}
+thor_gs_filtered <- thor_gs %>%
+  list_modify("thor_gp2_immunetcellbcell_score" = NULL) %>%
+  list_modify("thor_gp11_immune_ifn" = NULL) %>%
+  list_modify("thor_cd103pos_cd103neg_ratio_25446897" = NULL) %>%
+  list_modify("thor_gp2_immune_bcell_score" = NULL) %>%
+  list_modify("thor_gp2_immune_tcell_score" = NULL) %>%
+  list_modify("thor_gp2_immune_bcell_score" = NULL) %>%
+  list_modify("thor_gp2_immune_tcell_score" = NULL) %>%
+  list_modify("thor_gp11_immune_ifn" = NULL)
+  
+thor_gs_complete <- c(thor_gs_filtered, thor_bandt_gs, thor_gp11_immune_ifn_gs)
+str(thor_gs_complete)
+length(thor_gs_complete)
+
+```
+
+## Write out for later use
+```{r}
+saveRDS(thor_gs_complete, "output/gset_ids_complete_3.rds")
+```
+
+## Combined gene sets for GSVA v4
+New literature-based gene sets and gene sets from Thorsson et al. Immunity 2018.
+
+```{r}
+gset_ids_complete_4 <- c(gset_ids_complete_2, thor_gs_complete)
+str(gset_ids_complete_4)
+# 143 gene sets
+saveRDS(gset_ids_complete_4, "output/gset_ids_complete_4.rds")
 ```
