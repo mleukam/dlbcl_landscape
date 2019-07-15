@@ -1,0 +1,216 @@
+---
+title: "deconvolution"
+author: "mleukam"
+date: "2019-07-11"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Setup
+Clear the workspace
+```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+library("tidyverse")
+library("edgeR")
+library("limma")
+library("Biobase")
+```
+
+## Prepare counts for TIMER
+https://cistrome.shinyapps.io/timer/
+
+### Duke data
+
+#### Read in data
+```{r}
+total_counts <- read_csv("output/nci_dlbcl_unprocessed_counts.csv")
+```
+
+Duke data (raw reads estimated by Kallisto)
+See [analysis/dukedata.Rmd](dukedata.html) for creation of DGE list from kallisto output files
+
+See `/code/` for source code of Kallisto analysis from raw sequences
+
+```{r}
+dgelist <- readRDS("data/temp.dgelist_edger.rds")
+str(dgelist)
+```
+
+read in conversion table for gene IDs
+```{r}
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
+```
+
+#### Data cleaning
+
+Convert GENCODE v29 to gene symbols for TIMER
+```{r}
+# get expression matrix
+expr_duke <- dgelist[[1]]
+expr_duke[1:5, 1:5]
+col__names <- colnames(expr_duke)
+col_names_rep <- str_split(col__names, pattern = "\\.", simplify = TRUE) %>% 
+  as_tibble() %>%
+  pull(V1) %>%
+  paste0("duke_", .) %>%
+  print()
+colnames(expr_duke) <- col_names_rep
+expr_duke[1:5, 1:5]
+
+# format gencode table for left join
+geneID_split <- str_split(gencode_gtf$gene_id, pattern = "\\.", simplify = TRUE) %>% 
+  as_tibble() %>%
+  dplyr::select(geneID_split = V1)
+
+gencode_gtf_split <- gencode_gtf %>% 
+  bind_cols(geneID_split) %>%
+  dplyr::select(gene_id_v22 = gene_id, geneID_split, everything()) %>%
+  print()
+
+# left join, select columns, reformat
+expr_duke_df <- expr_duke %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "geneID_split") %>%
+  as_tibble() %>%
+  left_join(gencode_gtf_split) %>%
+  dplyr::select(gene_name, starts_with("duke")) %>%
+  drop_na(gene_name) %>%
+  as.data.frame()
+
+# merge duplicate entries for genes (average expression)
+nrow(expr_duke_df)
+expr_duke_data <- as.matrix(expr_duke_df[, 2:772])
+rownames(expr_duke_data) <- expr_duke_df[,1]
+expr_duke_nodups <- avereps(expr_duke_data)
+nrow(expr_duke_nodups)
+expr_duke_nodups[1:5, 1:5]
+```
+
+Filter samples to match those included in the clustering analysis
+```{r}
+duke_es <- readRDS("output/duke_expressionset.rds")
+prior_duke_expr <- exprs(duke_es)
+samplelist <- c("gene_symbol", colnames(prior_duke_expr))
+
+expr_duke_decon <- expr_duke_nodups %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_symbol") %>%
+  as_tibble() %>%
+  dplyr::select(one_of(samplelist)) %>%
+  column_to_rownames(var = "gene_symbol") %>%
+  as.matrix()
+
+dim(expr_duke_decon)
+str(expr_duke_decon)
+expr_duke_decon[1:5, 1:5]
+```
+
+### NCI
+
+Read in NCI raw counts
+```{r}
+total_counts <- read_csv("output/nci_dlbcl_unprocessed_counts.csv")
+```
+
+Convert gene id to gene symbol, eliminate duplicates
+```{r}
+tot_counts_symbol <- total_counts %>%
+  dplyr::rename(gene_id = gene) %>%
+  left_join(gencode_gtf) %>%
+  dplyr::select(gene_name, starts_with("DLBCL")) %>%
+  drop_na(gene_name)
+
+tot_counts_matrix <- tot_counts_symbol[, 2:482] %>%
+  as.matrix() 
+rownames(tot_counts_matrix) <- tot_counts_symbol$gene_name
+ 
+dim(tot_counts_matrix)
+str(tot_counts_matrix)
+tot_counts_matrix[1:5, 1:5]
+
+# eliminate duplicates by averaging counts
+# merge duplicate entries for genes (average expression)
+expr_nci_nodups <- avereps(tot_counts_matrix, ID = rownames(tot_counts_matrix))
+nrow(expr_nci_nodups)
+expr_nci_nodups[1:5, 1:5]
+```
+
+### Merge
+
+There are more rows in the NCI dataset after removal of duplicates and missing gene symbols. Will keep only those rows present in both datasets to allow for fair comparison. 
+
+```{r}
+nci_counts_df <- expr_nci_nodups %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_symbol") %>%
+  as_tibble()
+
+duke_counts_df <- expr_duke_nodups %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_symbol") %>%
+  as_tibble()
+
+merge_counts_df <- nci_counts_df %>%
+  inner_join(duke_counts_df) %>%
+  print()
+
+## Write out for use in TIMER online application
+merge_counts <- merge_counts_df %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_symbol") %>%
+  as.matrix()
+
+write.csv(merge_counts, "output/merged_raw_counts.csv")
+```
+
+Limit on TIMER upload to 50 MB, total size of CSV now is ~ 231 MB. Will need to split into parts. Leave a little overlap to correct for any batch effect (would not expect any due to per-sample analysis)
+
+```{r}
+ncol(merge_counts) / 5
+
+mc1 <- merge_counts[, 1:250]
+rownames(mc1) <- rownames(merge_counts)
+write.csv(mc1, "output/merged_raw_counts_1.csv")
+mc2 <- merge_counts[, 240:500]
+rownames(mc2) <- rownames(merge_counts)
+write.csv(mc2, "output/merged_raw_counts_2.csv")
+mc3 <- merge_counts[, 490:650]
+rownames(mc3) <- rownames(merge_counts)
+write.csv(mc3, "output/merged_raw_counts_3.csv")
+mc4 <- merge_counts[, 640:800]
+rownames(mc4) <- rownames(merge_counts)
+write.csv(mc4, "output/merged_raw_counts_4.csv")
+mc5 <- merge_counts[, 790:950]
+rownames(mc5) <- rownames(merge_counts)
+write.csv(mc5, "output/merged_raw_counts_5.csv")
+mc6 <- merge_counts[, 940:1100]
+rownames(mc6) <- rownames(merge_counts)
+write.csv(mc6, "output/merged_raw_counts_6.csv")
+mc7 <- merge_counts[, 1090:1252]
+rownames(mc7) <- rownames(merge_counts)
+write.csv(mc7, "output/merged_raw_counts_7.csv")
+```
+
+## MuSiC
+
+https://www-nature-com.proxy.uchicago.edu/articles/nmeth.1830
+Use non-transformed (raw counts) for deconvolution
+
+http://xuranw.github.io/MuSiC/articles/MuSiC.html
+
+```{r}
+# install devtools if necessary
+#install.packages('devtools')
+
+# install the MuSiC package
+#devtools::install_github('xuranw/MuSiC')
+
+# load
+#library(MuSiC)
+```
+

@@ -1,0 +1,47 @@
+---
+title: "Tumor-intrinsic mutations"
+author: "mleukam"
+date: "2019-07-13"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Setup
+
+Clear the workspace
+```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+library(maftools)
+library(tidyverse)
+library(RColorBrewer)
+library(knitr)
+library(ggpubr)
+library(ggsci)
+```
+
+Read in NCI mutation data
+```{r}
+# read in significance rank list from MutSig2CV
+mutsig_siggenes <- read_delim("data/sig_genes.txt", "\t")
+
+# read in final analysis MAF from MutSig2CV
+final_analysis_set <- read_delim(
+  "data/final_analysis_set.maf", "\t")
+
+# repair nonstandard variant classification
+final_analysis_set$Variant_Classification <- str_replace(final_analysis_set$Variant_Classification, "Start_Codon_Del", "Translation_Start_Site")
+
+final_analysis_set$Variant_Classification <- str_replace(final_analysis_set$Variant_Classification, "Stop_Codon_Ins", "Nonstop_Mutation")
+
+final_analysis_set <- as.data.frame(final_analysis_set)
+```
+
+Read in Duke mutation data
+```{r}
+
+```
