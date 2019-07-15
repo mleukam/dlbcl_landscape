@@ -15,7 +15,7 @@
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/darkly.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -336,7 +336,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-07-03
+<strong>Last updated:</strong> 2019-07-14
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -367,10 +367,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree803095951a60c73e0fe43e51336f6e014908fbaatargetblank8030959a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/803095951a60c73e0fe43e51336f6e014908fbaa" target="_blank">8030959</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreeca8a259605f6dd40d843a7367d1a944895cf8044targetblankca8a259a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/ca8a259605f6dd40d843a7367d1a944895cf8044" target="_blank">ca8a259</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree803095951a60c73e0fe43e51336f6e014908fbaatargetblank8030959a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreeca8a259605f6dd40d843a7367d1a944895cf8044targetblankca8a259a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -419,10 +419,45 @@ Ignored files:
     Ignored:    output/total_immune_gset_v1.rds
 
 Untracked files:
+    Untracked:  analysis/assign_mutations.Rmd
+    Untracked:  analysis/deconvolution.Rmd
+    Untracked:  analysis/visualizing_gsva_scores_3.Rmd
+    Untracked:  analysis/visualizing_gsva_scores_4.Rmd
+    Untracked:  data/12864_2005_498_MOESM2_ESM.xls
+    Untracked:  data/PanImmune_GeneSet_Definitions.xlsx
+    Untracked:  data/final_analysis_set.maf
+    Untracked:  data/genesets/
+    Untracked:  data/reactome_imm_signaling.tsv
+    Untracked:  data/sig_genes.txt
+    Untracked:  data/temp.dgelist_edger.rds
+    Untracked:  docs/assets/Rplot01.pdf
+    Untracked:  docs/assets/Rplot02.pdf
+    Untracked:  docs/assets/Rplot03.pdf
+    Untracked:  docs/assets/gsva4_heatmap_rawscores.pdf
+    Untracked:  output/combined_es_gsva2_4cluster.rds
     Untracked:  output/combined_expressionset.rds
+    Untracked:  output/dlbcl_total_immune_gset_v3_results.rds
+    Untracked:  output/dlbcl_total_immune_gset_v4_results.rds
+    Untracked:  output/gset_ids_complete_3.rds
+    Untracked:  output/gset_ids_complete_4.rds
+    Untracked:  output/gsva_v2_4clust_assign.rds
+    Untracked:  output/mc1_score_matrix.csv
+    Untracked:  output/mc2_score_matrix.csv
+    Untracked:  output/mc3_score_matrix.csv
+    Untracked:  output/mc4_score_matrix.csv
+    Untracked:  output/mc5_score_matrix.csv
+    Untracked:  output/mc6_score_matrix.csv
+    Untracked:  output/mc7_score_matrix.csv
+    Untracked:  output/merged_raw_counts.csv
+    Untracked:  output/merged_raw_counts_1.csv
+    Untracked:  output/merged_raw_counts_2.csv
+    Untracked:  output/merged_raw_counts_3.csv
+    Untracked:  output/merged_raw_counts_4.csv
+    Untracked:  output/merged_raw_counts_5.csv
+    Untracked:  output/merged_raw_counts_6.csv
+    Untracked:  output/merged_raw_counts_7.csv
 
 Unstaged changes:
-    Modified:   analysis/merge.Rmd
     Modified:   analysis/visualizing_gsva_scores_2.Rmd
 
 </code></pre>
@@ -462,6 +497,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/2f549bf07b22b250dc450889671d6d8933b654fe/docs/index.html" target="_blank">2f549bf</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-03
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -524,7 +576,7 @@ html
 mleukam
 </td>
 <td>
-2019-07-01
+2019-07-02
 </td>
 <td>
 Build site.
@@ -541,7 +593,7 @@ Rmd
 mleukam
 </td>
 <td>
-2019-07-01
+2019-07-02
 </td>
 <td>
 wflow_publish(“analysis/index.Rmd”)
@@ -694,7 +746,7 @@ html
 mleukam
 </td>
 <td>
-2019-06-13
+2019-06-14
 </td>
 <td>
 Build site.
@@ -711,7 +763,7 @@ Rmd
 mleukam
 </td>
 <td>
-2019-06-13
+2019-06-14
 </td>
 <td>
 wflow_publish(“analysis/index.Rmd”)
@@ -728,7 +780,7 @@ html
 mleukam
 </td>
 <td>
-2019-06-13
+2019-06-14
 </td>
 <td>
 Build site.
@@ -745,7 +797,7 @@ Rmd
 mleukam
 </td>
 <td>
-2019-06-13
+2019-06-14
 </td>
 <td>
 wflow_publish(“analysis/index.Rmd”)
@@ -762,7 +814,7 @@ html
 mleukam
 </td>
 <td>
-2019-06-13
+2019-06-14
 </td>
 <td>
 Build site.
@@ -779,7 +831,7 @@ html
 mleukam
 </td>
 <td>
-2019-06-13
+2019-06-14
 </td>
 <td>
 Build site.
@@ -796,7 +848,7 @@ Rmd
 mleukam
 </td>
 <td>
-2019-06-13
+2019-06-14
 </td>
 <td>
 update title
@@ -813,7 +865,7 @@ html
 mleukam
 </td>
 <td>
-2019-06-13
+2019-06-14
 </td>
 <td>
 Build site.
@@ -830,7 +882,7 @@ Rmd
 mleukam
 </td>
 <td>
-2019-06-13
+2019-06-14
 </td>
 <td>
 wflow_publish(“analysis/index.Rmd”)
@@ -847,7 +899,7 @@ Rmd
 mleukam
 </td>
 <td>
-2019-06-13
+2019-06-14
 </td>
 <td>
 Start workflowr project.
@@ -860,7 +912,24 @@ Start workflowr project.
 </div>
 </div>
 </div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
 <p>Welcome to the computational lab notebook for our research project focused on profiling the immune microenvironment of DLBCL using gene expression data and multi-channel immunohistochemistry, then linking clusters of similar immune signatures with mutations in tumors.</p>
+<p><a href="https://docs.google.com/presentation/d/1sKzira205EXmpdX3D1h6Hy_67gWcaE9-PLBPEcOIE5g/edit?usp=sharing">Slides containing work-in-progress figures</a></p>
+<p>Short-term to-do list:</p>
+<ul>
+<li>GSVA v4 and deconvolution</li>
+<li>Inverse correction for tumor purity?</li>
+<li>Download GDC mutation data</li>
+<li>Combined mutation calls pipeline</li>
+</ul>
+<p>Major issues:</p>
+<ul>
+<li>How to account for malignant B-cells vs immune response B-cells?</li>
+</ul>
+</div>
+<div id="background" class="section level2">
+<h2>Background</h2>
 <p>The over-arching questions are:</p>
 <ol style="list-style-type: decimal">
 <li>Are there recurrent immune phenotypes in DLBCL?</li>
@@ -880,22 +949,12 @@ Start workflowr project.
 <li>Hosted at the Genomic Data Commons project ID <a href="https://portal.gdc.cancer.gov/projects/NCICCR-DLBCL">NCICCR-DLBCL</a></li>
 </ul></li>
 </ol>
-<p>Short-term to-do list:</p>
-<ul>
-<li>New gene lists - re-run GSVA on all samples and re-cluster</li>
-<li>Evaluate new gene lists in NCI data, PD-L1amp vs non</li>
-<li>Inverse correction for tumor purity?</li>
-<li>Download GDC mutation data</li>
-<li>Combined mutation calls pipeline</li>
-</ul>
-<p>Major questions:</p>
-<ul>
-<li>How to account for malignant B-cells vs immune response B-cells?</li>
-</ul>
+</div>
 <div id="aim-1-identify-recurrent-immune-phenotypes-using-rnaseq-data" class="section level2">
 <h2>Aim 1: Identify Recurrent Immune Phenotypes using RNAseq Data</h2>
 <div id="prepare-rnaseq-data-for-analysis" class="section level3">
 <h3>Prepare RNAseq data for analysis</h3>
+<p>All steps in data download, cleaning, and analysis are documented in R markdown notebooks listed below or in source code in <code>/code/</code> folder in github repo.</p>
 <ul>
 <li><a href="gdc_download.html">Download raw RNAseq counts in NCI lymphoma dataset from GDC</a></li>
 <li><a href="preprocessing_count_data.html">Preprocessing NCI counts</a></li>
@@ -913,30 +972,25 @@ Start workflowr project.
 <h3>Gene set variation analysis</h3>
 <div id="first-try-at-gene-list-collection" class="section level4">
 <h4>First try at gene list collection:</h4>
-<p>Gene lists selected from work-in-progress analyis of TCGA macrophage signatures and from immune-related C2 “curated” gene sets from MSigDB. Also included T-cell inflamed signature from prior publications (Riyue Bao). No additional filtering was done after selection of candidate gene lists. GSVA run on expression data from NCI only to see how well it recapitulates known <em>PD-L1</em> amplified immune phenotype.</p>
+<p>Gene lists selected from work-in-progress analyis of TCGA macrophage signatures and from immune-related C2 “curated” gene sets from MSigDB. Also included T-cell inflamed signature from prior publications (Riyue Bao). No additional filtering was done after selection of candidate 49 gene lists. GSVA run on expression data from NCI only to see how well it recapitulates known <em>PD-L1</em> amplified immune phenotype.</p>
 <ul>
-<li><a href="enrichment.html">GSVA</a></li>
-<li><a href="clustering_enrichment_scores.html">Clustering GSVA results</a></li>
-</ul>
-<p>There is poor separation, especially on PCA2, of the known immune phenotype <em>PD-L1</em> amplified in NCI data.</p>
-<p><img src="assets/first_gsva_pca_samples.png" /></p>
-<p>This is because the gene sets are highly clustered in the same axis on the PCA analysis. There is too much co-variation among the immune gene sets I initially selected, and the overall analysis is not able to find meaningul differences in immune phenotype.</p>
-<p><img src="assets/first_gsva_pca_variables.png" /></p>
-</div>
-<div id="gene-set-collection-refinement" class="section level4">
-<h4>Gene set collection refinement:</h4>
-<p>We will need better-separating gene sets to proceed.</p>
+<li><a href="enrichment.html">Data prep for GSVA</a></li>
+<li>GSVA analysis run on Gardner Supercomputer (HPC) Cluster at UChicago
 <ul>
-<li><a href="newgs.html">New gene set collection</a></li>
-<li><a href="clustering_enrichment_scores.html">Visualizing and clustering new GSVA results</a></li>
+<li>Source code in <code>/code/</code></li>
+</ul></li>
+<li><a href="clustering_enrichment_scores.html">Visualizing and clustering GSVA results</a></li>
 </ul>
-<p>Looking at the PCA plot of new immune gene signature enrichment of only PD-L1 amplified and non-amplified (NCI samples only), there is some separation on both PCA1 and PCA2 with a preponderance of samples in the southeast quadrant, though the effect is not marked.</p>
-<p><img src="assets/second_gsva_pca_individuals.png" /></p>
-<p>There are still many correlated gene sets in the NCI sample, but a better distribution than previously.</p>
-<p><img src="assets/second_gsva_pca_variables.png" /></p>
-<p>This PCA plot collapses immune gene set enrichment in all analyzed samples, and compares all NCI samples (enriched in ABC) to all Duke samples. There is no significant difference in distribution between the NCI and Duke data, and there is good scatter on the two PCA axis (though the contribution of PCA2 is fairly small). <img src="assets/second_gsva_pca_individuals_dukenci.png" /></p>
-<p>The contribution of each of the gene sets to this distribution shows better distribution overall. <img src="assets/second_gsva_pca_variables_dukenci.png" /></p>
-<p>A heatmap of gene set expression by sample is clustered with heirarchical clustering for both samples and gene sets <img src="assets/second_gsva_heatmap.png" /></p>
+<p>There is poor separation, especially on PCA2, of the known immune phenotype <em>PD-L1</em> amplified in NCI data. Contribution of individual gene sets to the PCA axes shows high concentration pointing towards (0,1) on a unit circle and few parallel to the PC2 axis. Will try to find additional gene sets that can separate immune phenotypes better.</p>
+<ul>
+<li><a href="newgs.html">New gene set collections</a></li>
+</ul>
+<p>Downloaded and formatted 83 gene sets first published in Thorsson et al. Also found an additional 60 gene sets from recent publications, especially focused on recent single-cell RNAseq publications of tumor-infiltrating immune cells.</p>
+<ul>
+<li><a href="visualizing_gsva_scores_2.html">Visualizing and clustering GSVA results using recently published gene sets</a></li>
+<li><a href="visualizing_gsva_scores_3.html">Visualizing and clustering GSVA results using Thorsson et al gene sets</a></li>
+</ul>
+<p>Both new collections of gene sets perform better than original MSigDB in separating known phenotype PD-L1, and have a broader distribution of vector angles in contributions of each gene set to the principal component axes. A four-cluster model was found to best fit the data in both cases, with 75% identical assignments and 87% Pearson concordance with cluster assignment treated as a numerical value. Several gene sets were removed from Thorsson et al GSVA analysis due to multicollinearity. See <a href="visualizing_gsva_scores_3.html">notebook</a> for details.</p>
 </div>
 </div>
 </div>
