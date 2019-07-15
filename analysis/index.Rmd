@@ -8,7 +8,23 @@ editor_options:
   chunk_output_type: console
 ---
 
+## Introduction
 Welcome to the computational lab notebook for our research project focused on profiling the immune microenvironment of DLBCL using gene expression data and multi-channel immunohistochemistry, then linking clusters of similar immune signatures with mutations in tumors.
+
+[Slides containing work-in-progress figures](https://docs.google.com/presentation/d/1sKzira205EXmpdX3D1h6Hy_67gWcaE9-PLBPEcOIE5g/edit?usp=sharing)
+
+Short-term to-do list:
+
+* GSVA v4 and deconvolution
+* Inverse correction for tumor purity?
+* Download GDC mutation data
+* Combined mutation calls pipeline
+
+Major issues:
+
+* How to account for malignant B-cells vs immune response B-cells?
+
+## Background
 
 The over-arching questions are:
 
@@ -24,21 +40,11 @@ The primary data sources are:
     * From [Schmitz et al N Engl J Med. 2018 Apr 12;378(15):1396](https://www.ncbi.nlm.nih.gov/pubmed/?term=29641966)  
     * Hosted at the Genomic Data Commons project ID [NCICCR-DLBCL](https://portal.gdc.cancer.gov/projects/NCICCR-DLBCL)
 
-Short-term to-do list:
-
-* New gene lists - re-run GSVA on all samples and re-cluster
-* Evaluate new gene lists in NCI data, PD-L1amp vs non
-* Inverse correction for tumor purity?
-* Download GDC mutation data
-* Combined mutation calls pipeline
-
-Major questions:
-
-* How to account for malignant B-cells vs immune response B-cells?
-
 ## Aim 1: Identify Recurrent Immune Phenotypes using RNAseq Data
 
 ### Prepare RNAseq data for analysis
+
+All steps in data download, cleaning, and analysis are documented in R markdown notebooks listed below or in source code in `/code/` folder in github repo.
 
 * [Download raw RNAseq counts in NCI lymphoma dataset from GDC](gdc_download.html)
 * [Preprocessing NCI counts](preprocessing_count_data.html)
@@ -53,42 +59,23 @@ Major questions:
 
 #### First try at gene list collection:
 
-Gene lists selected from work-in-progress analyis of TCGA macrophage signatures and from immune-related C2 "curated" gene sets from MSigDB. Also included T-cell inflamed signature from prior publications (Riyue Bao). No additional filtering was done after selection of candidate gene lists. GSVA run on expression data from NCI only to see how well it recapitulates known _PD-L1_ amplified immune phenotype.
+Gene lists selected from work-in-progress analyis of TCGA macrophage signatures and from immune-related C2 "curated" gene sets from MSigDB. Also included T-cell inflamed signature from prior publications (Riyue Bao). No additional filtering was done after selection of candidate 49 gene lists. GSVA run on expression data from NCI only to see how well it recapitulates known _PD-L1_ amplified immune phenotype.
 
-* [GSVA](enrichment.html)
-* [Clustering GSVA results](clustering_enrichment_scores.html)
+* [Data prep for GSVA](enrichment.html)
+* GSVA analysis run on Gardner Supercomputer (HPC) Cluster at UChicago
+  * Source code in `/code/`
+* [Visualizing and clustering GSVA results](clustering_enrichment_scores.html)
 
-There is poor separation, especially on PCA2, of the known immune phenotype _PD-L1_ amplified in NCI data.
+There is poor separation, especially on PCA2, of the known immune phenotype _PD-L1_ amplified in NCI data. Contribution of individual gene sets to the PCA axes shows high concentration pointing towards (0,1) on a unit circle and few parallel to the PC2 axis. Will try to find additional gene sets that can separate immune phenotypes better.
 
-![](assets/first_gsva_pca_samples.png)
+* [New gene set collections](newgs.html)
 
-This is because the gene sets are highly clustered in the same axis on the PCA analysis. There is too much co-variation among the immune gene sets I initially selected, and the overall analysis is not able to find meaningul differences in immune phenotype.
+Downloaded and formatted 83 gene sets first published in Thorsson et al. Also found an additional 60 gene sets from recent publications, especially focused on recent single-cell RNAseq publications of tumor-infiltrating immune cells.
 
-![](assets/first_gsva_pca_variables.png)
+* [Visualizing and clustering GSVA results using recently published gene sets](visualizing_gsva_scores_2.html)
+* [Visualizing and clustering GSVA results using Thorsson et al gene sets](visualizing_gsva_scores_3.html)
 
-#### Gene set collection refinement:
-
-We will need better-separating gene sets to proceed.
-
-* [New gene set collection](newgs.html)
-* [Visualizing and clustering new GSVA results](clustering_enrichment_scores.html)
-
-Looking at the PCA plot of new immune gene signature enrichment of only PD-L1 amplified and non-amplified (NCI samples only), there is some separation on both PCA1 and PCA2 with a preponderance of samples in the southeast quadrant, though the effect is not marked.
-
-![](assets/second_gsva_pca_individuals.png)
-
-There are still many correlated gene sets in the NCI sample, but a better distribution than previously.
-
-![](assets/second_gsva_pca_variables.png)
-
-This PCA plot collapses immune gene set enrichment in all analyzed samples, and compares all NCI samples (enriched in ABC) to all Duke samples. There is no significant difference in distribution between the NCI and Duke data, and there is good scatter on the two PCA axis (though the contribution of PCA2 is fairly small).
-![](assets/second_gsva_pca_individuals_dukenci.png)
-
-The contribution of each of the gene sets to this distribution shows better distribution overall.
-![](assets/second_gsva_pca_variables_dukenci.png)
-
-A heatmap of gene set expression by sample is clustered with heirarchical clustering for both samples and gene sets
-![](assets/second_gsva_heatmap.png)
+Both new collections of gene sets perform better than original MSigDB in separating known phenotype PD-L1, and have a broader distribution of vector angles in contributions of each gene set to the principal component axes. A four-cluster model was found to best fit the data in both cases, with 75% identical assignments and 87% Pearson concordance with cluster assignment treated as a numerical value. Several gene sets were removed from Thorsson et al GSVA analysis due to multicollinearity. See [notebook](visualizing_gsva_scores_3.html) for details.
 
 ## Aim 2: Link Immune Phenotype Clusters to Oncogenes
 
