@@ -21,6 +21,11 @@ Load packages
 library("tidyverse")
 library("sva")
 library("Biobase")
+library("viridis")
+library("ggdark")
+library("jcolors")
+library("ggsci")
+library("ggpubr")
 ```
 
 Read in expressionsets
@@ -42,9 +47,9 @@ edata <- exprs(duke_es)
 
 # There is a single "NA" value in the lane assignments. Will review and decide whether to keep or not for further analysis
 which(is.na(pheno$lane))
-pheno[214,]
+pheno[225,]
 
-# The sample looks otherwise complete and with a large enough library size compared to others (though small overall). Will set to "unknown" and keep. Because one batch now will only have one member, will have to adjust means only and not variance (cannot calculate variance from one sample)
+# The sample looks otherwise complete and with a large enough library size compared to others. Will set to "unknown" and keep. Because one batch now will only have one member, will have to adjust means only and not variance (cannot calculate variance from one sample)
 
 # The ComBat function adjusts for known batches using an empirical Bayesian framework. In order to use the function, you must have a known batch variable in your dataset.
 batch = pheno$lane %>% as.data.frame() %>%
@@ -74,8 +79,20 @@ edata_df <- as.data.frame(t(edata)) %>%
   gather(key = "gene_id", value = "intensity", -sample_id, -lane) %>%
   group_by(lane) %>%
   print()
-before_box <- ggplot(edata_df, aes(x = lane, y = intensity, group = lane)) +
-  geom_boxplot()
+
+before_box <- ggplot(edata_df, 
+                     aes(x = lane,
+                         y = intensity, 
+                         group = lane)) +
+  geom_boxplot(aes(fill = lane)) +
+  geom_hline(yintercept = 5, 
+             color = "#767676", 
+             linetype = 2) +
+  dark_theme_gray() +
+  scale_color_manual("white") + 
+  scale_fill_viridis(discrete = TRUE, 
+                     option = "plasma")
+
 before_box
 
 # pretty minimal differences in mean and distribution
@@ -99,8 +116,16 @@ combat_edata_df <- as.data.frame(t(combat_edata)) %>%
   gather(key = "gene_id", value = "intensity", -sample_id, -lane) %>%
   group_by(lane) %>%
   print()
+
 after_box <- ggplot(combat_edata_df, aes(x = lane, y = intensity, group = lane)) +
-  geom_boxplot()
+  geom_boxplot(aes(fill = lane)) +
+  geom_hline(yintercept = 5, 
+             color = "#767676", 
+             linetype = 2) +
+  dark_theme_gray() +
+  scale_color_manual("white") + 
+  scale_fill_viridis(discrete = TRUE, 
+                     option = "plasma")
 after_box
 
 # even more better :-)
@@ -321,10 +346,22 @@ edata_df <- as.data.frame(t(exprs(combined_es))) %>%
   gather(key = "gene_id", value = "intensity", -sample_id, -source) %>%
   group_by(source) %>%
   print()
-before_box <- ggplot(edata_df, aes(x = source, y = intensity, group = source)) +
-  geom_boxplot()
+
+before_box <- ggplot(edata_df, 
+                     aes(x = source, 
+                         y = intensity, 
+                         group = source)) +
+  geom_boxplot(aes(fill = source)) +
+  geom_hline(yintercept = 5, 
+             color = "#767676", 
+             linetype = 2) +
+  dark_theme_gray() +
+  scale_color_manual("white") + 
+  scale_fill_viridis(discrete = TRUE, 
+                     option = "plasma")
+
 before_box
-# small but norable differences in mean and distribution
+# small but notable differences in mean and distribution
 # will use the NCI data as the "ground truth" for normalization given higher read counts overall and standardized count pipeline through GDC
 
 # Note that adjustment variables will be treated as given to the ComBat function. This means if you are trying to adjust for a categorical variable with p different levels, you will need to give ComBat p-1 indicator variables for this covariate.
@@ -350,9 +387,18 @@ after_df <- as.data.frame(t(combined_combat_edata)) %>%
   gather(key = "gene_id", value = "intensity", -sample_id, -source) %>%
   group_by(source) %>%
   print()
+
 after_box <- ggplot(after_df, 
-                    aes(x = source, y = intensity, group = source)) +
-  geom_boxplot()
+                    aes(x = source, 
+                        y = intensity, 
+                        group = source)) +
+  geom_boxplot(aes(fill = source)) +
+  geom_hline(yintercept = 5, 
+             color = "#767676", 
+             linetype = 2) +
+  dark_theme_gray() +
+  scale_color_manual("white") + 
+  scale_fill_tron()
 after_box
 ```
 
@@ -384,4 +430,8 @@ combined_es
 combined_exprs <- exprs(combined_es)
 combined_csv <- as.data.frame(combined_exprs) %>% rownames_to_column(var = "gene") %>% as_tibble() %>% select(gene, everything()) %>% print() 
 write_csv(combined_csv, "output/combined_dlbcl_expr_matrix.csv")
+```
+
+```{r}
+saveRDS(combined_es, "output/combined_expressionset.rds")
 ```

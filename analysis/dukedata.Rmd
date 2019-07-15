@@ -42,49 +42,91 @@ library("limma")
 library("Biobase")
 ```
 
-From the cluster:
+Batch script from Gardner HPC Cluster
 ```{r eval = FALSE}
-# txi <- readRDS("txi.limma.rds")
-# > str(txi)
-#List of 5
-# $ abundance          : num [1:58721, 1:771] 1.89 0.687 150.765 14.069 51.961 ...
-#  ..- attr(*, "dimnames")=List of 2
-#  .. ..$ : chr [1:58721] "ENSG00000000003.14" "ENSG00000000005.5" "ENSG00000000419.12" #"ENSG00000000457.13" ...
-#  .. ..$ : chr [1:771] "648.a.1kDLBCL.DLBCL.SL137547.RNA" "658.a.1kDLBCL.DLBCL.SL137175.RNA" #"683.a.1kDLBCL.DLBCL.SL137187.RNA" "684.a.1kDLBCL.DLBCL.SL137583.RNA" ...
-# $ counts             : num [1:58721, 1:771] 18.04 3.02 502.55 231.24 653.92 ...
-#  ..- attr(*, "dimnames")=List of 2
-#  .. ..$ : chr [1:58721] "ENSG00000000003.14" "ENSG00000000005.5" "ENSG00000000419.12" #"ENSG00000000457.13" ...
-#  .. ..$ : chr [1:771] "648.a.1kDLBCL.DLBCL.SL137547.RNA" "658.a.1kDLBCL.DLBCL.SL137175.RNA" #"683.a.1kDLBCL.DLBCL.SL137187.RNA" "684.a.1kDLBCL.DLBCL.SL137583.RNA" ...
-# $ infReps            :List of 771
-#  ..$ 648.a.1kDLBCL.DLBCL.SL137547.RNA : num [1:58721, 1:100] 16 4 461 229 559 ...
-#  .. ..- attr(*, "dimnames")=List of 2
-#  .. .. ..$ : chr [1:58721] "ENSG00000000003.14" "ENSG00000000005.5" "ENSG00000000419.12" #"ENSG00000000457.13" ...
-#  .. .. ..$ : NULL
+#!/usr/bin/env Rscript
 
-# dgelist <- txi$counts
-  
-# str(dgelist)
-# Formal class 'DGEList' [package "edgeR"] with 1 slot
-#  ..@ .Data:List of 3
-#  .. ..$ : num [1:16178, 1:771] 18.04 3.02 502.55 231.24 653.92 ...
-#  .. .. ..- attr(*, "dimnames")=List of 2
-#  .. .. .. ..$ : chr [1:16178] "ENSG00000000003" "ENSG00000000005" "ENSG00000000419" #"ENSG00000000457" ...
-#  .. .. .. ..$ : chr [1:771] "648.a.1kDLBCL.DLBCL.SL137547.RNA" #"658.a.1kDLBCL.DLBCL.SL137175.RNA" "683.a.1kDLBCL.DLBCL.SL137187.RNA" #"684.a.1kDLBCL.DLBCL.SL137583.RNA" ...
-#  .. ..$ :'data.frame':	771 obs. of  4 variables:
-#  .. .. ..$ group       : Factor w/ 1 level "1": 1 1 1 1 1 1 1 1 1 1 ...
-#  .. .. ..$ lib.size    : num [1:771] 7664006 13270246 8620210 5512745 8874452 ...
-#  .. .. ..$ norm.factors: num [1:771] 1.014 0.952 0.947 0.843 0.938 ...
-#  .. .. ..$ lane        : Factor w/ 7 levels "C7FYAANXX","C7U9KANXX",..: 7 5 5 7 7 7 7 7 7 7 #...
-#  .. ..$ :'data.frame':	16178 obs. of  4 variables:
-#  .. .. ..$ ensembl_gene_id: chr [1:16178] "ENSG00000000003" "ENSG00000000005" #"ENSG00000000419" "ENSG00000000457" ...
-#  .. .. ..$ hgnc_symbol    : chr [1:16178] "TSPAN6" "TNMD" "DPM1" "SCYL3" ...
-#  .. .. ..$ chromosome_name: chr [1:16178] "X" "X" "20" "1" ...
-#  .. .. ..$ gene_biotype   : chr [1:16178] "protein_coding" "protein_coding" "protein_coding" #"protein_coding" ...
+# requires R version 3.5.0
+
+# load packages
+library("dplyr")
+library("readr")
+library("tximport")
+library("GenomicFeatures")
+library("AnnotationDbi")
+library("edgeR")
+
+# import input files
+TxDb.gencode.v29.primary <- loadDb("/gpfs/data/kline-lab/ref/Gencode/TxDb.gencode.v29.primary.sqlite")
+kallisto.files <- read_table("/gpfs/data/kline-lab/inputs/abundance_tsv.tsv", col_names=FALSE)
+metadata <- read_csv("/gpfs/data/kline-lab/inputs/rna_meta_table.csv", col_names=FALSE)
+
+# select columns to make tx2gene
+k <- keys(TxDb.gencode.v29.primary, keytype = "TXNAME")
+tx2gene <- AnnotationDbi::select(TxDb.gencode.v29.primary, k, "GENEID", "TXNAME")
+
+# convert filenames and samples to vector
+kallisto.files <- dplyr::pull(kallisto.files[,1])
+sample.names <- dplyr::pull(metadata[,1])
+names(kallisto.files) <- sample.names
+
+# how to work around ignoreAfterBar
+# https://www.biostars.org/p/322297/
+
+# import reabdundance files for use with edger
+txi.edger <- tximport(kallisto.files, 
+	type = "kallisto", 
+	tx2gene = tx2gene, 
+	ignoreAfterBar = TRUE)
+
+# save tximport objects for later use
+saveRDS(txi.edger, "/gpfs/data/kline-lab/inputs/txi.edger.rds")
 ```
 
-Read in data
+Cluster interactive node:
+```{r eval=FALSE}
+## load packages
+library(tximport)
+library(edgeR)
+library(limma)
+library(tidyverse)
+library(biomaRt)
+
+## read in tximport objects and metadata
+## this takes a while
+txi_edger <- readRDS("/gpfs/data/kline-lab/inputs/txi.edger.rds")
+metadata <- read_csv("/gpfs/data/kline-lab/inputs/rna_meta_table.csv",col_names=FALSE)
+
+## add counts by gene to DGEList as matrix
+dgelist_edger <- DGEList(txi_edger$counts)
+
+## add readgroup information to DGEList as data.frame
+lane <- as.factor(metadata$X4) 
+dgelist_edger$samples$lane <- lane 
+
+## add gene symbol information to DGEList
+## first remove version number from gene names in dgelist$counts
+genes_edger <- sapply(strsplit((rownames(dgelist_edger$counts)), ".", fixed = TRUE), function(x) x[1])
+rownames(dgelist_edger$counts) <- genes_edger
+
+## then pull gene symbols for each gene name
+mart <- useDataset("hsapiens_gene_ensembl", useMart("ensembl"))  
+
+symbol_edger <- getBM(filters = "ensembl_gene_id", attributes = c("ensembl_gene_id", "hgnc_symbol","chromosome_name", "gene_biotype"), values = genes_edger, mart = mart)
+
+## reorder and adjust length to match my genes
+symbol_edger <- symbol_edger[match(genes_edger, symbol_edger$ensembl_gene_id),]
+
+## add data.frame of gene symbols to DGElist
+dgelist_edger$genes <- symbol_edger
+
+saveRDS(dgelist_edger, "/gpfs/data/kline-lab/inputs/temp.dgelist_edger.rds")
+
+```
+
+Move output file to local machine and load into R notebook session
 ```{r}
-dgelist <- readRDS("data/temp.dgelist_limma.rds")
+dgelist <- readRDS("data/temp.dgelist_edger.rds")
 str(dgelist)
 
 # read in conversion table for gene IDs
@@ -121,11 +163,12 @@ gencode_gtf_split <- gencode_gtf %>%
 
 row__names <- rownames(expr_duke) %>%
   enframe() %>%
-  dplyr::select(geneID_split = value)
+  dplyr::select(geneID_split = value) %>%
+  print()
 
 # check how many gene ids are missing in v22 that are named in v29
 setdiff(row__names$geneID_split, gencode_gtf_split$geneID_split)
-# 55, not terrible, spot check with google finds that many of these are not protein-coding
+# approx 1900 (previous checks show none after filtering for protein coding genes)
 
 # merge gene name data with expression matrix
 expr_duke_df <- expr_duke %>%
@@ -273,6 +316,7 @@ dplot_duke_log_2 +
 ```
 
 #### Normalize gene expression distributions
+
 Normalization by the method of trimmed mean of M-values (TMM) is performed using the calcNormFactors function in edgeR. The normalisation factors calculated here are used as a scaling factor for the library sizes. 
 
 ```{r}
