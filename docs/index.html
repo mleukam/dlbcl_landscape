@@ -336,7 +336,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-07-14
+<strong>Last updated:</strong> 2019-07-15
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -367,10 +367,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree3f5de36a8c2cf46ebd8aa75a9e3262d8833f8964targetblank3f5de36a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/3f5de36a8c2cf46ebd8aa75a9e3262d8833f8964" target="_blank">3f5de36</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree01e4acfb63eb651b4b0785b5ae5c794d1d7bda67targetblank01e4acfa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/01e4acfb63eb651b4b0785b5ae5c794d1d7bda67" target="_blank">01e4acf</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree3f5de36a8c2cf46ebd8aa75a9e3262d8833f8964targetblank3f5de36a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree01e4acfb63eb651b4b0785b5ae5c794d1d7bda67targetblank01e4acfa" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -420,6 +420,7 @@ Ignored files:
 
 Untracked files:
     Untracked:  analysis/assign_mutations.Rmd
+    Untracked:  analysis/cluster_dge.Rmd
     Untracked:  analysis/deconvolution.Rmd
     Untracked:  analysis/visualizing_gsva_scores_3.Rmd
     Untracked:  analysis/visualizing_gsva_scores_4.Rmd
@@ -441,6 +442,8 @@ Untracked files:
     Untracked:  output/gset_ids_complete_3.rds
     Untracked:  output/gset_ids_complete_4.rds
     Untracked:  output/gsva_v2_4clust_assign.rds
+    Untracked:  output/gsva_v3_4clust_assign.rds
+    Untracked:  output/gsva_v4_4clust_assign.rds
     Untracked:  output/mc1_score_matrix.csv
     Untracked:  output/mc2_score_matrix.csv
     Untracked:  output/mc3_score_matrix.csv
@@ -497,6 +500,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/01e4acfb63eb651b4b0785b5ae5c794d1d7bda67/analysis/index.Rmd" target="_blank">01e4acf</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-15
+</td>
+<td>
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/20609e01e9a35c09bb18fd5130704d6f8a7fec3a/docs/index.html" target="_blank">20609e0</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1029,7 +1066,11 @@ Start workflowr project.
 <li><a href="visualizing_gsva_scores_4.html">Visualizing and clustering GSVA results using a combination of recently published and Thorsson et al gene sets</a></li>
 </ul>
 <p>Both new collections of gene sets perform better than original MSigDB in separating known phenotype PD-L1, and have a broader distribution of vector angles in contributions of each gene set to the principal component axes. A four-cluster model was found to best fit the data in both cases, with 75% identical assignments and 87% Pearson concordance with cluster assignment treated as a numerical value. Several gene sets were removed from Thorsson et al and combined GSVA analyses due to multicollinearity. See <a href="visualizing_gsva_scores_3.html">GSVA v3 notebook</a> and <a href="visualizing_gsva_scores_4.html">GSVA v4 notebook</a> for details.</p>
-<p>4-cluster model assignments made with GSVA v4 scores. See <a href="(visualizing_gsva_scores_4.html)">notebook</a> for details.</p>
+<p>4-cluster model assignments made with GSVA v4 (combination of Thorsson and new gene set scores. See <a href="(visualizing_gsva_scores_4.html)">notebook</a> for details.</p>
+<p>Further exploration:</p>
+<ul>
+<li><a href="cluster_dge.html">Differential gene expression by cluster</a></li>
+</ul>
 </div>
 </div>
 <div id="deconvolution-of-immune-cell-types" class="section level3">
