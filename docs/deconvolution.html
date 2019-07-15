@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="mleukam" />
+
+<meta name="date" content="2019-07-11" />
+
+<title>deconvolution</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/darkly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Immune Landscape of DLBCL</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">deconvolution</h1>
+<h4 class="author">mleukam</h4>
+<h4 class="date">2019-07-11</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2019-07-15
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.4.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div class="panel-group" id="workflowr-checks">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongobjectspresent"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>Environment:</strong> objects present </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongobjectspresent" class="panel-collapse collapse">
+<div class="panel-body">
+
+<p>
+The global environment had objects present when the code in the R Markdown file was run. These objects can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment. Use <code>wflow_publish</code> or <code>wflow_build</code> to ensure that the code is always run in an empty environment.
+</p>
+<p>
+The following objects were defined in the global environment when these results were created:
+</p>
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th style="text-align:left;">
+Name
+</th>
+<th style="text-align:left;">
+Class
+</th>
+<th style="text-align:left;">
+Size
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+data
+</td>
+<td style="text-align:left;">
+environment
+</td>
+<td style="text-align:left;">
+56 bytes
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+env
+</td>
+<td style="text-align:left;">
+environment
+</td>
+<td style="text-align:left;">
+56 bytes
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20190613code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20190613)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20190613code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20190613)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreed372d0ac0400710cfcfe3f4ee00a2f7709c7d07dtargetblankd372d0aa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/d372d0ac0400710cfcfe3f4ee00a2f7709c7d07d" target="_blank">d372d0a</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreed372d0ac0400710cfcfe3f4ee00a2f7709c7d07dtargetblankd372d0aa" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    data/1-s2.0-S1074761316304320-mmc2.xlsx
+    Ignored:    data/41591_2018_45_MOESM5_ESM.xlsx
+    Ignored:    data/NIH_PDL1_amp_cases.csv
+    Ignored:    data/NIH_PDL1_nonamp_cases.csv
+    Ignored:    data/aliquot.tsv
+    Ignored:    data/azizi_curated.xlsx
+    Ignored:    data/c2_human_immune_genesets.gmt
+    Ignored:    data/dlbcl_total_immune_gset_v1_results.rds
+    Ignored:    data/ds_JCO.18.01583-2.xlsx
+    Ignored:    data/gdc_clinical_data.json
+    Ignored:    data/gdc_files_and_case_ids.json
+    Ignored:    data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Ignored:    data/gset_ids_complete.rds
+    Ignored:    data/htseq_counts/
+    Ignored:    data/journal.pone.0088309.s001.XLS
+    Ignored:    data/mmc1.xlsx
+    Ignored:    data/nejmoa1801445_appendix_2.xlsx
+    Ignored:    data/sample.tsv
+    Ignored:    data/sig.rda
+    Ignored:    data/temp.dgelist_limma.rds
+    Ignored:    docs/.DS_Store
+    Ignored:    output/combined_clin_data.xlsx
+    Ignored:    output/combined_dlbcl_expr_matrix.csv
+    Ignored:    output/dlbcl_expr_matrix.csv
+    Ignored:    output/dlbcl_total_immune_gset_v2_results.rds
+    Ignored:    output/duke_expression_set_cleaned_log.rds
+    Ignored:    output/duke_expressionset.rds
+    Ignored:    output/duke_expressionset_pext.rds
+    Ignored:    output/duke_extended_pheno_data.csv
+    Ignored:    output/expr_matrix.csv
+    Ignored:    output/gset_ids_complete_2.rds
+    Ignored:    output/nci_dlbcl_annotation.csv
+    Ignored:    output/nci_dlbcl_unprocessed_counts.csv
+    Ignored:    output/nci_expressionset.rds
+    Ignored:    output/nci_expressionset_pext.rds
+    Ignored:    output/nci_extended_pheno_data.csv
+    Ignored:    output/total_immune_gset_v1.rds
+
+Untracked files:
+    Untracked:  analysis/visualizing_gsva_scores_3.Rmd
+    Untracked:  analysis/visualizing_gsva_scores_4.Rmd
+    Untracked:  data/12864_2005_498_MOESM2_ESM.xls
+    Untracked:  data/PanImmune_GeneSet_Definitions.xlsx
+    Untracked:  data/final_analysis_set.maf
+    Untracked:  data/genesets/
+    Untracked:  data/reactome_imm_signaling.tsv
+    Untracked:  data/sig_genes.txt
+    Untracked:  data/temp.dgelist_edger.rds
+    Untracked:  docs/assets/Rplot01.pdf
+    Untracked:  docs/assets/Rplot02.pdf
+    Untracked:  docs/assets/Rplot03.pdf
+    Untracked:  docs/assets/gsva4_heatmap_rawscores.pdf
+    Untracked:  output/combined_es_gsva2_4cluster.rds
+    Untracked:  output/combined_expressionset.rds
+    Untracked:  output/dlbcl_total_immune_gset_v3_results.rds
+    Untracked:  output/dlbcl_total_immune_gset_v4_results.rds
+    Untracked:  output/gset_ids_complete_3.rds
+    Untracked:  output/gset_ids_complete_4.rds
+    Untracked:  output/gsva_v2_4clust_assign.rds
+    Untracked:  output/gsva_v3_4clust_assign.rds
+    Untracked:  output/gsva_v4_4clust_assign.rds
+    Untracked:  output/mc1_score_matrix.csv
+    Untracked:  output/mc2_score_matrix.csv
+    Untracked:  output/mc3_score_matrix.csv
+    Untracked:  output/mc4_score_matrix.csv
+    Untracked:  output/mc5_score_matrix.csv
+    Untracked:  output/mc6_score_matrix.csv
+    Untracked:  output/mc7_score_matrix.csv
+    Untracked:  output/merged_raw_counts.csv
+    Untracked:  output/merged_raw_counts_1.csv
+    Untracked:  output/merged_raw_counts_2.csv
+    Untracked:  output/merged_raw_counts_3.csv
+    Untracked:  output/merged_raw_counts_4.csv
+    Untracked:  output/merged_raw_counts_5.csv
+    Untracked:  output/merged_raw_counts_6.csv
+    Untracked:  output/merged_raw_counts_7.csv
+
+Unstaged changes:
+    Modified:   analysis/visualizing_gsva_scores_2.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/d372d0ac0400710cfcfe3f4ee00a2f7709c7d07d/analysis/deconvolution.Rmd" target="_blank">d372d0a</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-15
+</td>
+<td>
+new notebooks, first commit
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>Clear the workspace</p>
+<pre class="r"><code>rm(list = ls())</code></pre>
+<p>Load packages</p>
+<pre class="r"><code>library(&quot;tidyverse&quot;)</code></pre>
+<pre><code>── Attaching packages ────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>✔ ggplot2 3.2.0     ✔ purrr   0.3.2
+✔ tibble  2.1.3     ✔ dplyr   0.8.3
+✔ tidyr   0.8.3     ✔ stringr 1.4.0
+✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
+<pre><code>── Conflicts ───────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(&quot;edgeR&quot;)</code></pre>
+<pre><code>Loading required package: limma</code></pre>
+<pre class="r"><code>library(&quot;limma&quot;)
+library(&quot;Biobase&quot;)</code></pre>
+<pre><code>Loading required package: BiocGenerics</code></pre>
+<pre><code>Loading required package: parallel</code></pre>
+<pre><code>
+Attaching package: &#39;BiocGenerics&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:parallel&#39;:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB</code></pre>
+<pre><code>The following object is masked from &#39;package:limma&#39;:
+
+    plotMA</code></pre>
+<pre><code>The following objects are masked from &#39;package:dplyr&#39;:
+
+    combine, intersect, setdiff, union</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
+
+    IQR, mad, sd, var, xtabs</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
+
+    anyDuplicated, append, as.data.frame, basename, cbind,
+    colMeans, colnames, colSums, dirname, do.call, duplicated,
+    eval, evalq, Filter, Find, get, grep, grepl, intersect,
+    is.unsorted, lapply, lengths, Map, mapply, match, mget, order,
+    paste, pmax, pmax.int, pmin, pmin.int, Position, rank, rbind,
+    Reduce, rowMeans, rownames, rowSums, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which, which.max,
+    which.min</code></pre>
+<pre><code>Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    &#39;browseVignettes()&#39;. To cite Bioconductor, see
+    &#39;citation(&quot;Biobase&quot;)&#39;, and for packages &#39;citation(&quot;pkgname&quot;)&#39;.</code></pre>
+</div>
+<div id="prepare-counts-for-timer" class="section level2">
+<h2>Prepare counts for TIMER</h2>
+<p><a href="https://cistrome.shinyapps.io/timer/" class="uri">https://cistrome.shinyapps.io/timer/</a></p>
+<div id="duke-data" class="section level3">
+<h3>Duke data</h3>
+<div id="read-in-data" class="section level4">
+<h4>Read in data</h4>
+<pre class="r"><code>total_counts &lt;- read_csv(&quot;output/nci_dlbcl_unprocessed_counts.csv&quot;)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_double(),
+  gene = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<p>Duke data (raw reads estimated by Kallisto) See <a href="dukedata.html">analysis/dukedata.Rmd</a> for creation of DGE list from kallisto output files</p>
+<p>See <code>/code/</code> for source code of Kallisto analysis from raw sequences</p>
+<pre class="r"><code>dgelist &lt;- readRDS(&quot;data/temp.dgelist_edger.rds&quot;)
+str(dgelist)</code></pre>
+<pre><code>Formal class &#39;DGEList&#39; [package &quot;edgeR&quot;] with 1 slot
+  ..@ .Data:List of 3
+  .. ..$ : num [1:58721, 1:771] 18.4 3 477 233.8 560 ...
+  .. .. ..- attr(*, &quot;dimnames&quot;)=List of 2
+  .. .. .. ..$ : chr [1:58721] &quot;ENSG00000000003&quot; &quot;ENSG00000000005&quot; &quot;ENSG00000000419&quot; &quot;ENSG00000000457&quot; ...
+  .. .. .. ..$ : chr [1:771] &quot;648.a.1kDLBCL.DLBCL.SL137547.RNA&quot; &quot;658.a.1kDLBCL.DLBCL.SL137175.RNA&quot; &quot;683.a.1kDLBCL.DLBCL.SL137187.RNA&quot; &quot;684.a.1kDLBCL.DLBCL.SL137583.RNA&quot; ...
+  .. ..$ :&#39;data.frame&#39;: 771 obs. of  4 variables:
+  .. .. ..$ group       : Factor w/ 1 level &quot;1&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+  .. .. ..$ lib.size    : num [1:771] 8555760 14637402 9636558 6111139 9908540 ...
+  .. .. ..$ norm.factors: num [1:771] 1 1 1 1 1 1 1 1 1 1 ...
+  .. .. ..$ lane        : Factor w/ 7 levels &quot;C7FYAANXX&quot;,&quot;C7U9KANXX&quot;,..: 7 5 5 7 7 7 7 7 7 7 ...
+  .. ..$ :&#39;data.frame&#39;: 58721 obs. of  4 variables:
+  .. .. ..$ ensembl_gene_id: chr [1:58721] &quot;ENSG00000000003&quot; &quot;ENSG00000000005&quot; &quot;ENSG00000000419&quot; &quot;ENSG00000000457&quot; ...
+  .. .. ..$ hgnc_symbol    : chr [1:58721] &quot;TSPAN6&quot; &quot;TNMD&quot; &quot;DPM1&quot; &quot;SCYL3&quot; ...
+  .. .. ..$ chromosome_name: chr [1:58721] &quot;X&quot; &quot;X&quot; &quot;20&quot; &quot;1&quot; ...
+  .. .. ..$ gene_biotype   : chr [1:58721] &quot;protein_coding&quot; &quot;protein_coding&quot; &quot;protein_coding&quot; &quot;protein_coding&quot; ...</code></pre>
+<p>read in conversion table for gene IDs</p>
+<pre class="r"><code>gencode_gtf &lt;- read_tsv(&quot;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&quot;)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  gene_id = col_character(),
+  gene_type = col_character(),
+  gene_status = col_character(),
+  gene_name = col_character(),
+  level = col_double(),
+  havana_gene = col_character()
+)</code></pre>
+<pre><code>Warning: 10327 parsing failures.
+  row col  expected    actual                                                        file
+ 5304  -- 6 columns 5 columns &#39;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&#39;
+12445  -- 6 columns 5 columns &#39;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&#39;
+12913  -- 6 columns 5 columns &#39;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&#39;
+13082  -- 6 columns 5 columns &#39;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&#39;
+13310  -- 6 columns 5 columns &#39;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&#39;
+..... ... ......... ......... ...........................................................
+See problems(...) for more details.</code></pre>
+</div>
+<div id="data-cleaning" class="section level4">
+<h4>Data cleaning</h4>
+<p>Convert GENCODE v29 to gene symbols for TIMER</p>
+<pre class="r"><code># get expression matrix
+expr_duke &lt;- dgelist[[1]]
+expr_duke[1:5, 1:5]</code></pre>
+<pre><code>                648.a.1kDLBCL.DLBCL.SL137547.RNA
+ENSG00000000003                        18.435400
+ENSG00000000005                         2.999997
+ENSG00000000419                       476.999500
+ENSG00000000457                       233.777470
+ENSG00000000460                       560.002740
+                658.a.1kDLBCL.DLBCL.SL137175.RNA
+ENSG00000000003                         56.00074
+ENSG00000000005                          0.00000
+ENSG00000000419                        817.00040
+ENSG00000000457                        330.03661
+ENSG00000000460                       1121.99950
+                683.a.1kDLBCL.DLBCL.SL137187.RNA
+ENSG00000000003                         50.58101
+ENSG00000000005                          0.00000
+ENSG00000000419                        141.99956
+ENSG00000000457                        431.32295
+ENSG00000000460                        591.99990
+                684.a.1kDLBCL.DLBCL.SL137583.RNA
+ENSG00000000003                          7.19879
+ENSG00000000005                          0.00000
+ENSG00000000419                        254.00005
+ENSG00000000457                        204.92859
+ENSG00000000460                        564.99992
+                689.a.1kDLBCL.DLBCL.SL137307.RNA
+ENSG00000000003                          82.0210
+ENSG00000000005                           0.0000
+ENSG00000000419                         192.9999
+ENSG00000000457                         343.8820
+ENSG00000000460                         525.0006</code></pre>
+<pre class="r"><code>col__names &lt;- colnames(expr_duke)
+col_names_rep &lt;- str_split(col__names, pattern = &quot;\\.&quot;, simplify = TRUE) %&gt;% 
+  as_tibble() %&gt;%
+  pull(V1) %&gt;%
+  paste0(&quot;duke_&quot;, .) %&gt;%
+  print()</code></pre>
+<pre><code>Warning: `as_tibble.matrix()` requires a matrix with column names or a `.name_repair` argument. Using compatibility `.name_repair`.
+This warning is displayed once per session.</code></pre>
+<pre><code>  [1] &quot;duke_648&quot;  &quot;duke_658&quot;  &quot;duke_683&quot;  &quot;duke_684&quot;  &quot;duke_689&quot; 
+  [6] &quot;duke_690&quot;  &quot;duke_695&quot;  &quot;duke_702&quot;  &quot;duke_704&quot;  &quot;duke_705&quot; 
+ [11] &quot;duke_759&quot;  &quot;duke_787&quot;  &quot;duke_793&quot;  &quot;duke_799&quot;  &quot;duke_800&quot; 
+ [16] &quot;duke_813&quot;  &quot;duke_816&quot;  &quot;duke_823&quot;  &quot;duke_829&quot;  &quot;duke_830&quot; 
+ [21] &quot;duke_831&quot;  &quot;duke_832&quot;  &quot;duke_1008&quot; &quot;duke_1016&quot; &quot;duke_2043&quot;
+ [26] &quot;duke_2044&quot; &quot;duke_2045&quot; &quot;duke_2046&quot; &quot;duke_2047&quot; &quot;duke_2048&quot;
+ [31] &quot;duke_2057&quot; &quot;duke_2060&quot; &quot;duke_2072&quot; &quot;duke_2074&quot; &quot;duke_2075&quot;
+ [36] &quot;duke_2076&quot; &quot;duke_2078&quot; &quot;duke_2079&quot; &quot;duke_2080&quot; &quot;duke_2081&quot;
+ [41] &quot;duke_2084&quot; &quot;duke_2085&quot; &quot;duke_2087&quot; &quot;duke_2088&quot; &quot;duke_2089&quot;
+ [46] &quot;duke_2091&quot; &quot;duke_2092&quot; &quot;duke_2093&quot; &quot;duke_2095&quot; &quot;duke_2097&quot;
+ [51] &quot;duke_2110&quot; &quot;duke_2112&quot; &quot;duke_2114&quot; &quot;duke_2115&quot; &quot;duke_2121&quot;
+ [56] &quot;duke_2122&quot; &quot;duke_2125&quot; &quot;duke_2126&quot; &quot;duke_2127&quot; &quot;duke_2128&quot;
+ [61] &quot;duke_2130&quot; &quot;duke_2140&quot; &quot;duke_2141&quot; &quot;duke_2142&quot; &quot;duke_2144&quot;
+ [66] &quot;duke_2145&quot; &quot;duke_2146&quot; &quot;duke_2147&quot; &quot;duke_2148&quot; &quot;duke_2149&quot;
+ [71] &quot;duke_2150&quot; &quot;duke_2153&quot; &quot;duke_2154&quot; &quot;duke_2155&quot; &quot;duke_2156&quot;
+ [76] &quot;duke_2159&quot; &quot;duke_2160&quot; &quot;duke_2190&quot; &quot;duke_2191&quot; &quot;duke_2192&quot;
+ [81] &quot;duke_2193&quot; &quot;duke_2194&quot; &quot;duke_2195&quot; &quot;duke_2196&quot; &quot;duke_2199&quot;
+ [86] &quot;duke_2204&quot; &quot;duke_2205&quot; &quot;duke_2206&quot; &quot;duke_2209&quot; &quot;duke_2210&quot;
+ [91] &quot;duke_2211&quot; &quot;duke_2212&quot; &quot;duke_2213&quot; &quot;duke_2214&quot; &quot;duke_2215&quot;
+ [96] &quot;duke_2217&quot; &quot;duke_2219&quot; &quot;duke_2220&quot; &quot;duke_2221&quot; &quot;duke_2223&quot;
+[101] &quot;duke_2224&quot; &quot;duke_2225&quot; &quot;duke_2226&quot; &quot;duke_2227&quot; &quot;duke_2228&quot;
+[106] &quot;duke_2229&quot; &quot;duke_2230&quot; &quot;duke_2231&quot; &quot;duke_2232&quot; &quot;duke_2233&quot;
+[111] &quot;duke_2234&quot; &quot;duke_2235&quot; &quot;duke_2241&quot; &quot;duke_2242&quot; &quot;duke_2243&quot;
+[116] &quot;duke_2244&quot; &quot;duke_2246&quot; &quot;duke_2247&quot; &quot;duke_2248&quot; &quot;duke_2249&quot;
+[121] &quot;duke_2250&quot; &quot;duke_2251&quot; &quot;duke_2252&quot; &quot;duke_2254&quot; &quot;duke_2255&quot;
+[126] &quot;duke_2256&quot; &quot;duke_2257&quot; &quot;duke_2259&quot; &quot;duke_2260&quot; &quot;duke_2261&quot;
+[131] &quot;duke_2262&quot; &quot;duke_2263&quot; &quot;duke_2269&quot; &quot;duke_2270&quot; &quot;duke_2273&quot;
+[136] &quot;duke_2279&quot; &quot;duke_2290&quot; &quot;duke_2291&quot; &quot;duke_2300&quot; &quot;duke_2306&quot;
+[141] &quot;duke_2307&quot; &quot;duke_2450&quot; &quot;duke_2451&quot; &quot;duke_2453&quot; &quot;duke_2455&quot;
+[146] &quot;duke_2459&quot; &quot;duke_2461&quot; &quot;duke_2462&quot; &quot;duke_2468&quot; &quot;duke_2469&quot;
+[151] &quot;duke_2470&quot; &quot;duke_2482&quot; &quot;duke_2483&quot; &quot;duke_2522&quot; &quot;duke_2523&quot;
+[156] &quot;duke_2524&quot; &quot;duke_2525&quot; &quot;duke_2527&quot; &quot;duke_2530&quot; &quot;duke_2532&quot;
+[161] &quot;duke_2533&quot; &quot;duke_2534&quot; &quot;duke_2539&quot; &quot;duke_2542&quot; &quot;duke_2548&quot;
+[166] &quot;duke_2550&quot; &quot;duke_2552&quot; &quot;duke_2553&quot; &quot;duke_2554&quot; &quot;duke_2559&quot;
+[171] &quot;duke_2561&quot; &quot;duke_2565&quot; &quot;duke_2566&quot; &quot;duke_2570&quot; &quot;duke_2571&quot;
+[176] &quot;duke_2573&quot; &quot;duke_2575&quot; &quot;duke_2576&quot; &quot;duke_2577&quot; &quot;duke_2578&quot;
+[181] &quot;duke_2585&quot; &quot;duke_2588&quot; &quot;duke_2591&quot; &quot;duke_2593&quot; &quot;duke_2596&quot;
+[186] &quot;duke_2597&quot; &quot;duke_2602&quot; &quot;duke_2603&quot; &quot;duke_2604&quot; &quot;duke_2605&quot;
+[191] &quot;duke_2606&quot; &quot;duke_2608&quot; &quot;duke_2609&quot; &quot;duke_2612&quot; &quot;duke_2613&quot;
+[196] &quot;duke_2616&quot; &quot;duke_2617&quot; &quot;duke_2619&quot; &quot;duke_2620&quot; &quot;duke_2622&quot;
+[201] &quot;duke_2624&quot; &quot;duke_2626&quot; &quot;duke_2628&quot; &quot;duke_2629&quot; &quot;duke_2634&quot;
+[206] &quot;duke_2635&quot; &quot;duke_2636&quot; &quot;duke_2637&quot; &quot;duke_2639&quot; &quot;duke_2640&quot;
+[211] &quot;duke_2642&quot; &quot;duke_2643&quot; &quot;duke_2644&quot; &quot;duke_2646&quot; &quot;duke_2647&quot;
+[216] &quot;duke_2649&quot; &quot;duke_2650&quot; &quot;duke_2651&quot; &quot;duke_2652&quot; &quot;duke_2654&quot;
+[221] &quot;duke_2655&quot; &quot;duke_2656&quot; &quot;duke_2657&quot; &quot;duke_2659&quot; &quot;duke_2660&quot;
+[226] &quot;duke_2663&quot; &quot;duke_2664&quot; &quot;duke_2666&quot; &quot;duke_2667&quot; &quot;duke_2669&quot;
+[231] &quot;duke_2673&quot; &quot;duke_2675&quot; &quot;duke_2676&quot; &quot;duke_2677&quot; &quot;duke_2678&quot;
+[236] &quot;duke_2680&quot; &quot;duke_2681&quot; &quot;duke_2684&quot; &quot;duke_2685&quot; &quot;duke_2687&quot;
+[241] &quot;duke_2688&quot; &quot;duke_2689&quot; &quot;duke_2690&quot; &quot;duke_2691&quot; &quot;duke_2692&quot;
+[246] &quot;duke_2696&quot; &quot;duke_2697&quot; &quot;duke_2698&quot; &quot;duke_2699&quot; &quot;duke_2700&quot;
+[251] &quot;duke_2704&quot; &quot;duke_2705&quot; &quot;duke_2706&quot; &quot;duke_2707&quot; &quot;duke_2709&quot;
+[256] &quot;duke_2713&quot; &quot;duke_2714&quot; &quot;duke_2715&quot; &quot;duke_2716&quot; &quot;duke_2718&quot;
+[261] &quot;duke_2719&quot; &quot;duke_2720&quot; &quot;duke_2725&quot; &quot;duke_2727&quot; &quot;duke_2728&quot;
+[266] &quot;duke_2758&quot; &quot;duke_2761&quot; &quot;duke_2764&quot; &quot;duke_2765&quot; &quot;duke_2767&quot;
+[271] &quot;duke_2768&quot; &quot;duke_2769&quot; &quot;duke_2770&quot; &quot;duke_2771&quot; &quot;duke_2772&quot;
+[276] &quot;duke_2773&quot; &quot;duke_2775&quot; &quot;duke_2776&quot; &quot;duke_2777&quot; &quot;duke_2778&quot;
+[281] &quot;duke_2779&quot; &quot;duke_2781&quot; &quot;duke_2783&quot; &quot;duke_2784&quot; &quot;duke_2785&quot;
+[286] &quot;duke_2786&quot; &quot;duke_2788&quot; &quot;duke_2789&quot; &quot;duke_2790&quot; &quot;duke_2791&quot;
+[291] &quot;duke_2792&quot; &quot;duke_2805&quot; &quot;duke_2808&quot; &quot;duke_2809&quot; &quot;duke_2810&quot;
+[296] &quot;duke_2812&quot; &quot;duke_2813&quot; &quot;duke_2815&quot; &quot;duke_2816&quot; &quot;duke_2818&quot;
+[301] &quot;duke_2819&quot; &quot;duke_2820&quot; &quot;duke_2821&quot; &quot;duke_2823&quot; &quot;duke_2824&quot;
+[306] &quot;duke_2826&quot; &quot;duke_2827&quot; &quot;duke_2828&quot; &quot;duke_2829&quot; &quot;duke_2830&quot;
+[311] &quot;duke_2831&quot; &quot;duke_2832&quot; &quot;duke_2833&quot; &quot;duke_2834&quot; &quot;duke_2837&quot;
+[316] &quot;duke_2838&quot; &quot;duke_2839&quot; &quot;duke_2840&quot; &quot;duke_2841&quot; &quot;duke_2843&quot;
+[321] &quot;duke_2844&quot; &quot;duke_2865&quot; &quot;duke_2867&quot; &quot;duke_2871&quot; &quot;duke_2872&quot;
+[326] &quot;duke_2873&quot; &quot;duke_2874&quot; &quot;duke_2877&quot; &quot;duke_2878&quot; &quot;duke_2879&quot;
+[331] &quot;duke_2881&quot; &quot;duke_2882&quot; &quot;duke_2884&quot; &quot;duke_2886&quot; &quot;duke_2887&quot;
+[336] &quot;duke_2888&quot; &quot;duke_2889&quot; &quot;duke_2891&quot; &quot;duke_2892&quot; &quot;duke_2893&quot;
+[341] &quot;duke_2894&quot; &quot;duke_2895&quot; &quot;duke_2897&quot; &quot;duke_2898&quot; &quot;duke_2899&quot;
+[346] &quot;duke_2900&quot; &quot;duke_2901&quot; &quot;duke_2902&quot; &quot;duke_2903&quot; &quot;duke_2905&quot;
+[351] &quot;duke_2908&quot; &quot;duke_2909&quot; &quot;duke_2910&quot; &quot;duke_2912&quot; &quot;duke_2915&quot;
+[356] &quot;duke_2917&quot; &quot;duke_2918&quot; &quot;duke_2919&quot; &quot;duke_2921&quot; &quot;duke_2922&quot;
+[361] &quot;duke_2923&quot; &quot;duke_2925&quot; &quot;duke_2928&quot; &quot;duke_2933&quot; &quot;duke_2934&quot;
+[366] &quot;duke_2935&quot; &quot;duke_2936&quot; &quot;duke_2939&quot; &quot;duke_2940&quot; &quot;duke_2944&quot;
+[371] &quot;duke_2945&quot; &quot;duke_2946&quot; &quot;duke_2947&quot; &quot;duke_2948&quot; &quot;duke_2949&quot;
+[376] &quot;duke_2950&quot; &quot;duke_2952&quot; &quot;duke_2953&quot; &quot;duke_2954&quot; &quot;duke_2955&quot;
+[381] &quot;duke_2956&quot; &quot;duke_2957&quot; &quot;duke_2958&quot; &quot;duke_3382&quot; &quot;duke_3385&quot;
+[386] &quot;duke_3386&quot; &quot;duke_3388&quot; &quot;duke_3389&quot; &quot;duke_3401&quot; &quot;duke_3403&quot;
+[391] &quot;duke_3404&quot; &quot;duke_3405&quot; &quot;duke_3407&quot; &quot;duke_3408&quot; &quot;duke_3409&quot;
+[396] &quot;duke_3411&quot; &quot;duke_3412&quot; &quot;duke_3417&quot; &quot;duke_3418&quot; &quot;duke_3422&quot;
+[401] &quot;duke_3429&quot; &quot;duke_3430&quot; &quot;duke_3431&quot; &quot;duke_3432&quot; &quot;duke_3433&quot;
+[406] &quot;duke_3434&quot; &quot;duke_3435&quot; &quot;duke_3438&quot; &quot;duke_3439&quot; &quot;duke_3440&quot;
+[411] &quot;duke_3441&quot; &quot;duke_3444&quot; &quot;duke_3446&quot; &quot;duke_3447&quot; &quot;duke_3448&quot;
+[416] &quot;duke_3449&quot; &quot;duke_3450&quot; &quot;duke_3451&quot; &quot;duke_3452&quot; &quot;duke_3453&quot;
+[421] &quot;duke_3454&quot; &quot;duke_3455&quot; &quot;duke_3456&quot; &quot;duke_3457&quot; &quot;duke_3458&quot;
+[426] &quot;duke_3459&quot; &quot;duke_3460&quot; &quot;duke_3461&quot; &quot;duke_3462&quot; &quot;duke_3463&quot;
+[431] &quot;duke_3464&quot; &quot;duke_3465&quot; &quot;duke_3467&quot; &quot;duke_3468&quot; &quot;duke_3470&quot;
+[436] &quot;duke_3471&quot; &quot;duke_3472&quot; &quot;duke_3473&quot; &quot;duke_3474&quot; &quot;duke_3475&quot;
+[441] &quot;duke_3476&quot; &quot;duke_3477&quot; &quot;duke_3478&quot; &quot;duke_3479&quot; &quot;duke_3480&quot;
+[446] &quot;duke_3481&quot; &quot;duke_3482&quot; &quot;duke_3483&quot; &quot;duke_3484&quot; &quot;duke_3485&quot;
+[451] &quot;duke_3487&quot; &quot;duke_3488&quot; &quot;duke_3489&quot; &quot;duke_3490&quot; &quot;duke_3493&quot;
+[456] &quot;duke_3496&quot; &quot;duke_3498&quot; &quot;duke_3500&quot; &quot;duke_3502&quot; &quot;duke_3504&quot;
+[461] &quot;duke_3505&quot; &quot;duke_3506&quot; &quot;duke_3507&quot; &quot;duke_3508&quot; &quot;duke_3546&quot;
+[466] &quot;duke_3547&quot; &quot;duke_3548&quot; &quot;duke_3549&quot; &quot;duke_3551&quot; &quot;duke_3552&quot;
+[471] &quot;duke_3555&quot; &quot;duke_3556&quot; &quot;duke_3557&quot; &quot;duke_3558&quot; &quot;duke_3559&quot;
+[476] &quot;duke_3560&quot; &quot;duke_3561&quot; &quot;duke_3562&quot; &quot;duke_3563&quot; &quot;duke_3565&quot;
+[481] &quot;duke_3566&quot; &quot;duke_3579&quot; &quot;duke_3582&quot; &quot;duke_3584&quot; &quot;duke_3585&quot;
+[486] &quot;duke_3586&quot; &quot;duke_3587&quot; &quot;duke_3589&quot; &quot;duke_3590&quot; &quot;duke_3591&quot;
+[491] &quot;duke_3592&quot; &quot;duke_3593&quot; &quot;duke_3594&quot; &quot;duke_3595&quot; &quot;duke_3596&quot;
+[496] &quot;duke_3597&quot; &quot;duke_3598&quot; &quot;duke_3600&quot; &quot;duke_3601&quot; &quot;duke_3602&quot;
+[501] &quot;duke_3603&quot; &quot;duke_3604&quot; &quot;duke_3605&quot; &quot;duke_3606&quot; &quot;duke_3608&quot;
+[506] &quot;duke_3609&quot; &quot;duke_3610&quot; &quot;duke_3611&quot; &quot;duke_3612&quot; &quot;duke_3613&quot;
+[511] &quot;duke_3615&quot; &quot;duke_3616&quot; &quot;duke_3617&quot; &quot;duke_3618&quot; &quot;duke_3620&quot;
+[516] &quot;duke_3622&quot; &quot;duke_3623&quot; &quot;duke_3624&quot; &quot;duke_3625&quot; &quot;duke_3627&quot;
+[521] &quot;duke_3628&quot; &quot;duke_3629&quot; &quot;duke_3630&quot; &quot;duke_3631&quot; &quot;duke_3632&quot;
+[526] &quot;duke_3634&quot; &quot;duke_3635&quot; &quot;duke_3637&quot; &quot;duke_3638&quot; &quot;duke_3639&quot;
+[531] &quot;duke_3640&quot; &quot;duke_3642&quot; &quot;duke_3644&quot; &quot;duke_3645&quot; &quot;duke_3646&quot;
+[536] &quot;duke_3647&quot; &quot;duke_3649&quot; &quot;duke_3651&quot; &quot;duke_3653&quot; &quot;duke_3654&quot;
+[541] &quot;duke_3655&quot; &quot;duke_3659&quot; &quot;duke_3660&quot; &quot;duke_3661&quot; &quot;duke_3662&quot;
+[546] &quot;duke_3663&quot; &quot;duke_3664&quot; &quot;duke_3666&quot; &quot;duke_3667&quot; &quot;duke_3668&quot;
+[551] &quot;duke_3669&quot; &quot;duke_3671&quot; &quot;duke_3672&quot; &quot;duke_3673&quot; &quot;duke_3674&quot;
+[556] &quot;duke_3675&quot; &quot;duke_3677&quot; &quot;duke_3679&quot; &quot;duke_3680&quot; &quot;duke_3682&quot;
+[561] &quot;duke_3684&quot; &quot;duke_3685&quot; &quot;duke_3687&quot; &quot;duke_3688&quot; &quot;duke_3689&quot;
+[566] &quot;duke_3691&quot; &quot;duke_3692&quot; &quot;duke_3693&quot; &quot;duke_3694&quot; &quot;duke_3696&quot;
+[571] &quot;duke_3697&quot; &quot;duke_3699&quot; &quot;duke_3700&quot; &quot;duke_3701&quot; &quot;duke_3703&quot;
+[576] &quot;duke_3704&quot; &quot;duke_3705&quot; &quot;duke_3706&quot; &quot;duke_3707&quot; &quot;duke_3708&quot;
+[581] &quot;duke_3709&quot; &quot;duke_3711&quot; &quot;duke_3712&quot; &quot;duke_3713&quot; &quot;duke_3715&quot;
+[586] &quot;duke_3716&quot; &quot;duke_3717&quot; &quot;duke_3718&quot; &quot;duke_3719&quot; &quot;duke_3721&quot;
+[591] &quot;duke_3722&quot; &quot;duke_3724&quot; &quot;duke_3725&quot; &quot;duke_3726&quot; &quot;duke_3727&quot;
+[596] &quot;duke_3728&quot; &quot;duke_3729&quot; &quot;duke_3730&quot; &quot;duke_3731&quot; &quot;duke_3732&quot;
+[601] &quot;duke_3733&quot; &quot;duke_3737&quot; &quot;duke_3739&quot; &quot;duke_3740&quot; &quot;duke_3741&quot;
+[606] &quot;duke_3742&quot; &quot;duke_3743&quot; &quot;duke_3744&quot; &quot;duke_3745&quot; &quot;duke_3746&quot;
+[611] &quot;duke_3747&quot; &quot;duke_3749&quot; &quot;duke_3750&quot; &quot;duke_3753&quot; &quot;duke_3754&quot;
+[616] &quot;duke_3755&quot; &quot;duke_3756&quot; &quot;duke_3757&quot; &quot;duke_3758&quot; &quot;duke_3759&quot;
+[621] &quot;duke_3761&quot; &quot;duke_3762&quot; &quot;duke_3763&quot; &quot;duke_3764&quot; &quot;duke_3765&quot;
+[626] &quot;duke_3766&quot; &quot;duke_3767&quot; &quot;duke_3770&quot; &quot;duke_3771&quot; &quot;duke_3775&quot;
+[631] &quot;duke_3776&quot; &quot;duke_3777&quot; &quot;duke_3778&quot; &quot;duke_3779&quot; &quot;duke_3780&quot;
+[636] &quot;duke_3781&quot; &quot;duke_3782&quot; &quot;duke_3783&quot; &quot;duke_3784&quot; &quot;duke_3785&quot;
+[641] &quot;duke_3786&quot; &quot;duke_3787&quot; &quot;duke_3810&quot; &quot;duke_3811&quot; &quot;duke_3812&quot;
+[646] &quot;duke_3813&quot; &quot;duke_3814&quot; &quot;duke_3815&quot; &quot;duke_3816&quot; &quot;duke_3817&quot;
+[651] &quot;duke_3823&quot; &quot;duke_3835&quot; &quot;duke_3843&quot; &quot;duke_3845&quot; &quot;duke_3846&quot;
+[656] &quot;duke_3847&quot; &quot;duke_3848&quot; &quot;duke_3849&quot; &quot;duke_3851&quot; &quot;duke_3852&quot;
+[661] &quot;duke_3856&quot; &quot;duke_3857&quot; &quot;duke_3859&quot; &quot;duke_3861&quot; &quot;duke_3865&quot;
+[666] &quot;duke_3867&quot; &quot;duke_3872&quot; &quot;duke_3873&quot; &quot;duke_3875&quot; &quot;duke_3876&quot;
+[671] &quot;duke_3879&quot; &quot;duke_3880&quot; &quot;duke_3881&quot; &quot;duke_3882&quot; &quot;duke_3883&quot;
+[676] &quot;duke_3886&quot; &quot;duke_3887&quot; &quot;duke_3888&quot; &quot;duke_3891&quot; &quot;duke_3892&quot;
+[681] &quot;duke_3893&quot; &quot;duke_3894&quot; &quot;duke_3895&quot; &quot;duke_3896&quot; &quot;duke_3898&quot;
+[686] &quot;duke_3899&quot; &quot;duke_3900&quot; &quot;duke_3901&quot; &quot;duke_3902&quot; &quot;duke_3903&quot;
+[691] &quot;duke_3904&quot; &quot;duke_3905&quot; &quot;duke_3906&quot; &quot;duke_3907&quot; &quot;duke_3908&quot;
+[696] &quot;duke_3909&quot; &quot;duke_3910&quot; &quot;duke_3911&quot; &quot;duke_3913&quot; &quot;duke_3914&quot;
+[701] &quot;duke_3915&quot; &quot;duke_3916&quot; &quot;duke_3918&quot; &quot;duke_3919&quot; &quot;duke_3920&quot;
+[706] &quot;duke_3921&quot; &quot;duke_3922&quot; &quot;duke_3925&quot; &quot;duke_3926&quot; &quot;duke_3927&quot;
+[711] &quot;duke_3928&quot; &quot;duke_3929&quot; &quot;duke_3930&quot; &quot;duke_3931&quot; &quot;duke_3932&quot;
+[716] &quot;duke_3933&quot; &quot;duke_3936&quot; &quot;duke_3937&quot; &quot;duke_3938&quot; &quot;duke_3940&quot;
+[721] &quot;duke_3941&quot; &quot;duke_3942&quot; &quot;duke_3943&quot; &quot;duke_3944&quot; &quot;duke_3945&quot;
+[726] &quot;duke_3946&quot; &quot;duke_3948&quot; &quot;duke_3949&quot; &quot;duke_3950&quot; &quot;duke_3951&quot;
+[731] &quot;duke_3952&quot; &quot;duke_3953&quot; &quot;duke_3954&quot; &quot;duke_3955&quot; &quot;duke_3956&quot;
+[736] &quot;duke_3957&quot; &quot;duke_3958&quot; &quot;duke_3959&quot; &quot;duke_3960&quot; &quot;duke_3963&quot;
+[741] &quot;duke_3964&quot; &quot;duke_3965&quot; &quot;duke_3966&quot; &quot;duke_3967&quot; &quot;duke_3968&quot;
+[746] &quot;duke_3969&quot; &quot;duke_3971&quot; &quot;duke_3972&quot; &quot;duke_3973&quot; &quot;duke_3974&quot;
+[751] &quot;duke_3975&quot; &quot;duke_3976&quot; &quot;duke_3977&quot; &quot;duke_3978&quot; &quot;duke_3979&quot;
+[756] &quot;duke_3980&quot; &quot;duke_3981&quot; &quot;duke_3982&quot; &quot;duke_3983&quot; &quot;duke_3984&quot;
+[761] &quot;duke_3985&quot; &quot;duke_3986&quot; &quot;duke_3987&quot; &quot;duke_3988&quot; &quot;duke_3989&quot;
+[766] &quot;duke_3990&quot; &quot;duke_3992&quot; &quot;duke_3993&quot; &quot;duke_3994&quot; &quot;duke_3997&quot;
+[771] &quot;duke_3999&quot;</code></pre>
+<pre class="r"><code>colnames(expr_duke) &lt;- col_names_rep
+expr_duke[1:5, 1:5]</code></pre>
+<pre><code>                  duke_648   duke_658  duke_683  duke_684 duke_689
+ENSG00000000003  18.435400   56.00074  50.58101   7.19879  82.0210
+ENSG00000000005   2.999997    0.00000   0.00000   0.00000   0.0000
+ENSG00000000419 476.999500  817.00040 141.99956 254.00005 192.9999
+ENSG00000000457 233.777470  330.03661 431.32295 204.92859 343.8820
+ENSG00000000460 560.002740 1121.99950 591.99990 564.99992 525.0006</code></pre>
+<pre class="r"><code># format gencode table for left join
+geneID_split &lt;- str_split(gencode_gtf$gene_id, pattern = &quot;\\.&quot;, simplify = TRUE) %&gt;% 
+  as_tibble() %&gt;%
+  dplyr::select(geneID_split = V1)
+
+gencode_gtf_split &lt;- gencode_gtf %&gt;% 
+  bind_cols(geneID_split) %&gt;%
+  dplyr::select(gene_id_v22 = gene_id, geneID_split, everything()) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 60,654 x 7
+   gene_id_v22 geneID_split gene_type gene_status gene_name level
+   &lt;chr&gt;       &lt;chr&gt;        &lt;chr&gt;     &lt;chr&gt;       &lt;chr&gt;     &lt;dbl&gt;
+ 1 ENSG000000… ENSG0000000… protein_… KNOWN       TSPAN6        2
+ 2 ENSG000000… ENSG0000000… protein_… KNOWN       TNMD          2
+ 3 ENSG000000… ENSG0000000… protein_… KNOWN       DPM1          2
+ 4 ENSG000000… ENSG0000000… protein_… KNOWN       SCYL3         2
+ 5 ENSG000000… ENSG0000000… protein_… KNOWN       C1orf112      2
+ 6 ENSG000000… ENSG0000000… protein_… KNOWN       FGR           2
+ 7 ENSG000000… ENSG0000000… protein_… KNOWN       CFH           1
+ 8 ENSG000000… ENSG0000000… protein_… KNOWN       FUCA2         2
+ 9 ENSG000000… ENSG0000000… protein_… KNOWN       GCLC          1
+10 ENSG000000… ENSG0000000… protein_… KNOWN       NFYA          2
+# … with 60,644 more rows, and 1 more variable: havana_gene &lt;chr&gt;</code></pre>
+<pre class="r"><code># left join, select columns, reformat
+expr_duke_df &lt;- expr_duke %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;geneID_split&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(gencode_gtf_split) %&gt;%
+  dplyr::select(gene_name, starts_with(&quot;duke&quot;)) %&gt;%
+  drop_na(gene_name) %&gt;%
+  as.data.frame()</code></pre>
+<pre><code>Joining, by = &quot;geneID_split&quot;</code></pre>
+<pre class="r"><code># merge duplicate entries for genes (average expression)
+nrow(expr_duke_df)</code></pre>
+<pre><code>[1] 56753</code></pre>
+<pre class="r"><code>expr_duke_data &lt;- as.matrix(expr_duke_df[, 2:772])
+rownames(expr_duke_data) &lt;- expr_duke_df[,1]
+expr_duke_nodups &lt;- avereps(expr_duke_data)
+nrow(expr_duke_nodups)</code></pre>
+<pre><code>[1] 54908</code></pre>
+<pre class="r"><code>expr_duke_nodups[1:5, 1:5]</code></pre>
+<pre><code>           duke_648   duke_658  duke_683  duke_684 duke_689
+TSPAN6    18.435400   56.00074  50.58101   7.19879  82.0210
+TNMD       2.999997    0.00000   0.00000   0.00000   0.0000
+DPM1     476.999500  817.00040 141.99956 254.00005 192.9999
+SCYL3    233.777470  330.03661 431.32295 204.92859 343.8820
+C1orf112 560.002740 1121.99950 591.99990 564.99992 525.0006</code></pre>
+<p>Filter samples to match those included in the clustering analysis</p>
+<pre class="r"><code>duke_es &lt;- readRDS(&quot;output/duke_expressionset.rds&quot;)
+prior_duke_expr &lt;- exprs(duke_es)
+samplelist &lt;- c(&quot;gene_symbol&quot;, colnames(prior_duke_expr))
+
+expr_duke_decon &lt;- expr_duke_nodups %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_symbol&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(one_of(samplelist)) %&gt;%
+  column_to_rownames(var = &quot;gene_symbol&quot;) %&gt;%
+  as.matrix()
+
+dim(expr_duke_decon)</code></pre>
+<pre><code>[1] 54908   708</code></pre>
+<pre class="r"><code>str(expr_duke_decon)</code></pre>
+<pre><code> num [1:54908, 1:708] 18.4 3 477 233.8 560 ...
+ - attr(*, &quot;dimnames&quot;)=List of 2
+  ..$ : chr [1:54908] &quot;TSPAN6&quot; &quot;TNMD&quot; &quot;DPM1&quot; &quot;SCYL3&quot; ...
+  ..$ : chr [1:708] &quot;duke_648&quot; &quot;duke_658&quot; &quot;duke_683&quot; &quot;duke_684&quot; ...</code></pre>
+<pre class="r"><code>expr_duke_decon[1:5, 1:5]</code></pre>
+<pre><code>           duke_648   duke_658  duke_683  duke_684 duke_689
+TSPAN6    18.435400   56.00074  50.58101   7.19879  82.0210
+TNMD       2.999997    0.00000   0.00000   0.00000   0.0000
+DPM1     476.999500  817.00040 141.99956 254.00005 192.9999
+SCYL3    233.777470  330.03661 431.32295 204.92859 343.8820
+C1orf112 560.002740 1121.99950 591.99990 564.99992 525.0006</code></pre>
+</div>
+</div>
+<div id="nci" class="section level3">
+<h3>NCI</h3>
+<p>Read in NCI raw counts</p>
+<pre class="r"><code>total_counts &lt;- read_csv(&quot;output/nci_dlbcl_unprocessed_counts.csv&quot;)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_double(),
+  gene = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<p>Convert gene id to gene symbol, eliminate duplicates</p>
+<pre class="r"><code>tot_counts_symbol &lt;- total_counts %&gt;%
+  dplyr::rename(gene_id = gene) %&gt;%
+  left_join(gencode_gtf) %&gt;%
+  dplyr::select(gene_name, starts_with(&quot;DLBCL&quot;)) %&gt;%
+  drop_na(gene_name)</code></pre>
+<pre><code>Joining, by = &quot;gene_id&quot;</code></pre>
+<pre class="r"><code>tot_counts_matrix &lt;- tot_counts_symbol[, 2:482] %&gt;%
+  as.matrix() 
+rownames(tot_counts_matrix) &lt;- tot_counts_symbol$gene_name
+ 
+dim(tot_counts_matrix)</code></pre>
+<pre><code>[1] 60483   481</code></pre>
+<pre class="r"><code>str(tot_counts_matrix)</code></pre>
+<pre><code> num [1:60483, 1:481] 51 1 1087 172 162 ...
+ - attr(*, &quot;dimnames&quot;)=List of 2
+  ..$ : chr [1:60483] &quot;TSPAN6&quot; &quot;TNMD&quot; &quot;DPM1&quot; &quot;SCYL3&quot; ...
+  ..$ : chr [1:481] &quot;DLBCL11667&quot; &quot;DLBCL10501&quot; &quot;DLBCL10954&quot; &quot;DLBCL10984&quot; ...</code></pre>
+<pre class="r"><code>tot_counts_matrix[1:5, 1:5]</code></pre>
+<pre><code>         DLBCL11667 DLBCL10501 DLBCL10954 DLBCL10984 DLBCL11206
+TSPAN6           51         73        137        121        515
+TNMD              1          0          0          0          1
+DPM1           1087       1284       1500       1993       2008
+SCYL3           172        118       1613       1355       1114
+C1orf112        162        413       1069        837        865</code></pre>
+<pre class="r"><code># eliminate duplicates by averaging counts
+# merge duplicate entries for genes (average expression)
+expr_nci_nodups &lt;- avereps(tot_counts_matrix, ID = rownames(tot_counts_matrix))
+nrow(expr_nci_nodups)</code></pre>
+<pre><code>[1] 58387</code></pre>
+<pre class="r"><code>expr_nci_nodups[1:5, 1:5]</code></pre>
+<pre><code>         DLBCL11667 DLBCL10501 DLBCL10954 DLBCL10984 DLBCL11206
+TSPAN6           51         73        137        121        515
+TNMD              1          0          0          0          1
+DPM1           1087       1284       1500       1993       2008
+SCYL3           172        118       1613       1355       1114
+C1orf112        162        413       1069        837        865</code></pre>
+</div>
+<div id="merge" class="section level3">
+<h3>Merge</h3>
+<p>There are more rows in the NCI dataset after removal of duplicates and missing gene symbols. Will keep only those rows present in both datasets to allow for fair comparison.</p>
+<pre class="r"><code>nci_counts_df &lt;- expr_nci_nodups %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_symbol&quot;) %&gt;%
+  as_tibble()
+
+duke_counts_df &lt;- expr_duke_nodups %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_symbol&quot;) %&gt;%
+  as_tibble()
+
+merge_counts_df &lt;- nci_counts_df %&gt;%
+  inner_join(duke_counts_df) %&gt;%
+  print()</code></pre>
+<pre><code>Joining, by = &quot;gene_symbol&quot;</code></pre>
+<pre><code># A tibble: 54,908 x 1,253
+   gene_symbol DLBCL11667 DLBCL10501 DLBCL10954 DLBCL10984 DLBCL11206
+   &lt;chr&gt;            &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+ 1 TSPAN6              51         73        137        121        515
+ 2 TNMD                 1          0          0          0          1
+ 3 DPM1              1087       1284       1500       1993       2008
+ 4 SCYL3              172        118       1613       1355       1114
+ 5 C1orf112           162        413       1069        837        865
+ 6 FGR                827        573       2458       3986       2399
+ 7 CFH                705        904       2204       1677       2039
+ 8 FUCA2              847        441       3292       1837       2176
+ 9 GCLC               498        670       3195       2497       2782
+10 NFYA               892       1578       2788       2902       2080
+# … with 54,898 more rows, and 1,247 more variables: DLBCL10959 &lt;dbl&gt;,
+#   DLBCL10985 &lt;dbl&gt;, DLBCL11533 &lt;dbl&gt;, DLBCL11519 &lt;dbl&gt;,
+#   DLBCL10921 &lt;dbl&gt;, DLBCL11462 &lt;dbl&gt;, DLBCL10960 &lt;dbl&gt;,
+#   DLBCL10943 &lt;dbl&gt;, DLBCL11503 &lt;dbl&gt;, DLBCL11674 &lt;dbl&gt;,
+#   DLBCL10969 &lt;dbl&gt;, DLBCL11481 &lt;dbl&gt;, DLBCL10946 &lt;dbl&gt;,
+#   DLBCL11538 &lt;dbl&gt;, DLBCL11000 &lt;dbl&gt;, DLBCL10972 &lt;dbl&gt;,
+#   DLBCL11537 &lt;dbl&gt;, DLBCL10902 &lt;dbl&gt;, DLBCL10555 &lt;dbl&gt;,
+#   DLBCL10918 &lt;dbl&gt;, DLBCL11573 &lt;dbl&gt;, DLBCL11559 &lt;dbl&gt;,
+#   DLBCL11590 &lt;dbl&gt;, DLBCL11528 &lt;dbl&gt;, DLBCL10881 &lt;dbl&gt;,
+#   DLBCL10539 &lt;dbl&gt;, DLBCL10890 &lt;dbl&gt;, DLBCL11571 &lt;dbl&gt;,
+#   DLBCL10945 &lt;dbl&gt;, DLBCL11456 &lt;dbl&gt;, DLBCL11517 &lt;dbl&gt;,
+#   DLBCL11474 &lt;dbl&gt;, DLBCL11492 &lt;dbl&gt;, DLBCL10924 &lt;dbl&gt;,
+#   DLBCL11208 &lt;dbl&gt;, DLBCL10899 &lt;dbl&gt;, DLBCL11575 &lt;dbl&gt;,
+#   DLBCL11353 &lt;dbl&gt;, DLBCL11495 &lt;dbl&gt;, DLBCL11180 &lt;dbl&gt;,
+#   DLBCL10466 &lt;dbl&gt;, DLBCL10529 &lt;dbl&gt;, DLBCL11181 &lt;dbl&gt;,
+#   DLBCL11261 &lt;dbl&gt;, DLBCL11441 &lt;dbl&gt;, DLBCL10116 &lt;dbl&gt;,
+#   DLBCL10478 &lt;dbl&gt;, DLBCL10986 &lt;dbl&gt;, DLBCL10862 &lt;dbl&gt;,
+#   DLBCL11454 &lt;dbl&gt;, DLBCL11428 &lt;dbl&gt;, DLBCL11196 &lt;dbl&gt;,
+#   DLBCL10534 &lt;dbl&gt;, DLBCL10515 &lt;dbl&gt;, DLBCL10965 &lt;dbl&gt;,
+#   DLBCL10462 &lt;dbl&gt;, DLBCL11259 &lt;dbl&gt;, DLBCL11576 &lt;dbl&gt;,
+#   DLBCL11439 &lt;dbl&gt;, DLBCL10967 &lt;dbl&gt;, DLBCL10917 &lt;dbl&gt;,
+#   DLBCL11448 &lt;dbl&gt;, DLBCL11512 &lt;dbl&gt;, DLBCL11662 &lt;dbl&gt;,
+#   DLBCL10873 &lt;dbl&gt;, DLBCL10538 &lt;dbl&gt;, DLBCL11685 &lt;dbl&gt;,
+#   DLBCL10893 &lt;dbl&gt;, DLBCL11508 &lt;dbl&gt;, DLBCL10992 &lt;dbl&gt;,
+#   DLBCL10545 &lt;dbl&gt;, DLBCL10915 &lt;dbl&gt;, DLBCL11657 &lt;dbl&gt;,
+#   DLBCL10496 &lt;dbl&gt;, DLBCL11191 &lt;dbl&gt;, DLBCL10864 &lt;dbl&gt;,
+#   DLBCL11535 &lt;dbl&gt;, DLBCL10502 &lt;dbl&gt;, DLBCL10492 &lt;dbl&gt;,
+#   DLBCL10876 &lt;dbl&gt;, DLBCL10500 &lt;dbl&gt;, DLBCL11677 &lt;dbl&gt;,
+#   DLBCL10835 &lt;dbl&gt;, DLBCL11490 &lt;dbl&gt;, DLBCL10896 &lt;dbl&gt;,
+#   DLBCL10525 &lt;dbl&gt;, DLBCL11672 &lt;dbl&gt;, DLBCL10488 &lt;dbl&gt;,
+#   DLBCL10504 &lt;dbl&gt;, DLBCL11531 &lt;dbl&gt;, DLBCL10451 &lt;dbl&gt;,
+#   DLBCL10457 &lt;dbl&gt;, DLBCL11430 &lt;dbl&gt;, DLBCL11477 &lt;dbl&gt;,
+#   DLBCL11300 &lt;dbl&gt;, DLBCL10961 &lt;dbl&gt;, DLBCL11655 &lt;dbl&gt;,
+#   DLBCL11434 &lt;dbl&gt;, DLBCL11515 &lt;dbl&gt;, DLBCL10834 &lt;dbl&gt;, …</code></pre>
+<pre class="r"><code>## Write out for use in TIMER online application
+merge_counts &lt;- merge_counts_df %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;gene_symbol&quot;) %&gt;%
+  as.matrix()
+
+write.csv(merge_counts, &quot;output/merged_raw_counts.csv&quot;)</code></pre>
+<p>Limit on TIMER upload to 50 MB, total size of CSV now is ~ 231 MB. Will need to split into parts. Leave a little overlap to correct for any batch effect (would not expect any due to per-sample analysis)</p>
+<pre class="r"><code>ncol(merge_counts) / 5</code></pre>
+<pre><code>[1] 250.4</code></pre>
+<pre class="r"><code>mc1 &lt;- merge_counts[, 1:250]
+rownames(mc1) &lt;- rownames(merge_counts)
+write.csv(mc1, &quot;output/merged_raw_counts_1.csv&quot;)
+mc2 &lt;- merge_counts[, 240:500]
+rownames(mc2) &lt;- rownames(merge_counts)
+write.csv(mc2, &quot;output/merged_raw_counts_2.csv&quot;)
+mc3 &lt;- merge_counts[, 490:650]
+rownames(mc3) &lt;- rownames(merge_counts)
+write.csv(mc3, &quot;output/merged_raw_counts_3.csv&quot;)
+mc4 &lt;- merge_counts[, 640:800]
+rownames(mc4) &lt;- rownames(merge_counts)
+write.csv(mc4, &quot;output/merged_raw_counts_4.csv&quot;)
+mc5 &lt;- merge_counts[, 790:950]
+rownames(mc5) &lt;- rownames(merge_counts)
+write.csv(mc5, &quot;output/merged_raw_counts_5.csv&quot;)
+mc6 &lt;- merge_counts[, 940:1100]
+rownames(mc6) &lt;- rownames(merge_counts)
+write.csv(mc6, &quot;output/merged_raw_counts_6.csv&quot;)
+mc7 &lt;- merge_counts[, 1090:1252]
+rownames(mc7) &lt;- rownames(merge_counts)
+write.csv(mc7, &quot;output/merged_raw_counts_7.csv&quot;)</code></pre>
+</div>
+</div>
+<div id="music" class="section level2">
+<h2>MuSiC</h2>
+<p><a href="https://www-nature-com.proxy.uchicago.edu/articles/nmeth.1830" class="uri">https://www-nature-com.proxy.uchicago.edu/articles/nmeth.1830</a> Use non-transformed (raw counts) for deconvolution</p>
+<p><a href="http://xuranw.github.io/MuSiC/articles/MuSiC.html" class="uri">http://xuranw.github.io/MuSiC/articles/MuSiC.html</a></p>
+<pre class="r"><code># install devtools if necessary
+#install.packages(&#39;devtools&#39;)
+
+# install the MuSiC package
+#devtools::install_github(&#39;xuranw/MuSiC&#39;)
+
+# load
+#library(MuSiC)</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.5.3 (2019-03-11)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Mojave 10.14.4
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] Biobase_2.42.0      BiocGenerics_0.28.0 edgeR_3.24.3       
+ [4] limma_3.38.3        forcats_0.4.0       stringr_1.4.0      
+ [7] dplyr_0.8.3         purrr_0.3.2         readr_1.3.1        
+[10] tidyr_0.8.3         tibble_2.1.3        ggplot2_3.2.0      
+[13] tidyverse_1.2.1    
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_0.2.5 locfit_1.5-9.1   xfun_0.8         haven_2.1.1     
+ [5] lattice_0.20-38  vctrs_0.2.0      colorspace_1.4-1 generics_0.0.2  
+ [9] htmltools_0.3.6  yaml_2.2.0       utf8_1.1.4       rlang_0.4.0     
+[13] pillar_1.4.2     glue_1.3.1       withr_2.1.2      modelr_0.1.4    
+[17] readxl_1.3.1     munsell_0.5.0    gtable_0.3.0     workflowr_1.4.0 
+[21] cellranger_1.1.0 rvest_0.3.4      evaluate_0.14    knitr_1.23      
+[25] fansi_0.4.0      highr_0.8        broom_0.5.2      Rcpp_1.0.1      
+[29] scales_1.0.0     backports_1.1.4  jsonlite_1.6     fs_1.3.1        
+[33] hms_0.4.2        digest_0.6.20    stringi_1.4.3    grid_3.5.3      
+[37] rprojroot_1.3-2  cli_1.1.0        tools_3.5.3      magrittr_1.5    
+[41] lazyeval_0.2.2   zeallot_0.1.0    crayon_1.3.4     whisker_0.3-2   
+[45] pkgconfig_2.0.2  xml2_1.2.0       lubridate_1.7.4  assertthat_0.2.1
+[49] rmarkdown_1.13   httr_1.4.0       rstudioapi_0.10  R6_2.4.0        
+[53] nlme_3.1-140     git2r_0.26.1     compiler_3.5.3  </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
