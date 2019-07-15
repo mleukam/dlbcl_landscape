@@ -17,7 +17,7 @@
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/darkly.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -419,7 +419,7 @@ div.section {
 
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
-<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
 </button>
 </p>
 <div id="workflowr-report" class="collapse">
@@ -428,7 +428,7 @@ div.section {
 <a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -437,10 +437,10 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-06-28
+<strong>Last updated:</strong> 2019-07-14
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
@@ -452,7 +452,7 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <hr>
 </div>
 <div id="checks" class="tab-pane fade">
-<div id="workflowr-checks" class="panel-group">
+<div class="panel-group" id="workflowr-checks">
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
@@ -468,12 +468,57 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongobjectspresent"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>Environment:</strong> objects present </a>
 </p>
 </div>
-<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div id="strongEnvironmentstrongobjectspresent" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+
+<p>
+The global environment had objects present when the code in the R Markdown file was run. These objects can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment. Use <code>wflow_publish</code> or <code>wflow_build</code> to ensure that the code is always run in an empty environment.
+</p>
+<p>
+The following objects were defined in the global environment when these results were created:
+</p>
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th style="text-align:left;">
+Name
+</th>
+<th style="text-align:left;">
+Class
+</th>
+<th style="text-align:left;">
+Size
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+data
+</td>
+<td style="text-align:left;">
+environment
+</td>
+<td style="text-align:left;">
+56 bytes
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+env
+</td>
+<td style="text-align:left;">
+environment
+</td>
+<td style="text-align:left;">
+56 bytes
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -528,10 +573,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree42da9d5893be09775a582da78b8bec151d4ea9bftargetblank42da9d5a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/42da9d5893be09775a582da78b8bec151d4ea9bf" target="_blank">42da9d5</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreefe5d4fd9041e164bdf73f0c225e86c757de78434targetblankfe5d4fda"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/fe5d4fd9041e164bdf73f0c225e86c757de78434" target="_blank">fe5d4fd</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree42da9d5893be09775a582da78b8bec151d4ea9bftargetblank42da9d5a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreefe5d4fd9041e164bdf73f0c225e86c757de78434targetblankfe5d4fda" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -541,33 +586,86 @@ Ignored files:
     Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    data/1-s2.0-S1074761316304320-mmc2.xlsx
+    Ignored:    data/41591_2018_45_MOESM5_ESM.xlsx
+    Ignored:    data/NIH_PDL1_amp_cases.csv
+    Ignored:    data/NIH_PDL1_nonamp_cases.csv
+    Ignored:    data/aliquot.tsv
+    Ignored:    data/azizi_curated.xlsx
+    Ignored:    data/c2_human_immune_genesets.gmt
+    Ignored:    data/dlbcl_total_immune_gset_v1_results.rds
+    Ignored:    data/ds_JCO.18.01583-2.xlsx
+    Ignored:    data/gdc_clinical_data.json
+    Ignored:    data/gdc_files_and_case_ids.json
+    Ignored:    data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Ignored:    data/gset_ids_complete.rds
+    Ignored:    data/htseq_counts/
+    Ignored:    data/journal.pone.0088309.s001.XLS
+    Ignored:    data/mmc1.xlsx
+    Ignored:    data/nejmoa1801445_appendix_2.xlsx
+    Ignored:    data/sample.tsv
+    Ignored:    data/sig.rda
+    Ignored:    data/temp.dgelist_limma.rds
+    Ignored:    docs/.DS_Store
+    Ignored:    output/combined_clin_data.xlsx
+    Ignored:    output/combined_dlbcl_expr_matrix.csv
+    Ignored:    output/dlbcl_expr_matrix.csv
+    Ignored:    output/dlbcl_total_immune_gset_v2_results.rds
+    Ignored:    output/duke_expression_set_cleaned_log.rds
+    Ignored:    output/duke_expressionset.rds
+    Ignored:    output/duke_expressionset_pext.rds
+    Ignored:    output/duke_extended_pheno_data.csv
+    Ignored:    output/expr_matrix.csv
+    Ignored:    output/gset_ids_complete_2.rds
+    Ignored:    output/nci_dlbcl_annotation.csv
+    Ignored:    output/nci_dlbcl_unprocessed_counts.csv
+    Ignored:    output/nci_expressionset.rds
+    Ignored:    output/nci_expressionset_pext.rds
+    Ignored:    output/nci_extended_pheno_data.csv
+    Ignored:    output/total_immune_gset_v1.rds
 
 Untracked files:
-    Untracked:  analysis/enrichment.Rmd
-    Untracked:  analysis/newgs.Rmd
-    Untracked:  code/gsva1.r
-    Untracked:  code/gsva1.sh
-    Untracked:  code/run_gsva1.pbs
-    Untracked:  data/NIH_PDL1_amp_cases.csv
-    Untracked:  data/NIH_PDL1_nonamp_cases.csv
-    Untracked:  data/aliquot.tsv
-    Untracked:  data/c2_human_immune_genesets.gmt
-    Untracked:  data/dlbcl_total_immune_gset_v1_results.rds
-    Untracked:  data/gdc_clinical_data.json
-    Untracked:  data/gdc_files_and_case_ids.json
-    Untracked:  data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
-    Untracked:  data/gset_ids_complete.rds
-    Untracked:  data/htseq_counts/
-    Untracked:  data/sample.tsv
-    Untracked:  data/temp.dgelist_limma.rds
-    Untracked:  output/dlbcl_expr_matrix.csv
-    Untracked:  output/duke_expression_set_cleaned_log.rds
-    Untracked:  output/duke_expressionset.rds
-    Untracked:  output/expr_matrix.csv
-    Untracked:  output/nci_dlbcl_annotation.csv
-    Untracked:  output/nci_dlbcl_unprocessed_counts.csv
-    Untracked:  output/nci_expressionset.rds
-    Untracked:  output/total_immune_gset_v1.rds
+    Untracked:  analysis/assign_mutations.Rmd
+    Untracked:  analysis/deconvolution.Rmd
+    Untracked:  analysis/visualizing_gsva_scores_3.Rmd
+    Untracked:  analysis/visualizing_gsva_scores_4.Rmd
+    Untracked:  data/12864_2005_498_MOESM2_ESM.xls
+    Untracked:  data/PanImmune_GeneSet_Definitions.xlsx
+    Untracked:  data/final_analysis_set.maf
+    Untracked:  data/genesets/
+    Untracked:  data/reactome_imm_signaling.tsv
+    Untracked:  data/sig_genes.txt
+    Untracked:  data/temp.dgelist_edger.rds
+    Untracked:  docs/assets/Rplot01.pdf
+    Untracked:  docs/assets/Rplot02.pdf
+    Untracked:  docs/assets/Rplot03.pdf
+    Untracked:  docs/assets/gsva4_heatmap_rawscores.pdf
+    Untracked:  output/combined_es_gsva2_4cluster.rds
+    Untracked:  output/combined_expressionset.rds
+    Untracked:  output/dlbcl_total_immune_gset_v3_results.rds
+    Untracked:  output/dlbcl_total_immune_gset_v4_results.rds
+    Untracked:  output/gset_ids_complete_3.rds
+    Untracked:  output/gset_ids_complete_4.rds
+    Untracked:  output/gsva_v2_4clust_assign.rds
+    Untracked:  output/mc1_score_matrix.csv
+    Untracked:  output/mc2_score_matrix.csv
+    Untracked:  output/mc3_score_matrix.csv
+    Untracked:  output/mc4_score_matrix.csv
+    Untracked:  output/mc5_score_matrix.csv
+    Untracked:  output/mc6_score_matrix.csv
+    Untracked:  output/mc7_score_matrix.csv
+    Untracked:  output/merged_raw_counts.csv
+    Untracked:  output/merged_raw_counts_1.csv
+    Untracked:  output/merged_raw_counts_2.csv
+    Untracked:  output/merged_raw_counts_3.csv
+    Untracked:  output/merged_raw_counts_4.csv
+    Untracked:  output/merged_raw_counts_5.csv
+    Untracked:  output/merged_raw_counts_6.csv
+    Untracked:  output/merged_raw_counts_7.csv
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/visualizing_gsva_scores_2.Rmd
 
 </code></pre>
 <p>
@@ -606,6 +704,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/fe5d4fd9041e164bdf73f0c225e86c757de78434/analysis/dukedata.Rmd" target="_blank">fe5d4fd</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-15
+</td>
+<td>
+fixed duke raw counts
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/5a57ec091786bd8b0362d31767fd966d90be89cd/docs/dukedata.html" target="_blank">5a57ec0</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-28
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -676,12 +808,12 @@ working notebook for cleaning and normalizing duke expression data with some
 <pre class="r"><code>rm(list = ls())</code></pre>
 <p>Load packages</p>
 <pre class="r"><code>library(&quot;tidyverse&quot;)</code></pre>
-<pre><code>── Attaching packages ─────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
-<pre><code>✔ ggplot2 3.1.1     ✔ purrr   0.3.2
-✔ tibble  2.1.3     ✔ dplyr   0.8.1
+<pre><code>── Attaching packages ─────────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>✔ ggplot2 3.2.0     ✔ purrr   0.3.2
+✔ tibble  2.1.3     ✔ dplyr   0.8.3
 ✔ tidyr   0.8.3     ✔ stringr 1.4.0
 ✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
-<pre><code>── Conflicts ────────────────────────────────────────────────── tidyverse_conflicts() ──
+<pre><code>── Conflicts ────────────────────────────────────────────────────── tidyverse_conflicts() ──
 ✖ dplyr::filter() masks stats::filter()
 ✖ dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>library(&quot;edgeR&quot;)</code></pre>
@@ -721,62 +853,100 @@ Attaching package: &#39;BiocGenerics&#39;</code></pre>
     Vignettes contain introductory material; view with
     &#39;browseVignettes()&#39;. To cite Bioconductor, see
     &#39;citation(&quot;Biobase&quot;)&#39;, and for packages &#39;citation(&quot;pkgname&quot;)&#39;.</code></pre>
-<p>From the cluster:</p>
-<pre class="r"><code># txi &lt;- readRDS(&quot;txi.limma.rds&quot;)
-# &gt; str(txi)
-#List of 5
-# $ abundance          : num [1:58721, 1:771] 1.89 0.687 150.765 14.069 51.961 ...
-#  ..- attr(*, &quot;dimnames&quot;)=List of 2
-#  .. ..$ : chr [1:58721] &quot;ENSG00000000003.14&quot; &quot;ENSG00000000005.5&quot; &quot;ENSG00000000419.12&quot; #&quot;ENSG00000000457.13&quot; ...
-#  .. ..$ : chr [1:771] &quot;648.a.1kDLBCL.DLBCL.SL137547.RNA&quot; &quot;658.a.1kDLBCL.DLBCL.SL137175.RNA&quot; #&quot;683.a.1kDLBCL.DLBCL.SL137187.RNA&quot; &quot;684.a.1kDLBCL.DLBCL.SL137583.RNA&quot; ...
-# $ counts             : num [1:58721, 1:771] 18.04 3.02 502.55 231.24 653.92 ...
-#  ..- attr(*, &quot;dimnames&quot;)=List of 2
-#  .. ..$ : chr [1:58721] &quot;ENSG00000000003.14&quot; &quot;ENSG00000000005.5&quot; &quot;ENSG00000000419.12&quot; #&quot;ENSG00000000457.13&quot; ...
-#  .. ..$ : chr [1:771] &quot;648.a.1kDLBCL.DLBCL.SL137547.RNA&quot; &quot;658.a.1kDLBCL.DLBCL.SL137175.RNA&quot; #&quot;683.a.1kDLBCL.DLBCL.SL137187.RNA&quot; &quot;684.a.1kDLBCL.DLBCL.SL137583.RNA&quot; ...
-# $ infReps            :List of 771
-#  ..$ 648.a.1kDLBCL.DLBCL.SL137547.RNA : num [1:58721, 1:100] 16 4 461 229 559 ...
-#  .. ..- attr(*, &quot;dimnames&quot;)=List of 2
-#  .. .. ..$ : chr [1:58721] &quot;ENSG00000000003.14&quot; &quot;ENSG00000000005.5&quot; &quot;ENSG00000000419.12&quot; #&quot;ENSG00000000457.13&quot; ...
-#  .. .. ..$ : NULL
+<p>Batch script from Gardner HPC Cluster</p>
+<pre class="r"><code>#!/usr/bin/env Rscript
 
-# dgelist &lt;- txi$counts
-  
-# str(dgelist)
-# Formal class &#39;DGEList&#39; [package &quot;edgeR&quot;] with 1 slot
-#  ..@ .Data:List of 3
-#  .. ..$ : num [1:16178, 1:771] 18.04 3.02 502.55 231.24 653.92 ...
-#  .. .. ..- attr(*, &quot;dimnames&quot;)=List of 2
-#  .. .. .. ..$ : chr [1:16178] &quot;ENSG00000000003&quot; &quot;ENSG00000000005&quot; &quot;ENSG00000000419&quot; #&quot;ENSG00000000457&quot; ...
-#  .. .. .. ..$ : chr [1:771] &quot;648.a.1kDLBCL.DLBCL.SL137547.RNA&quot; #&quot;658.a.1kDLBCL.DLBCL.SL137175.RNA&quot; &quot;683.a.1kDLBCL.DLBCL.SL137187.RNA&quot; #&quot;684.a.1kDLBCL.DLBCL.SL137583.RNA&quot; ...
-#  .. ..$ :&#39;data.frame&#39;:    771 obs. of  4 variables:
-#  .. .. ..$ group       : Factor w/ 1 level &quot;1&quot;: 1 1 1 1 1 1 1 1 1 1 ...
-#  .. .. ..$ lib.size    : num [1:771] 7664006 13270246 8620210 5512745 8874452 ...
-#  .. .. ..$ norm.factors: num [1:771] 1.014 0.952 0.947 0.843 0.938 ...
-#  .. .. ..$ lane        : Factor w/ 7 levels &quot;C7FYAANXX&quot;,&quot;C7U9KANXX&quot;,..: 7 5 5 7 7 7 7 7 7 7 #...
-#  .. ..$ :&#39;data.frame&#39;:    16178 obs. of  4 variables:
-#  .. .. ..$ ensembl_gene_id: chr [1:16178] &quot;ENSG00000000003&quot; &quot;ENSG00000000005&quot; #&quot;ENSG00000000419&quot; &quot;ENSG00000000457&quot; ...
-#  .. .. ..$ hgnc_symbol    : chr [1:16178] &quot;TSPAN6&quot; &quot;TNMD&quot; &quot;DPM1&quot; &quot;SCYL3&quot; ...
-#  .. .. ..$ chromosome_name: chr [1:16178] &quot;X&quot; &quot;X&quot; &quot;20&quot; &quot;1&quot; ...
-#  .. .. ..$ gene_biotype   : chr [1:16178] &quot;protein_coding&quot; &quot;protein_coding&quot; &quot;protein_coding&quot; #&quot;protein_coding&quot; ...</code></pre>
-<p>Read in data</p>
-<pre class="r"><code>dgelist &lt;- readRDS(&quot;data/temp.dgelist_limma.rds&quot;)
+# requires R version 3.5.0
+
+# load packages
+library(&quot;dplyr&quot;)
+library(&quot;readr&quot;)
+library(&quot;tximport&quot;)
+library(&quot;GenomicFeatures&quot;)
+library(&quot;AnnotationDbi&quot;)
+library(&quot;edgeR&quot;)
+
+# import input files
+TxDb.gencode.v29.primary &lt;- loadDb(&quot;/gpfs/data/kline-lab/ref/Gencode/TxDb.gencode.v29.primary.sqlite&quot;)
+kallisto.files &lt;- read_table(&quot;/gpfs/data/kline-lab/inputs/abundance_tsv.tsv&quot;, col_names=FALSE)
+metadata &lt;- read_csv(&quot;/gpfs/data/kline-lab/inputs/rna_meta_table.csv&quot;, col_names=FALSE)
+
+# select columns to make tx2gene
+k &lt;- keys(TxDb.gencode.v29.primary, keytype = &quot;TXNAME&quot;)
+tx2gene &lt;- AnnotationDbi::select(TxDb.gencode.v29.primary, k, &quot;GENEID&quot;, &quot;TXNAME&quot;)
+
+# convert filenames and samples to vector
+kallisto.files &lt;- dplyr::pull(kallisto.files[,1])
+sample.names &lt;- dplyr::pull(metadata[,1])
+names(kallisto.files) &lt;- sample.names
+
+# how to work around ignoreAfterBar
+# https://www.biostars.org/p/322297/
+
+# import reabdundance files for use with edger
+txi.edger &lt;- tximport(kallisto.files, 
+    type = &quot;kallisto&quot;, 
+    tx2gene = tx2gene, 
+    ignoreAfterBar = TRUE)
+
+# save tximport objects for later use
+saveRDS(txi.edger, &quot;/gpfs/data/kline-lab/inputs/txi.edger.rds&quot;)</code></pre>
+<p>Cluster interactive node:</p>
+<pre class="r"><code>## load packages
+library(tximport)
+library(edgeR)
+library(limma)
+library(tidyverse)
+library(biomaRt)
+
+## read in tximport objects and metadata
+## this takes a while
+txi_edger &lt;- readRDS(&quot;/gpfs/data/kline-lab/inputs/txi.edger.rds&quot;)
+metadata &lt;- read_csv(&quot;/gpfs/data/kline-lab/inputs/rna_meta_table.csv&quot;,col_names=FALSE)
+
+## add counts by gene to DGEList as matrix
+dgelist_edger &lt;- DGEList(txi_edger$counts)
+
+## add readgroup information to DGEList as data.frame
+lane &lt;- as.factor(metadata$X4) 
+dgelist_edger$samples$lane &lt;- lane 
+
+## add gene symbol information to DGEList
+## first remove version number from gene names in dgelist$counts
+genes_edger &lt;- sapply(strsplit((rownames(dgelist_edger$counts)), &quot;.&quot;, fixed = TRUE), function(x) x[1])
+rownames(dgelist_edger$counts) &lt;- genes_edger
+
+## then pull gene symbols for each gene name
+mart &lt;- useDataset(&quot;hsapiens_gene_ensembl&quot;, useMart(&quot;ensembl&quot;))  
+
+symbol_edger &lt;- getBM(filters = &quot;ensembl_gene_id&quot;, attributes = c(&quot;ensembl_gene_id&quot;, &quot;hgnc_symbol&quot;,&quot;chromosome_name&quot;, &quot;gene_biotype&quot;), values = genes_edger, mart = mart)
+
+## reorder and adjust length to match my genes
+symbol_edger &lt;- symbol_edger[match(genes_edger, symbol_edger$ensembl_gene_id),]
+
+## add data.frame of gene symbols to DGElist
+dgelist_edger$genes &lt;- symbol_edger
+
+saveRDS(dgelist_edger, &quot;/gpfs/data/kline-lab/inputs/temp.dgelist_edger.rds&quot;)</code></pre>
+<p>Move output file to local machine and load into R notebook session</p>
+<pre class="r"><code>dgelist &lt;- readRDS(&quot;data/temp.dgelist_edger.rds&quot;)
 str(dgelist)</code></pre>
 <pre><code>Formal class &#39;DGEList&#39; [package &quot;edgeR&quot;] with 1 slot
   ..@ .Data:List of 3
-  .. ..$ : num [1:16178, 1:771] 18.04 3.02 502.55 231.24 653.92 ...
+  .. ..$ : num [1:58721, 1:771] 18.4 3 477 233.8 560 ...
   .. .. ..- attr(*, &quot;dimnames&quot;)=List of 2
-  .. .. .. ..$ : chr [1:16178] &quot;ENSG00000000003&quot; &quot;ENSG00000000005&quot; &quot;ENSG00000000419&quot; &quot;ENSG00000000457&quot; ...
+  .. .. .. ..$ : chr [1:58721] &quot;ENSG00000000003&quot; &quot;ENSG00000000005&quot; &quot;ENSG00000000419&quot; &quot;ENSG00000000457&quot; ...
   .. .. .. ..$ : chr [1:771] &quot;648.a.1kDLBCL.DLBCL.SL137547.RNA&quot; &quot;658.a.1kDLBCL.DLBCL.SL137175.RNA&quot; &quot;683.a.1kDLBCL.DLBCL.SL137187.RNA&quot; &quot;684.a.1kDLBCL.DLBCL.SL137583.RNA&quot; ...
   .. ..$ :&#39;data.frame&#39;: 771 obs. of  4 variables:
   .. .. ..$ group       : Factor w/ 1 level &quot;1&quot;: 1 1 1 1 1 1 1 1 1 1 ...
-  .. .. ..$ lib.size    : num [1:771] 7664006 13270246 8620210 5512745 8874452 ...
-  .. .. ..$ norm.factors: num [1:771] 1.014 0.952 0.947 0.843 0.938 ...
+  .. .. ..$ lib.size    : num [1:771] 8555760 14637402 9636558 6111139 9908540 ...
+  .. .. ..$ norm.factors: num [1:771] 1 1 1 1 1 1 1 1 1 1 ...
   .. .. ..$ lane        : Factor w/ 7 levels &quot;C7FYAANXX&quot;,&quot;C7U9KANXX&quot;,..: 7 5 5 7 7 7 7 7 7 7 ...
-  .. ..$ :&#39;data.frame&#39;: 16178 obs. of  4 variables:
-  .. .. ..$ ensembl_gene_id: chr [1:16178] &quot;ENSG00000000003&quot; &quot;ENSG00000000005&quot; &quot;ENSG00000000419&quot; &quot;ENSG00000000457&quot; ...
-  .. .. ..$ hgnc_symbol    : chr [1:16178] &quot;TSPAN6&quot; &quot;TNMD&quot; &quot;DPM1&quot; &quot;SCYL3&quot; ...
-  .. .. ..$ chromosome_name: chr [1:16178] &quot;X&quot; &quot;X&quot; &quot;20&quot; &quot;1&quot; ...
-  .. .. ..$ gene_biotype   : chr [1:16178] &quot;protein_coding&quot; &quot;protein_coding&quot; &quot;protein_coding&quot; &quot;protein_coding&quot; ...</code></pre>
+  .. ..$ :&#39;data.frame&#39;: 58721 obs. of  4 variables:
+  .. .. ..$ ensembl_gene_id: chr [1:58721] &quot;ENSG00000000003&quot; &quot;ENSG00000000005&quot; &quot;ENSG00000000419&quot; &quot;ENSG00000000457&quot; ...
+  .. .. ..$ hgnc_symbol    : chr [1:58721] &quot;TSPAN6&quot; &quot;TNMD&quot; &quot;DPM1&quot; &quot;SCYL3&quot; ...
+  .. .. ..$ chromosome_name: chr [1:58721] &quot;X&quot; &quot;X&quot; &quot;20&quot; &quot;1&quot; ...
+  .. .. ..$ gene_biotype   : chr [1:58721] &quot;protein_coding&quot; &quot;protein_coding&quot; &quot;protein_coding&quot; &quot;protein_coding&quot; ...</code></pre>
 <pre class="r"><code># read in conversion table for gene IDs
 gencode_gtf &lt;- read_tsv(&quot;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&quot;)</code></pre>
 <pre><code>Parsed with column specification:
@@ -805,35 +975,35 @@ See problems(...) for more details.</code></pre>
 expr_duke &lt;- dgelist[[1]]
 expr_duke[1:5, 1:5]</code></pre>
 <pre><code>                648.a.1kDLBCL.DLBCL.SL137547.RNA
-ENSG00000000003                        18.036060
-ENSG00000000005                         3.022655
-ENSG00000000419                       502.551508
-ENSG00000000457                       231.243100
-ENSG00000000460                       653.920429
+ENSG00000000003                        18.435400
+ENSG00000000005                         2.999997
+ENSG00000000419                       476.999500
+ENSG00000000457                       233.777470
+ENSG00000000460                       560.002740
                 658.a.1kDLBCL.DLBCL.SL137175.RNA
-ENSG00000000003                         56.52077
+ENSG00000000003                         56.00074
 ENSG00000000005                          0.00000
-ENSG00000000419                        879.08074
-ENSG00000000457                        333.21953
-ENSG00000000460                       1144.52933
+ENSG00000000419                        817.00040
+ENSG00000000457                        330.03661
+ENSG00000000460                       1121.99950
                 683.a.1kDLBCL.DLBCL.SL137187.RNA
-ENSG00000000003                         57.04855
+ENSG00000000003                         50.58101
 ENSG00000000005                          0.00000
-ENSG00000000419                        150.61949
-ENSG00000000457                        387.19099
-ENSG00000000460                        534.36886
+ENSG00000000419                        141.99956
+ENSG00000000457                        431.32295
+ENSG00000000460                        591.99990
                 684.a.1kDLBCL.DLBCL.SL137583.RNA
-ENSG00000000003                         7.290646
-ENSG00000000005                         0.000000
-ENSG00000000419                       287.679769
-ENSG00000000457                       207.392488
-ENSG00000000460                       625.864030
-                689.a.1kDLBCL.DLBCL.SL137307.RNA
-ENSG00000000003                         85.59033
+ENSG00000000003                          7.19879
 ENSG00000000005                          0.00000
-ENSG00000000419                        191.18755
-ENSG00000000457                        304.50997
-ENSG00000000460                        419.88944</code></pre>
+ENSG00000000419                        254.00005
+ENSG00000000457                        204.92859
+ENSG00000000460                        564.99992
+                689.a.1kDLBCL.DLBCL.SL137307.RNA
+ENSG00000000003                          82.0210
+ENSG00000000005                           0.0000
+ENSG00000000419                         192.9999
+ENSG00000000457                         343.8820
+ENSG00000000460                         525.0006</code></pre>
 <pre class="r"><code>col__names &lt;- colnames(expr_duke)
 col_names_rep &lt;- str_split(col__names, pattern = &quot;\\.&quot;, simplify = TRUE) %&gt;% 
   as_tibble() %&gt;%
@@ -999,12 +1169,12 @@ This warning is displayed once per session.</code></pre>
 [771] &quot;duke_3999&quot;</code></pre>
 <pre class="r"><code>colnames(expr_duke) &lt;- col_names_rep
 expr_duke[1:5, 1:5]</code></pre>
-<pre><code>                  duke_648   duke_658  duke_683   duke_684  duke_689
-ENSG00000000003  18.036060   56.52077  57.04855   7.290646  85.59033
-ENSG00000000005   3.022655    0.00000   0.00000   0.000000   0.00000
-ENSG00000000419 502.551508  879.08074 150.61949 287.679769 191.18755
-ENSG00000000457 231.243100  333.21953 387.19099 207.392488 304.50997
-ENSG00000000460 653.920429 1144.52933 534.36886 625.864030 419.88944</code></pre>
+<pre><code>                  duke_648   duke_658  duke_683  duke_684 duke_689
+ENSG00000000003  18.435400   56.00074  50.58101   7.19879  82.0210
+ENSG00000000005   2.999997    0.00000   0.00000   0.00000   0.0000
+ENSG00000000419 476.999500  817.00040 141.99956 254.00005 192.9999
+ENSG00000000457 233.777470  330.03661 431.32295 204.92859 343.8820
+ENSG00000000460 560.002740 1121.99950 591.99990 564.99992 525.0006</code></pre>
 <pre class="r"><code># gencode v29 was used to generate rownames of expr_duke matrix
 # GDC standard is gencode v22, which is source of NCI data
 # will convert to gencode v22 to match rows of NCI data
@@ -1032,30 +1202,666 @@ gencode_gtf_split &lt;- gencode_gtf %&gt;%
 # … with 60,644 more rows, and 1 more variable: havana_gene &lt;chr&gt;</code></pre>
 <pre class="r"><code>row__names &lt;- rownames(expr_duke) %&gt;%
   enframe() %&gt;%
-  dplyr::select(geneID_split = value)
-
-# check how many gene ids are missing in v22 that are named in v29
+  dplyr::select(geneID_split = value) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 58,721 x 1
+   geneID_split   
+   &lt;chr&gt;          
+ 1 ENSG00000000003
+ 2 ENSG00000000005
+ 3 ENSG00000000419
+ 4 ENSG00000000457
+ 5 ENSG00000000460
+ 6 ENSG00000000938
+ 7 ENSG00000000971
+ 8 ENSG00000001036
+ 9 ENSG00000001084
+10 ENSG00000001167
+# … with 58,711 more rows</code></pre>
+<pre class="r"><code># check how many gene ids are missing in v22 that are named in v29
 setdiff(row__names$geneID_split, gencode_gtf_split$geneID_split)</code></pre>
-<pre><code> [1] &quot;ENSG00000281990&quot; &quot;ENSG00000283149&quot; &quot;ENSG00000283303&quot;
- [4] &quot;ENSG00000283378&quot; &quot;ENSG00000283515&quot; &quot;ENSG00000283544&quot;
- [7] &quot;ENSG00000283662&quot; &quot;ENSG00000283706&quot; &quot;ENSG00000283709&quot;
-[10] &quot;ENSG00000283907&quot; &quot;ENSG00000284266&quot; &quot;ENSG00000284602&quot;
-[13] &quot;ENSG00000284649&quot; &quot;ENSG00000284685&quot; &quot;ENSG00000284692&quot;
-[16] &quot;ENSG00000284703&quot; &quot;ENSG00000284734&quot; &quot;ENSG00000284755&quot;
-[19] &quot;ENSG00000284762&quot; &quot;ENSG00000284797&quot; &quot;ENSG00000284809&quot;
-[22] &quot;ENSG00000284922&quot; &quot;ENSG00000284946&quot; &quot;ENSG00000284952&quot;
-[25] &quot;ENSG00000284964&quot; &quot;ENSG00000284976&quot; &quot;ENSG00000284977&quot;
-[28] &quot;ENSG00000285025&quot; &quot;ENSG00000285053&quot; &quot;ENSG00000285103&quot;
-[31] &quot;ENSG00000285184&quot; &quot;ENSG00000285238&quot; &quot;ENSG00000285258&quot;
-[34] &quot;ENSG00000285314&quot; &quot;ENSG00000285330&quot; &quot;ENSG00000285331&quot;
-[37] &quot;ENSG00000285382&quot; &quot;ENSG00000285404&quot; &quot;ENSG00000285427&quot;
-[40] &quot;ENSG00000285441&quot; &quot;ENSG00000285509&quot; &quot;ENSG00000285583&quot;
-[43] &quot;ENSG00000285713&quot; &quot;ENSG00000285816&quot; &quot;ENSG00000285854&quot;
-[46] &quot;ENSG00000285935&quot; &quot;ENSG00000285942&quot; &quot;ENSG00000285952&quot;
-[49] &quot;ENSG00000285967&quot; &quot;ENSG00000285968&quot; &quot;ENSG00000285972&quot;
-[52] &quot;ENSG00000285976&quot; &quot;ENSG00000285982&quot; &quot;ENSG00000285991&quot;
-[55] &quot;ENSG00000285994&quot;</code></pre>
-<pre class="r"><code># 55, not terrible, spot check with google finds that many of these are not protein-coding
+<pre><code>   [1] &quot;ENSG00000273716&quot; &quot;ENSG00000281938&quot; &quot;ENSG00000281941&quot;
+   [4] &quot;ENSG00000281955&quot; &quot;ENSG00000281958&quot; &quot;ENSG00000281961&quot;
+   [7] &quot;ENSG00000281969&quot; &quot;ENSG00000281974&quot; &quot;ENSG00000281990&quot;
+  [10] &quot;ENSG00000281991&quot; &quot;ENSG00000282012&quot; &quot;ENSG00000282021&quot;
+  [13] &quot;ENSG00000282022&quot; &quot;ENSG00000282024&quot; &quot;ENSG00000282033&quot;
+  [16] &quot;ENSG00000282034&quot; &quot;ENSG00000282041&quot; &quot;ENSG00000282048&quot;
+  [19] &quot;ENSG00000282051&quot; &quot;ENSG00000282057&quot; &quot;ENSG00000282059&quot;
+  [22] &quot;ENSG00000282080&quot; &quot;ENSG00000282089&quot; &quot;ENSG00000282097&quot;
+  [25] &quot;ENSG00000282100&quot; &quot;ENSG00000282111&quot; &quot;ENSG00000282121&quot;
+  [28] &quot;ENSG00000282122&quot; &quot;ENSG00000282133&quot; &quot;ENSG00000282137&quot;
+  [31] &quot;ENSG00000282142&quot; &quot;ENSG00000282143&quot; &quot;ENSG00000282160&quot;
+  [34] &quot;ENSG00000282164&quot; &quot;ENSG00000282173&quot; &quot;ENSG00000282199&quot;
+  [37] &quot;ENSG00000282206&quot; &quot;ENSG00000282218&quot; &quot;ENSG00000282221&quot;
+  [40] &quot;ENSG00000282222&quot; &quot;ENSG00000282246&quot; &quot;ENSG00000282265&quot;
+  [43] &quot;ENSG00000282268&quot; &quot;ENSG00000282277&quot; &quot;ENSG00000282278&quot;
+  [46] &quot;ENSG00000282299&quot; &quot;ENSG00000282300&quot; &quot;ENSG00000282301&quot;
+  [49] &quot;ENSG00000282304&quot; &quot;ENSG00000282306&quot; &quot;ENSG00000282308&quot;
+  [52] &quot;ENSG00000282317&quot; &quot;ENSG00000282320&quot; &quot;ENSG00000282321&quot;
+  [55] &quot;ENSG00000282327&quot; &quot;ENSG00000282339&quot; &quot;ENSG00000282358&quot;
+  [58] &quot;ENSG00000282375&quot; &quot;ENSG00000282381&quot; &quot;ENSG00000282386&quot;
+  [61] &quot;ENSG00000282390&quot; &quot;ENSG00000282393&quot; &quot;ENSG00000282408&quot;
+  [64] &quot;ENSG00000282413&quot; &quot;ENSG00000282416&quot; &quot;ENSG00000282418&quot;
+  [67] &quot;ENSG00000282419&quot; &quot;ENSG00000282420&quot; &quot;ENSG00000282431&quot;
+  [70] &quot;ENSG00000282432&quot; &quot;ENSG00000282440&quot; &quot;ENSG00000282458&quot;
+  [73] &quot;ENSG00000282478&quot; &quot;ENSG00000282499&quot; &quot;ENSG00000282501&quot;
+  [76] &quot;ENSG00000282502&quot; &quot;ENSG00000282508&quot; &quot;ENSG00000282511&quot;
+  [79] &quot;ENSG00000282520&quot; &quot;ENSG00000282527&quot; &quot;ENSG00000282535&quot;
+  [82] &quot;ENSG00000282542&quot; &quot;ENSG00000282556&quot; &quot;ENSG00000282564&quot;
+  [85] &quot;ENSG00000282572&quot; &quot;ENSG00000282591&quot; &quot;ENSG00000282599&quot;
+  [88] &quot;ENSG00000282600&quot; &quot;ENSG00000282602&quot; &quot;ENSG00000282608&quot;
+  [91] &quot;ENSG00000282625&quot; &quot;ENSG00000282639&quot; &quot;ENSG00000282651&quot;
+  [94] &quot;ENSG00000282668&quot; &quot;ENSG00000282686&quot; &quot;ENSG00000282692&quot;
+  [97] &quot;ENSG00000282697&quot; &quot;ENSG00000282718&quot; &quot;ENSG00000282728&quot;
+ [100] &quot;ENSG00000282732&quot; &quot;ENSG00000282738&quot; &quot;ENSG00000282740&quot;
+ [103] &quot;ENSG00000282742&quot; &quot;ENSG00000282757&quot; &quot;ENSG00000282759&quot;
+ [106] &quot;ENSG00000282772&quot; &quot;ENSG00000282780&quot; &quot;ENSG00000282785&quot;
+ [109] &quot;ENSG00000282787&quot; &quot;ENSG00000282793&quot; &quot;ENSG00000282798&quot;
+ [112] &quot;ENSG00000282804&quot; &quot;ENSG00000282807&quot; &quot;ENSG00000282815&quot;
+ [115] &quot;ENSG00000282816&quot; &quot;ENSG00000282826&quot; &quot;ENSG00000282828&quot;
+ [118] &quot;ENSG00000282834&quot; &quot;ENSG00000282836&quot; &quot;ENSG00000282840&quot;
+ [121] &quot;ENSG00000282842&quot; &quot;ENSG00000282843&quot; &quot;ENSG00000282849&quot;
+ [124] &quot;ENSG00000282850&quot; &quot;ENSG00000282851&quot; &quot;ENSG00000282852&quot;
+ [127] &quot;ENSG00000282855&quot; &quot;ENSG00000282859&quot; &quot;ENSG00000282860&quot;
+ [130] &quot;ENSG00000282863&quot; &quot;ENSG00000282864&quot; &quot;ENSG00000282865&quot;
+ [133] &quot;ENSG00000282870&quot; &quot;ENSG00000282872&quot; &quot;ENSG00000282875&quot;
+ [136] &quot;ENSG00000282876&quot; &quot;ENSG00000282879&quot; &quot;ENSG00000282881&quot;
+ [139] &quot;ENSG00000282882&quot; &quot;ENSG00000282885&quot; &quot;ENSG00000282886&quot;
+ [142] &quot;ENSG00000282887&quot; &quot;ENSG00000282890&quot; &quot;ENSG00000282894&quot;
+ [145] &quot;ENSG00000282897&quot; &quot;ENSG00000282898&quot; &quot;ENSG00000282904&quot;
+ [148] &quot;ENSG00000282906&quot; &quot;ENSG00000282907&quot; &quot;ENSG00000282909&quot;
+ [151] &quot;ENSG00000282911&quot; &quot;ENSG00000282912&quot; &quot;ENSG00000282914&quot;
+ [154] &quot;ENSG00000282915&quot; &quot;ENSG00000282916&quot; &quot;ENSG00000282917&quot;
+ [157] &quot;ENSG00000282921&quot; &quot;ENSG00000282924&quot; &quot;ENSG00000282925&quot;
+ [160] &quot;ENSG00000282927&quot; &quot;ENSG00000282933&quot; &quot;ENSG00000282935&quot;
+ [163] &quot;ENSG00000282936&quot; &quot;ENSG00000282939&quot; &quot;ENSG00000282943&quot;
+ [166] &quot;ENSG00000282944&quot; &quot;ENSG00000282946&quot; &quot;ENSG00000282949&quot;
+ [169] &quot;ENSG00000282950&quot; &quot;ENSG00000282951&quot; &quot;ENSG00000282952&quot;
+ [172] &quot;ENSG00000282961&quot; &quot;ENSG00000282964&quot; &quot;ENSG00000282965&quot;
+ [175] &quot;ENSG00000282968&quot; &quot;ENSG00000282973&quot; &quot;ENSG00000282975&quot;
+ [178] &quot;ENSG00000282977&quot; &quot;ENSG00000282978&quot; &quot;ENSG00000282980&quot;
+ [181] &quot;ENSG00000282987&quot; &quot;ENSG00000282988&quot; &quot;ENSG00000282989&quot;
+ [184] &quot;ENSG00000282993&quot; &quot;ENSG00000282994&quot; &quot;ENSG00000282995&quot;
+ [187] &quot;ENSG00000282996&quot; &quot;ENSG00000282997&quot; &quot;ENSG00000282998&quot;
+ [190] &quot;ENSG00000283000&quot; &quot;ENSG00000283001&quot; &quot;ENSG00000283003&quot;
+ [193] &quot;ENSG00000283005&quot; &quot;ENSG00000283010&quot; &quot;ENSG00000283016&quot;
+ [196] &quot;ENSG00000283020&quot; &quot;ENSG00000283023&quot; &quot;ENSG00000283025&quot;
+ [199] &quot;ENSG00000283029&quot; &quot;ENSG00000283031&quot; &quot;ENSG00000283033&quot;
+ [202] &quot;ENSG00000283036&quot; &quot;ENSG00000283039&quot; &quot;ENSG00000283040&quot;
+ [205] &quot;ENSG00000283041&quot; &quot;ENSG00000283043&quot; &quot;ENSG00000283044&quot;
+ [208] &quot;ENSG00000283045&quot; &quot;ENSG00000283047&quot; &quot;ENSG00000283050&quot;
+ [211] &quot;ENSG00000283051&quot; &quot;ENSG00000283052&quot; &quot;ENSG00000283053&quot;
+ [214] &quot;ENSG00000283057&quot; &quot;ENSG00000283058&quot; &quot;ENSG00000283061&quot;
+ [217] &quot;ENSG00000283063&quot; &quot;ENSG00000283064&quot; &quot;ENSG00000283065&quot;
+ [220] &quot;ENSG00000283069&quot; &quot;ENSG00000283071&quot; &quot;ENSG00000283072&quot;
+ [223] &quot;ENSG00000283073&quot; &quot;ENSG00000283075&quot; &quot;ENSG00000283076&quot;
+ [226] &quot;ENSG00000283078&quot; &quot;ENSG00000283083&quot; &quot;ENSG00000283084&quot;
+ [229] &quot;ENSG00000283088&quot; &quot;ENSG00000283093&quot; &quot;ENSG00000283095&quot;
+ [232] &quot;ENSG00000283096&quot; &quot;ENSG00000283097&quot; &quot;ENSG00000283098&quot;
+ [235] &quot;ENSG00000283101&quot; &quot;ENSG00000283103&quot; &quot;ENSG00000283108&quot;
+ [238] &quot;ENSG00000283110&quot; &quot;ENSG00000283117&quot; &quot;ENSG00000283118&quot;
+ [241] &quot;ENSG00000283122&quot; &quot;ENSG00000283123&quot; &quot;ENSG00000283125&quot;
+ [244] &quot;ENSG00000283126&quot; &quot;ENSG00000283128&quot; &quot;ENSG00000283130&quot;
+ [247] &quot;ENSG00000283131&quot; &quot;ENSG00000283132&quot; &quot;ENSG00000283133&quot;
+ [250] &quot;ENSG00000283136&quot; &quot;ENSG00000283138&quot; &quot;ENSG00000283141&quot;
+ [253] &quot;ENSG00000283142&quot; &quot;ENSG00000283145&quot; &quot;ENSG00000283146&quot;
+ [256] &quot;ENSG00000283148&quot; &quot;ENSG00000283149&quot; &quot;ENSG00000283152&quot;
+ [259] &quot;ENSG00000283154&quot; &quot;ENSG00000283155&quot; &quot;ENSG00000283156&quot;
+ [262] &quot;ENSG00000283157&quot; &quot;ENSG00000283159&quot; &quot;ENSG00000283160&quot;
+ [265] &quot;ENSG00000283162&quot; &quot;ENSG00000283164&quot; &quot;ENSG00000283165&quot;
+ [268] &quot;ENSG00000283166&quot; &quot;ENSG00000283167&quot; &quot;ENSG00000283170&quot;
+ [271] &quot;ENSG00000283172&quot; &quot;ENSG00000283174&quot; &quot;ENSG00000283175&quot;
+ [274] &quot;ENSG00000283176&quot; &quot;ENSG00000283178&quot; &quot;ENSG00000283180&quot;
+ [277] &quot;ENSG00000283183&quot; &quot;ENSG00000283188&quot; &quot;ENSG00000283189&quot;
+ [280] &quot;ENSG00000283193&quot; &quot;ENSG00000283195&quot; &quot;ENSG00000283196&quot;
+ [283] &quot;ENSG00000283197&quot; &quot;ENSG00000283199&quot; &quot;ENSG00000283200&quot;
+ [286] &quot;ENSG00000283201&quot; &quot;ENSG00000283202&quot; &quot;ENSG00000283203&quot;
+ [289] &quot;ENSG00000283204&quot; &quot;ENSG00000283205&quot; &quot;ENSG00000283206&quot;
+ [292] &quot;ENSG00000283207&quot; &quot;ENSG00000283208&quot; &quot;ENSG00000283209&quot;
+ [295] &quot;ENSG00000283210&quot; &quot;ENSG00000283211&quot; &quot;ENSG00000283212&quot;
+ [298] &quot;ENSG00000283213&quot; &quot;ENSG00000283214&quot; &quot;ENSG00000283215&quot;
+ [301] &quot;ENSG00000283217&quot; &quot;ENSG00000283218&quot; &quot;ENSG00000283219&quot;
+ [304] &quot;ENSG00000283221&quot; &quot;ENSG00000283222&quot; &quot;ENSG00000283225&quot;
+ [307] &quot;ENSG00000283227&quot; &quot;ENSG00000283228&quot; &quot;ENSG00000283230&quot;
+ [310] &quot;ENSG00000283232&quot; &quot;ENSG00000283234&quot; &quot;ENSG00000283235&quot;
+ [313] &quot;ENSG00000283236&quot; &quot;ENSG00000283237&quot; &quot;ENSG00000283238&quot;
+ [316] &quot;ENSG00000283239&quot; &quot;ENSG00000283240&quot; &quot;ENSG00000283242&quot;
+ [319] &quot;ENSG00000283246&quot; &quot;ENSG00000283247&quot; &quot;ENSG00000283249&quot;
+ [322] &quot;ENSG00000283251&quot; &quot;ENSG00000283255&quot; &quot;ENSG00000283256&quot;
+ [325] &quot;ENSG00000283257&quot; &quot;ENSG00000283258&quot; &quot;ENSG00000283259&quot;
+ [328] &quot;ENSG00000283262&quot; &quot;ENSG00000283265&quot; &quot;ENSG00000283267&quot;
+ [331] &quot;ENSG00000283268&quot; &quot;ENSG00000283269&quot; &quot;ENSG00000283270&quot;
+ [334] &quot;ENSG00000283271&quot; &quot;ENSG00000283273&quot; &quot;ENSG00000283274&quot;
+ [337] &quot;ENSG00000283275&quot; &quot;ENSG00000283278&quot; &quot;ENSG00000283279&quot;
+ [340] &quot;ENSG00000283281&quot; &quot;ENSG00000283283&quot; &quot;ENSG00000283285&quot;
+ [343] &quot;ENSG00000283286&quot; &quot;ENSG00000283288&quot; &quot;ENSG00000283289&quot;
+ [346] &quot;ENSG00000283290&quot; &quot;ENSG00000283291&quot; &quot;ENSG00000283293&quot;
+ [349] &quot;ENSG00000283294&quot; &quot;ENSG00000283296&quot; &quot;ENSG00000283297&quot;
+ [352] &quot;ENSG00000283298&quot; &quot;ENSG00000283300&quot; &quot;ENSG00000283301&quot;
+ [355] &quot;ENSG00000283303&quot; &quot;ENSG00000283304&quot; &quot;ENSG00000283307&quot;
+ [358] &quot;ENSG00000283311&quot; &quot;ENSG00000283312&quot; &quot;ENSG00000283313&quot;
+ [361] &quot;ENSG00000283314&quot; &quot;ENSG00000283317&quot; &quot;ENSG00000283320&quot;
+ [364] &quot;ENSG00000283321&quot; &quot;ENSG00000283324&quot; &quot;ENSG00000283326&quot;
+ [367] &quot;ENSG00000283327&quot; &quot;ENSG00000283329&quot; &quot;ENSG00000283330&quot;
+ [370] &quot;ENSG00000283333&quot; &quot;ENSG00000283334&quot; &quot;ENSG00000283335&quot;
+ [373] &quot;ENSG00000283337&quot; &quot;ENSG00000283338&quot; &quot;ENSG00000283339&quot;
+ [376] &quot;ENSG00000283340&quot; &quot;ENSG00000283341&quot; &quot;ENSG00000283342&quot;
+ [379] &quot;ENSG00000283343&quot; &quot;ENSG00000283345&quot; &quot;ENSG00000283346&quot;
+ [382] &quot;ENSG00000283347&quot; &quot;ENSG00000283349&quot; &quot;ENSG00000283351&quot;
+ [385] &quot;ENSG00000283352&quot; &quot;ENSG00000283354&quot; &quot;ENSG00000283355&quot;
+ [388] &quot;ENSG00000283356&quot; &quot;ENSG00000283359&quot; &quot;ENSG00000283360&quot;
+ [391] &quot;ENSG00000283361&quot; &quot;ENSG00000283364&quot; &quot;ENSG00000283365&quot;
+ [394] &quot;ENSG00000283366&quot; &quot;ENSG00000283367&quot; &quot;ENSG00000283369&quot;
+ [397] &quot;ENSG00000283371&quot; &quot;ENSG00000283372&quot; &quot;ENSG00000283375&quot;
+ [400] &quot;ENSG00000283376&quot; &quot;ENSG00000283377&quot; &quot;ENSG00000283378&quot;
+ [403] &quot;ENSG00000283379&quot; &quot;ENSG00000283380&quot; &quot;ENSG00000283381&quot;
+ [406] &quot;ENSG00000283383&quot; &quot;ENSG00000283384&quot; &quot;ENSG00000283385&quot;
+ [409] &quot;ENSG00000283386&quot; &quot;ENSG00000283389&quot; &quot;ENSG00000283390&quot;
+ [412] &quot;ENSG00000283392&quot; &quot;ENSG00000283393&quot; &quot;ENSG00000283394&quot;
+ [415] &quot;ENSG00000283398&quot; &quot;ENSG00000283399&quot; &quot;ENSG00000283400&quot;
+ [418] &quot;ENSG00000283402&quot; &quot;ENSG00000283403&quot; &quot;ENSG00000283405&quot;
+ [421] &quot;ENSG00000283408&quot; &quot;ENSG00000283409&quot; &quot;ENSG00000283411&quot;
+ [424] &quot;ENSG00000283412&quot; &quot;ENSG00000283413&quot; &quot;ENSG00000283414&quot;
+ [427] &quot;ENSG00000283415&quot; &quot;ENSG00000283416&quot; &quot;ENSG00000283417&quot;
+ [430] &quot;ENSG00000283418&quot; &quot;ENSG00000283419&quot; &quot;ENSG00000283420&quot;
+ [433] &quot;ENSG00000283421&quot; &quot;ENSG00000283422&quot; &quot;ENSG00000283423&quot;
+ [436] &quot;ENSG00000283426&quot; &quot;ENSG00000283427&quot; &quot;ENSG00000283428&quot;
+ [439] &quot;ENSG00000283429&quot; &quot;ENSG00000283431&quot; &quot;ENSG00000283432&quot;
+ [442] &quot;ENSG00000283433&quot; &quot;ENSG00000283434&quot; &quot;ENSG00000283435&quot;
+ [445] &quot;ENSG00000283436&quot; &quot;ENSG00000283438&quot; &quot;ENSG00000283439&quot;
+ [448] &quot;ENSG00000283440&quot; &quot;ENSG00000283441&quot; &quot;ENSG00000283442&quot;
+ [451] &quot;ENSG00000283443&quot; &quot;ENSG00000283444&quot; &quot;ENSG00000283445&quot;
+ [454] &quot;ENSG00000283446&quot; &quot;ENSG00000283450&quot; &quot;ENSG00000283451&quot;
+ [457] &quot;ENSG00000283452&quot; &quot;ENSG00000283453&quot; &quot;ENSG00000283455&quot;
+ [460] &quot;ENSG00000283456&quot; &quot;ENSG00000283457&quot; &quot;ENSG00000283458&quot;
+ [463] &quot;ENSG00000283459&quot; &quot;ENSG00000283461&quot; &quot;ENSG00000283462&quot;
+ [466] &quot;ENSG00000283463&quot; &quot;ENSG00000283464&quot; &quot;ENSG00000283468&quot;
+ [469] &quot;ENSG00000283469&quot; &quot;ENSG00000283471&quot; &quot;ENSG00000283473&quot;
+ [472] &quot;ENSG00000283474&quot; &quot;ENSG00000283475&quot; &quot;ENSG00000283476&quot;
+ [475] &quot;ENSG00000283477&quot; &quot;ENSG00000283479&quot; &quot;ENSG00000283480&quot;
+ [478] &quot;ENSG00000283481&quot; &quot;ENSG00000283483&quot; &quot;ENSG00000283484&quot;
+ [481] &quot;ENSG00000283486&quot; &quot;ENSG00000283487&quot; &quot;ENSG00000283489&quot;
+ [484] &quot;ENSG00000283490&quot; &quot;ENSG00000283491&quot; &quot;ENSG00000283492&quot;
+ [487] &quot;ENSG00000283493&quot; &quot;ENSG00000283496&quot; &quot;ENSG00000283497&quot;
+ [490] &quot;ENSG00000283498&quot; &quot;ENSG00000283499&quot; &quot;ENSG00000283502&quot;
+ [493] &quot;ENSG00000283503&quot; &quot;ENSG00000283504&quot; &quot;ENSG00000283505&quot;
+ [496] &quot;ENSG00000283506&quot; &quot;ENSG00000283507&quot; &quot;ENSG00000283509&quot;
+ [499] &quot;ENSG00000283511&quot; &quot;ENSG00000283513&quot; &quot;ENSG00000283514&quot;
+ [502] &quot;ENSG00000283515&quot; &quot;ENSG00000283516&quot; &quot;ENSG00000283517&quot;
+ [505] &quot;ENSG00000283518&quot; &quot;ENSG00000283519&quot; &quot;ENSG00000283522&quot;
+ [508] &quot;ENSG00000283523&quot; &quot;ENSG00000283524&quot; &quot;ENSG00000283525&quot;
+ [511] &quot;ENSG00000283526&quot; &quot;ENSG00000283527&quot; &quot;ENSG00000283528&quot;
+ [514] &quot;ENSG00000283529&quot; &quot;ENSG00000283532&quot; &quot;ENSG00000283534&quot;
+ [517] &quot;ENSG00000283535&quot; &quot;ENSG00000283536&quot; &quot;ENSG00000283537&quot;
+ [520] &quot;ENSG00000283538&quot; &quot;ENSG00000283540&quot; &quot;ENSG00000283541&quot;
+ [523] &quot;ENSG00000283542&quot; &quot;ENSG00000283544&quot; &quot;ENSG00000283545&quot;
+ [526] &quot;ENSG00000283546&quot; &quot;ENSG00000283547&quot; &quot;ENSG00000283549&quot;
+ [529] &quot;ENSG00000283550&quot; &quot;ENSG00000283551&quot; &quot;ENSG00000283554&quot;
+ [532] &quot;ENSG00000283555&quot; &quot;ENSG00000283556&quot; &quot;ENSG00000283558&quot;
+ [535] &quot;ENSG00000283559&quot; &quot;ENSG00000283561&quot; &quot;ENSG00000283562&quot;
+ [538] &quot;ENSG00000283563&quot; &quot;ENSG00000283564&quot; &quot;ENSG00000283566&quot;
+ [541] &quot;ENSG00000283567&quot; &quot;ENSG00000283568&quot; &quot;ENSG00000283569&quot;
+ [544] &quot;ENSG00000283571&quot; &quot;ENSG00000283572&quot; &quot;ENSG00000283573&quot;
+ [547] &quot;ENSG00000283575&quot; &quot;ENSG00000283576&quot; &quot;ENSG00000283578&quot;
+ [550] &quot;ENSG00000283579&quot; &quot;ENSG00000283580&quot; &quot;ENSG00000283582&quot;
+ [553] &quot;ENSG00000283583&quot; &quot;ENSG00000283584&quot; &quot;ENSG00000283586&quot;
+ [556] &quot;ENSG00000283587&quot; &quot;ENSG00000283588&quot; &quot;ENSG00000283591&quot;
+ [559] &quot;ENSG00000283592&quot; &quot;ENSG00000283594&quot; &quot;ENSG00000283597&quot;
+ [562] &quot;ENSG00000283598&quot; &quot;ENSG00000283599&quot; &quot;ENSG00000283601&quot;
+ [565] &quot;ENSG00000283602&quot; &quot;ENSG00000283603&quot; &quot;ENSG00000283604&quot;
+ [568] &quot;ENSG00000283605&quot; &quot;ENSG00000283607&quot; &quot;ENSG00000283608&quot;
+ [571] &quot;ENSG00000283609&quot; &quot;ENSG00000283611&quot; &quot;ENSG00000283612&quot;
+ [574] &quot;ENSG00000283613&quot; &quot;ENSG00000283614&quot; &quot;ENSG00000283615&quot;
+ [577] &quot;ENSG00000283616&quot; &quot;ENSG00000283618&quot; &quot;ENSG00000283621&quot;
+ [580] &quot;ENSG00000283622&quot; &quot;ENSG00000283625&quot; &quot;ENSG00000283626&quot;
+ [583] &quot;ENSG00000283627&quot; &quot;ENSG00000283629&quot; &quot;ENSG00000283631&quot;
+ [586] &quot;ENSG00000283632&quot; &quot;ENSG00000283633&quot; &quot;ENSG00000283634&quot;
+ [589] &quot;ENSG00000283635&quot; &quot;ENSG00000283636&quot; &quot;ENSG00000283637&quot;
+ [592] &quot;ENSG00000283638&quot; &quot;ENSG00000283639&quot; &quot;ENSG00000283644&quot;
+ [595] &quot;ENSG00000283645&quot; &quot;ENSG00000283646&quot; &quot;ENSG00000283647&quot;
+ [598] &quot;ENSG00000283648&quot; &quot;ENSG00000283653&quot; &quot;ENSG00000283654&quot;
+ [601] &quot;ENSG00000283656&quot; &quot;ENSG00000283657&quot; &quot;ENSG00000283659&quot;
+ [604] &quot;ENSG00000283662&quot; &quot;ENSG00000283663&quot; &quot;ENSG00000283664&quot;
+ [607] &quot;ENSG00000283665&quot; &quot;ENSG00000283666&quot; &quot;ENSG00000283667&quot;
+ [610] &quot;ENSG00000283669&quot; &quot;ENSG00000283672&quot; &quot;ENSG00000283673&quot;
+ [613] &quot;ENSG00000283674&quot; &quot;ENSG00000283675&quot; &quot;ENSG00000283676&quot;
+ [616] &quot;ENSG00000283677&quot; &quot;ENSG00000283678&quot; &quot;ENSG00000283679&quot;
+ [619] &quot;ENSG00000283680&quot; &quot;ENSG00000283682&quot; &quot;ENSG00000283683&quot;
+ [622] &quot;ENSG00000283684&quot; &quot;ENSG00000283685&quot; &quot;ENSG00000283686&quot;
+ [625] &quot;ENSG00000283688&quot; &quot;ENSG00000283689&quot; &quot;ENSG00000283690&quot;
+ [628] &quot;ENSG00000283691&quot; &quot;ENSG00000283692&quot; &quot;ENSG00000283694&quot;
+ [631] &quot;ENSG00000283695&quot; &quot;ENSG00000283696&quot; &quot;ENSG00000283697&quot;
+ [634] &quot;ENSG00000283698&quot; &quot;ENSG00000283699&quot; &quot;ENSG00000283701&quot;
+ [637] &quot;ENSG00000283703&quot; &quot;ENSG00000283704&quot; &quot;ENSG00000283705&quot;
+ [640] &quot;ENSG00000283706&quot; &quot;ENSG00000283709&quot; &quot;ENSG00000283710&quot;
+ [643] &quot;ENSG00000283712&quot; &quot;ENSG00000283717&quot; &quot;ENSG00000283721&quot;
+ [646] &quot;ENSG00000283724&quot; &quot;ENSG00000283726&quot; &quot;ENSG00000283728&quot;
+ [649] &quot;ENSG00000283733&quot; &quot;ENSG00000283734&quot; &quot;ENSG00000283736&quot;
+ [652] &quot;ENSG00000283737&quot; &quot;ENSG00000283740&quot; &quot;ENSG00000283743&quot;
+ [655] &quot;ENSG00000283744&quot; &quot;ENSG00000283745&quot; &quot;ENSG00000283749&quot;
+ [658] &quot;ENSG00000283751&quot; &quot;ENSG00000283752&quot; &quot;ENSG00000283755&quot;
+ [661] &quot;ENSG00000283757&quot; &quot;ENSG00000283758&quot; &quot;ENSG00000283759&quot;
+ [664] &quot;ENSG00000283761&quot; &quot;ENSG00000283762&quot; &quot;ENSG00000283764&quot;
+ [667] &quot;ENSG00000283765&quot; &quot;ENSG00000283766&quot; &quot;ENSG00000283768&quot;
+ [670] &quot;ENSG00000283769&quot; &quot;ENSG00000283770&quot; &quot;ENSG00000283772&quot;
+ [673] &quot;ENSG00000283773&quot; &quot;ENSG00000283774&quot; &quot;ENSG00000283775&quot;
+ [676] &quot;ENSG00000283776&quot; &quot;ENSG00000283782&quot; &quot;ENSG00000283783&quot;
+ [679] &quot;ENSG00000283785&quot; &quot;ENSG00000283787&quot; &quot;ENSG00000283788&quot;
+ [682] &quot;ENSG00000283789&quot; &quot;ENSG00000283791&quot; &quot;ENSG00000283792&quot;
+ [685] &quot;ENSG00000283793&quot; &quot;ENSG00000283795&quot; &quot;ENSG00000283796&quot;
+ [688] &quot;ENSG00000283797&quot; &quot;ENSG00000283798&quot; &quot;ENSG00000283799&quot;
+ [691] &quot;ENSG00000283801&quot; &quot;ENSG00000283803&quot; &quot;ENSG00000283805&quot;
+ [694] &quot;ENSG00000283809&quot; &quot;ENSG00000283813&quot; &quot;ENSG00000283815&quot;
+ [697] &quot;ENSG00000283818&quot; &quot;ENSG00000283819&quot; &quot;ENSG00000283821&quot;
+ [700] &quot;ENSG00000283822&quot; &quot;ENSG00000283824&quot; &quot;ENSG00000283828&quot;
+ [703] &quot;ENSG00000283829&quot; &quot;ENSG00000283836&quot; &quot;ENSG00000283839&quot;
+ [706] &quot;ENSG00000283840&quot; &quot;ENSG00000283842&quot; &quot;ENSG00000283844&quot;
+ [709] &quot;ENSG00000283845&quot; &quot;ENSG00000283848&quot; &quot;ENSG00000283849&quot;
+ [712] &quot;ENSG00000283853&quot; &quot;ENSG00000283856&quot; &quot;ENSG00000283857&quot;
+ [715] &quot;ENSG00000283858&quot; &quot;ENSG00000283863&quot; &quot;ENSG00000283865&quot;
+ [718] &quot;ENSG00000283867&quot; &quot;ENSG00000283871&quot; &quot;ENSG00000283873&quot;
+ [721] &quot;ENSG00000283874&quot; &quot;ENSG00000283876&quot; &quot;ENSG00000283877&quot;
+ [724] &quot;ENSG00000283879&quot; &quot;ENSG00000283880&quot; &quot;ENSG00000283881&quot;
+ [727] &quot;ENSG00000283885&quot; &quot;ENSG00000283886&quot; &quot;ENSG00000283888&quot;
+ [730] &quot;ENSG00000283891&quot; &quot;ENSG00000283894&quot; &quot;ENSG00000283897&quot;
+ [733] &quot;ENSG00000283899&quot; &quot;ENSG00000283900&quot; &quot;ENSG00000283904&quot;
+ [736] &quot;ENSG00000283906&quot; &quot;ENSG00000283907&quot; &quot;ENSG00000283913&quot;
+ [739] &quot;ENSG00000283914&quot; &quot;ENSG00000283920&quot; &quot;ENSG00000283921&quot;
+ [742] &quot;ENSG00000283923&quot; &quot;ENSG00000283926&quot; &quot;ENSG00000283927&quot;
+ [745] &quot;ENSG00000283928&quot; &quot;ENSG00000283929&quot; &quot;ENSG00000283930&quot;
+ [748] &quot;ENSG00000283931&quot; &quot;ENSG00000283932&quot; &quot;ENSG00000283933&quot;
+ [751] &quot;ENSG00000283935&quot; &quot;ENSG00000283936&quot; &quot;ENSG00000283938&quot;
+ [754] &quot;ENSG00000283940&quot; &quot;ENSG00000283941&quot; &quot;ENSG00000283944&quot;
+ [757] &quot;ENSG00000283945&quot; &quot;ENSG00000283948&quot; &quot;ENSG00000283950&quot;
+ [760] &quot;ENSG00000283952&quot; &quot;ENSG00000283956&quot; &quot;ENSG00000283958&quot;
+ [763] &quot;ENSG00000283959&quot; &quot;ENSG00000283967&quot; &quot;ENSG00000283969&quot;
+ [766] &quot;ENSG00000283971&quot; &quot;ENSG00000283972&quot; &quot;ENSG00000283973&quot;
+ [769] &quot;ENSG00000283977&quot; &quot;ENSG00000283978&quot; &quot;ENSG00000283980&quot;
+ [772] &quot;ENSG00000283982&quot; &quot;ENSG00000283988&quot; &quot;ENSG00000283990&quot;
+ [775] &quot;ENSG00000283991&quot; &quot;ENSG00000283992&quot; &quot;ENSG00000283994&quot;
+ [778] &quot;ENSG00000283998&quot; &quot;ENSG00000283999&quot; &quot;ENSG00000284000&quot;
+ [781] &quot;ENSG00000284003&quot; &quot;ENSG00000284005&quot; &quot;ENSG00000284008&quot;
+ [784] &quot;ENSG00000284010&quot; &quot;ENSG00000284011&quot; &quot;ENSG00000284012&quot;
+ [787] &quot;ENSG00000284015&quot; &quot;ENSG00000284018&quot; &quot;ENSG00000284020&quot;
+ [790] &quot;ENSG00000284024&quot; &quot;ENSG00000284027&quot; &quot;ENSG00000284028&quot;
+ [793] &quot;ENSG00000284029&quot; &quot;ENSG00000284031&quot; &quot;ENSG00000284032&quot;
+ [796] &quot;ENSG00000284034&quot; &quot;ENSG00000284035&quot; &quot;ENSG00000284038&quot;
+ [799] &quot;ENSG00000284040&quot; &quot;ENSG00000284041&quot; &quot;ENSG00000284042&quot;
+ [802] &quot;ENSG00000284043&quot; &quot;ENSG00000284047&quot; &quot;ENSG00000284048&quot;
+ [805] &quot;ENSG00000284049&quot; &quot;ENSG00000284052&quot; &quot;ENSG00000284054&quot;
+ [808] &quot;ENSG00000284055&quot; &quot;ENSG00000284057&quot; &quot;ENSG00000284059&quot;
+ [811] &quot;ENSG00000284060&quot; &quot;ENSG00000284062&quot; &quot;ENSG00000284064&quot;
+ [814] &quot;ENSG00000284065&quot; &quot;ENSG00000284067&quot; &quot;ENSG00000284070&quot;
+ [817] &quot;ENSG00000284071&quot; &quot;ENSG00000284074&quot; &quot;ENSG00000284078&quot;
+ [820] &quot;ENSG00000284079&quot; &quot;ENSG00000284081&quot; &quot;ENSG00000284082&quot;
+ [823] &quot;ENSG00000284084&quot; &quot;ENSG00000284085&quot; &quot;ENSG00000284087&quot;
+ [826] &quot;ENSG00000284092&quot; &quot;ENSG00000284094&quot; &quot;ENSG00000284095&quot;
+ [829] &quot;ENSG00000284098&quot; &quot;ENSG00000284107&quot; &quot;ENSG00000284108&quot;
+ [832] &quot;ENSG00000284112&quot; &quot;ENSG00000284114&quot; &quot;ENSG00000284116&quot;
+ [835] &quot;ENSG00000284117&quot; &quot;ENSG00000284118&quot; &quot;ENSG00000284121&quot;
+ [838] &quot;ENSG00000284122&quot; &quot;ENSG00000284125&quot; &quot;ENSG00000284128&quot;
+ [841] &quot;ENSG00000284129&quot; &quot;ENSG00000284130&quot; &quot;ENSG00000284134&quot;
+ [844] &quot;ENSG00000284135&quot; &quot;ENSG00000284138&quot; &quot;ENSG00000284139&quot;
+ [847] &quot;ENSG00000284140&quot; &quot;ENSG00000284142&quot; &quot;ENSG00000284143&quot;
+ [850] &quot;ENSG00000284144&quot; &quot;ENSG00000284146&quot; &quot;ENSG00000284147&quot;
+ [853] &quot;ENSG00000284148&quot; &quot;ENSG00000284149&quot; &quot;ENSG00000284152&quot;
+ [856] &quot;ENSG00000284154&quot; &quot;ENSG00000284155&quot; &quot;ENSG00000284157&quot;
+ [859] &quot;ENSG00000284158&quot; &quot;ENSG00000284159&quot; &quot;ENSG00000284160&quot;
+ [862] &quot;ENSG00000284162&quot; &quot;ENSG00000284163&quot; &quot;ENSG00000284167&quot;
+ [865] &quot;ENSG00000284171&quot; &quot;ENSG00000284172&quot; &quot;ENSG00000284173&quot;
+ [868] &quot;ENSG00000284175&quot; &quot;ENSG00000284176&quot; &quot;ENSG00000284179&quot;
+ [871] &quot;ENSG00000284180&quot; &quot;ENSG00000284182&quot; &quot;ENSG00000284184&quot;
+ [874] &quot;ENSG00000284185&quot; &quot;ENSG00000284186&quot; &quot;ENSG00000284188&quot;
+ [877] &quot;ENSG00000284190&quot; &quot;ENSG00000284191&quot; &quot;ENSG00000284193&quot;
+ [880] &quot;ENSG00000284194&quot; &quot;ENSG00000284195&quot; &quot;ENSG00000284196&quot;
+ [883] &quot;ENSG00000284197&quot; &quot;ENSG00000284200&quot; &quot;ENSG00000284202&quot;
+ [886] &quot;ENSG00000284203&quot; &quot;ENSG00000284204&quot; &quot;ENSG00000284209&quot;
+ [889] &quot;ENSG00000284214&quot; &quot;ENSG00000284216&quot; &quot;ENSG00000284219&quot;
+ [892] &quot;ENSG00000284221&quot; &quot;ENSG00000284224&quot; &quot;ENSG00000284229&quot;
+ [895] &quot;ENSG00000284231&quot; &quot;ENSG00000284233&quot; &quot;ENSG00000284234&quot;
+ [898] &quot;ENSG00000284237&quot; &quot;ENSG00000284239&quot; &quot;ENSG00000284240&quot;
+ [901] &quot;ENSG00000284242&quot; &quot;ENSG00000284246&quot; &quot;ENSG00000284247&quot;
+ [904] &quot;ENSG00000284250&quot; &quot;ENSG00000284251&quot; &quot;ENSG00000284252&quot;
+ [907] &quot;ENSG00000284253&quot; &quot;ENSG00000284256&quot; &quot;ENSG00000284258&quot;
+ [910] &quot;ENSG00000284259&quot; &quot;ENSG00000284261&quot; &quot;ENSG00000284263&quot;
+ [913] &quot;ENSG00000284265&quot; &quot;ENSG00000284266&quot; &quot;ENSG00000284268&quot;
+ [916] &quot;ENSG00000284269&quot; &quot;ENSG00000284272&quot; &quot;ENSG00000284276&quot;
+ [919] &quot;ENSG00000284277&quot; &quot;ENSG00000284280&quot; &quot;ENSG00000284283&quot;
+ [922] &quot;ENSG00000284284&quot; &quot;ENSG00000284286&quot; &quot;ENSG00000284288&quot;
+ [925] &quot;ENSG00000284289&quot; &quot;ENSG00000284291&quot; &quot;ENSG00000284292&quot;
+ [928] &quot;ENSG00000284293&quot; &quot;ENSG00000284294&quot; &quot;ENSG00000284299&quot;
+ [931] &quot;ENSG00000284300&quot; &quot;ENSG00000284305&quot; &quot;ENSG00000284306&quot;
+ [934] &quot;ENSG00000284308&quot; &quot;ENSG00000284309&quot; &quot;ENSG00000284310&quot;
+ [937] &quot;ENSG00000284311&quot; &quot;ENSG00000284317&quot; &quot;ENSG00000284321&quot;
+ [940] &quot;ENSG00000284324&quot; &quot;ENSG00000284325&quot; &quot;ENSG00000284327&quot;
+ [943] &quot;ENSG00000284328&quot; &quot;ENSG00000284329&quot; &quot;ENSG00000284331&quot;
+ [946] &quot;ENSG00000284332&quot; &quot;ENSG00000284334&quot; &quot;ENSG00000284336&quot;
+ [949] &quot;ENSG00000284337&quot; &quot;ENSG00000284341&quot; &quot;ENSG00000284343&quot;
+ [952] &quot;ENSG00000284344&quot; &quot;ENSG00000284346&quot; &quot;ENSG00000284351&quot;
+ [955] &quot;ENSG00000284353&quot; &quot;ENSG00000284356&quot; &quot;ENSG00000284357&quot;
+ [958] &quot;ENSG00000284360&quot; &quot;ENSG00000284361&quot; &quot;ENSG00000284362&quot;
+ [961] &quot;ENSG00000284363&quot; &quot;ENSG00000284364&quot; &quot;ENSG00000284368&quot;
+ [964] &quot;ENSG00000284370&quot; &quot;ENSG00000284372&quot; &quot;ENSG00000284373&quot;
+ [967] &quot;ENSG00000284375&quot; &quot;ENSG00000284376&quot; &quot;ENSG00000284377&quot;
+ [970] &quot;ENSG00000284378&quot; &quot;ENSG00000284380&quot; &quot;ENSG00000284385&quot;
+ [973] &quot;ENSG00000284386&quot; &quot;ENSG00000284387&quot; &quot;ENSG00000284388&quot;
+ [976] &quot;ENSG00000284391&quot; &quot;ENSG00000284393&quot; &quot;ENSG00000284394&quot;
+ [979] &quot;ENSG00000284395&quot; &quot;ENSG00000284399&quot; &quot;ENSG00000284402&quot;
+ [982] &quot;ENSG00000284407&quot; &quot;ENSG00000284410&quot; &quot;ENSG00000284411&quot;
+ [985] &quot;ENSG00000284412&quot; &quot;ENSG00000284415&quot; &quot;ENSG00000284416&quot;
+ [988] &quot;ENSG00000284418&quot; &quot;ENSG00000284419&quot; &quot;ENSG00000284421&quot;
+ [991] &quot;ENSG00000284424&quot; &quot;ENSG00000284425&quot; &quot;ENSG00000284427&quot;
+ [994] &quot;ENSG00000284428&quot; &quot;ENSG00000284430&quot; &quot;ENSG00000284431&quot;
+ [997] &quot;ENSG00000284433&quot; &quot;ENSG00000284435&quot; &quot;ENSG00000284436&quot;
+[1000] &quot;ENSG00000284438&quot; &quot;ENSG00000284439&quot; &quot;ENSG00000284440&quot;
+[1003] &quot;ENSG00000284442&quot; &quot;ENSG00000284443&quot; &quot;ENSG00000284446&quot;
+[1006] &quot;ENSG00000284447&quot; &quot;ENSG00000284448&quot; &quot;ENSG00000284450&quot;
+[1009] &quot;ENSG00000284452&quot; &quot;ENSG00000284453&quot; &quot;ENSG00000284458&quot;
+[1012] &quot;ENSG00000284459&quot; &quot;ENSG00000284461&quot; &quot;ENSG00000284463&quot;
+[1015] &quot;ENSG00000284464&quot; &quot;ENSG00000284465&quot; &quot;ENSG00000284469&quot;
+[1018] &quot;ENSG00000284471&quot; &quot;ENSG00000284473&quot; &quot;ENSG00000284474&quot;
+[1021] &quot;ENSG00000284479&quot; &quot;ENSG00000284481&quot; &quot;ENSG00000284482&quot;
+[1024] &quot;ENSG00000284484&quot; &quot;ENSG00000284485&quot; &quot;ENSG00000284488&quot;
+[1027] &quot;ENSG00000284489&quot; &quot;ENSG00000284490&quot; &quot;ENSG00000284491&quot;
+[1030] &quot;ENSG00000284498&quot; &quot;ENSG00000284499&quot; &quot;ENSG00000284500&quot;
+[1033] &quot;ENSG00000284503&quot; &quot;ENSG00000284505&quot; &quot;ENSG00000284508&quot;
+[1036] &quot;ENSG00000284512&quot; &quot;ENSG00000284513&quot; &quot;ENSG00000284516&quot;
+[1039] &quot;ENSG00000284517&quot; &quot;ENSG00000284518&quot; &quot;ENSG00000284519&quot;
+[1042] &quot;ENSG00000284520&quot; &quot;ENSG00000284522&quot; &quot;ENSG00000284523&quot;
+[1045] &quot;ENSG00000284525&quot; &quot;ENSG00000284526&quot; &quot;ENSG00000284532&quot;
+[1048] &quot;ENSG00000284534&quot; &quot;ENSG00000284535&quot; &quot;ENSG00000284536&quot;
+[1051] &quot;ENSG00000284538&quot; &quot;ENSG00000284540&quot; &quot;ENSG00000284541&quot;
+[1054] &quot;ENSG00000284542&quot; &quot;ENSG00000284543&quot; &quot;ENSG00000284544&quot;
+[1057] &quot;ENSG00000284546&quot; &quot;ENSG00000284547&quot; &quot;ENSG00000284550&quot;
+[1060] &quot;ENSG00000284553&quot; &quot;ENSG00000284554&quot; &quot;ENSG00000284557&quot;
+[1063] &quot;ENSG00000284558&quot; &quot;ENSG00000284561&quot; &quot;ENSG00000284564&quot;
+[1066] &quot;ENSG00000284565&quot; &quot;ENSG00000284567&quot; &quot;ENSG00000284568&quot;
+[1069] &quot;ENSG00000284570&quot; &quot;ENSG00000284572&quot; &quot;ENSG00000284574&quot;
+[1072] &quot;ENSG00000284575&quot; &quot;ENSG00000284583&quot; &quot;ENSG00000284584&quot;
+[1075] &quot;ENSG00000284585&quot; &quot;ENSG00000284586&quot; &quot;ENSG00000284587&quot;
+[1078] &quot;ENSG00000284591&quot; &quot;ENSG00000284592&quot; &quot;ENSG00000284594&quot;
+[1081] &quot;ENSG00000284595&quot; &quot;ENSG00000284596&quot; &quot;ENSG00000284600&quot;
+[1084] &quot;ENSG00000284601&quot; &quot;ENSG00000284602&quot; &quot;ENSG00000284603&quot;
+[1087] &quot;ENSG00000284604&quot; &quot;ENSG00000284605&quot; &quot;ENSG00000284606&quot;
+[1090] &quot;ENSG00000284607&quot; &quot;ENSG00000284608&quot; &quot;ENSG00000284609&quot;
+[1093] &quot;ENSG00000284610&quot; &quot;ENSG00000284611&quot; &quot;ENSG00000284612&quot;
+[1096] &quot;ENSG00000284613&quot; &quot;ENSG00000284614&quot; &quot;ENSG00000284615&quot;
+[1099] &quot;ENSG00000284616&quot; &quot;ENSG00000284617&quot; &quot;ENSG00000284618&quot;
+[1102] &quot;ENSG00000284619&quot; &quot;ENSG00000284620&quot; &quot;ENSG00000284621&quot;
+[1105] &quot;ENSG00000284622&quot; &quot;ENSG00000284623&quot; &quot;ENSG00000284624&quot;
+[1108] &quot;ENSG00000284625&quot; &quot;ENSG00000284626&quot; &quot;ENSG00000284627&quot;
+[1111] &quot;ENSG00000284628&quot; &quot;ENSG00000284629&quot; &quot;ENSG00000284630&quot;
+[1114] &quot;ENSG00000284631&quot; &quot;ENSG00000284632&quot; &quot;ENSG00000284633&quot;
+[1117] &quot;ENSG00000284634&quot; &quot;ENSG00000284635&quot; &quot;ENSG00000284636&quot;
+[1120] &quot;ENSG00000284637&quot; &quot;ENSG00000284638&quot; &quot;ENSG00000284639&quot;
+[1123] &quot;ENSG00000284640&quot; &quot;ENSG00000284641&quot; &quot;ENSG00000284642&quot;
+[1126] &quot;ENSG00000284643&quot; &quot;ENSG00000284644&quot; &quot;ENSG00000284645&quot;
+[1129] &quot;ENSG00000284646&quot; &quot;ENSG00000284648&quot; &quot;ENSG00000284649&quot;
+[1132] &quot;ENSG00000284650&quot; &quot;ENSG00000284651&quot; &quot;ENSG00000284652&quot;
+[1135] &quot;ENSG00000284653&quot; &quot;ENSG00000284654&quot; &quot;ENSG00000284655&quot;
+[1138] &quot;ENSG00000284656&quot; &quot;ENSG00000284657&quot; &quot;ENSG00000284658&quot;
+[1141] &quot;ENSG00000284659&quot; &quot;ENSG00000284660&quot; &quot;ENSG00000284661&quot;
+[1144] &quot;ENSG00000284662&quot; &quot;ENSG00000284663&quot; &quot;ENSG00000284664&quot;
+[1147] &quot;ENSG00000284665&quot; &quot;ENSG00000284666&quot; &quot;ENSG00000284667&quot;
+[1150] &quot;ENSG00000284668&quot; &quot;ENSG00000284669&quot; &quot;ENSG00000284670&quot;
+[1153] &quot;ENSG00000284671&quot; &quot;ENSG00000284672&quot; &quot;ENSG00000284673&quot;
+[1156] &quot;ENSG00000284674&quot; &quot;ENSG00000284675&quot; &quot;ENSG00000284676&quot;
+[1159] &quot;ENSG00000284677&quot; &quot;ENSG00000284678&quot; &quot;ENSG00000284679&quot;
+[1162] &quot;ENSG00000284680&quot; &quot;ENSG00000284681&quot; &quot;ENSG00000284682&quot;
+[1165] &quot;ENSG00000284684&quot; &quot;ENSG00000284685&quot; &quot;ENSG00000284686&quot;
+[1168] &quot;ENSG00000284687&quot; &quot;ENSG00000284688&quot; &quot;ENSG00000284689&quot;
+[1171] &quot;ENSG00000284690&quot; &quot;ENSG00000284691&quot; &quot;ENSG00000284692&quot;
+[1174] &quot;ENSG00000284693&quot; &quot;ENSG00000284694&quot; &quot;ENSG00000284695&quot;
+[1177] &quot;ENSG00000284696&quot; &quot;ENSG00000284697&quot; &quot;ENSG00000284698&quot;
+[1180] &quot;ENSG00000284699&quot; &quot;ENSG00000284700&quot; &quot;ENSG00000284701&quot;
+[1183] &quot;ENSG00000284702&quot; &quot;ENSG00000284703&quot; &quot;ENSG00000284704&quot;
+[1186] &quot;ENSG00000284705&quot; &quot;ENSG00000284706&quot; &quot;ENSG00000284707&quot;
+[1189] &quot;ENSG00000284708&quot; &quot;ENSG00000284709&quot; &quot;ENSG00000284710&quot;
+[1192] &quot;ENSG00000284711&quot; &quot;ENSG00000284713&quot; &quot;ENSG00000284715&quot;
+[1195] &quot;ENSG00000284716&quot; &quot;ENSG00000284717&quot; &quot;ENSG00000284718&quot;
+[1198] &quot;ENSG00000284719&quot; &quot;ENSG00000284720&quot; &quot;ENSG00000284721&quot;
+[1201] &quot;ENSG00000284722&quot; &quot;ENSG00000284723&quot; &quot;ENSG00000284724&quot;
+[1204] &quot;ENSG00000284725&quot; &quot;ENSG00000284726&quot; &quot;ENSG00000284727&quot;
+[1207] &quot;ENSG00000284728&quot; &quot;ENSG00000284729&quot; &quot;ENSG00000284730&quot;
+[1210] &quot;ENSG00000284731&quot; &quot;ENSG00000284732&quot; &quot;ENSG00000284733&quot;
+[1213] &quot;ENSG00000284734&quot; &quot;ENSG00000284735&quot; &quot;ENSG00000284736&quot;
+[1216] &quot;ENSG00000284737&quot; &quot;ENSG00000284738&quot; &quot;ENSG00000284739&quot;
+[1219] &quot;ENSG00000284740&quot; &quot;ENSG00000284741&quot; &quot;ENSG00000284742&quot;
+[1222] &quot;ENSG00000284743&quot; &quot;ENSG00000284744&quot; &quot;ENSG00000284745&quot;
+[1225] &quot;ENSG00000284746&quot; &quot;ENSG00000284747&quot; &quot;ENSG00000284748&quot;
+[1228] &quot;ENSG00000284753&quot; &quot;ENSG00000284755&quot; &quot;ENSG00000284762&quot;
+[1231] &quot;ENSG00000284763&quot; &quot;ENSG00000284770&quot; &quot;ENSG00000284772&quot;
+[1234] &quot;ENSG00000284773&quot; &quot;ENSG00000284776&quot; &quot;ENSG00000284779&quot;
+[1237] &quot;ENSG00000284783&quot; &quot;ENSG00000284788&quot; &quot;ENSG00000284791&quot;
+[1240] &quot;ENSG00000284797&quot; &quot;ENSG00000284800&quot; &quot;ENSG00000284803&quot;
+[1243] &quot;ENSG00000284808&quot; &quot;ENSG00000284809&quot; &quot;ENSG00000284820&quot;
+[1246] &quot;ENSG00000284823&quot; &quot;ENSG00000284824&quot; &quot;ENSG00000284825&quot;
+[1249] &quot;ENSG00000284826&quot; &quot;ENSG00000284828&quot; &quot;ENSG00000284829&quot;
+[1252] &quot;ENSG00000284830&quot; &quot;ENSG00000284834&quot; &quot;ENSG00000284837&quot;
+[1255] &quot;ENSG00000284839&quot; &quot;ENSG00000284840&quot; &quot;ENSG00000284842&quot;
+[1258] &quot;ENSG00000284844&quot; &quot;ENSG00000284846&quot; &quot;ENSG00000284847&quot;
+[1261] &quot;ENSG00000284848&quot; &quot;ENSG00000284858&quot; &quot;ENSG00000284862&quot;
+[1264] &quot;ENSG00000284867&quot; &quot;ENSG00000284873&quot; &quot;ENSG00000284874&quot;
+[1267] &quot;ENSG00000284876&quot; &quot;ENSG00000284879&quot; &quot;ENSG00000284882&quot;
+[1270] &quot;ENSG00000284883&quot; &quot;ENSG00000284892&quot; &quot;ENSG00000284895&quot;
+[1273] &quot;ENSG00000284902&quot; &quot;ENSG00000284906&quot; &quot;ENSG00000284914&quot;
+[1276] &quot;ENSG00000284917&quot; &quot;ENSG00000284922&quot; &quot;ENSG00000284928&quot;
+[1279] &quot;ENSG00000284930&quot; &quot;ENSG00000284931&quot; &quot;ENSG00000284932&quot;
+[1282] &quot;ENSG00000284934&quot; &quot;ENSG00000284946&quot; &quot;ENSG00000284948&quot;
+[1285] &quot;ENSG00000284951&quot; &quot;ENSG00000284952&quot; &quot;ENSG00000284954&quot;
+[1288] &quot;ENSG00000284956&quot; &quot;ENSG00000284957&quot; &quot;ENSG00000284959&quot;
+[1291] &quot;ENSG00000284962&quot; &quot;ENSG00000284964&quot; &quot;ENSG00000284966&quot;
+[1294] &quot;ENSG00000284968&quot; &quot;ENSG00000284969&quot; &quot;ENSG00000284976&quot;
+[1297] &quot;ENSG00000284977&quot; &quot;ENSG00000284981&quot; &quot;ENSG00000284985&quot;
+[1300] &quot;ENSG00000284986&quot; &quot;ENSG00000284987&quot; &quot;ENSG00000284988&quot;
+[1303] &quot;ENSG00000284989&quot; &quot;ENSG00000284994&quot; &quot;ENSG00000284999&quot;
+[1306] &quot;ENSG00000285000&quot; &quot;ENSG00000285006&quot; &quot;ENSG00000285010&quot;
+[1309] &quot;ENSG00000285012&quot; &quot;ENSG00000285016&quot; &quot;ENSG00000285018&quot;
+[1312] &quot;ENSG00000285020&quot; &quot;ENSG00000285025&quot; &quot;ENSG00000285030&quot;
+[1315] &quot;ENSG00000285035&quot; &quot;ENSG00000285040&quot; &quot;ENSG00000285041&quot;
+[1318] &quot;ENSG00000285042&quot; &quot;ENSG00000285043&quot; &quot;ENSG00000285045&quot;
+[1321] &quot;ENSG00000285051&quot; &quot;ENSG00000285053&quot; &quot;ENSG00000285057&quot;
+[1324] &quot;ENSG00000285062&quot; &quot;ENSG00000285064&quot; &quot;ENSG00000285068&quot;
+[1327] &quot;ENSG00000285076&quot; &quot;ENSG00000285077&quot; &quot;ENSG00000285079&quot;
+[1330] &quot;ENSG00000285080&quot; &quot;ENSG00000285081&quot; &quot;ENSG00000285082&quot;
+[1333] &quot;ENSG00000285085&quot; &quot;ENSG00000285090&quot; &quot;ENSG00000285091&quot;
+[1336] &quot;ENSG00000285094&quot; &quot;ENSG00000285095&quot; &quot;ENSG00000285100&quot;
+[1339] &quot;ENSG00000285102&quot; &quot;ENSG00000285103&quot; &quot;ENSG00000285106&quot;
+[1342] &quot;ENSG00000285108&quot; &quot;ENSG00000285115&quot; &quot;ENSG00000285116&quot;
+[1345] &quot;ENSG00000285117&quot; &quot;ENSG00000285122&quot; &quot;ENSG00000285128&quot;
+[1348] &quot;ENSG00000285130&quot; &quot;ENSG00000285133&quot; &quot;ENSG00000285135&quot;
+[1351] &quot;ENSG00000285138&quot; &quot;ENSG00000285142&quot; &quot;ENSG00000285144&quot;
+[1354] &quot;ENSG00000285151&quot; &quot;ENSG00000285155&quot; &quot;ENSG00000285159&quot;
+[1357] &quot;ENSG00000285160&quot; &quot;ENSG00000285162&quot; &quot;ENSG00000285163&quot;
+[1360] &quot;ENSG00000285165&quot; &quot;ENSG00000285169&quot; &quot;ENSG00000285171&quot;
+[1363] &quot;ENSG00000285177&quot; &quot;ENSG00000285179&quot; &quot;ENSG00000285184&quot;
+[1366] &quot;ENSG00000285188&quot; &quot;ENSG00000285190&quot; &quot;ENSG00000285191&quot;
+[1369] &quot;ENSG00000285201&quot; &quot;ENSG00000285204&quot; &quot;ENSG00000285205&quot;
+[1372] &quot;ENSG00000285210&quot; &quot;ENSG00000285212&quot; &quot;ENSG00000285215&quot;
+[1375] &quot;ENSG00000285216&quot; &quot;ENSG00000285218&quot; &quot;ENSG00000285219&quot;
+[1378] &quot;ENSG00000285220&quot; &quot;ENSG00000285228&quot; &quot;ENSG00000285230&quot;
+[1381] &quot;ENSG00000285231&quot; &quot;ENSG00000285237&quot; &quot;ENSG00000285238&quot;
+[1384] &quot;ENSG00000285239&quot; &quot;ENSG00000285244&quot; &quot;ENSG00000285245&quot;
+[1387] &quot;ENSG00000285253&quot; &quot;ENSG00000285254&quot; &quot;ENSG00000285257&quot;
+[1390] &quot;ENSG00000285258&quot; &quot;ENSG00000285268&quot; &quot;ENSG00000285269&quot;
+[1393] &quot;ENSG00000285278&quot; &quot;ENSG00000285280&quot; &quot;ENSG00000285283&quot;
+[1396] &quot;ENSG00000285287&quot; &quot;ENSG00000285292&quot; &quot;ENSG00000285294&quot;
+[1399] &quot;ENSG00000285300&quot; &quot;ENSG00000285303&quot; &quot;ENSG00000285304&quot;
+[1402] &quot;ENSG00000285314&quot; &quot;ENSG00000285323&quot; &quot;ENSG00000285325&quot;
+[1405] &quot;ENSG00000285329&quot; &quot;ENSG00000285330&quot; &quot;ENSG00000285331&quot;
+[1408] &quot;ENSG00000285336&quot; &quot;ENSG00000285338&quot; &quot;ENSG00000285347&quot;
+[1411] &quot;ENSG00000285354&quot; &quot;ENSG00000285361&quot; &quot;ENSG00000285366&quot;
+[1414] &quot;ENSG00000285367&quot; &quot;ENSG00000285370&quot; &quot;ENSG00000285373&quot;
+[1417] &quot;ENSG00000285374&quot; &quot;ENSG00000285382&quot; &quot;ENSG00000285385&quot;
+[1420] &quot;ENSG00000285388&quot; &quot;ENSG00000285396&quot; &quot;ENSG00000285398&quot;
+[1423] &quot;ENSG00000285399&quot; &quot;ENSG00000285401&quot; &quot;ENSG00000285402&quot;
+[1426] &quot;ENSG00000285404&quot; &quot;ENSG00000285405&quot; &quot;ENSG00000285407&quot;
+[1429] &quot;ENSG00000285409&quot; &quot;ENSG00000285410&quot; &quot;ENSG00000285412&quot;
+[1432] &quot;ENSG00000285413&quot; &quot;ENSG00000285416&quot; &quot;ENSG00000285417&quot;
+[1435] &quot;ENSG00000285420&quot; &quot;ENSG00000285424&quot; &quot;ENSG00000285427&quot;
+[1438] &quot;ENSG00000285437&quot; &quot;ENSG00000285441&quot; &quot;ENSG00000285444&quot;
+[1441] &quot;ENSG00000285445&quot; &quot;ENSG00000285446&quot; &quot;ENSG00000285447&quot;
+[1444] &quot;ENSG00000285448&quot; &quot;ENSG00000285454&quot; &quot;ENSG00000285458&quot;
+[1447] &quot;ENSG00000285462&quot; &quot;ENSG00000285467&quot; &quot;ENSG00000285470&quot;
+[1450] &quot;ENSG00000285471&quot; &quot;ENSG00000285472&quot; &quot;ENSG00000285473&quot;
+[1453] &quot;ENSG00000285476&quot; &quot;ENSG00000285480&quot; &quot;ENSG00000285483&quot;
+[1456] &quot;ENSG00000285486&quot; &quot;ENSG00000285491&quot; &quot;ENSG00000285492&quot;
+[1459] &quot;ENSG00000285498&quot; &quot;ENSG00000285505&quot; &quot;ENSG00000285508&quot;
+[1462] &quot;ENSG00000285509&quot; &quot;ENSG00000285513&quot; &quot;ENSG00000285517&quot;
+[1465] &quot;ENSG00000285518&quot; &quot;ENSG00000285519&quot; &quot;ENSG00000285520&quot;
+[1468] &quot;ENSG00000285521&quot; &quot;ENSG00000285522&quot; &quot;ENSG00000285523&quot;
+[1471] &quot;ENSG00000285524&quot; &quot;ENSG00000285525&quot; &quot;ENSG00000285526&quot;
+[1474] &quot;ENSG00000285527&quot; &quot;ENSG00000285528&quot; &quot;ENSG00000285529&quot;
+[1477] &quot;ENSG00000285530&quot; &quot;ENSG00000285531&quot; &quot;ENSG00000285532&quot;
+[1480] &quot;ENSG00000285533&quot; &quot;ENSG00000285534&quot; &quot;ENSG00000285535&quot;
+[1483] &quot;ENSG00000285536&quot; &quot;ENSG00000285537&quot; &quot;ENSG00000285538&quot;
+[1486] &quot;ENSG00000285539&quot; &quot;ENSG00000285540&quot; &quot;ENSG00000285541&quot;
+[1489] &quot;ENSG00000285542&quot; &quot;ENSG00000285543&quot; &quot;ENSG00000285544&quot;
+[1492] &quot;ENSG00000285545&quot; &quot;ENSG00000285546&quot; &quot;ENSG00000285547&quot;
+[1495] &quot;ENSG00000285548&quot; &quot;ENSG00000285549&quot; &quot;ENSG00000285550&quot;
+[1498] &quot;ENSG00000285551&quot; &quot;ENSG00000285552&quot; &quot;ENSG00000285553&quot;
+[1501] &quot;ENSG00000285554&quot; &quot;ENSG00000285555&quot; &quot;ENSG00000285556&quot;
+[1504] &quot;ENSG00000285557&quot; &quot;ENSG00000285558&quot; &quot;ENSG00000285559&quot;
+[1507] &quot;ENSG00000285560&quot; &quot;ENSG00000285561&quot; &quot;ENSG00000285562&quot;
+[1510] &quot;ENSG00000285563&quot; &quot;ENSG00000285564&quot; &quot;ENSG00000285565&quot;
+[1513] &quot;ENSG00000285566&quot; &quot;ENSG00000285567&quot; &quot;ENSG00000285568&quot;
+[1516] &quot;ENSG00000285569&quot; &quot;ENSG00000285570&quot; &quot;ENSG00000285571&quot;
+[1519] &quot;ENSG00000285572&quot; &quot;ENSG00000285573&quot; &quot;ENSG00000285574&quot;
+[1522] &quot;ENSG00000285575&quot; &quot;ENSG00000285576&quot; &quot;ENSG00000285577&quot;
+[1525] &quot;ENSG00000285578&quot; &quot;ENSG00000285579&quot; &quot;ENSG00000285580&quot;
+[1528] &quot;ENSG00000285581&quot; &quot;ENSG00000285582&quot; &quot;ENSG00000285583&quot;
+[1531] &quot;ENSG00000285584&quot; &quot;ENSG00000285585&quot; &quot;ENSG00000285586&quot;
+[1534] &quot;ENSG00000285587&quot; &quot;ENSG00000285588&quot; &quot;ENSG00000285589&quot;
+[1537] &quot;ENSG00000285590&quot; &quot;ENSG00000285591&quot; &quot;ENSG00000285592&quot;
+[1540] &quot;ENSG00000285593&quot; &quot;ENSG00000285594&quot; &quot;ENSG00000285595&quot;
+[1543] &quot;ENSG00000285596&quot; &quot;ENSG00000285597&quot; &quot;ENSG00000285598&quot;
+[1546] &quot;ENSG00000285599&quot; &quot;ENSG00000285600&quot; &quot;ENSG00000285601&quot;
+[1549] &quot;ENSG00000285602&quot; &quot;ENSG00000285603&quot; &quot;ENSG00000285604&quot;
+[1552] &quot;ENSG00000285605&quot; &quot;ENSG00000285606&quot; &quot;ENSG00000285607&quot;
+[1555] &quot;ENSG00000285608&quot; &quot;ENSG00000285609&quot; &quot;ENSG00000285610&quot;
+[1558] &quot;ENSG00000285611&quot; &quot;ENSG00000285612&quot; &quot;ENSG00000285613&quot;
+[1561] &quot;ENSG00000285614&quot; &quot;ENSG00000285615&quot; &quot;ENSG00000285616&quot;
+[1564] &quot;ENSG00000285618&quot; &quot;ENSG00000285619&quot; &quot;ENSG00000285620&quot;
+[1567] &quot;ENSG00000285621&quot; &quot;ENSG00000285622&quot; &quot;ENSG00000285623&quot;
+[1570] &quot;ENSG00000285624&quot; &quot;ENSG00000285625&quot; &quot;ENSG00000285626&quot;
+[1573] &quot;ENSG00000285627&quot; &quot;ENSG00000285628&quot; &quot;ENSG00000285629&quot;
+[1576] &quot;ENSG00000285630&quot; &quot;ENSG00000285631&quot; &quot;ENSG00000285632&quot;
+[1579] &quot;ENSG00000285633&quot; &quot;ENSG00000285634&quot; &quot;ENSG00000285635&quot;
+[1582] &quot;ENSG00000285636&quot; &quot;ENSG00000285637&quot; &quot;ENSG00000285638&quot;
+[1585] &quot;ENSG00000285639&quot; &quot;ENSG00000285640&quot; &quot;ENSG00000285641&quot;
+[1588] &quot;ENSG00000285642&quot; &quot;ENSG00000285643&quot; &quot;ENSG00000285644&quot;
+[1591] &quot;ENSG00000285645&quot; &quot;ENSG00000285646&quot; &quot;ENSG00000285647&quot;
+[1594] &quot;ENSG00000285648&quot; &quot;ENSG00000285649&quot; &quot;ENSG00000285650&quot;
+[1597] &quot;ENSG00000285651&quot; &quot;ENSG00000285652&quot; &quot;ENSG00000285653&quot;
+[1600] &quot;ENSG00000285654&quot; &quot;ENSG00000285655&quot; &quot;ENSG00000285656&quot;
+[1603] &quot;ENSG00000285657&quot; &quot;ENSG00000285658&quot; &quot;ENSG00000285659&quot;
+[1606] &quot;ENSG00000285660&quot; &quot;ENSG00000285661&quot; &quot;ENSG00000285662&quot;
+[1609] &quot;ENSG00000285663&quot; &quot;ENSG00000285664&quot; &quot;ENSG00000285665&quot;
+[1612] &quot;ENSG00000285666&quot; &quot;ENSG00000285667&quot; &quot;ENSG00000285668&quot;
+[1615] &quot;ENSG00000285669&quot; &quot;ENSG00000285670&quot; &quot;ENSG00000285671&quot;
+[1618] &quot;ENSG00000285672&quot; &quot;ENSG00000285673&quot; &quot;ENSG00000285674&quot;
+[1621] &quot;ENSG00000285675&quot; &quot;ENSG00000285676&quot; &quot;ENSG00000285677&quot;
+[1624] &quot;ENSG00000285679&quot; &quot;ENSG00000285680&quot; &quot;ENSG00000285681&quot;
+[1627] &quot;ENSG00000285683&quot; &quot;ENSG00000285684&quot; &quot;ENSG00000285685&quot;
+[1630] &quot;ENSG00000285686&quot; &quot;ENSG00000285687&quot; &quot;ENSG00000285688&quot;
+[1633] &quot;ENSG00000285689&quot; &quot;ENSG00000285690&quot; &quot;ENSG00000285691&quot;
+[1636] &quot;ENSG00000285692&quot; &quot;ENSG00000285693&quot; &quot;ENSG00000285694&quot;
+[1639] &quot;ENSG00000285695&quot; &quot;ENSG00000285696&quot; &quot;ENSG00000285697&quot;
+[1642] &quot;ENSG00000285698&quot; &quot;ENSG00000285699&quot; &quot;ENSG00000285700&quot;
+[1645] &quot;ENSG00000285701&quot; &quot;ENSG00000285702&quot; &quot;ENSG00000285703&quot;
+[1648] &quot;ENSG00000285704&quot; &quot;ENSG00000285705&quot; &quot;ENSG00000285706&quot;
+[1651] &quot;ENSG00000285707&quot; &quot;ENSG00000285708&quot; &quot;ENSG00000285709&quot;
+[1654] &quot;ENSG00000285710&quot; &quot;ENSG00000285711&quot; &quot;ENSG00000285712&quot;
+[1657] &quot;ENSG00000285713&quot; &quot;ENSG00000285714&quot; &quot;ENSG00000285715&quot;
+[1660] &quot;ENSG00000285716&quot; &quot;ENSG00000285717&quot; &quot;ENSG00000285718&quot;
+[1663] &quot;ENSG00000285719&quot; &quot;ENSG00000285720&quot; &quot;ENSG00000285721&quot;
+[1666] &quot;ENSG00000285722&quot; &quot;ENSG00000285723&quot; &quot;ENSG00000285724&quot;
+[1669] &quot;ENSG00000285725&quot; &quot;ENSG00000285726&quot; &quot;ENSG00000285727&quot;
+[1672] &quot;ENSG00000285728&quot; &quot;ENSG00000285729&quot; &quot;ENSG00000285730&quot;
+[1675] &quot;ENSG00000285731&quot; &quot;ENSG00000285732&quot; &quot;ENSG00000285733&quot;
+[1678] &quot;ENSG00000285734&quot; &quot;ENSG00000285735&quot; &quot;ENSG00000285736&quot;
+[1681] &quot;ENSG00000285737&quot; &quot;ENSG00000285738&quot; &quot;ENSG00000285739&quot;
+[1684] &quot;ENSG00000285740&quot; &quot;ENSG00000285741&quot; &quot;ENSG00000285742&quot;
+[1687] &quot;ENSG00000285743&quot; &quot;ENSG00000285744&quot; &quot;ENSG00000285745&quot;
+[1690] &quot;ENSG00000285746&quot; &quot;ENSG00000285747&quot; &quot;ENSG00000285748&quot;
+[1693] &quot;ENSG00000285749&quot; &quot;ENSG00000285750&quot; &quot;ENSG00000285751&quot;
+[1696] &quot;ENSG00000285752&quot; &quot;ENSG00000285753&quot; &quot;ENSG00000285754&quot;
+[1699] &quot;ENSG00000285755&quot; &quot;ENSG00000285756&quot; &quot;ENSG00000285757&quot;
+[1702] &quot;ENSG00000285758&quot; &quot;ENSG00000285759&quot; &quot;ENSG00000285760&quot;
+[1705] &quot;ENSG00000285761&quot; &quot;ENSG00000285762&quot; &quot;ENSG00000285763&quot;
+[1708] &quot;ENSG00000285764&quot; &quot;ENSG00000285765&quot; &quot;ENSG00000285766&quot;
+[1711] &quot;ENSG00000285768&quot; &quot;ENSG00000285769&quot; &quot;ENSG00000285770&quot;
+[1714] &quot;ENSG00000285771&quot; &quot;ENSG00000285772&quot; &quot;ENSG00000285773&quot;
+[1717] &quot;ENSG00000285774&quot; &quot;ENSG00000285775&quot; &quot;ENSG00000285776&quot;
+[1720] &quot;ENSG00000285777&quot; &quot;ENSG00000285778&quot; &quot;ENSG00000285779&quot;
+[1723] &quot;ENSG00000285780&quot; &quot;ENSG00000285781&quot; &quot;ENSG00000285782&quot;
+[1726] &quot;ENSG00000285783&quot; &quot;ENSG00000285784&quot; &quot;ENSG00000285785&quot;
+[1729] &quot;ENSG00000285786&quot; &quot;ENSG00000285788&quot; &quot;ENSG00000285789&quot;
+[1732] &quot;ENSG00000285790&quot; &quot;ENSG00000285791&quot; &quot;ENSG00000285792&quot;
+[1735] &quot;ENSG00000285793&quot; &quot;ENSG00000285794&quot; &quot;ENSG00000285796&quot;
+[1738] &quot;ENSG00000285797&quot; &quot;ENSG00000285798&quot; &quot;ENSG00000285799&quot;
+[1741] &quot;ENSG00000285800&quot; &quot;ENSG00000285801&quot; &quot;ENSG00000285802&quot;
+[1744] &quot;ENSG00000285803&quot; &quot;ENSG00000285804&quot; &quot;ENSG00000285805&quot;
+[1747] &quot;ENSG00000285806&quot; &quot;ENSG00000285807&quot; &quot;ENSG00000285808&quot;
+[1750] &quot;ENSG00000285809&quot; &quot;ENSG00000285810&quot; &quot;ENSG00000285811&quot;
+[1753] &quot;ENSG00000285812&quot; &quot;ENSG00000285813&quot; &quot;ENSG00000285814&quot;
+[1756] &quot;ENSG00000285815&quot; &quot;ENSG00000285816&quot; &quot;ENSG00000285817&quot;
+[1759] &quot;ENSG00000285818&quot; &quot;ENSG00000285819&quot; &quot;ENSG00000285820&quot;
+[1762] &quot;ENSG00000285821&quot; &quot;ENSG00000285822&quot; &quot;ENSG00000285823&quot;
+[1765] &quot;ENSG00000285824&quot; &quot;ENSG00000285825&quot; &quot;ENSG00000285826&quot;
+[1768] &quot;ENSG00000285827&quot; &quot;ENSG00000285829&quot; &quot;ENSG00000285830&quot;
+[1771] &quot;ENSG00000285831&quot; &quot;ENSG00000285833&quot; &quot;ENSG00000285834&quot;
+[1774] &quot;ENSG00000285835&quot; &quot;ENSG00000285836&quot; &quot;ENSG00000285837&quot;
+[1777] &quot;ENSG00000285838&quot; &quot;ENSG00000285839&quot; &quot;ENSG00000285840&quot;
+[1780] &quot;ENSG00000285841&quot; &quot;ENSG00000285842&quot; &quot;ENSG00000285843&quot;
+[1783] &quot;ENSG00000285844&quot; &quot;ENSG00000285845&quot; &quot;ENSG00000285846&quot;
+[1786] &quot;ENSG00000285847&quot; &quot;ENSG00000285848&quot; &quot;ENSG00000285849&quot;
+[1789] &quot;ENSG00000285850&quot; &quot;ENSG00000285851&quot; &quot;ENSG00000285852&quot;
+[1792] &quot;ENSG00000285853&quot; &quot;ENSG00000285854&quot; &quot;ENSG00000285855&quot;
+[1795] &quot;ENSG00000285856&quot; &quot;ENSG00000285857&quot; &quot;ENSG00000285858&quot;
+[1798] &quot;ENSG00000285859&quot; &quot;ENSG00000285860&quot; &quot;ENSG00000285861&quot;
+[1801] &quot;ENSG00000285862&quot; &quot;ENSG00000285863&quot; &quot;ENSG00000285864&quot;
+[1804] &quot;ENSG00000285865&quot; &quot;ENSG00000285866&quot; &quot;ENSG00000285867&quot;
+[1807] &quot;ENSG00000285868&quot; &quot;ENSG00000285869&quot; &quot;ENSG00000285870&quot;
+[1810] &quot;ENSG00000285871&quot; &quot;ENSG00000285872&quot; &quot;ENSG00000285873&quot;
+[1813] &quot;ENSG00000285875&quot; &quot;ENSG00000285876&quot; &quot;ENSG00000285877&quot;
+[1816] &quot;ENSG00000285878&quot; &quot;ENSG00000285879&quot; &quot;ENSG00000285880&quot;
+[1819] &quot;ENSG00000285881&quot; &quot;ENSG00000285882&quot; &quot;ENSG00000285883&quot;
+[1822] &quot;ENSG00000285884&quot; &quot;ENSG00000285885&quot; &quot;ENSG00000285886&quot;
+[1825] &quot;ENSG00000285887&quot; &quot;ENSG00000285888&quot; &quot;ENSG00000285889&quot;
+[1828] &quot;ENSG00000285890&quot; &quot;ENSG00000285891&quot; &quot;ENSG00000285892&quot;
+[1831] &quot;ENSG00000285894&quot; &quot;ENSG00000285895&quot; &quot;ENSG00000285896&quot;
+[1834] &quot;ENSG00000285897&quot; &quot;ENSG00000285898&quot; &quot;ENSG00000285899&quot;
+[1837] &quot;ENSG00000285900&quot; &quot;ENSG00000285901&quot; &quot;ENSG00000285902&quot;
+[1840] &quot;ENSG00000285904&quot; &quot;ENSG00000285905&quot; &quot;ENSG00000285906&quot;
+[1843] &quot;ENSG00000285907&quot; &quot;ENSG00000285908&quot; &quot;ENSG00000285909&quot;
+[1846] &quot;ENSG00000285910&quot; &quot;ENSG00000285911&quot; &quot;ENSG00000285912&quot;
+[1849] &quot;ENSG00000285913&quot; &quot;ENSG00000285914&quot; &quot;ENSG00000285915&quot;
+[1852] &quot;ENSG00000285917&quot; &quot;ENSG00000285918&quot; &quot;ENSG00000285919&quot;
+[1855] &quot;ENSG00000285920&quot; &quot;ENSG00000285921&quot; &quot;ENSG00000285922&quot;
+[1858] &quot;ENSG00000285923&quot; &quot;ENSG00000285925&quot; &quot;ENSG00000285926&quot;
+[1861] &quot;ENSG00000285927&quot; &quot;ENSG00000285928&quot; &quot;ENSG00000285929&quot;
+[1864] &quot;ENSG00000285930&quot; &quot;ENSG00000285931&quot; &quot;ENSG00000285932&quot;
+[1867] &quot;ENSG00000285933&quot; &quot;ENSG00000285934&quot; &quot;ENSG00000285935&quot;
+[1870] &quot;ENSG00000285936&quot; &quot;ENSG00000285937&quot; &quot;ENSG00000285938&quot;
+[1873] &quot;ENSG00000285939&quot; &quot;ENSG00000285940&quot; &quot;ENSG00000285941&quot;
+[1876] &quot;ENSG00000285942&quot; &quot;ENSG00000285943&quot; &quot;ENSG00000285944&quot;
+[1879] &quot;ENSG00000285945&quot; &quot;ENSG00000285946&quot; &quot;ENSG00000285947&quot;
+[1882] &quot;ENSG00000285948&quot; &quot;ENSG00000285950&quot; &quot;ENSG00000285952&quot;
+[1885] &quot;ENSG00000285953&quot; &quot;ENSG00000285954&quot; &quot;ENSG00000285955&quot;
+[1888] &quot;ENSG00000285956&quot; &quot;ENSG00000285957&quot; &quot;ENSG00000285958&quot;
+[1891] &quot;ENSG00000285959&quot; &quot;ENSG00000285960&quot; &quot;ENSG00000285961&quot;
+[1894] &quot;ENSG00000285963&quot; &quot;ENSG00000285964&quot; &quot;ENSG00000285966&quot;
+[1897] &quot;ENSG00000285967&quot; &quot;ENSG00000285968&quot; &quot;ENSG00000285969&quot;
+[1900] &quot;ENSG00000285970&quot; &quot;ENSG00000285971&quot; &quot;ENSG00000285972&quot;
+[1903] &quot;ENSG00000285973&quot; &quot;ENSG00000285974&quot; &quot;ENSG00000285975&quot;
+[1906] &quot;ENSG00000285976&quot; &quot;ENSG00000285977&quot; &quot;ENSG00000285978&quot;
+[1909] &quot;ENSG00000285979&quot; &quot;ENSG00000285980&quot; &quot;ENSG00000285981&quot;
+[1912] &quot;ENSG00000285982&quot; &quot;ENSG00000285984&quot; &quot;ENSG00000285985&quot;
+[1915] &quot;ENSG00000285986&quot; &quot;ENSG00000285987&quot; &quot;ENSG00000285988&quot;
+[1918] &quot;ENSG00000285989&quot; &quot;ENSG00000285990&quot; &quot;ENSG00000285991&quot;
+[1921] &quot;ENSG00000285992&quot; &quot;ENSG00000285993&quot; &quot;ENSG00000285994&quot;</code></pre>
+<pre class="r"><code># approx 1900 (previous checks show none after filtering for protein coding genes)
 
 # merge gene name data with expression matrix
 expr_duke_df &lt;- expr_duke %&gt;%
@@ -1069,20 +1875,20 @@ expr_duke_df &lt;- expr_duke %&gt;%
   dplyr::select(-gene_status, -gene_name, -level, -havana_gene) %&gt;%
   print()</code></pre>
 <pre><code>Joining, by = &quot;geneID_split&quot;</code></pre>
-<pre><code># A tibble: 16,178 x 775
+<pre><code># A tibble: 58,721 x 775
    gene_id_v29 gene_id_v22 geneID_split gene_type duke_648 duke_658
    &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;        &lt;chr&gt;        &lt;dbl&gt;    &lt;dbl&gt;
- 1 ENSG000000… ENSG000000… ENSG0000000… protein_…    18.0      56.5
- 2 ENSG000000… ENSG000000… ENSG0000000… protein_…     3.02      0  
- 3 ENSG000000… ENSG000000… ENSG0000000… protein_…   503.      879. 
- 4 ENSG000000… ENSG000000… ENSG0000000… protein_…   231.      333. 
- 5 ENSG000000… ENSG000000… ENSG0000000… protein_…   654.     1145. 
- 6 ENSG000000… ENSG000000… ENSG0000000… protein_…   243.      261. 
- 7 ENSG000000… ENSG000000… ENSG0000000… protein_…  1227.     1167. 
- 8 ENSG000000… ENSG000000… ENSG0000000… protein_…   175.      361. 
- 9 ENSG000000… ENSG000000… ENSG0000000… protein_…   490.     1213. 
-10 ENSG000000… ENSG000000… ENSG0000000… protein_…   837.     1392. 
-# … with 16,168 more rows, and 769 more variables: duke_683 &lt;dbl&gt;,
+ 1 ENSG000000… ENSG000000… ENSG0000000… protein_…    18.4      56.0
+ 2 ENSG000000… ENSG000000… ENSG0000000… protein_…     3.00      0  
+ 3 ENSG000000… ENSG000000… ENSG0000000… protein_…   477.      817. 
+ 4 ENSG000000… ENSG000000… ENSG0000000… protein_…   234.      330. 
+ 5 ENSG000000… ENSG000000… ENSG0000000… protein_…   560.     1122. 
+ 6 ENSG000000… ENSG000000… ENSG0000000… protein_…   278.      245. 
+ 7 ENSG000000… ENSG000000… ENSG0000000… protein_…  1054.     1135. 
+ 8 ENSG000000… ENSG000000… ENSG0000000… protein_…   181.      374. 
+ 9 ENSG000000… ENSG000000… ENSG0000000… protein_…   547.     1452. 
+10 ENSG000000… ENSG000000… ENSG0000000… protein_…   845.     1361. 
+# … with 58,711 more rows, and 769 more variables: duke_683 &lt;dbl&gt;,
 #   duke_684 &lt;dbl&gt;, duke_689 &lt;dbl&gt;, duke_690 &lt;dbl&gt;, duke_695 &lt;dbl&gt;,
 #   duke_702 &lt;dbl&gt;, duke_704 &lt;dbl&gt;, duke_705 &lt;dbl&gt;, duke_759 &lt;dbl&gt;,
 #   duke_787 &lt;dbl&gt;, duke_793 &lt;dbl&gt;, duke_799 &lt;dbl&gt;, duke_800 &lt;dbl&gt;,
@@ -1111,33 +1917,53 @@ expr_duke_df &lt;- expr_duke %&gt;%
 <pre class="r"><code># check how many gene ids are missing from version 22  
 summary(is.na(expr_duke_df$gene_id_v22))</code></pre>
 <pre><code>   Mode   FALSE    TRUE 
-logical   16109      69 </code></pre>
+logical   56753    1968 </code></pre>
 <pre class="r"><code># check the gene types in the expression matrix
 summary(as.factor(expr_duke_df$gene_type))</code></pre>
-<pre><code>                         antisense                          IG_V_gene 
-                               119                                  6 
+<pre><code>          3prime_overlapping_ncrna                          antisense 
+                                29                               5460 
+                         IG_C_gene                    IG_C_pseudogene 
+                                14                                  9 
+                         IG_D_gene                          IG_J_gene 
+                                33                                 18 
+                   IG_J_pseudogene                          IG_V_gene 
+                                 3                                142 
                    IG_V_pseudogene                            lincRNA 
-                                 3                                103 
-                             miRNA                           misc_RNA 
-                                 9                                  3 
-            polymorphic_pseudogene               processed_pseudogene 
-                                 4                                100 
-              processed_transcript                     protein_coding 
-                                48                              15495 
-                              rRNA                             scaRNA 
+                               179                               7361 
+                      macro_lncRNA                              miRNA 
+                                 1                               1450 
+                          misc_RNA                            Mt_rRNA 
+                              2207                                  2 
+                           Mt_tRNA             polymorphic_pseudogene 
+                                22                                 56 
+              processed_pseudogene               processed_transcript 
+                             10223                                471 
+                    protein_coding                         pseudogene 
+                             19546                                 25 
+                          ribozyme                               rRNA 
+                                 8                                536 
+                            scaRNA                     sense_intronic 
+                                49                                883 
+                 sense_overlapping                             snoRNA 
+                               181                                940 
+                             snRNA                               sRNA 
+                              1872                                  2 
+                               TEC                          TR_C_gene 
+                              1030                                  5 
+                         TR_D_gene                          TR_J_gene 
+                                 3                                 73 
+                   TR_J_pseudogene                          TR_V_gene 
+                                 4                                106 
+                   TR_V_pseudogene   transcribed_processed_pseudogene 
+                                30                                429 
+    transcribed_unitary_pseudogene transcribed_unprocessed_pseudogene 
+                                 1                                653 
+   translated_processed_pseudogene  translated_unprocessed_pseudogene 
                                  1                                  1 
-                    sense_intronic                  sense_overlapping 
-                                 4                                  4 
-                            snoRNA                              snRNA 
-                                 5                                  3 
-                               TEC   transcribed_processed_pseudogene 
-                                 4                                 24 
-transcribed_unprocessed_pseudogene  translated_unprocessed_pseudogene 
-                               113                                  1 
                 unitary_pseudogene             unprocessed_pseudogene 
-                                 9                                 50 
-                              NA&#39;s 
-                                69 </code></pre>
+                               168                               2526 
+                          vaultRNA                               NA&#39;s 
+                                 1                               1968 </code></pre>
 <div id="filter-for-protein-coding" class="section level4">
 <h4>Filter for protein coding</h4>
 <pre class="r"><code># filter for protein coding genes only
@@ -1147,7 +1973,7 @@ expr_duke_filtered &lt;- expr_duke_df %&gt;%
 # any missing gene ids also protein coding genes?
 summary(is.na(expr_duke_filtered$gene_id_v22))</code></pre>
 <pre><code>   Mode   FALSE 
-logical   15495 </code></pre>
+logical   19546 </code></pre>
 <pre class="r"><code># NO
 
 expr_duke_protcoding &lt;- expr_duke_filtered %&gt;%
@@ -1157,27 +1983,27 @@ expr_duke_protcoding &lt;- expr_duke_filtered %&gt;%
   as.matrix()
 
 str(expr_duke_protcoding)</code></pre>
-<pre><code> num [1:15495, 1:771] 18.04 3.02 502.55 231.24 653.92 ...
+<pre><code> num [1:19546, 1:771] 18.4 3 477 233.8 560 ...
  - attr(*, &quot;dimnames&quot;)=List of 2
-  ..$ : chr [1:15495] &quot;ENSG00000000003.13&quot; &quot;ENSG00000000005.5&quot; &quot;ENSG00000000419.11&quot; &quot;ENSG00000000457.12&quot; ...
+  ..$ : chr [1:19546] &quot;ENSG00000000003.13&quot; &quot;ENSG00000000005.5&quot; &quot;ENSG00000000419.11&quot; &quot;ENSG00000000457.12&quot; ...
   ..$ : chr [1:771] &quot;duke_648&quot; &quot;duke_658&quot; &quot;duke_683&quot; &quot;duke_684&quot; ...</code></pre>
 <pre class="r"><code>expr_duke_protcoding[1:5, 1:5]</code></pre>
-<pre><code>                     duke_648   duke_658  duke_683   duke_684  duke_689
-ENSG00000000003.13  18.036060   56.52077  57.04855   7.290646  85.59033
-ENSG00000000005.5    3.022655    0.00000   0.00000   0.000000   0.00000
-ENSG00000000419.11 502.551508  879.08074 150.61949 287.679769 191.18755
-ENSG00000000457.12 231.243100  333.21953 387.19099 207.392488 304.50997
-ENSG00000000460.15 653.920429 1144.52933 534.36886 625.864030 419.88944</code></pre>
+<pre><code>                     duke_648   duke_658  duke_683  duke_684 duke_689
+ENSG00000000003.13  18.435400   56.00074  50.58101   7.19879  82.0210
+ENSG00000000005.5    2.999997    0.00000   0.00000   0.00000   0.0000
+ENSG00000000419.11 476.999500  817.00040 141.99956 254.00005 192.9999
+ENSG00000000457.12 233.777470  330.03661 431.32295 204.92859 343.8820
+ENSG00000000460.15 560.002740 1121.99950 591.99990 564.99992 525.0006</code></pre>
 </div>
 <div id="subset-cases-based-on-protein-coding-library-coverage" class="section level4">
 <h4>Subset cases based on protein coding library coverage</h4>
 <pre class="r"><code>expr_duke_protcoding[1:5, 1:5]</code></pre>
-<pre><code>                     duke_648   duke_658  duke_683   duke_684  duke_689
-ENSG00000000003.13  18.036060   56.52077  57.04855   7.290646  85.59033
-ENSG00000000005.5    3.022655    0.00000   0.00000   0.000000   0.00000
-ENSG00000000419.11 502.551508  879.08074 150.61949 287.679769 191.18755
-ENSG00000000457.12 231.243100  333.21953 387.19099 207.392488 304.50997
-ENSG00000000460.15 653.920429 1144.52933 534.36886 625.864030 419.88944</code></pre>
+<pre><code>                     duke_648   duke_658  duke_683  duke_684 duke_689
+ENSG00000000003.13  18.435400   56.00074  50.58101   7.19879  82.0210
+ENSG00000000005.5    2.999997    0.00000   0.00000   0.00000   0.0000
+ENSG00000000419.11 476.999500  817.00040 141.99956 254.00005 192.9999
+ENSG00000000457.12 233.777470  330.03661 431.32295 204.92859 343.8820
+ENSG00000000460.15 560.002740 1121.99950 591.99990 564.99992 525.0006</code></pre>
 <pre class="r"><code>gene_coverage_threshold &lt;- 12000
 
 ncol(expr_duke_protcoding)</code></pre>
@@ -1185,31 +2011,31 @@ ncol(expr_duke_protcoding)</code></pre>
 <pre class="r"><code>expr_duke_subset &lt;- expr_duke_protcoding[, colSums(expr_duke_protcoding != 0) &gt; gene_coverage_threshold]
 
 expr_duke_subset[1:5, 1:5]</code></pre>
-<pre><code>                     duke_648   duke_658  duke_683   duke_684  duke_689
-ENSG00000000003.13  18.036060   56.52077  57.04855   7.290646  85.59033
-ENSG00000000005.5    3.022655    0.00000   0.00000   0.000000   0.00000
-ENSG00000000419.11 502.551508  879.08074 150.61949 287.679769 191.18755
-ENSG00000000457.12 231.243100  333.21953 387.19099 207.392488 304.50997
-ENSG00000000460.15 653.920429 1144.52933 534.36886 625.864030 419.88944</code></pre>
+<pre><code>                     duke_648   duke_658  duke_683  duke_684 duke_689
+ENSG00000000003.13  18.435400   56.00074  50.58101   7.19879  82.0210
+ENSG00000000005.5    2.999997    0.00000   0.00000   0.00000   0.0000
+ENSG00000000419.11 476.999500  817.00040 141.99956 254.00005 192.9999
+ENSG00000000457.12 233.777470  330.03661 431.32295 204.92859 343.8820
+ENSG00000000460.15 560.002740 1121.99950 591.99990 564.99992 525.0006</code></pre>
 <pre class="r"><code>ncol(expr_duke_subset)</code></pre>
-<pre><code>[1] 665</code></pre>
+<pre><code>[1] 708</code></pre>
 </div>
 <div id="convert-to-cpm" class="section level4">
 <h4>Convert to CPM</h4>
 <pre class="r"><code># correct for library size with cpm using EdgeR
 expr_duke_cpm &lt;- cpm(expr_duke_subset, log = FALSE)
 str(expr_duke_cpm)</code></pre>
-<pre><code> num [1:15495, 1:665] 2.362 0.396 65.82 30.286 85.645 ...
+<pre><code> num [1:19546, 1:708] 2.236 0.364 57.852 28.353 67.919 ...
  - attr(*, &quot;dimnames&quot;)=List of 2
-  ..$ : chr [1:15495] &quot;ENSG00000000003.13&quot; &quot;ENSG00000000005.5&quot; &quot;ENSG00000000419.11&quot; &quot;ENSG00000000457.12&quot; ...
-  ..$ : chr [1:665] &quot;duke_648&quot; &quot;duke_658&quot; &quot;duke_683&quot; &quot;duke_684&quot; ...</code></pre>
+  ..$ : chr [1:19546] &quot;ENSG00000000003.13&quot; &quot;ENSG00000000005.5&quot; &quot;ENSG00000000419.11&quot; &quot;ENSG00000000457.12&quot; ...
+  ..$ : chr [1:708] &quot;duke_648&quot; &quot;duke_658&quot; &quot;duke_683&quot; &quot;duke_684&quot; ...</code></pre>
 <pre class="r"><code>expr_duke_cpm[1:5, 1:5]</code></pre>
-<pre><code>                     duke_648 duke_658  duke_683   duke_684  duke_689
-ENSG00000000003.13  2.3622214  4.27268  6.641871   1.326269  9.689145
-ENSG00000000005.5   0.3958836  0.00000  0.000000   0.000000  0.000000
-ENSG00000000419.11 65.8202481 66.45399 17.535856  52.332938 21.643145
-ENSG00000000457.12 30.2864044 25.18969 45.078665  37.727568 34.471666
-ENSG00000000460.15 85.6453602 86.52055 62.213830 113.853342 47.533053</code></pre>
+<pre><code>                     duke_648  duke_658  duke_683  duke_684  duke_689
+ENSG00000000003.13  2.2359001  3.930938  5.461113  1.217216  8.572243
+ENSG00000000005.5   0.3638486  0.000000  0.000000  0.000000  0.000000
+ENSG00000000419.11 57.8519182 57.348855 15.331359 42.947912 20.170960
+ENSG00000000457.12 28.3532269 23.166723 46.568925 34.650604 35.940067
+ENSG00000000460.15 67.9187981 78.758084 63.916838 95.533709 54.869276</code></pre>
 </div>
 <div id="initial-density-plots" class="section level4">
 <h4>Initial density plots</h4>
@@ -1221,36 +2047,110 @@ tidy_cpm &lt;- t(expr_duke_cpm) %&gt;%
   as_tibble() %&gt;%
   gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id) %&gt;%
   print()</code></pre>
-<pre><code># A tibble: 10,304,175 x 3
+<pre><code># A tibble: 13,838,568 x 3
    sample_id gene_id            intensity
    &lt;chr&gt;     &lt;chr&gt;                  &lt;dbl&gt;
- 1 duke_648  ENSG00000000003.13      2.36
- 2 duke_658  ENSG00000000003.13      4.27
- 3 duke_683  ENSG00000000003.13      6.64
- 4 duke_684  ENSG00000000003.13      1.33
- 5 duke_689  ENSG00000000003.13      9.69
- 6 duke_690  ENSG00000000003.13     17.9 
- 7 duke_695  ENSG00000000003.13      1.73
+ 1 duke_648  ENSG00000000003.13      2.24
+ 2 duke_658  ENSG00000000003.13      3.93
+ 3 duke_683  ENSG00000000003.13      5.46
+ 4 duke_684  ENSG00000000003.13      1.22
+ 5 duke_689  ENSG00000000003.13      8.57
+ 6 duke_690  ENSG00000000003.13     15.8 
+ 7 duke_695  ENSG00000000003.13      1.45
  8 duke_704  ENSG00000000003.13      0   
- 9 duke_705  ENSG00000000003.13      5.48
-10 duke_759  ENSG00000000003.13      2.71
-# … with 10,304,165 more rows</code></pre>
+ 9 duke_705  ENSG00000000003.13      5.67
+10 duke_759  ENSG00000000003.13      2.08
+# … with 13,838,558 more rows</code></pre>
 <pre class="r"><code># plots
 dplot_duke &lt;- ggplot(tidy_cpm, aes(intensity)) +
   geom_density() + 
   theme(legend.position = &quot;none&quot;)
 dplot_duke +
   xlim(-5, 20)</code></pre>
-<pre><code>Warning: Removed 5170211 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/dukedata.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Warning: Removed 5797720 rows containing non-finite values (stat_density).</code></pre>
+<p><img src="figure/dukedata.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
+Past versions of unnamed-chunk-10-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/3cee826038da6f1bd23b82e184f1f26e99fe574d/docs/figure/dukedata.Rmd/unnamed-chunk-10-1.png" target="_blank">3cee826</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-27
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># plot with log and small offset
 dplot_duke_log &lt;- ggplot(tidy_cpm, aes(log(intensity + 0.5))) +
   geom_density() + 
   theme(legend.position = &quot;none&quot;)
 dplot_duke_log +
   xlim(-10, 10)</code></pre>
-<pre><code>Warning: Removed 39 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/dukedata.Rmd/unnamed-chunk-9-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Warning: Removed 37 rows containing non-finite values (stat_density).</code></pre>
+<p><img src="figure/dukedata.Rmd/unnamed-chunk-10-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-2">
+Past versions of unnamed-chunk-10-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/3cee826038da6f1bd23b82e184f1f26e99fe574d/docs/figure/dukedata.Rmd/unnamed-chunk-10-2.png" target="_blank">3cee826</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-06-27
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="filtering-by-expression" class="section level4">
 <h4>Filtering by expression</h4>
@@ -1261,7 +2161,7 @@ cutoff &lt;- 1
 min_sm_frac &lt;- 0.5
 filter_frac &lt;- min_sm_frac * ncol(expr_duke_cpm)
  filter_frac</code></pre>
-<pre><code>[1] 332.5</code></pre>
+<pre><code>[1] 354</code></pre>
 <pre class="r"><code> total_cpm_stats &lt;- data.frame(
    total = apply(expr_duke_cpm, 1, function(x){
      sum(x &gt; cutoff, na.rm = TRUE) 
@@ -1281,10 +2181,10 @@ expr_duke_cpm_df &lt;- expr_duke_cpm %&gt;% as.data.frame()
 
 # check results
 dim(expr_duke_cpm_df)</code></pre>
-<pre><code>[1] 15495   665</code></pre>
+<pre><code>[1] 19546   708</code></pre>
 <pre class="r"><code>expr_duke_cpm_filtered &lt;- expr_duke_cpm_df[keep,]
 dim(expr_duke_cpm_filtered)</code></pre>
-<pre><code>[1] 12414   665</code></pre>
+<pre><code>[1] 13678   708</code></pre>
 </div>
 <div id="post-filtering-density-plots" class="section level4">
 <h4>Post-filtering density plots</h4>
@@ -1296,36 +2196,36 @@ tidy_cpm_filtered &lt;- t(expr_duke_cpm_filtered) %&gt;%
   as_tibble() %&gt;%
   gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id) %&gt;%
   print()</code></pre>
-<pre><code># A tibble: 8,255,310 x 3
+<pre><code># A tibble: 9,684,024 x 3
    sample_id gene_id            intensity
    &lt;chr&gt;     &lt;chr&gt;                  &lt;dbl&gt;
- 1 duke_648  ENSG00000000003.13      2.36
- 2 duke_658  ENSG00000000003.13      4.27
- 3 duke_683  ENSG00000000003.13      6.64
- 4 duke_684  ENSG00000000003.13      1.33
- 5 duke_689  ENSG00000000003.13      9.69
- 6 duke_690  ENSG00000000003.13     17.9 
- 7 duke_695  ENSG00000000003.13      1.73
+ 1 duke_648  ENSG00000000003.13      2.24
+ 2 duke_658  ENSG00000000003.13      3.93
+ 3 duke_683  ENSG00000000003.13      5.46
+ 4 duke_684  ENSG00000000003.13      1.22
+ 5 duke_689  ENSG00000000003.13      8.57
+ 6 duke_690  ENSG00000000003.13     15.8 
+ 7 duke_695  ENSG00000000003.13      1.45
  8 duke_704  ENSG00000000003.13      0   
- 9 duke_705  ENSG00000000003.13      5.48
-10 duke_759  ENSG00000000003.13      2.71
-# … with 8,255,300 more rows</code></pre>
+ 9 duke_705  ENSG00000000003.13      5.67
+10 duke_759  ENSG00000000003.13      2.08
+# … with 9,684,014 more rows</code></pre>
 <pre class="r"><code># plots
 dplot_duke_2 &lt;- ggplot(tidy_cpm_filtered, aes(intensity)) +
   geom_density() + 
   theme(legend.position = &quot;none&quot;)
 dplot_duke_2 +
   xlim(-5, 20)</code></pre>
-<pre><code>Warning: Removed 5148798 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/dukedata.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Warning: Removed 5767429 rows containing non-finite values (stat_density).</code></pre>
+<p><img src="figure/dukedata.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code># plot with log and small offset
 dplot_duke_log_2 &lt;- ggplot(tidy_cpm_filtered, aes(log(intensity + 0.5))) +
   geom_density() + 
   theme(legend.position = &quot;none&quot;)
 dplot_duke_log_2 +
   xlim(-10, 10)</code></pre>
-<pre><code>Warning: Removed 27 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/dukedata.Rmd/unnamed-chunk-11-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Warning: Removed 23 rows containing non-finite values (stat_density).</code></pre>
+<p><img src="figure/dukedata.Rmd/unnamed-chunk-12-2.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="normalize-gene-expression-distributions" class="section level4">
 <h4>Normalize gene expression distributions</h4>
@@ -1342,11 +2242,11 @@ duke_cpm_norm &lt;- as.data.frame(duke_cpm_norm)
 rownames(duke_cpm_norm) &lt;- rownames(expr_duke_cpm_filtered)
 duke_cpm_norm[1:5, 1:5]</code></pre>
 <pre><code>                    duke_648  duke_658  duke_683  duke_684  duke_689
-ENSG00000000003.13  2.490157  4.213576  6.289349  1.155982  9.146129
-ENSG00000000419.11 69.384999 65.534730 16.605128 45.613624 20.430181
-ENSG00000000457.12 31.926682 24.841236 42.686084 32.883519 32.539743
-ENSG00000000460.15 90.283816 85.323699 58.911789 99.235086 44.869121
-ENSG00000000938.11 33.536589 19.491612 31.356546  8.606193 13.576131</code></pre>
+ENSG00000000003.13  2.413736  3.960388  5.225765  1.063591  8.170125
+ENSG00000000419.11 62.453274 57.778500 14.670651 37.527448 19.224753
+ENSG00000000457.12 30.608352 23.340283 44.562030 30.277345 34.254142
+ENSG00000000460.15 73.320841 79.348123 61.162331 83.476383 52.295395
+ENSG00000000938.11 36.398330 17.326469 28.721541 10.046709 13.845842</code></pre>
 </div>
 <div id="log-transformation" class="section level4">
 <h4>Log transformation</h4>
@@ -1354,20 +2254,20 @@ ENSG00000000938.11 33.536589 19.491612 31.356546  8.606193 13.576131</code></pre
 offset_duke_cpm_norm &lt;- duke_cpm_norm + 0.5
 offset_duke_cpm_norm[1:5, 1:5]</code></pre>
 <pre><code>                    duke_648  duke_658  duke_683  duke_684  duke_689
-ENSG00000000003.13  2.990157  4.713576  6.789349  1.655982  9.646129
-ENSG00000000419.11 69.884999 66.034730 17.105128 46.113624 20.930181
-ENSG00000000457.12 32.426682 25.341236 43.186084 33.383519 33.039743
-ENSG00000000460.15 90.783816 85.823699 59.411789 99.735086 45.369121
-ENSG00000000938.11 34.036589 19.991612 31.856546  9.106193 14.076131</code></pre>
+ENSG00000000003.13  2.913736  4.460388  5.725765  1.563591  8.670125
+ENSG00000000419.11 62.953274 58.278500 15.170651 38.027448 19.724753
+ENSG00000000457.12 31.108352 23.840283 45.062030 30.777345 34.754142
+ENSG00000000460.15 73.820841 79.848123 61.662331 83.976383 52.795395
+ENSG00000000938.11 36.898330 17.826469 29.221541 10.546709 14.345842</code></pre>
 <pre class="r"><code># log transformation
 duke_log_cpm_filtered_norm &lt;- log2(offset_duke_cpm_norm)
 duke_log_cpm_filtered_norm[1:5, 1:5]</code></pre>
 <pre><code>                   duke_648 duke_658 duke_683  duke_684 duke_689
-ENSG00000000003.13 1.580221 2.236822 2.763273 0.7276874 3.269950
-ENSG00000000419.11 6.126911 6.045153 4.096357 5.5271212 4.387513
-ENSG00000000457.12 5.019110 4.663415 5.432495 5.0610641 5.046131
-ENSG00000000460.15 6.504363 6.423304 5.892677 6.6400292 5.503639
-ENSG00000000938.11 5.089015 4.321323 4.993518 3.1868480 3.815179</code></pre>
+ENSG00000000003.13 1.542870 2.157169 2.517469 0.6448634 3.116053
+ENSG00000000419.11 5.976210 5.864892 3.923211 5.2489692 4.301935
+ENSG00000000457.12 4.959230 4.575329 5.493840 4.9437969 5.119113
+ENSG00000000460.15 6.205956 6.319187 5.946318 6.3919117 5.722340
+ENSG00000000938.11 5.205484 4.155949 4.868960 3.3987210 3.842561</code></pre>
 <p>Final density plot</p>
 <pre class="r"><code>duke_log_cpm_filtered_tbl &lt;- duke_log_cpm_filtered_norm %&gt;%
   as.data.frame() %&gt;%
@@ -1383,7 +2283,7 @@ dplot3 &lt;- ggplot(tidy_log_cpm, aes(intensity)) +
   xlim(-20, 20) +
   ggtitle(&quot;Final density plot of log(CPM) for Duke DLBCL&quot;)
 dplot3</code></pre>
-<p><img src="figure/dukedata.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/dukedata.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="prepare-phenotype-data" class="section level2">
@@ -1569,22 +2469,22 @@ pheno_data_joined &lt;- pheno_data_split %&gt;%
 <pre><code># A tibble: 771 x 3
    sample_id lib_size lane     
    &lt;chr&gt;        &lt;int&gt; &lt;fct&gt;    
- 1 duke_648   7664005 C85CBANXX
- 2 duke_658  13270245 C80RHANXX
- 3 duke_683   8620210 C80RHANXX
- 4 duke_684   5512745 C85CBANXX
- 5 duke_689   8874451 C85CBANXX
- 6 duke_690   9633770 C85CBANXX
- 7 duke_695   8313974 C85CBANXX
- 8 duke_702     70058 C85CBANXX
- 9 duke_704    399772 C85CBANXX
-10 duke_705   4856641 C85CBANXX
+ 1 duke_648   8555759 C85CBANXX
+ 2 duke_658  14637401 C80RHANXX
+ 3 duke_683   9636557 C80RHANXX
+ 4 duke_684   6111138 C85CBANXX
+ 5 duke_689   9908539 C85CBANXX
+ 6 duke_690  10741192 C85CBANXX
+ 7 duke_695   9146045 C85CBANXX
+ 8 duke_702     77965 C85CBANXX
+ 9 duke_704    444959 C85CBANXX
+10 duke_705   5421838 C85CBANXX
 # … with 761 more rows</code></pre>
 <pre class="r"><code># select rows based on columns in expression matrix
 pheno_data_filtered &lt;- pheno_data_joined %&gt;%
   dplyr::filter(sample_id %in% colnames(duke_log_cpm_filtered_norm))
 nrow(pheno_data_filtered)</code></pre>
-<pre><code>[1] 665</code></pre>
+<pre><code>[1] 708</code></pre>
 <pre class="r"><code># Ensure that samples in expression matrix matches pheno data
 sample_exprs &lt;- colnames(duke_log_cpm_filtered_norm)
 sample_pheno &lt;- pheno_data_filtered %&gt;% pull(sample_id)
@@ -1609,7 +2509,7 @@ phenoData &lt;- new(&quot;AnnotatedDataFrame&quot;,
                  varMetadata = v_metadata)
 phenoData</code></pre>
 <pre><code>An object of class &#39;AnnotatedDataFrame&#39;
-  rowNames: duke_648 duke_658 ... duke_3999 (665 total)
+  rowNames: duke_648 duke_658 ... duke_3999 (708 total)
   varLabels: lib_size lane
   varMetadata: labelDescription</code></pre>
 <pre class="r"><code># convert expression data to matrix format
@@ -1625,11 +2525,11 @@ duke_es &lt;- ExpressionSet(
   annotation = annotation)
 duke_es</code></pre>
 <pre><code>ExpressionSet (storageMode: lockedEnvironment)
-assayData: 12414 features, 665 samples 
+assayData: 13678 features, 708 samples 
   element names: exprs 
 protocolData: none
 phenoData
-  sampleNames: duke_648 duke_658 ... duke_3999 (665 total)
+  sampleNames: duke_648 duke_658 ... duke_3999 (708 total)
   varLabels: lib_size lane
   varMetadata: labelDescription
 featureData: none
@@ -1662,25 +2562,25 @@ attached base packages:
 other attached packages:
  [1] Biobase_2.42.0      BiocGenerics_0.28.0 edgeR_3.24.3       
  [4] limma_3.38.3        forcats_0.4.0       stringr_1.4.0      
- [7] dplyr_0.8.1         purrr_0.3.2         readr_1.3.1        
-[10] tidyr_0.8.3         tibble_2.1.3        ggplot2_3.1.1      
+ [7] dplyr_0.8.3         purrr_0.3.2         readr_1.3.1        
+[10] tidyr_0.8.3         tibble_2.1.3        ggplot2_3.2.0      
 [13] tidyverse_1.2.1    
 
 loaded via a namespace (and not attached):
- [1] tidyselect_0.2.5 locfit_1.5-9.1   xfun_0.7         haven_2.1.0     
+ [1] tidyselect_0.2.5 locfit_1.5-9.1   xfun_0.8         haven_2.1.1     
  [5] lattice_0.20-38  vctrs_0.1.0      colorspace_1.4-1 generics_0.0.2  
- [9] htmltools_0.3.6  yaml_2.2.0       utf8_1.1.4       rlang_0.3.4     
-[13] pillar_1.4.1     glue_1.3.1       withr_2.1.2      modelr_0.1.4    
-[17] readxl_1.3.1     plyr_1.8.4       munsell_0.5.0    gtable_0.3.0    
-[21] workflowr_1.4.0  cellranger_1.1.0 rvest_0.3.4      evaluate_0.14   
-[25] labeling_0.3     knitr_1.23       fansi_0.4.0      broom_0.5.2     
+ [9] htmltools_0.3.6  yaml_2.2.0       utf8_1.1.4       rlang_0.4.0     
+[13] pillar_1.4.2     glue_1.3.1       withr_2.1.2      modelr_0.1.4    
+[17] readxl_1.3.1     munsell_0.5.0    gtable_0.3.0     workflowr_1.4.0 
+[21] cellranger_1.1.0 rvest_0.3.4      evaluate_0.14    labeling_0.3    
+[25] knitr_1.23       fansi_0.4.0      highr_0.8        broom_0.5.2     
 [29] Rcpp_1.0.1       scales_1.0.0     backports_1.1.4  jsonlite_1.6    
-[33] fs_1.3.1         hms_0.4.2        digest_0.6.19    stringi_1.4.3   
+[33] fs_1.3.1         hms_0.4.2        digest_0.6.20    stringi_1.4.3   
 [37] grid_3.5.3       rprojroot_1.3-2  cli_1.1.0        tools_3.5.3     
 [41] magrittr_1.5     lazyeval_0.2.2   zeallot_0.1.0    crayon_1.3.4    
 [45] whisker_0.3-2    pkgconfig_2.0.2  xml2_1.2.0       lubridate_1.7.4 
 [49] assertthat_0.2.1 rmarkdown_1.13   httr_1.4.0       rstudioapi_0.10 
-[53] R6_2.4.0         nlme_3.1-140     git2r_0.25.2     compiler_3.5.3  </code></pre>
+[53] R6_2.4.0         nlme_3.1-140     git2r_0.26.1     compiler_3.5.3  </code></pre>
 </div>
 </div>
 
