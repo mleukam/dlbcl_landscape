@@ -7,9 +7,647 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Introduction
+## Setup
+
+Clear the workspace
+```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+library("tidyverse")
+library("Biobase")
+library("limma")
+library("edgeR")
+library("ggdark")
+library("ggsci")
+library("viridis")
+library("sva")
+```
+
+Read in data
+```{r}
+# Combined duke+nci es with gsva4, 4-cluster model phenodata and log-transformed, normalized read counts
+combined_es <- readRDS("output/combined_es_gsva4_4cluster.rds")
+```
+
+Setup for limma voom linear modeling following limma user's manual https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf
+
+Chapter 15 RNAseq Data
+
+Recommended steps:
+
+1. Start with raw counts (HTSeq or Kallisto for example)
+2. Filter for expression
+3. TMM normalize
+4. Do not log transform
+
+## NCI 
+
+Read in raw counts
+```{r}
+total_counts <- read_csv("output/nci_dlbcl_unprocessed_counts.csv")
+
+# read in conversion table for gene IDs
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
+```
+
+#### Filter for protein coding genes
+```{r}
+# filter for protein coding genes
+total_counts_prcode <- total_counts %>%
+  dplyr::rename(gene_id = gene) %>%
+  left_join(gencode_gtf, by = "gene_id") %>%
+  dplyr::filter(gene_type == "protein_coding") %>%
+  dplyr::select(-gene_name, -gene_type, -gene_status, -level, -havana_gene) %>%
+  dplyr::select(gene_id, everything())
+total_counts_prcode[1:5, 1:5]
+
+nrow(total_counts)
+nrow(total_counts_prcode)
+```
+
+#### Density plots before expression filtering
+```{r}
+tidy_counts <- total_counts_prcode %>% 
+  gather(key = "sampleID", value = "intensity", -gene_id) 
+
+dplot1 <- ggplot(tidy_counts, aes(intensity)) +
+  geom_density() + 
+  theme(legend.position = "none") +
+  xlim(-5, 100) +
+  ggtitle("Density plot of counts for NCI DLBCL") +
+  dark_theme_gray()
+dplot1
+
+dplot2 <- ggplot(tidy_counts, aes(log(intensity))) +
+  geom_density() +
+  theme(legend.position = "none") +
+  xlim(-20, 20) +
+  ggtitle("Density plot of log(counts) for NCI DLBCL") +
+  dark_theme_gray()
+dplot2
+```
+
+#### Filter by expression levels
+```{r}
+# move gene names to rownames
+totcounts_prcode_matrix <- total_counts_prcode %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_id")
+totcounts_prcode_matrix[1:5, 1:5]
+dim(totcounts_prcode_matrix)
+
+# apply hard cutoffs 
+# filter out genes that have counts <= 10 in at least half of cases
+# count expression cutoff: 10
+cutoff <- 10
+# set filter fraction
+min_sm_frac = 0.5
+filter_frac = min_sm_frac * ncol(totcounts_prcode_matrix)
+filter_frac
+total_stats <- data.frame(
+  total = apply(totcounts_prcode_matrix, 
+                1, 
+               function(x) {sum(x > cutoff, na.rm = TRUE) } ))
+keep <- which(total_stats$total >= filter_frac)
+
+# apply keep criteria and check results
+dim(totcounts_prcode_matrix)
+total_filtered = totcounts_prcode_matrix[keep,]
+dim(total_filtered)
+total_filtered[1:5, 1:5]
+```
+
+#### Density plots after expression filtering
+```{r}
+tidy_counts <- total_filtered %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  gather(key = "sampleID", value = "counts", -gene_id) 
+
+dplot1 <- ggplot(tidy_counts, aes(counts)) +
+  geom_density() + 
+  theme(legend.position = "none") +
+  xlim(-5, 100) +
+  ggtitle("Density plot of filtered counts for NCI DLBCL") +
+  dark_theme_gray()
+dplot1
+
+dplot2 <- ggplot(tidy_counts, aes(log(counts))) +
+  geom_density() +
+  theme(legend.position = "none") +
+  xlim(-20, 20) +
+  ggtitle("Density plot of filtered log(counts) for NCI DLBCL") +
+  dark_theme_gray()
+dplot2
+```
+
+#### Normalize gene expression distributions
+
+Normalisation by the method of trimmed mean of M-values (TMM) is performed using the calcNormFactors function in edgeR. The normalisation factors calculated here are used as a scaling factor for the library sizes. 
+```{r}
+# get normalization factors
+norm_factors <- calcNormFactors(total_filtered, method = "TMM")
+
+# apply factor to each column
+nci_norm <- map2_dfc(total_filtered, norm_factors, `*`)
+nci_norm <- as.data.frame(nci_norm)
+rownames(nci_norm) <- rownames(total_filtered)
+nci_norm[1:5, 1:5]
+```
+
+## Duke
+
+Read in raw counts for Duke samples as dgelist
+```{r}
+dgelist <- readRDS("data/temp.dgelist_edger.rds")
+str(dgelist)
+```
+
+Convert GENCODE v29 to v22 gene ids to match GDC standard
+```{r}
+# get expression matrix
+expr_duke <- dgelist[[1]]
+expr_duke[1:5, 1:5]
+col__names <- colnames(expr_duke)
+col_names_rep <- str_split(col__names, pattern = "\\.", simplify = TRUE) %>% 
+  as_tibble() %>%
+  pull(V1) %>%
+  paste0("duke_", .) %>%
+  print()
+colnames(expr_duke) <- col_names_rep
+expr_duke[1:5, 1:5]
+
+# gencode v29 was used to generate rownames of expr_duke matrix
+# GDC standard is gencode v22, which is source of NCI data
+# will convert to gencode v22 to match rows of NCI data
+geneID_split <- str_split(gencode_gtf$gene_id, pattern = "\\.", simplify = TRUE) %>% 
+  as_tibble() %>%
+  dplyr::select(geneID_split = V1)
+
+gencode_gtf_split <- gencode_gtf %>% 
+  bind_cols(geneID_split) %>%
+  dplyr::select(gene_id_v22 = gene_id, geneID_split, everything()) %>%
+  print()
+
+row__names <- rownames(expr_duke) %>%
+  enframe() %>%
+  dplyr::select(geneID_split = value) %>%
+  print()
+
+# check how many gene ids are missing in v22 that are named in v29
+setdiff(row__names$geneID_split, gencode_gtf_split$geneID_split)
+# approx 1900 (previous checks show none after filtering for protein coding genes)
+
+# merge gene name data with expression matrix
+expr_duke_df <- expr_duke %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id_v29") %>%
+  as_tibble() %>%
+  mutate(geneID_split = str_replace(gene_id_v29, pattern = "\\.*", "")) %>%
+  dplyr::select(gene_id_v29, geneID_split, everything()) %>%
+  left_join(gencode_gtf_split) %>%
+  dplyr::select(gene_id_v29, gene_id_v22, geneID_split, gene_type, everything()) %>%
+  dplyr::select(-gene_status, -gene_name, -level, -havana_gene) %>%
+  print()
+
+# check how many gene ids are missing from version 22  
+summary(is.na(expr_duke_df$gene_id_v22))
+
+# check the gene types in the expression matrix
+summary(as.factor(expr_duke_df$gene_type))
+```
+
+#### Filter for protein coding
+```{r}
+# filter for protein coding genes only
+expr_duke_filtered <- expr_duke_df %>% 
+  dplyr::filter(gene_type == "protein_coding")
+  
+# any missing gene ids also protein coding genes?
+summary(is.na(expr_duke_filtered$gene_id_v22))
+# NO
+
+expr_duke_protcoding <- expr_duke_filtered %>%
+  dplyr::select(-gene_id_v29, -geneID_split, -gene_type) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_id_v22") %>%
+  as.matrix()
+
+str(expr_duke_protcoding)
+expr_duke_protcoding[1:5, 1:5]
+```
+
+#### Subset cases based on protein coding library coverage
+
+Following recommendation in methods section of Reddy et al Cell 2017 (original data source). They reported including only those libraries containing at least 12,000 protein coding genes.
 
 ```{r}
+expr_duke_protcoding[1:5, 1:5]
 
+gene_coverage_threshold <- 12000
+
+ncol(expr_duke_protcoding)
+expr_duke_subset <- expr_duke_protcoding[, colSums(expr_duke_protcoding != 0) > gene_coverage_threshold]
+
+expr_duke_subset[1:5, 1:5]
+ncol(expr_duke_subset)
+```
+
+#### Initial density plots
+```{r}
+# Density plots
+# tidy data
+tidy_counts <- t(expr_duke_subset) %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  gather(key = "gene_id", value = "counts", -sample_id) %>%
+  print()
+
+# plots
+dplot_duke <- ggplot(tidy_counts, aes(counts)) +
+  geom_density() + 
+  theme(legend.position = "none") +
+  dark_theme_gray()
+dplot_duke +
+  xlim(-5, 100)
+
+# plot with log and small offset
+dplot_duke_log <- ggplot(tidy_counts, aes(log(counts + 0.5))) +
+  geom_density() + 
+  theme(legend.position = "none") +
+  dark_theme_gray()
+dplot_duke_log +
+  xlim(-10, 10)
+
+```
+
+#### Filtering by expression
+```{r}
+# apply hard cutoffs - same as NCI dataset
+# count expression cutoff: 10
+cutoff <- 10
+# must be expressed in at least: half
+min_sm_frac <- 0.5
+filter_frac <- min_sm_frac * ncol(expr_duke_subset)
+filter_frac
+total_stats <- data.frame(
+   total = apply(expr_duke_subset, 1, function(x){
+     sum(x > cutoff, na.rm = TRUE) 
+     } ))
+keep <- which(total_stats$total >= filter_frac)
+
+# convert to data frame for subsetting
+expr_duke_df <- expr_duke_subset %>% as.data.frame()
+
+# check results
+dim(expr_duke_df)
+expr_duke_filtered <- expr_duke_df[keep,]
+dim(expr_duke_filtered)
+```
+
+#### Post-filtering density plots
+```{r}
+# Density plots
+# tidy data
+tidy_filtered <- t(expr_duke_filtered) %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  gather(key = "gene_id", value = "counts", -sample_id) %>%
+  print()
+
+# plots
+dplot_duke_2 <- ggplot(tidy_filtered, aes(counts)) +
+  geom_density() + 
+  theme(legend.position = "none") +
+  dark_theme_gray() +
+  ggtitle("Density plot of Duke raw counts after expression filtering")
+dplot_duke_2 +
+  xlim(-5, 100)
+
+# plot with log and small offset
+dplot_duke_log_2 <- ggplot(tidy_filtered, aes(log(counts + 0.5))) +
+  geom_density() + 
+  theme(legend.position = "none") +
+  dark_theme_gray() +
+  ggtitle("Density plot of Duke log(counts) after expression filtering")
+dplot_duke_log_2 +
+  xlim(-10, 10)
+```
+
+#### Normalize gene expression distributions
+
+Normalisation by the method of trimmed mean of M-values (TMM) is performed using the calcNormFactors function in edgeR. The normalisation factors calculated here are used as a scaling factor for the library sizes. 
+```{r}
+# get normalization factors
+norm_factors <- calcNormFactors(expr_duke_filtered, method = "TMM")
+
+# apply factor to each column
+duke_norm <- map2_dfc(expr_duke_filtered, norm_factors, `*`)
+duke_norm <- as.data.frame(duke_norm)
+rownames(duke_norm) <- rownames(expr_duke_filtered)
+duke_norm[1:5, 1:5]
+```
+
+## Merge and Batch Correction
+
+#### Duke sequencing lanes
+
+Following examples and suggestions in vignette here:
+https://bioconductor.org/packages/release/bioc/vignettes/sva/inst/doc/sva.pdf and examples here: http://jtleek.com/genstats/inst/doc/02_13_batch-effects.html
+
+Duke expression data did not go through GDC pipeline and may contain batch effects carried over from raw sequence data. Duke pheno data includes lanes, which will be examined for batch effect using SVA ComBat function
+
+```{r}
+duke_pheno <- pData(combined_es) %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  filter(source == "duke")
+edata <- as.matrix(duke_norm)
+
+# There is a single "NA" value in the lane assignments. Will review and decide whether to keep or not for further analysis
+which(is.na(duke_pheno$lane))
+duke_pheno[225,]
+
+# The sample looks otherwise complete and with a large enough library size compared to others. Will set to "unknown" and keep. Because one batch now will only have one member, will have to adjust means only and not variance (cannot calculate variance from one sample)
+
+# The ComBat function adjusts for known batches using an empirical Bayesian framework. In order to use the function, you must have a known batch variable in your dataset.
+batch = duke_pheno$lane %>% as.data.frame() %>%
+  dplyr::rename(lane = 1) %>%
+  mutate(lane = as.character(lane)) %>%
+  replace(is.na(.), "unknown") %>%
+  mutate(lane = as.factor(lane)) %>%
+  pull(lane)
+summary(batch)
+# Note that adjustment variables will be treated as given to the ComBat function. This means if you are trying to adjust for a categorical variable with p different levels, you will need to give ComBat p-1 indicator variables for this covariate.
+modlane <- model.matrix(~ lane, data = duke_pheno)
+
+# We need to create a model matrix for the adjustment variables, including the variable of interest. Note that you do not include batch in creating this model matrix - it will be included later in the ComBat function. In this case there are no other adjustment variables so we simply fit an intercept term.
+modcombat <- model.matrix(~ 1, data = duke_pheno)
+
+# apply combat to get "cleaned data matrix"
+# will use the mean.only=TRUE option for correction for lanes that only adjusts the mean of the batch effects across batches (default adjusts the mean and variance). This option is recommended for cases where milder batch effects are expected (so no need to adjust the variance), or in cases where the variances are expected to be different across batches due to the biology.
+
+# plot the before
+batch_df <- enframe(batch) %>%
+  dplyr::select(lane = value)
+edata_df <- as.data.frame(t(edata)) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  bind_cols(batch_df) %>%
+  dplyr::select(sample_id, lane, everything()) %>%
+  gather(key = "gene_id", value = "counts", -sample_id, -lane) %>%
+  group_by(lane) %>%
+  print()
+
+before_box <- ggplot(edata_df, 
+                     aes(x = lane,
+                         y = counts, 
+                         group = lane)) +
+  geom_boxplot(aes(fill = lane)) +
+  dark_theme_gray() +
+  scale_color_manual("white") + 
+  scale_fill_viridis(discrete = TRUE, 
+                     option = "plasma")
+
+before_box
+
+# significant outlier in C7FYAANXX
+summary(edata_df$counts)
+high <- which(edata_df$counts > 1000000)
+high
+edata_df[6019307, ]
+# ENSG00000155657.22 corresponds to Titan gene - very long gene. High read count is due to lack of length correction
+
+# apply batch correction
+combat_edata <- ComBat(dat = edata,
+                       batch = batch,
+                       mod = modcombat,
+                       mean.only = TRUE,
+                       par.prior = TRUE, 
+                       prior.plots = FALSE)
+
+# plot the after
+batch_df <- enframe(batch) %>%
+  dplyr::select(lane = value)
+combat_edata_df <- as.data.frame(t(combat_edata)) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  bind_cols(batch_df) %>%
+  dplyr::select(sample_id, lane, everything()) %>%
+  gather(key = "gene_id", value = "intensity", -sample_id, -lane) %>%
+  group_by(lane) %>%
+  print()
+
+after_box <- ggplot(combat_edata_df, aes(x = lane, y = intensity, group = lane)) +
+  geom_boxplot(aes(fill = lane)) +
+  geom_hline(yintercept = 5, 
+             color = "#767676", 
+             linetype = 2) +
+  dark_theme_gray() +
+  scale_color_manual("white") + 
+  scale_fill_viridis(discrete = TRUE, 
+                     option = "plasma")
+after_box
+```
+
+#### Combine expression data
+
+Use Duke expression data that is batch-corrected for lanes
+
+```{r}
+duke_exprs <- combat_edata %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  dplyr::select(gene_id, everything()) %>%
+  print()
+
+nci_exprs <- nci_norm %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  dplyr::select(gene_id, everything()) %>%
+  print()
+
+# filter rownames to only keep intersecting rows
+duke_genes <- duke_exprs %>% pull(gene_id)
+length(duke_genes)
+nci_genes <- nci_exprs %>% pull(gene_id)
+length(nci_genes)
+
+combined_genes <- intersect(duke_genes, nci_genes)
+length(combined_genes)
+head(combined_genes)
+
+duke_exprs_filt <- duke_exprs %>%
+  dplyr::filter(gene_id %in% combined_genes)
+nrow(duke_exprs_filt)
+
+nci_exprs_filt <- nci_exprs %>%
+  dplyr::filter(gene_id %in% combined_genes)
+nrow(nci_exprs_filt)
+
+combined_exprs <- nci_exprs_filt %>%
+  left_join(duke_exprs_filt, by = "gene_id") %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_id") %>%
+  as.matrix()
+dim(combined_exprs)
+combined_exprs[1:10, 1:6]
+```
+
+#### Reformat pheno data to match
+
+```{r}
+pheno_data_tbl <- pData(combined_es) %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  select(sample_id, 127:198) %>%
+  select(-alpha_var) %>%
+  as_tibble() %>%
+  print()
+
+samplenames <- pheno_data_tbl %>% pull(sample_id)
+length(samplenames)
+columnnames <- colnames(combined_exprs)
+length(columnnames)
+identical(samplenames, columnnames)
+
+pheno_data <- pheno_data_tbl %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id")
+```
+
+
+#### Batch Correction by Source
+```{r}
+# define batch as source marker
+batch = pheno_data$source
+summary(batch)
+
+# boxplot by data source
+# plot the before
+batch_df <- enframe(batch) %>%
+  dplyr::select(source = value)
+edata_df <- as.data.frame(t(combined_exprs)) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  bind_cols(batch_df) %>%
+  dplyr::select(sample_id, source, everything()) %>%
+  gather(key = "gene_id", value = "counts", -sample_id, -source) %>%
+  group_by(source) %>%
+  print()
+
+before_box <- ggplot(edata_df, 
+                     aes(x = source, 
+                         y = counts, 
+                         group = source)) +
+  geom_boxplot(aes(fill = source)) +
+  geom_hline(yintercept = 5, 
+             color = "#767676", 
+             linetype = 2) +
+  dark_theme_gray() +
+  scale_color_manual("white") + 
+  scale_fill_viridis(discrete = TRUE, 
+                     option = "plasma")
+
+before_box
+# small but notable differences in mean and distribution
+# will use the NCI data as the "ground truth" for normalization given higher read counts overall and standardized count pipeline through GDC
+
+# Note that adjustment variables will be treated as given to the ComBat function. This means if you are trying to adjust for a categorical variable with p different levels, you will need to give ComBat p-1 indicator variables for this covariate.
+modsource <- model.matrix(~ source, data = pheno_data)
+
+# We need to create a model matrix for the adjustment variables, including the variable of interest. Note that you do not include batch in creating this model matrix - it will be included later in the ComBat function. In this case there are no other adjustment variables so we simply fit an intercept term.
+modcombat <- model.matrix(~ 1, data = pheno_data)
+
+# apply batch correction
+combined_combat_edata <- ComBat(dat = combined_exprs,
+                       batch = batch,
+                       mod = modcombat,
+                       par.prior = TRUE,
+                       prior.plots = FALSE,
+                       mean.only = FALSE,
+                       ref.batch = "nci")
+
+after_df <- as.data.frame(t(combined_combat_edata)) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  bind_cols(batch_df) %>%
+  dplyr::select(sample_id, source, everything()) %>%
+  gather(key = "gene_id", value = "counts", -sample_id, -source) %>%
+  group_by(source) %>%
+  print()
+
+after_box <- ggplot(after_df, 
+                    aes(x = source, 
+                        y = counts, 
+                        group = source)) +
+  geom_boxplot(aes(fill = source)) +
+  geom_hline(yintercept = 5, 
+             color = "#767676", 
+             linetype = 2) +
+  dark_theme_gray() +
+  scale_color_manual("white") + 
+  scale_fill_tron()
+after_box
+```
+
+## DGE by cluster
+
+#### Limma
+```{r}
+
+# After normalization and bactch correction, there are some negative values in the count matrix
+min(combined_combat_edata)
+
+# To preserve linear relationships, will add a constant to every value
+edata_adj <- combined_combat_edata + 5000
+min(edata_adj)
+
+# create DGEList
+dge <- DGEList(counts = edata_adj)
+
+# set up design matrix
+rnames <- colnames(exprs(combined_es))
+groups <- pData(combined_es) %>% 
+  pull(clust) %>%
+  as.factor()
+design <- model.matrix(~ 0 + groups)
+colnames(design) <- gsub("groups", "", colnames(design)) %>%
+  paste0("cluster_", .)
+rownames(design) <- rnames
+head(design)
+
+# voom transformation is applied to the normalized and filtered DGEList object
+v <- voom(dge, design, plot = TRUE)
+
+# fit linear model and estimate DGE
+fit <- lmFit(v, design)
+fit <- eBayes(fit)
+topTable(fit)
+cluster1_top_dge <- topTable(fit, coef = 1)
+cluster2_top_dge <- topTable(fit, coef = 2)
+cluster3_top_dge <- topTable(fit, coef = 3)
+cluster4_top_dge <- topTable(fit, coef = 4)
+
+cluster1_dge <- topTable(fit, coef = 1, adjust.method = "BH", sort.by = "none", number = Inf)
+cluster2_dge <- topTable(fit, coef = 2, adjust.method = "BH", sort.by = "none", number = Inf)
+cluster3_dge <- topTable(fit, coef = 3, adjust.method = "BH", sort.by = "none", number = Inf)
+cluster4_dge <- topTable(fit, coef = 4, adjust.method = "BH", sort.by = "none", number = Inf)
+```
+
+## Write out data
+```{r}
+saveRDS(cluster1_dge, "output/cluster1_dge.rds")
+saveRDS(cluster2_dge, "output/cluster2_dge.rds")
+saveRDS(cluster3_dge, "output/cluster3_dge.rds")
+saveRDS(cluster4_dge, "output/cluster4_dge.rds")
 ```
 

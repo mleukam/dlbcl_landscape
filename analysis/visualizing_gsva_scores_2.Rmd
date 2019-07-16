@@ -19,11 +19,23 @@ Load packages
 library("tidyverse")
 library("factoextra")
 library("FactoMineR")
+library("cluster")
 library("ggpubr")
 library("ggsci")
 library("Biobase")
 library("ComplexHeatmap")
+library("clustertend")
+library("NbClust")
+library("ggdark")
+library("jcolors")
 ```
+
+```{r}
+library("devtools")
+install_github("cmartin/ggConvexHull")
+library("ggConvexHull")
+```
+
 
 NB: need to transfer scripts to `/code/`:
 
@@ -38,6 +50,12 @@ gs_matrix[, 1:5]
 
 combined_es <- readRDS("output/combined_expressionset.rds")
 pheno_data <- pData(combined_es)
+```
+
+Repair rownames
+```{r}
+names <- c("cyt_gs", "dhit_gs", "imsig_bcells_gs", "imsig_proliferation_gs", "imsig_interferon_gs", "imsig_macrophages_gs", "imsig_monocytes_gs", "imsig_neutrophils_gs", "imsig_nkcells_gs", "imsig_plasmacells_gs", "imsig_translation_gs", "imsig_tcells_gs", "mskcc_treg_gs", "mskcc_cd8activation_gs", "mskcc_antiinflammatory_gs", "mskcc_anergy_gs", "mskcc_proinflammatory_gs", "mskcc_lipid mediators_gs", "mskcc_glycolysis_gs", "mskcc_tcacycle_gs", "mskcc_pentosephosphatepathway_gs", "mskcc_glycogenmetabolism_gs", "mskcc_glucosedeprivation_gs",  "mskcc_m1macrophage_gs", "mskcc_m2macrophage_gs", "mskcc_cytolyticeffector_gs", "mskcc_type1ifn_response_gs", "mskcc_type2ifn_response_gs", "mskcc_hypoxia_regulated_gs", "mskcc_tcellterminal_diff_gs", "mskcc_cycle_g1s_gs", "mskcc_cycle_g2m_gs", "beijing_cd8_c1_lef1_gs", "beijing_cd8_c2_cd28_gs", "beijing_cd8_c3_cx3cr1_gs", "beijing_cd8_c4_gzmk_gs" , "beijing_cd8_c5_znf683_gs", "beijing_cd8_c6_layn_gs", "beijing_cd8_c7_slc4a10_gs", "beijing_cd4_c1_ccr7_gs", "beijing_cd4_c2_anxa1_gs", "beijing_cd4_c3_gnly_gs", "beijing_cd4_c4_cd69_gs", "beijing_cd4_c5_eomes_gs","beijing_cd4_c6_gzma_gs","beijing_cd4_c7_cxcl13_gs", "beijing_cd4_c8_foxp3_gs", "beijing_cd4_c9_ctla4_gs", "beijing_cd4_c9_ctla4_tnfrsf9_neg_gs", "beijing_cd4_c9_ctla4_tnfrsf9_pos_gs", "italy_checkpoint_gs", "italy_treg_gs", "uchi_macrophage_c1", "uchi_macrophage_c2", "uchi_macrophage_c3", "uchi_macrophage_c4", "uchi_macrophage_c5", "uchi_macrophage_c6", "uchi_macrophage_c7", "uchi_tcell_inflamed")
+rownames(gs_matrix) <- names
 ```
 
 ## Set up PD-L1 groups
@@ -140,9 +158,14 @@ fviz_pca_ind(dlbcl_pca,
 fviz_pca_var(dlbcl_pca, col.var = "contrib",
              gradient.cols = "rickandmorty",
              label = "none")
+
+# Contributions of variables to PC1
+fviz_contrib(dlbcl_pca, choice = "var", axes = 1, top = 10)
+# Contributions of variables to PC2
+fviz_contrib(dlbcl_pca, choice = "var", axes = 2, top = 10)
 ```
 
-#### Heatmap of results
+#### Heatmap of raw results
 ```{r}
 ht <- Heatmap(gs_matrix, name = "GSVA Score", 
                 row_title = "Gene Sets",
@@ -151,4 +174,250 @@ ht <- Heatmap(gs_matrix, name = "GSVA Score",
                 show_column_names = FALSE,
                 column_title_side = "bottom")
 ht
+```
+
+## Clustering results
+
+Heirarchical vs partitioning clustering: http://factominer.free.fr/more/HCPC_husson_josse.pdf
+
+> Hierarchical clustering as well as partitional clustering can be performed on the principal components of the PCA (i.e. the scores scaled to the associated eigenvalues). If all the components are used, the distances between individuals are the same than the ones obtained from the raw data set, and consequently the subsequent analysis remains the same. It is then more interesting to perform the clustering onto the first S principal components. Indeed, PCA can be viewed as a denoising method which separates signal and noise: the first dimensions extract the essential of the information while the last ones are restricted to noise. Then without the noise in the data, the clustering is more stable than the one obtained from the original distances. Consequently, if a hierarchical tree is built from another subsample of individuals, the shape of the top of the hierarchical tree remains approximately the same. PCA is thus considered as a preprocessing step before performing clustering methods. The
+number of dimensions kept for the clustering can be chosen with several methods (Jolliffe 2002). If this number is too small, it leads suppression of information. It is less problematic to specify an excessive number of clusters than a too small number that leads to loss of information."
+
+More clustering background: https://www.datanovia.com/en/blog/types-of-clustering-methods-overview-and-quick-start-r-code/
+
+[Further recommendation](http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/117-hcpc-hierarchical-clustering-on-principal-components-essentials/) for clustering on PCA when there is a large number of continuous variables:
+
+> The HCPC (Hierarchical Clustering on Principal Components) approach allows us to combine the three standard methods used in multivariate data analyses (Husson, Josse, and J. 2010):
+1. Principal component methods (PCA, CA, MCA, FAMD, MFA),
+2. Hierarchical clustering and
+3. Partitioning clustering, particularly the k-means method.
+
+HCPC here: http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/117-hcpc-hierarchical-clustering-on-principal-components-essentials/
+
+Overall guide to setting up and evaluating clusters here: http://www.sthda.com/english/wiki/print.php?id=234
+
+#### Determine suitability of data for clustering
+
+First visualize similarity among observations with distance matrix
+```{r}
+# create pearson correlation matrix
+sample_matrix <- t(gs_matrix)
+dlbcl_dist <- get_dist(sample_matrix, 
+                       stand = TRUE, 
+                       method = "pearson")
+fviz_dist(dlbcl_dist, 
+   gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"),
+   show_labels = FALSE)
+```
+
+Get Hopkins statistic of clusterability
+```{r}
+# Compute Hopkins statistic for iris dataset
+# Below 0.5 is considered "clusterable"
+dlbcl_tend <- hopkins(gs_matrix, n = nrow(gs_matrix) - 1, header = FALSE)
+```
+
+Determine optimal number of clusters
+
+https://lukedaniels1.github.io/Bio381_2018/Daniels_Cluster_Analysis_Lecture.html
+
+```{r}
+# Method 1: Elbow Method Using FactoExtra 
+fviz_nbclust(sample_matrix, FUNcluster = kmeans, method = "wss") 
+
+# Method 2: Silhouette in FactoExtra
+fviz_nbclust(sample_matrix, kmeans, method = "silhouette") + theme_classic()
+
+# GAP STAT Using Facto Extra 
+fviz_nbclust(sample_matrix, kmeans, nstart = 25, method = "gap_stat", nboot = 500) + #nboot is # of bootstrap sample - must be included
+labs(subtitle = "Gap Statistic Method")
+
+# summary method: NbClust
+nb <- NbClust(sample_matrix, distance = "euclidean", min.nc = 2, max.nc = 10, method = "kmeans")
+```
+
+#### Determine best clustering algorithm
+
+
+#### Clustering
+
+Divide into groups with HCPC
+```{r}
+dlbcl_pca <- PCA(sample_matrix, ncp = 10, graph = FALSE)
+dlbcl_hcpc <- HCPC(dlbcl_pca, min = 4, max = 20, graph.scale = "sqrt-inertia", graph = FALSE)
+fviz_dend(dlbcl_hcpc, 
+          show_labels = FALSE, 
+          rect = TRUE, rect_fill = TRUE, 
+          rect_border = "ucscgb", 
+          lower_rect = -1,
+          ggtheme = dark_theme_grey(),
+          phylo_layout = "layout_with_drl"
+          )
+```
+
+Visualize samples with cluster label on PCA plot
+```{r}
+fviz_cluster(dlbcl_hcpc,
+             geom = "point",
+             show.clust.cent = TRUE,  
+             main = "Factor map", 
+             ggtheme = dark_theme_gray()
+             ) + 
+  scale_color_jcolors(palette = "pal3") +
+  scale_fill_jcolors(palette = "pal3")
+```
+
+#### Silhouette plots of clustering results
+```{r}
+
+```
+
+
+## Exploration and sanity checks
+
+Data cleaning and formatting
+```{r}
+# Get dataframe with gene set score matrix by sample and cluster assignment as the last column
+clust_assign <- dlbcl_hcpc$data.clust %>% 
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble %>%
+  print()
+
+# save cluster assignments for comparison in other notebooks
+gsva_v2_4clust_assign <- clust_assign %>%
+  dplyr::select(sample_id, gsva2_clust = clust)
+saveRDS(gsva_v2_4clust_assign, "output/gsva_v2_4clust_assign.rds")
+
+# get phenotype data
+pheno_data <- pData(combined_es) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+# combined tables
+pheno_clust_data <- clust_assign %>%
+  left_join(pheno_data, by = "sample_id") %>%
+  dplyr::select(-case_id, -filename, -demographic.submitter_id, demographic.race, demographic.ethnicity, size) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id")
+pheno_clust_data[1:10, 1:4]
+
+# confirm last column of gene set expression matrix
+pheno_clust_data[1:5,60:62]
+ncol(pheno_clust_data)
+# columns 1-60 are gene set expression matrix, columns 61-130 are phenotype data
+```
+
+Plots
+Source for overriding shape change with habillage argument: https://github.com/kassambara/factoextra/issues/20
+
+Instructions for convex hull geom: https://github.com/cmartin/ggConvexHull
+
+```{r}
+# convert NAs in pdl1_amp variable
+pheno_clust_data$pdl1_status <- pheno_clust_data$pdl1_status %>%
+  replace_na("not_assessed") %>%
+  str_replace_all("non-amplified", "non_amplified") %>%
+  as.factor()
+summary(pheno_clust_data$pdl1_status)
+
+# make variable for pdl1_amp vs all others
+pheno_clust_data$amp_or_not <- fct_recode(pheno_clust_data$pdl1_status,
+             "PDL1amp" = "high_amplified",
+             "other" = "low_amplified",
+             "other" = "non_amplified",
+             "other" = "not_assessed")
+summary(pheno_clust_data$amp_or_not)
+
+# make factor for alpha
+pheno_clust_data$alpha_var <- fct_recode(pheno_clust_data$amp_or_not,
+             "1" = "PDL1amp",
+             "0.2" = "other") %>%
+  as.character() %>%
+  as.numeric()
+summary(pheno_clust_data$alpha_var)
+
+# get colors
+mypal = pal_tron()(6)
+
+dlbcl_pca <- PCA(pheno_clust_data[, 1:60], graph = FALSE)
+pdl1_pca <- fviz_pca_ind(dlbcl_pca,
+             label = "none",
+             habillage = pheno_clust_data$amp_or_not,
+             pointshape = 19,
+             alpha.ind = pheno_clust_data$alpha_var,
+             show.legend.text = FALSE,
+             palette = "ucsc",
+             addEllipses = FALSE,
+             ggtheme = dark_theme_gray()
+             ) +
+  geom_convexhull(alpha = 0.3, 
+                  aes(fill = pheno_clust_data$clust),
+                  show.legend = FALSE,
+                  color = "#76767666") +
+  ggtitle("Gene set PCA: PDL1 high amp in 4-cluster model")
+pdl1_pca
+
+# get counts by cluster
+table(pheno_clust_data$amp_or_not, pheno_clust_data$clust)
+
+# plot cytotoxic score on combined GSVA PCA plot
+dlbcl_pca <- PCA(pheno_clust_data[, 1:60], graph = FALSE)
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_clust_data$cyt_gs,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = dark_theme_gray()) +
+  scale_color_material("amber", reverse = TRUE) +
+  labs(color = "CYT GSVA score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_clust_data$clust),
+                  show.legend = FALSE,
+                  color = "white") +
+  ggtitle("Gene set PCA: CYT GSVA score in 4-cluster model")
+
+# plot cytotoxic score on combined GSVA PCA plot
+dlbcl_pca <- PCA(pheno_clust_data[, 1:60], graph = FALSE)
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_clust_data$dhit_gs,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = dark_theme_gray()) +
+  scale_color_material("teal", reverse = TRUE) +
+  labs(color = "DHIT GSVA score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_clust_data$clust),
+                  show.legend = FALSE,
+                  color = "white") +
+  ggtitle("Gene set PCA: DHIT GSVA score in 4-cluster model")
+
+```
+
+## Write out new expressionset
+```{r}
+pheno_d <- pheno_clust_data
+pheno_d[1:5, 1:5]
+
+v_metadata <- data.frame(
+  labelDescription = colnames(pheno_d),
+  row.names = colnames(pheno_d) )
+  
+phenoData <- new("AnnotatedDataFrame", 
+                 data = pheno_d, 
+                 varMetadata = v_metadata)
+
+exprs_matrix <- exprs(combined_es)
+str(exprs_matrix)
+
+annotation <- as.character("Duke RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in >12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected using ComBat by sequencing lane. NCI RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected for NCI vs Duke source using ComBat. 60-gene GSVA v2 gene set expression matrix in columns 1:60 of pData, columns 61:130 are phenotype data including 4-cluster model assignments")
+
+# assemble expressionset
+combined_es_4cluster <- ExpressionSet(
+  assayData = exprs_matrix,
+  phenoData = phenoData,
+  annotation = annotation)
+combined_es_4cluster
+
+# write out new expressionset
+saveRDS(combined_es_4cluster, "output/combined_es_gsva2_4cluster.rds")
 ```

@@ -1,0 +1,377 @@
+---
+title: "Visualizing results of GSVA with version 4 gene lists"
+author: "mleukam"
+date: "2019-07-11"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Setup
+
+Clear the workspace
+```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+library("tidyverse")
+library("factoextra")
+library("FactoMineR")
+library("cluster")
+library("ggpubr")
+library("ggsci")
+library("Biobase")
+library("ComplexHeatmap")
+library("clustertend")
+library("NbClust")
+library("jcolors")
+library("ggdark")
+```
+
+```{r}
+library("devtools")
+install_github("cmartin/ggConvexHull")
+library("ggConvexHull")
+```
+
+NB: need to transfer scripts to `/code/`:
+* run_gsva3.pbs
+* gsva3.sh
+* gsva3.r
+
+```{r}
+gs_matrix <- readRDS("output/dlbcl_total_immune_gset_v3_results.rds")
+gs_matrix[, 1:5]
+str(gs_matrix)
+
+combined_es <- readRDS("output/combined_expressionset.rds")
+pheno_data <- pData(combined_es)
+```
+
+## Set up PD-L1 groups
+```{r}
+str(pheno_data)
+summary(as.factor(pheno_data$pdl1_status))
+pheno_data_tbl <- as.data.frame(pheno_data) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  mutate(pdl1_status = replace_na(pdl1_status, "not_assessed")) %>%
+  mutate(pdl1_status = ifelse(pdl1_status == "non-amplified", 
+                              "non_amplified", pdl1_status))
+
+summary(as.factor(pheno_data_tbl$pdl1_status))
+
+group_table <- pheno_data_tbl %>%
+  dplyr::select(sample_id, pdl1_status)
+
+# merge group data into gsva matrix
+pdl1_comb_exprs <- as.data.frame(t(gs_matrix)) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  left_join(group_table) %>%
+  dplyr::select(sample_id, pdl1_status, everything()) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  mutate(pdl1_status = as.factor(pdl1_status))
+```
+
+#### PCA plot of results
+```{r}
+# remove low amplified and samples not assessed
+nrow(pdl1_comb_exprs)
+pdl1_comb_exprs_filt <- pdl1_comb_exprs %>%
+  dplyr::filter(pdl1_status %in% c("high_amplified", "non_amplified"))
+nrow(pdl1_comb_exprs_filt)
+
+# get PCA values
+dlbcl_pca <- PCA(pdl1_comb_exprs_filt[-1], scale.unit = TRUE, graph = FALSE)
+
+# get eigenvalues
+eig_val <- get_eigenvalue(dlbcl_pca)
+eig_val
+fviz_eig(dlbcl_pca, addlabels = TRUE, ylim = c(0, 50))
+ind <- get_pca_ind(dlbcl_pca)
+
+pdl1_status <- pdl1_comb_exprs_filt$pdl1_status
+
+# visualize PCA
+fviz_pca_ind(dlbcl_pca,
+             label = "none",
+             habillage = pdl1_comb_exprs_filt$pdl1_status,
+             palette = "simpsons",
+             addEllipses = TRUE,
+             ggtheme = dark_theme_gray()) +
+  theme(axis.line = element_line(color = "#767676")) +
+  geom_hline(yintercept = 0, color = "white", alpha = 0.3) +
+  geom_vline(xintercept = 0, color = "white", alpha = 0.3) +
+  ggtitle("83 Gene Sets from Thorsson et al 2018 \nPD-L1amp vs nonamp, NCI data only")
+
+fviz_pca_var(dlbcl_pca, col.var = "contrib",
+             gradient.cols = "tron",
+             label = "none",
+             ggtheme = dark_theme_gray()) + 
+  theme(axis.line = element_line(color = "#767676")) +
+  geom_hline(yintercept = 0, color = "#76767666") +
+  geom_vline(xintercept = 0, color = "#76767666")
+```
+
+## Set up Duke/NCI groups
+```{r}
+str(pheno_data)
+summary(as.factor(pheno_data$source))
+group_table <- as.data.frame(pheno_data) %>%
+  rownames_to_column(var = "sample_id") %>%
+  dplyr::select(sample_id, source)
+
+# merge group data into gsva matrix
+dukenci_comb_exprs <- as.data.frame(t(gs_matrix)) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  left_join(group_table) %>%
+  dplyr::select(sample_id, source, everything()) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  mutate(source = as.factor(source))
+```
+
+#### PCA Plot of results
+```{r}
+# get PCA values
+dlbcl_pca <- PCA(dukenci_comb_exprs[-1], scale.unit = TRUE, graph = FALSE)
+
+# get eigenvalues
+eig_val <- get_eigenvalue(dlbcl_pca)
+eig_val
+fviz_eig(dlbcl_pca, addlabels = TRUE, ylim = c(0, 50))
+ind <- get_pca_ind(dlbcl_pca)
+
+pdl1_status <- dukenci_comb_exprs$pdl1_status
+
+# visualize PCA
+fviz_pca_ind(dlbcl_pca,
+             label = "none",
+             habillage = dukenci_comb_exprs$source,
+             palette = "tron",
+             addEllipses = TRUE,
+             ggtheme = dark_theme_gray()) +
+  theme(axis.line = element_line(color = "#767676")) +
+  geom_hline(yintercept = 0, color = "white", alpha = 0.3) +
+  geom_vline(xintercept = 0, color = "white", alpha = 0.3) +
+  ggtitle("83 Gene Sets from Thorsson et al 2018 \nDuke vs NCI data sources")
+
+fviz_pca_var(dlbcl_pca, col.var = "contrib",
+             gradient.cols = "tron",
+             label = "none",
+             ggtheme = dark_theme_gray()) +
+  geom_hline(yintercept = 0, color = "white", alpha = 0.3) +
+  geom_vline(xintercept = 0, color = "white", alpha = 0.3)
+
+# Contributions of variables to PC1
+fviz_contrib(dlbcl_pca, choice = "var", axes = 1, top = 15) + 
+  dark_theme_classic() +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1))
+
+# Contributions of variables to PC2
+fviz_contrib(dlbcl_pca, choice = "var", axes = 2, top = 15) +
+  dark_theme_classic() +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1))
+```
+
+#### Heatmap of raw results
+```{r}
+ht <- Heatmap(gs_matrix, name = "GSVA Score", 
+                row_title = "Gene Sets",
+                show_row_names = TRUE,
+                column_title = paste0("GSVA scores for Duke and NCI samples"), 
+                show_column_names = FALSE,
+                column_title_side = "bottom")
+ht
+```
+
+## Clustering
+
+#### Determine suitability of data for clustering
+
+First visualize similarity among observations with distance matrix
+```{r}
+# create pearson correlation matrix
+sample_matrix <- t(gs_matrix)
+dlbcl_dist <- get_dist(sample_matrix, 
+                       stand = TRUE, 
+                       method = "pearson")
+fviz_dist(dlbcl_dist, 
+   gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+```
+
+Get Hopkins statistic of clusterability
+```{r}
+# Compute Hopkins statistic for iris dataset
+# Below 0.5 is considered "clusterable"
+dlbcl_tend <- hopkins(gs_matrix, n = nrow(gs_matrix) - 1, header = FALSE)
+dlbcl_tend
+```
+
+Determine optimal number of clusters
+
+https://lukedaniels1.github.io/Bio381_2018/Daniels_Cluster_Analysis_Lecture.html
+
+```{r}
+# Method 1: Elbow Method Using FactoExtra 
+fviz_nbclust(sample_matrix, FUNcluster = kmeans, method = "wss") 
+
+# Method 2: Silhouette in FactoExtra
+fviz_nbclust(sample_matrix, kmeans, method = "silhouette") + theme_classic()
+
+# GAP STAT Using Facto Extra 
+fviz_nbclust(sample_matrix, kmeans, nstart = 25, method = "gap_stat", nboot = 500) + #nboot is # of bootstrap sample - must be included
+labs(subtitle = "Gap Statistic Method")
+
+# summary method: NbClust
+nb <- NbClust(sample_matrix, distance = "euclidean", min.nc = 2, max.nc = 10, method = "kmeans")
+```
+
+Errors in NbClust - "The TSS matrix is indefinite. There must be too many missing values. The index cannot be calculated."
+
+Error in NbClust is likely due to multicollinearity, or perfect linear dependency of one variable on another. "For example, if a plant researcher had data on corn (maize) stalks, and two of the variables in the covariance matrix were "plant height" and "plant weight," the linear correlation between the two would be nearly perfect, and the covariance matrix would be not positive definite within sampling error."
+
+#### Filter out highly correlated gene sets
+```{r}
+gs_cor <- cor(gs_matrix, method = c("pearson"))
+library(corrplot)
+source("http://www.sthda.com/upload/rquery_cormat.r")
+
+# view gene set correaltion heatmap
+cortables <- rquery.cormat(t(gs_matrix), graphType = "heatmap")
+
+# reformat gene set correlation table and view
+corflat <- rquery.cormat(t(gs_matrix), type = "flatten", graph = FALSE)
+corflat_tbl <- corflat$r %>% as_tibble() %>% arrange(desc(cor)) %>% print(n = 20)
+# two gene sets with perfect correlation of 1.0, 15 gene sets 0.96 correlation and above. Will pick "column" to remove one of the gene sets at random
+removesets <- corflat_tbl %>%
+  dplyr::filter(cor > 0.95) %>%
+  pull(column) %>%
+  unique() %>%
+  as.character() %>%
+  print()
+# 11 gene sets meet the criteria
+nrow(gs_matrix)
+gs_matrix_filtered_df <- gs_matrix %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_set") %>%
+  dplyr::filter(!gene_set %in% removesets)
+nrow(gs_matrix_filtered_df)
+
+sample_matrix_filtered <- gs_matrix_filtered_df %>%
+  column_to_rownames(var = "gene_set") %>%
+  as.matrix() %>%
+  t()
+sample_matrix_filtered[1:5, 1:5]
+
+```
+
+Determine optimal number of clusters, take 2
+
+```{r}
+# Method 1: Elbow Method Using FactoExtra 
+fviz_nbclust(sample_matrix_filtered, 
+             FUNcluster = kmeans, 
+             method = "wss") 
+
+# Method 2: Silhouette in FactoExtra
+fviz_nbclust(sample_matrix_filtered, 
+             kmeans, method = "silhouette") + 
+  theme_classic()
+
+# GAP STAT Using Facto Extra 
+fviz_nbclust(sample_matrix_filtered, 
+             kmeans, nstart = 25, 
+             method = "gap_stat", 
+             nboot = 500) + #nboot is # of bootstrap sample - must be included
+  labs(subtitle = "Gap Statistic Method")
+
+# summary method: NbClust
+nb <- NbClust(sample_matrix_filtered, 
+              distance = "euclidean", 
+              min.nc = 2, 
+              max.nc = 10, 
+              method = "kmeans")
+```
+
+#### Clustering
+
+Divide into groups with HCPC
+```{r}
+dlbcl_pca <- PCA(sample_matrix_filtered, ncp = 10, graph = FALSE)
+dlbcl_hcpc <- HCPC(dlbcl_pca, min = 4, max = 20, graph.scale = "sqrt-inertia", graph = TRUE)
+
+fviz_dend(dlbcl_hcpc, 
+          k = 4,
+          palette = "nejm",
+          show_labels = FALSE, 
+          rect = TRUE,
+          rect_border = "black",
+          rect_lty = 3,
+          rect_fill = FALSE, 
+          lower_rect = -1,
+          phylo_layout = "layout_with_drl"
+          )
+```
+
+Visualize samples with cluster label on PCA plot
+```{r}
+fviz_cluster(dlbcl_hcpc,
+             geom = "point",
+             show.clust.cent = TRUE,  
+             main = "Factor map", 
+             ggtheme = dark_theme_gray()
+             ) +
+  scale_color_jcolors(palette = "pal3") +
+  scale_fill_jcolors(palette = "pal3")
+```
+
+Grossly appears similar to GSVA v2 - will compare cluster assignments at the individual level.
+
+```{r}
+gsva2_assgn <- readRDS("output/gsva_v2_4clust_assign.rds") %>%
+  dplyr::rename(gsva2_clust = clust) %>%
+  mutate(gsva2_clust = as.numeric(gsva2_clust)) %>%
+  print()
+
+gsva3_assgn <- dlbcl_hcpc$data.clust %>% 
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble %>%
+  dplyr::select(sample_id, gsva3_clust = clust) %>%
+  mutate(gsva3_clust = as.numeric(gsva3_clust)) %>%
+  print()
+
+merge_assgn <- gsva2_assgn %>%
+  left_join(gsva3_assgn) %>%
+  print()
+
+cor(merge_assgn$gsva2_clust, merge_assgn$gsva3_clust)
+
+merge_assgn <- merge_assgn %>% 
+  mutate(concordance = ifelse(gsva2_clust == gsva3_clust, 1, 0))
+table(merge_assgn$concordance)
+```
+
+
+## Next steps
+
+Plan to run GSVA on combined gene set with Thorsson et al and new gene sets. Will have to later cull any highly correlated gene sets.
+
+Clean up and write out for later comparison
+```{r}
+# Get dataframe with gene set score matrix by sample and cluster assignment as the last column
+clust_assign <- dlbcl_hcpc$data.clust %>% 
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble %>%
+  print()
+
+# save cluster assignments for comparison in other notebooks
+gsva_v3_4clust_assign <- clust_assign %>%
+  dplyr::select(sample_id, gsva3_clust = clust)
+saveRDS(gsva_v3_4clust_assign, "output/gsva_v3_4clust_assign.rds")
+```
