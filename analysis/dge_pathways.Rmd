@@ -1,5 +1,5 @@
 ---
-title: "dge_pathways"
+title: "Pathway analysis of differentially expressed genes by cluster"
 author: "mleukam"
 date: "2019-07-16"
 output: workflowr::wflow_html
@@ -7,9 +7,308 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Introduction
+## Setup
+
+Clear the workspace
+```{r}
+rm(list = ls())
+```
+
+Load basic packages
+```{r}
+library("tidyverse")
+```
+
+Read in data
+```{r}
+# toptables
+cluster1_dge <- readRDS("output/cluster1_dge.rds")
+cluster2_dge <- readRDS("output/cluster2_dge.rds")
+cluster3_dge <- readRDS("output/cluster3_dge.rds")
+cluster4_dge <- readRDS("output/cluster4_dge.rds")
+
+ttable_list <- list(cluster1_dge, cluster2_dge, cluster3_dge, cluster4_dge)
+names(ttable_list) <- c("cluster1_dge", "cluster2_dge", "cluster3_dge", "cluster4_dge")
+
+# lookup table for gene names
+# read in conversion table for gene IDs
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
+```
+
+## GO with clusterProfiler
+
+Vignettes and tutorials from the author used to generate this analysis:
+https://guangchuangyu.github.io/2016/01/go-analysis-using-clusterprofiler/
+https://yulab-smu.github.io/clusterProfiler-book/chapter5.html
+
+Load packages
+```{r}
+library("clusterProfiler")
+```
+
+Prepare data - input for enrichGO test is simple vector of gene names
+Will pass gene names that meet cutoff criteria for adj.p.val and logFC from DGE experiment.
 
 ```{r}
+# set adjusted pval cutoff
+p_cut <- 0.001
+
+# see range of fold-changes
+summary(ttable_list[[1]]$logFC)
+summary(ttable_list[[2]]$logFC)
+summary(ttable_list[[3]]$logFC)
+summary(ttable_list[[4]]$logFC)
+
+# set logFC cutoff at average of 3rd quartile fold-change (upregulated genes only)
+l_cut <- (0.277162 + 0.192066 + 0.15353 + 0.26075) / 4
+
+# get gene list of entrez IDs that pass cutoff for each cluster from DGE
+go_gene_list <- ttable_list %>%
+  map(function(df){rownames_to_column(df, var = "gene_id")}) %>%
+  map(as_tibble) %>%
+  map(function(df){df %>% 
+      dplyr::filter(adj.P.Val < p_cut) %>%
+      dplyr::filter(logFC > l_cut)}) %>%
+  map(function(df){left_join(df, gencode_ent)}) %>%
+  map(function(df){pull(df, entrez_id)})
+
+str(go_gene_list)
+
+# get gene universe list (same for all clusters)
+go_gene_universe <- ttable_list[[1]] %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  left_join(gencode_ent) %>%
+  pull(entrez_id)
+str(go_gene_universe)
+```
+
+```{r}
+# get enriched/overrepresented GO lists for cluster 1 DGE
+ego1 <- enrichGO(gene = go_gene_list[[1]],
+                 OrgDb = org.Hs.eg.db,
+                 ont = "ALL",
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "BH",
+                 universe = go_gene_universe,
+                 qvalueCutoff = 0.1)
+# http://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/
+
+ego1_simp <- simplify(ego1, 
+                      cutoff = 0.7,
+                      by = "p.adjust",
+                      select_fun = min)
+
 
 ```
 
+## GSEA
+
+Filtering by FC and adjusted P-value
+```{r}
+# Adjusted p-value cutoff
+p_cut <- 0.01
+
+# filter for p value
+nrow(ttable_list[[1]])
+ttable_df_list <- ttable_list %>%
+  map(function(df){rownames_to_column(df, var = "gene_id")}) %>%
+  map(as_tibble) %>%
+  map(function(df){df %>% 
+      dplyr::filter(adj.P.Val < p_cut)})
+
+# how many significantly different genes left?
+nrow(ttable_df_list[[1]])
+nrow(ttable_df_list[[2]])
+nrow(ttable_df_list[[3]])
+nrow(ttable_df_list[[4]])
+```
+
+http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html
+
+Load packages
+```{r}
+library("fgsea")
+library("org.Hs.eg.db")
+library("msigdbr")
+```
+
+Add Entrez identifiers to gencode lookup table
+```{r}
+gencode_symbols <- gencode_gtf %>%
+  pull(gene_name)
+  
+entrez <- mapIds(org.Hs.eg.db, gencode_symbols, 'ENTREZID', 'SYMBOL') %>%
+  enframe() %>%
+  dplyr::rename(gene_name = name, entrez_id = value) %>%
+  print()
+
+gencode_ent <- gencode_gtf %>%
+  left_join(entrez) %>%
+  print()
+```
+
+Create ranked lists following this tutorial: https://bioinformatics-core-shared-training.github.io/cruk-summer-school-2018/RNASeq2018/html/06_Gene_set_testing.nb.html
+
+Downloading gene sets from MSigDB: https://cran.r-project.org/web/packages/msigdbr/vignettes/msigdbr-intro.html
+
+
+```{r}
+# define function for creating ranked lists
+ranklist <- function(df){
+  ranks <- df %>%
+    rownames_to_column(var = "gene_id") %>%
+    left_join(gencode_ent) %>%
+    dplyr::select(entrez_id, logFC) %>%
+    mutate(logFC = as.double(logFC)) %>%
+    drop_na(entrez_id)
+  rank_vector <- ranks %>% pull(logFC)
+  names(rank_vector) <- ranks %>% pull(entrez_id)
+  rank_vector
+}
+
+# apply to list of top tables
+rtable_list <- map(ttable_list, ranklist)
+rtable_list[[1]]
+str(rtable_list)
+```
+
+```{r}
+# get gene sets from MSigDB
+m_df = msigdbr(species = "Homo sapiens")
+
+# format  gene sets as a list of character vectors of entrez gene names
+gs_df <- m_df %>%
+  mutate(gs_idname = paste0(gs_cat, ".", gs_id, ".", gs_name)) %>%
+  dplyr::select(gs_idname, entrez_gene) %>%
+  nest(key = entrez_gene) %>%
+  arrange(desc(gs_idname))
+
+gs_list <- map(gs_df$data, pull) %>%
+  map(as.character)
+names(gs_list) <- gs_df$gs_idname
+str(gs_list)
+
+# start with just the hallmark gene sets for testing
+hall_gs_subset <- gs_df %>%
+  dplyr::filter(grepl("^H", gs_idname))
+
+hall_gs_list <- map(hall_gs_subset$data, pull) %>%
+  map(as.character)
+names(hall_gs_list) <- hall_gs_subset$gs_idname
+str(hall_gs_list)
+```
+
+#### GSEA
+
+Format data for JAVA GSEA app
+Needs to be in a specific text format
+http://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/File:Txt_format_snapshot.gif
+
+```{r}
+
+
+```
+
+```{r}
+# define function to run hallmark gsea on each toptable
+fgsea_hall_batch <- function(ranklist){
+  fgseaRes <- fgsea(pathways = hall_gs_list, 
+                  stats = ranklist,
+                  minSize = 15,
+                  maxSize = 200,
+                  nperm = 10000)
+  fgseaRes
+}
+
+# apply function to list of cluster toptables
+hallmark_gsea_results <- map(rtable_list, fgsea_hall_batch)
+
+# review results
+map(hallmark_gsea_results, function(df){dplyr::select(df, "pathway", "ES", "padj") %>% arrange(ES)})
+```
+
+```{r}
+# define function to run gsea on each toptable
+fgsea_batch <- function(ranklist){
+  fgseaRes <- fgsea(pathways = gs_list, 
+                  stats = ranklist,
+                  minSize = 15,
+                  maxSize = 1000,
+                  nperm = 10000)
+  fgseaRes
+}
+
+# apply function to list of cluster toptables
+gsea_results <- map(rtable_list, fgsea_batch)
+
+# review results
+map(gsea_results, function(df){as_tibble(df) %>% 
+    dplyr::filter(padj < 0.01) %>% 
+    dplyr::select("pathway", "ES", "padj") %>% 
+    arrange(desc(ES))})
+```
+
+Write out results for use in Cytoscape
+```{r}
+gsea_cluster1 <- gsea_results[[1]] %>% as_tibble() 
+lead <- map_chr(gsea_cluster1$leadingEdge, function(list){
+  paste(list, collapse = ",")
+  })
+gsea_cluster1$leadingEdge <- lead
+gsea_cluster1
+
+write_csv(gsea_cluster1, "output/gsea_res_cluster1.csv")
+
+```
+
+
+Example code for collapsing pathways:
+http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html
+
+Will instead handle the analysis and visualization of results with the EnrichmentMap App in Cytoscape 3.7.
+
+https://enrichmentmap.readthedocs.io/en/latest/
+
+Another option for functional annotation:
+http://genescf.kandurilab.org/documentation.php
+http://genescf.kandurilab.org/ftp/GeneSCF-Documentation_v1.1.pdf
+
+A third option for network analysis:
+https://www.networkanalyst.ca/NetworkAnalyst/resources/tutorials/t2a_single_list.pdf
+
+Prepare data for GSEA desktop app
+
+RNK file format: https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats
+
+```{r}
+# Column names need to start with `#` or just don't have any
+# Recommend Hugo Gene symbdols
+enframe(rtable_list[[1]]) %>% 
+  dplyr::rename(entrez_id = name) %>%
+  left_join(gencode_ent) %>%
+  drop_na(gene_name) %>%
+  dplyr::select(`#HGNC_symbol` = gene_name, logFC = value) %>%
+  write_delim("output/clust1_vs_others_dge.rnk", delim = "\t", col_names = FALSE)
+
+enframe(rtable_list[[2]]) %>% 
+  dplyr::rename(entrez_id = name) %>%
+  left_join(gencode_ent) %>%
+  drop_na(gene_name) %>%
+  dplyr::select(`#HGNC_symbol` = gene_name, logFC = value) %>%
+  write_delim("output/clust2_vs_others_dge.rnk", delim = "\t", col_names = FALSE)
+
+enframe(rtable_list[[3]]) %>% 
+  dplyr::rename(entrez_id = name) %>%
+  left_join(gencode_ent) %>%
+  drop_na(gene_name) %>%
+  dplyr::select(`#HGNC_symbol` = gene_name, logFC = value) %>%
+  write_delim("output/clust3_vs_others_dge.rnk", delim = "\t", col_names = FALSE)
+
+enframe(rtable_list[[4]]) %>% 
+  dplyr::rename(entrez_id = name) %>%
+  left_join(gencode_ent) %>%
+  drop_na(gene_name) %>%
+  dplyr::select(`#HGNC_symbol` = gene_name, logFC = value) %>%
+  write_delim("output/clust4_vs_others_dge.rnk", delim = "\t", col_names = FALSE)
+```

@@ -34,7 +34,13 @@ expr_matrix <- total_reads %>%
 rownames(expr_matrix) <- rownames
 
 # get gvsa scores
-tcga_es <- gsva(expr = expr_matrix, gset.idx.list = gset, annotation = NULL, method = "gsva", verbose = TRUE)
+tcga_es <- gsva(
+	expr = expr_matrix, 
+	gset.idx.list = gset, 
+	annotation = NULL, 
+	method = "gsva", 
+	verbose = TRUE
+	)
 
 # write out results
 saveRDS(tcga_es, "/gpfs/data/kline-lab/tcga_macs/output/dlbcl_total_immune_gset_v1_results.rds")
