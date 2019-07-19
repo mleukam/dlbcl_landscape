@@ -24,6 +24,8 @@ library(ggpubr)
 library(ggsci)
 ```
 
+## Read in and clean data
+
 Read in NCI mutation data
 ```{r}
 # read in significance rank list from MutSig2CV
@@ -39,9 +41,290 @@ final_analysis_set$Variant_Classification <- str_replace(final_analysis_set$Vari
 final_analysis_set$Variant_Classification <- str_replace(final_analysis_set$Variant_Classification, "Stop_Codon_Ins", "Nonstop_Mutation")
 
 final_analysis_set <- as.data.frame(final_analysis_set)
+
+nci_mut_by_sample <- final_analysis_set %>%
+  dplyr::select(sample_id = Tumor_Sample_Barcode, Hugo_Symbol) %>%
+  mutate(Hugo_Symbol = ifelse(Hugo_Symbol == "MLL2", "KMT2D", Hugo_Symbol)) %>%
+  as_tibble() %>%
+  print()
+  
 ```
 
 Read in Duke mutation data
 ```{r}
+duke_mut_raw <- read_csv("data/duke_study_driver_mutations_top150_maf.csv")
 
+duke_mut_by_sample <- duke_mut_raw %>%
+  dplyr::select(Tumor_Sample_Barcode, Hugo_Symbol) %>%
+  tidyr::separate(Tumor_Sample_Barcode, 
+                  into = c(NA, NA, "sample_id"), 
+                  sep = "_")  %>%
+  mutate(sample_id = paste0("duke_", sample_id)) %>%
+  arrange(sample_id) %>%
+  as_tibble() %>%
+  mutate(Hugo_Symbol = ifelse(Hugo_Symbol == "MLL2", "KMT2D", Hugo_Symbol)) %>%
+  print()
 ```
+
+#### Combine mutation data
+
+```{r}
+combined_mut <- nci_mut_by_sample %>%
+  bind_rows(duke_mut_by_sample) %>%
+  print()
+
+# remove duplicate mutations in the same patient and same gene
+unique_mut <- combined_mut %>%
+  distinct(sample_id, Hugo_Symbol, .keep_all = TRUE) %>%
+  print()
+
+nrow(combined_mut)
+nrow(unique_mut)
+```
+
+Read in cluster assignment and combine
+```{r}
+gsva4_es <- readRDS("output/combined_es_gsva4_4cluster.rds")
+
+clust_assgn <- pData(gsva4_es) %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  dplyr::select(sample_id, clust) %>%
+  as_tibble() %>%
+  print()
+
+# get the total n
+clust_assgn %>% distinct(sample_id) %>% nrow()
+
+mut_clust <- unique_mut %>%
+  left_join(clust_assgn) %>%
+  print()
+```
+
+#### Mutation counts by cluster
+
+Get mutation counts per gene for each cluster and combine back to a single table
+```{r}
+# get number of cases in the cluster
+mut_clust %>% dplyr::filter(clust == "1") %>% distinct(sample_id) %>% nrow()
+mut_clust %>% dplyr::filter(clust == "2") %>% distinct(sample_id) %>% nrow()
+mut_clust %>% dplyr::filter(clust == "3") %>% distinct(sample_id) %>% nrow()
+mut_clust %>% dplyr::filter(clust == "4") %>% distinct(sample_id) %>% nrow()
+
+# get counts by gene for clusters and compare each cluster for significance against pooled counts from each other cluster
+
+# first get mutation counts for each gene per cluster and create column for counts of unmutated genes
+cluster_1 <- mut_clust %>%
+  dplyr::filter(clust == "1") %>%
+  dplyr::select(-clust) %>%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %>%
+  count(Hugo_Symbol) %>%
+  dplyr::rename(c1_mut = n) %>%
+  mutate(c1_nonmut = 352 - c1_mut) %>%
+  print()
+
+cluster_2 <- mut_clust %>%
+  dplyr::filter(clust == "2") %>%
+  dplyr::select(-clust) %>%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %>%
+  count(Hugo_Symbol) %>%
+  dplyr::rename(c2_mut = n) %>%
+  mutate(c2_nonmut = 277 - c2_mut) %>%
+  print() 
+
+cluster_3 <- mut_clust %>%
+  dplyr::filter(clust == "3") %>%
+  dplyr::select(-clust) %>%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %>%
+  count(Hugo_Symbol) %>%
+  dplyr::rename(c3_mut = n) %>%
+  mutate(c3_nonmut = 222 - c3_mut) %>%
+  print() 
+
+cluster_4 <- mut_clust %>%
+  dplyr::filter(clust == "4") %>%
+  dplyr::select(-clust) %>%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %>%
+  count(Hugo_Symbol) %>%
+  dplyr::rename(c4_mut = n) %>%
+  mutate(c4_nonmut = 317 - c4_mut) %>%
+  print() 
+
+mut_counts_by_cluster <- cluster_1 %>%
+  full_join(cluster_2) %>%
+  full_join(cluster_3) %>%
+  full_join(cluster_4) %>%
+  replace_na(list(c1_mut = 0, c2_mut = 0, c3_mut = 0, c4_mut = 0)) %>%
+  replace_na(list(c1_nonmut = 0, c2_nonmut = 0, c3_nonmut = 0, c4_nonmut = 0)) %>%
+  arrange(desc(c4_mut)) %>%
+  print()
+
+mut_counts_matrix <- as.data.frame(mut_counts_by_cluster) %>%
+  column_to_rownames(var = "Hugo_Symbol") %>%
+  as.matrix()
+
+mut_counts_matrix[1:5, ]
+mut_counts <- mut_counts_matrix[, c(1,3,5,7)]
+  
+# filter for genes without any meaningful number of total mutations
+# filter out genes that have a mutant allele fraction < 0.05
+cutoff <- 1189 * 0.05
+
+mut_counts_filtered <- mut_counts_by_cluster %>%
+  mutate(mut_totals = c1_mut + c2_mut + c3_mut + c4_mut) %>%
+  filter(mut_totals > cutoff) %>%
+  print()
+```
+
+## Test pairwise significance
+
+Significance testing per for each cluster vs pool of other clusters
+
+https://stackoverflow.com/questions/41507230/fisher-test-on-multiple-data-entries-and-extract-results-in-separate-table/41512086#41512086?newreg=fbae75b1bdbc4796b925c53ca1e2f132
+
+https://blog.rstudio.com/2016/02/02/tidyr-0-4-0/
+
+https://jennybc.github.io/purrr-tutorial/index.html
+
+```{r}
+clust1_vs_pool <- mut_counts_filtered %>%
+  mutate(pool_mut = c2_mut + c3_mut + c4_mut) %>%
+  mutate(pool_nonmut = c2_nonmut + c3_nonmut + c4_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c1_mut, c1_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+sig <- clust1_vs_pool %>%
+  nest(-Hugo_Symbol) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  arrange(p.value)
+
+clust_1_summary <- sig %>%
+  left_join(clust1_vs_pool) %>%
+  mutate(p_adj = p.adjust(p.value, method = "BH")) %>%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
+  print()
+```
+
+```{r}
+clust2_vs_pool <- mut_counts_filtered %>%
+  mutate(pool_mut = c1_mut + c3_mut + c4_mut) %>%
+  mutate(pool_nonmut = c1_nonmut + c3_nonmut + c4_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c2_mut, c2_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+sig <- clust2_vs_pool %>%
+  nest(-Hugo_Symbol) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  arrange(p.value)
+
+clust_2_summary <- sig %>%
+  left_join(clust2_vs_pool) %>%
+  mutate(p_adj = p.adjust(p.value, method = "BH")) %>%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
+  print()
+```
+
+```{r}
+clust3_vs_pool <- mut_counts_filtered %>%
+  mutate(pool_mut = c1_mut + c2_mut + c4_mut) %>%
+  mutate(pool_nonmut = c1_nonmut + c2_nonmut + c4_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c3_mut, c3_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+sig <- clust3_vs_pool %>%
+  nest(-Hugo_Symbol) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  arrange(p.value)
+
+clust_3_summary <- sig %>%
+  left_join(clust3_vs_pool) %>%
+  mutate(p_adj = p.adjust(p.value, method = "BH")) %>%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
+  print()
+```
+
+```{r}
+clust4_vs_pool <- mut_counts_filtered %>%
+  mutate(pool_mut = c1_mut + c2_mut + c3_mut) %>%
+  mutate(pool_nonmut = c1_nonmut + c2_nonmut + c3_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c4_mut, c4_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+sig <- clust4_vs_pool %>%
+  nest(-Hugo_Symbol) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  arrange(p.value)
+
+clust_4_summary <- sig %>%
+  left_join(clust4_vs_pool) %>%
+  mutate(p_adj = p.adjust(p.value, method = "BH")) %>%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
+  print()
+```
+
+
+## g:Profiler input
+
+Get list of genes mutated over allele fraction of 0.05 for each individual cluster for input into g:profiler ordered enrichment test
+
+Rank by odds of mutation
+
+```{r}
+cluster_1_maf05 <- mut_clust %>%
+  dplyr::filter(clust == "1") %>%
+  dplyr::select(-clust) %>%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %>%
+  count(Hugo_Symbol) %>%
+  dplyr::rename(c1_mut = n) %>%
+  mutate(MAF = c1_mut/352) %>%
+  dplyr::filter(MAF > 0.01) %>%
+  print()
+
+mut_clust_c1_maf05 <- mut_clust %>%
+  left_join(cluster_1_maf05) %>%
+  print()
+  
+clust1_vs_pool <- mut_counts_filtered %>%
+  mutate(pool_mut = c2_mut + c3_mut + c4_mut) %>%
+  mutate(pool_nonmut = c2_nonmut + c3_nonmut + c4_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c1_mut, c1_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+sig <- clust1_vs_pool %>%
+  nest(-Hugo_Symbol) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  arrange(p.value)
+
+clust_1_summary <- sig %>%
+  left_join(clust1_vs_pool) %>%
+  mutate(p_adj = p.adjust(p.value, method = "BH")) %>%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
+  print()
+```
+
+

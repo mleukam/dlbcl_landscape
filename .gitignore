@@ -590,3 +590,5 @@ output/networkanal3_clust2.txt
 output/networkanal3_clust3.txt
 output/networkanal3_clust4.txt
 output/xcell_input_matrix.csv
+*.txt
+*.csv
