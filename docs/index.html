@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -244,18 +245,6 @@ $(document).ready(function () {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
@@ -318,7 +307,7 @@ div.section {
 
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
-<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
 </button>
 </p>
 <div id="workflowr-report" class="collapse">
@@ -327,7 +316,7 @@ div.section {
 <a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -336,10 +325,10 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-07-15
+<strong>Last updated:</strong> 2019-07-20
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 1 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
@@ -355,22 +344,22 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted changes </a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div id="strongRMarkdownfilestronguncommittedchanges" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+<p>The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree01e4acfb63eb651b4b0785b5ae5c794d1d7bda67targetblank01e4acfa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/01e4acfb63eb651b4b0785b5ae5c794d1d7bda67" target="_blank">01e4acf</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree79273ad25d94576529a78b683d26c0239d0f5c42targetblank79273ada"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/79273ad25d94576529a78b683d26c0239d0f5c42" target="_blank">79273ad</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree01e4acfb63eb651b4b0785b5ae5c794d1d7bda67targetblank01e4acfa" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree79273ad25d94576529a78b683d26c0239d0f5c42targetblank79273ada" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -381,87 +370,107 @@ Ignored files:
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
     Ignored:    data/1-s2.0-S1074761316304320-mmc2.xlsx
+    Ignored:    data/12864_2005_498_MOESM2_ESM.xls
     Ignored:    data/41591_2018_45_MOESM5_ESM.xlsx
     Ignored:    data/NIH_PDL1_amp_cases.csv
     Ignored:    data/NIH_PDL1_nonamp_cases.csv
+    Ignored:    data/PanImmune_GeneSet_Definitions.xlsx
     Ignored:    data/aliquot.tsv
     Ignored:    data/azizi_curated.xlsx
     Ignored:    data/c2_human_immune_genesets.gmt
     Ignored:    data/dlbcl_total_immune_gset_v1_results.rds
     Ignored:    data/ds_JCO.18.01583-2.xlsx
+    Ignored:    data/duke_study_driver_mutations_top150_maf.csv
+    Ignored:    data/final_analysis_set.maf
     Ignored:    data/gdc_clinical_data.json
     Ignored:    data/gdc_files_and_case_ids.json
     Ignored:    data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Ignored:    data/genesets/
     Ignored:    data/gset_ids_complete.rds
     Ignored:    data/htseq_counts/
     Ignored:    data/journal.pone.0088309.s001.XLS
     Ignored:    data/mmc1.xlsx
     Ignored:    data/nejmoa1801445_appendix_2.xlsx
+    Ignored:    data/reactome_imm_signaling.tsv
     Ignored:    data/sample.tsv
     Ignored:    data/sig.rda
+    Ignored:    data/sig_genes.txt
+    Ignored:    data/temp.dgelist_edger.rds
     Ignored:    data/temp.dgelist_limma.rds
     Ignored:    docs/.DS_Store
+    Ignored:    docs/assets/Rplot01.pdf
+    Ignored:    docs/assets/Rplot02.pdf
+    Ignored:    docs/assets/Rplot03.pdf
+    Ignored:    docs/assets/gsva4_heatmap_rawscores.pdf
+    Ignored:    output/clust1_vs_others.txt
+    Ignored:    output/clust1_vs_others_dge.rnk
+    Ignored:    output/clust2_vs_others_dge.rnk
+    Ignored:    output/clust3_vs_others_dge.rnk
+    Ignored:    output/clust4_vs_others_dge.rnk
+    Ignored:    output/cluster1_dge.rds
+    Ignored:    output/cluster2_dge.rds
+    Ignored:    output/cluster3_dge.rds
+    Ignored:    output/cluster4_dge.rds
     Ignored:    output/combined_clin_data.xlsx
     Ignored:    output/combined_dlbcl_expr_matrix.csv
+    Ignored:    output/combined_es_gsva2_4cluster.rds
+    Ignored:    output/combined_es_gsva4_4cluster.rds
+    Ignored:    output/combined_expressionset.rds
+    Ignored:    output/counts_expressionset_for_limma.rds
     Ignored:    output/dlbcl_expr_matrix.csv
     Ignored:    output/dlbcl_total_immune_gset_v2_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v3_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v4_results.rds
     Ignored:    output/duke_expression_set_cleaned_log.rds
     Ignored:    output/duke_expressionset.rds
     Ignored:    output/duke_expressionset_pext.rds
     Ignored:    output/duke_extended_pheno_data.csv
     Ignored:    output/expr_matrix.csv
+    Ignored:    output/gsea_res_cluster1.csv
     Ignored:    output/gset_ids_complete_2.rds
+    Ignored:    output/gset_ids_complete_3.rds
+    Ignored:    output/gset_ids_complete_4.rds
+    Ignored:    output/gsva_v2_4clust_assign.rds
+    Ignored:    output/gsva_v3_4clust_assign.rds
+    Ignored:    output/gsva_v4_4clust_assign.rds
+    Ignored:    output/mc1_score_matrix.csv
+    Ignored:    output/mc2_score_matrix.csv
+    Ignored:    output/mc3_score_matrix.csv
+    Ignored:    output/mc4_score_matrix.csv
+    Ignored:    output/mc5_score_matrix.csv
+    Ignored:    output/mc6_score_matrix.csv
+    Ignored:    output/mc7_score_matrix.csv
+    Ignored:    output/merged_raw_counts.csv
+    Ignored:    output/merged_raw_counts_1.csv
+    Ignored:    output/merged_raw_counts_2.csv
+    Ignored:    output/merged_raw_counts_3.csv
+    Ignored:    output/merged_raw_counts_4.csv
+    Ignored:    output/merged_raw_counts_5.csv
+    Ignored:    output/merged_raw_counts_6.csv
+    Ignored:    output/merged_raw_counts_7.csv
     Ignored:    output/nci_dlbcl_annotation.csv
     Ignored:    output/nci_dlbcl_unprocessed_counts.csv
     Ignored:    output/nci_expressionset.rds
     Ignored:    output/nci_expressionset_pext.rds
     Ignored:    output/nci_extended_pheno_data.csv
+    Ignored:    output/networkanal3_clust1.txt
+    Ignored:    output/networkanal3_clust2.txt
+    Ignored:    output/networkanal3_clust3.txt
+    Ignored:    output/networkanal3_clust4.txt
     Ignored:    output/total_immune_gset_v1.rds
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.pvals.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819_RAW.txt
+    Ignored:    output/xcell_input_matrix.csv
 
 Untracked files:
-    Untracked:  analysis/assign_mutations.Rmd
-    Untracked:  analysis/cluster_dge.Rmd
-    Untracked:  analysis/deconvolution.Rmd
-    Untracked:  analysis/visualizing_gsva_scores_3.Rmd
-    Untracked:  analysis/visualizing_gsva_scores_4.Rmd
-    Untracked:  data/12864_2005_498_MOESM2_ESM.xls
-    Untracked:  data/PanImmune_GeneSet_Definitions.xlsx
-    Untracked:  data/final_analysis_set.maf
-    Untracked:  data/genesets/
-    Untracked:  data/reactome_imm_signaling.tsv
-    Untracked:  data/sig_genes.txt
-    Untracked:  data/temp.dgelist_edger.rds
-    Untracked:  docs/assets/Rplot01.pdf
-    Untracked:  docs/assets/Rplot02.pdf
-    Untracked:  docs/assets/Rplot03.pdf
-    Untracked:  docs/assets/gsva4_heatmap_rawscores.pdf
-    Untracked:  output/combined_es_gsva2_4cluster.rds
-    Untracked:  output/combined_expressionset.rds
-    Untracked:  output/dlbcl_total_immune_gset_v3_results.rds
-    Untracked:  output/dlbcl_total_immune_gset_v4_results.rds
-    Untracked:  output/gset_ids_complete_3.rds
-    Untracked:  output/gset_ids_complete_4.rds
-    Untracked:  output/gsva_v2_4clust_assign.rds
-    Untracked:  output/gsva_v3_4clust_assign.rds
-    Untracked:  output/gsva_v4_4clust_assign.rds
-    Untracked:  output/mc1_score_matrix.csv
-    Untracked:  output/mc2_score_matrix.csv
-    Untracked:  output/mc3_score_matrix.csv
-    Untracked:  output/mc4_score_matrix.csv
-    Untracked:  output/mc5_score_matrix.csv
-    Untracked:  output/mc6_score_matrix.csv
-    Untracked:  output/mc7_score_matrix.csv
-    Untracked:  output/merged_raw_counts.csv
-    Untracked:  output/merged_raw_counts_1.csv
-    Untracked:  output/merged_raw_counts_2.csv
-    Untracked:  output/merged_raw_counts_3.csv
-    Untracked:  output/merged_raw_counts_4.csv
-    Untracked:  output/merged_raw_counts_5.csv
-    Untracked:  output/merged_raw_counts_6.csv
-    Untracked:  output/merged_raw_counts_7.csv
+    Untracked:  docs/figure/sparse_clustering.Rmd/
+    Untracked:  output/clust1_mut_ranked_maf05.tsv
+    Untracked:  output/clust1_mut_ranked_p05.tsv
 
 Unstaged changes:
-    Modified:   analysis/visualizing_gsva_scores_2.Rmd
+    Modified:   analysis/assign_mutations.Rmd
+    Modified:   analysis/index.Rmd
 
 </code></pre>
 <p>
@@ -500,6 +509,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/79273ad25d94576529a78b683d26c0239d0f5c42/analysis/index.Rmd" target="_blank">79273ad</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-21
+</td>
+<td>
+sparse hierarchical clustering
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/e4fde8a869aede82fe7210e8aceeae97922ff4d3/docs/index.html" target="_blank">e4fde8a</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -987,17 +1030,6 @@ Start workflowr project.
 <h2>Introduction</h2>
 <p>Welcome to the computational lab notebook for our research project focused on profiling the immune microenvironment of DLBCL using gene expression data and multi-channel immunohistochemistry, then linking clusters of similar immune signatures with mutations in tumors.</p>
 <p><a href="https://docs.google.com/presentation/d/1sKzira205EXmpdX3D1h6Hy_67gWcaE9-PLBPEcOIE5g/edit?usp=sharing">Slides containing work-in-progress figures</a></p>
-<p>Short-term to-do list:</p>
-<ul>
-<li>GSVA v4 and deconvolution</li>
-<li>Inverse correction for tumor purity?</li>
-<li>Download GDC mutation data</li>
-<li>Combined mutation calls pipeline</li>
-</ul>
-<p>Major issues:</p>
-<ul>
-<li>How to account for malignant B-cells vs immune response B-cells?</li>
-</ul>
 </div>
 <div id="background" class="section level2">
 <h2>Background</h2>
@@ -1066,12 +1098,18 @@ Start workflowr project.
 <li><a href="visualizing_gsva_scores_4.html">Visualizing and clustering GSVA results using a combination of recently published and Thorsson et al gene sets</a></li>
 </ul>
 <p>Both new collections of gene sets perform better than original MSigDB in separating known phenotype PD-L1, and have a broader distribution of vector angles in contributions of each gene set to the principal component axes. A four-cluster model was found to best fit the data in both cases, with 75% identical assignments and 87% Pearson concordance with cluster assignment treated as a numerical value. Several gene sets were removed from Thorsson et al and combined GSVA analyses due to multicollinearity. See <a href="visualizing_gsva_scores_3.html">GSVA v3 notebook</a> and <a href="visualizing_gsva_scores_4.html">GSVA v4 notebook</a> for details.</p>
-<p>4-cluster model assignments made with GSVA v4 (combination of Thorsson and new gene set scores. See <a href="(visualizing_gsva_scores_4.html)">notebook</a> for details.</p>
-<p>Further exploration:</p>
+<p>4-cluster model assignments made using HCPC on the first 10 principal components of GSVA v4 (combination of Thorsson and new gene set) scores. See <a href="(visualizing_gsva_scores_4.html)">notebook</a> for details.</p>
+<p>Also tested sparse heirarchical clustering to reduce number of contributing gene sets via L1 (Lasso-like) mechanism of iteratively forcing coefficients of each variable toward 0 while optimizing the gap statistic. This resulted in selection of 35 gene sets which could explain a high fraction of the total variability, unfortunately these were predominantly T-cell-related gene sets which were already overrepresented in the original gene set list due to characteristics of T-cells and larger number of studies focused on characterizing T-cells. The overall clustering was poorer, and was essentially a gradient on these closely related T-cell, IFN-gamma axis. This model was discarded in favor of noise reduction with HCPC of the first 10 principal components as described above.</p>
+<ul>
+<li><a href="sparse_clustering.html">Sparse hierarchical clustering</a></li>
+</ul>
+</div>
+</div>
+<div id="differential-gene-expression-by-cluster" class="section level3">
+<h3>Differential gene expression by cluster</h3>
 <ul>
 <li><a href="cluster_dge.html">Differential gene expression by cluster</a></li>
 </ul>
-</div>
 </div>
 <div id="deconvolution-of-immune-cell-types" class="section level3">
 <h3>Deconvolution of immune cell types</h3>
@@ -1130,6 +1168,23 @@ $(document).ready(function () {
 
 
 </script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

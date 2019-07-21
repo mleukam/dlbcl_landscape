@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="mleukam" />
+
+<meta name="date" content="2019-07-20" />
+
+<title>sparse_clustering</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/darkly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Immune Landscape of DLBCL</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">sparse_clustering</h1>
+<h4 class="author">mleukam</h4>
+<h4 class="date">2019-07-20</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2019-07-20
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.4.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20190613code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20190613)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20190613code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20190613)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree79273ad25d94576529a78b683d26c0239d0f5c42targetblank79273ada"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/79273ad25d94576529a78b683d26c0239d0f5c42" target="_blank">79273ad</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree79273ad25d94576529a78b683d26c0239d0f5c42targetblank79273ada" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    data/1-s2.0-S1074761316304320-mmc2.xlsx
+    Ignored:    data/12864_2005_498_MOESM2_ESM.xls
+    Ignored:    data/41591_2018_45_MOESM5_ESM.xlsx
+    Ignored:    data/NIH_PDL1_amp_cases.csv
+    Ignored:    data/NIH_PDL1_nonamp_cases.csv
+    Ignored:    data/PanImmune_GeneSet_Definitions.xlsx
+    Ignored:    data/aliquot.tsv
+    Ignored:    data/azizi_curated.xlsx
+    Ignored:    data/c2_human_immune_genesets.gmt
+    Ignored:    data/dlbcl_total_immune_gset_v1_results.rds
+    Ignored:    data/ds_JCO.18.01583-2.xlsx
+    Ignored:    data/duke_study_driver_mutations_top150_maf.csv
+    Ignored:    data/final_analysis_set.maf
+    Ignored:    data/gdc_clinical_data.json
+    Ignored:    data/gdc_files_and_case_ids.json
+    Ignored:    data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Ignored:    data/genesets/
+    Ignored:    data/gset_ids_complete.rds
+    Ignored:    data/htseq_counts/
+    Ignored:    data/journal.pone.0088309.s001.XLS
+    Ignored:    data/mmc1.xlsx
+    Ignored:    data/nejmoa1801445_appendix_2.xlsx
+    Ignored:    data/reactome_imm_signaling.tsv
+    Ignored:    data/sample.tsv
+    Ignored:    data/sig.rda
+    Ignored:    data/sig_genes.txt
+    Ignored:    data/temp.dgelist_edger.rds
+    Ignored:    data/temp.dgelist_limma.rds
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/assets/Rplot01.pdf
+    Ignored:    docs/assets/Rplot02.pdf
+    Ignored:    docs/assets/Rplot03.pdf
+    Ignored:    docs/assets/gsva4_heatmap_rawscores.pdf
+    Ignored:    output/clust1_vs_others.txt
+    Ignored:    output/clust1_vs_others_dge.rnk
+    Ignored:    output/clust2_vs_others_dge.rnk
+    Ignored:    output/clust3_vs_others_dge.rnk
+    Ignored:    output/clust4_vs_others_dge.rnk
+    Ignored:    output/cluster1_dge.rds
+    Ignored:    output/cluster2_dge.rds
+    Ignored:    output/cluster3_dge.rds
+    Ignored:    output/cluster4_dge.rds
+    Ignored:    output/combined_clin_data.xlsx
+    Ignored:    output/combined_dlbcl_expr_matrix.csv
+    Ignored:    output/combined_es_gsva2_4cluster.rds
+    Ignored:    output/combined_es_gsva4_4cluster.rds
+    Ignored:    output/combined_expressionset.rds
+    Ignored:    output/counts_expressionset_for_limma.rds
+    Ignored:    output/dlbcl_expr_matrix.csv
+    Ignored:    output/dlbcl_total_immune_gset_v2_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v3_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v4_results.rds
+    Ignored:    output/duke_expression_set_cleaned_log.rds
+    Ignored:    output/duke_expressionset.rds
+    Ignored:    output/duke_expressionset_pext.rds
+    Ignored:    output/duke_extended_pheno_data.csv
+    Ignored:    output/expr_matrix.csv
+    Ignored:    output/gsea_res_cluster1.csv
+    Ignored:    output/gset_ids_complete_2.rds
+    Ignored:    output/gset_ids_complete_3.rds
+    Ignored:    output/gset_ids_complete_4.rds
+    Ignored:    output/gsva_v2_4clust_assign.rds
+    Ignored:    output/gsva_v3_4clust_assign.rds
+    Ignored:    output/gsva_v4_4clust_assign.rds
+    Ignored:    output/mc1_score_matrix.csv
+    Ignored:    output/mc2_score_matrix.csv
+    Ignored:    output/mc3_score_matrix.csv
+    Ignored:    output/mc4_score_matrix.csv
+    Ignored:    output/mc5_score_matrix.csv
+    Ignored:    output/mc6_score_matrix.csv
+    Ignored:    output/mc7_score_matrix.csv
+    Ignored:    output/merged_raw_counts.csv
+    Ignored:    output/merged_raw_counts_1.csv
+    Ignored:    output/merged_raw_counts_2.csv
+    Ignored:    output/merged_raw_counts_3.csv
+    Ignored:    output/merged_raw_counts_4.csv
+    Ignored:    output/merged_raw_counts_5.csv
+    Ignored:    output/merged_raw_counts_6.csv
+    Ignored:    output/merged_raw_counts_7.csv
+    Ignored:    output/nci_dlbcl_annotation.csv
+    Ignored:    output/nci_dlbcl_unprocessed_counts.csv
+    Ignored:    output/nci_expressionset.rds
+    Ignored:    output/nci_expressionset_pext.rds
+    Ignored:    output/nci_extended_pheno_data.csv
+    Ignored:    output/networkanal3_clust1.txt
+    Ignored:    output/networkanal3_clust2.txt
+    Ignored:    output/networkanal3_clust3.txt
+    Ignored:    output/networkanal3_clust4.txt
+    Ignored:    output/total_immune_gset_v1.rds
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.pvals.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819_RAW.txt
+    Ignored:    output/xcell_input_matrix.csv
+
+Untracked files:
+    Untracked:  output/clust1_mut_ranked_maf05.tsv
+    Untracked:  output/clust1_mut_ranked_p05.tsv
+
+Unstaged changes:
+    Modified:   analysis/assign_mutations.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/79273ad25d94576529a78b683d26c0239d0f5c42/analysis/sparse_clustering.Rmd" target="_blank">79273ad</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-21
+</td>
+<td>
+sparse hierarchical clustering
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>Clear the workspace</p>
+<pre class="r"><code>rm(list = ls())
+
+# store plotting parameters at startup for later reset
+
+.pardefault &lt;- par(no.readonly = T)</code></pre>
+<p>Load packages</p>
+<pre class="r"><code>library(&quot;tidyverse&quot;)</code></pre>
+<pre><code>── Attaching packages ────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>✔ ggplot2 3.2.0     ✔ purrr   0.3.2
+✔ tibble  2.1.3     ✔ dplyr   0.8.3
+✔ tidyr   0.8.3     ✔ stringr 1.4.0
+✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
+<pre><code>── Conflicts ───────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(&quot;sparcl&quot;)
+library(&quot;Biobase&quot;)</code></pre>
+<pre><code>Loading required package: BiocGenerics</code></pre>
+<pre><code>Loading required package: parallel</code></pre>
+<pre><code>
+Attaching package: &#39;BiocGenerics&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:parallel&#39;:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB</code></pre>
+<pre><code>The following objects are masked from &#39;package:dplyr&#39;:
+
+    combine, intersect, setdiff, union</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
+
+    IQR, mad, sd, var, xtabs</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
+
+    anyDuplicated, append, as.data.frame, basename, cbind,
+    colMeans, colnames, colSums, dirname, do.call, duplicated,
+    eval, evalq, Filter, Find, get, grep, grepl, intersect,
+    is.unsorted, lapply, lengths, Map, mapply, match, mget, order,
+    paste, pmax, pmax.int, pmin, pmin.int, Position, rank, rbind,
+    Reduce, rowMeans, rownames, rowSums, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which, which.max,
+    which.min</code></pre>
+<pre><code>Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    &#39;browseVignettes()&#39;. To cite Bioconductor, see
+    &#39;citation(&quot;Biobase&quot;)&#39;, and for packages &#39;citation(&quot;pkgname&quot;)&#39;.</code></pre>
+<pre class="r"><code>library(&quot;factoextra&quot;)</code></pre>
+<pre><code>Welcome! Related Books: `Practical Guide To Cluster Analysis in R` at https://goo.gl/13EFCZ</code></pre>
+<pre class="r"><code>library(&quot;FactoMineR&quot;)
+library(&quot;viridis&quot;)</code></pre>
+<pre><code>Loading required package: viridisLite</code></pre>
+<pre class="r"><code>library(&quot;ggdark&quot;)
+library(&quot;jcolors&quot;)</code></pre>
+<pre class="r"><code>library(&quot;devtools&quot;)</code></pre>
+<pre><code>Loading required package: usethis</code></pre>
+<pre class="r"><code>install_github(&quot;cmartin/ggConvexHull&quot;)</code></pre>
+<pre><code>Skipping install of &#39;ggConvexHull&#39; from a github remote, the SHA1 (e05904a2) has not changed since last install.
+  Use `force = TRUE` to force installation</code></pre>
+<pre class="r"><code>library(&quot;ggConvexHull&quot;)</code></pre>
+<p>note: after using ggdark, need to restore defaults of fill/color with: “invert_geom_defaults()”</p>
+<p>Read in combined expression set (for pheno data)</p>
+<pre class="r"><code>combined_es &lt;- readRDS(&quot;output/combined_expressionset.rds&quot;)</code></pre>
+<p>Hierarchical sparse clustering: <a href="https://rdrr.io/cran/sparcl/man/HierarchicalSparseCluster.html" class="uri">https://rdrr.io/cran/sparcl/man/HierarchicalSparseCluster.html</a></p>
+<p>Manipulating an hclust object <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/hclust.html" class="uri">https://stat.ethz.ch/R-manual/R-patched/library/stats/html/hclust.html</a></p>
+<pre class="r"><code>set.seed(818)
+
+# read in data, get cases in rows and variables in columns
+score_matrix &lt;- readRDS(&quot;output/dlbcl_total_immune_gset_v4_results.rds&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+score_matrix[1:5, 1:5]</code></pre>
+<pre><code>               cyt_gs     dhit_gs imsig_bcells_gs imsig_proliferation_gs
+DLBCL11667  0.5505427  0.11543207      0.43092927             0.42444979
+DLBCL10501 -0.3230575 -0.06111411     -0.23146198             0.16705700
+DLBCL10954 -0.9178721  0.19313491      0.41732350            -0.01536497
+DLBCL10984  0.2964193 -0.27020670      0.06029763            -0.57596362
+DLBCL11206 -0.9377124 -0.23035925     -0.52285480            -0.55513913
+           imsig_interferon_gs
+DLBCL11667           0.5463314
+DLBCL10501          -0.4624949
+DLBCL10954          -0.6397891
+DLBCL10984           0.6446462
+DLBCL11206          -0.4338063</code></pre>
+<pre class="r"><code># Do tuning parameter selection for sparse hierarchical clustering
+perm.out &lt;- HierarchicalSparseCluster.permute(score_matrix, 
+                                              wbounds = c(1.5,2:6), 
+                                              nperms = 5)</code></pre>
+<pre><code>Running sparse hierarchical clustering on unpermuted data
+123456
+Running sparse hierarchical clustering on permuted data
+Permutation  1  of  5
+123456
+Permutation  2  of  5
+123456
+Permutation  3  of  5
+123456
+Permutation  4  of  5
+123456
+Permutation  5  of  5
+123456</code></pre>
+<pre class="r"><code>print(perm.out)</code></pre>
+<pre><code>Tuning parameter selection results for Sparse Hierarchical Clustering:
+  Wbound # Non-Zero W&#39;s Gap Statistic Standard Deviation
+1    1.5              3        0.0723              2e-04
+2    2.0              6        0.1008              2e-04
+3    3.0             15        0.1210              1e-04
+4    4.0             25        0.1248              1e-04
+5    5.0             35        0.1265              0e+00
+6    6.0             55        0.1244              0e+00
+Tuning parameter that leads to largest Gap statistic:  5</code></pre>
+<pre class="r"><code>plot(perm.out)</code></pre>
+<p><img src="figure/sparse_clustering.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>str(perm.out)</code></pre>
+<pre><code>List of 8
+ $ tots      : num [1:6] 1306 1618 2224 2768 3253 ...
+ $ permtots  : num [1:6, 1:5] 1216 1463 1971 2443 2866 ...
+ $ nnonzerows: int [1:6] 3 6 15 25 35 55
+ $ gaps      : num [1:6] 0.0723 0.1008 0.121 0.1248 0.1265 ...
+ $ sdgaps    : num [1:6] 2.00e-04 1.62e-04 7.50e-05 5.40e-05 4.69e-05 ...
+ $ wbounds   : num [1:6] 1.5 2 3 4 5 6
+ $ bestw     : num 5
+ $ dists     : num [1:706266, 1:143] 0.874 1.468 0.254 1.488 1.548 ...
+ - attr(*, &quot;class&quot;)= chr &quot;HierarchicalSparseCluster.permute&quot;</code></pre>
+<pre class="r"><code># Perform sparse hierarchical clustering
+sparsehc &lt;- HierarchicalSparseCluster(dists = perm.out$dists, 
+                                      wbound = perm.out$bestw, 
+                                      method = &quot;complete&quot;)</code></pre>
+<pre><code>12345678</code></pre>
+<pre class="r"><code>par(mfrow = c(1, 2))
+plot(sparsehc)</code></pre>
+<p><img src="figure/sparse_clustering.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>sparsehc</code></pre>
+<pre><code>Wbound is  5 :
+Number of non-zero weights:  35
+Sum of weights:  4.999959</code></pre>
+<pre class="r"><code>str(sparsehc)</code></pre>
+<pre><code>List of 7
+ $ hc    :List of 7
+  ..$ merge      : int [1:1188, 1:2] -670 -974 -377 -35 -79 -906 -506 -508 -375 -111 ...
+  ..$ height     : num [1:1188] 7.18e-06 7.62e-06 8.50e-06 9.94e-06 1.06e-05 ...
+  ..$ order      : int [1:1189] 1167 919 782 835 338 201 639 354 705 580 ...
+  ..$ labels     : chr [1:1189] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...
+  ..$ method     : chr &quot;complete&quot;
+  ..$ call       : language hclust(d = as.dist(out$u), method = method)
+  ..$ dist.method: NULL
+  ..- attr(*, &quot;class&quot;)= chr &quot;hclust&quot;
+ $ ws    : num [1:143, 1] 0.333 0 0 0 0 ...
+ $ u     : num [1:1189, 1:1189] 0 0.000581 0.001043 0.000384 0.000698 ...
+  ..- attr(*, &quot;dimnames&quot;)=List of 2
+  .. ..$ : chr [1:1189] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...
+  .. ..$ : chr [1:1189] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...
+ $ crit  : num 3253
+ $ dists : num [1:706266, 1:143] 0.874 1.468 0.254 1.488 1.548 ...
+ $ uorth : NULL
+ $ wbound: num 5
+ - attr(*, &quot;class&quot;)= chr &quot;HierarchicalSparseCluster&quot;</code></pre>
+<pre class="r"><code># Get cluster assignments
+memb &lt;- cutree(sparsehc$hc, k = 4)
+summary(as.factor(memb))</code></pre>
+<pre><code>  1   2   3   4 
+305 254 290 340 </code></pre>
+<pre class="r"><code>memb_df &lt;- enframe(memb) %&gt;%
+  select(sp_clust = value) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 1,189 x 1
+   sp_clust
+      &lt;int&gt;
+ 1        1
+ 2        2
+ 3        3
+ 4        4
+ 5        2
+ 6        3
+ 7        1
+ 8        3
+ 9        2
+10        1
+# … with 1,179 more rows</code></pre>
+<pre class="r"><code># Add cluster assignments to phenoData
+pheno_data &lt;- pData(combined_es) %&gt;% 
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  bind_cols(memb_df) %&gt;%
+  dplyr::select(sample_id, sp_clust, everything()) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 1,189 x 74
+   sample_id sp_clust source abc_gcb_rna ipi_group os_status os_years   age
+   &lt;chr&gt;        &lt;int&gt; &lt;fct&gt;  &lt;fct&gt;       &lt;chr&gt;         &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;
+ 1 DLBCL116…        1 nci    GCB         Low               1     1.73    48
+ 2 DLBCL105…        2 nci    GCB         Low               0     1.85    42
+ 3 DLBCL109…        3 nci    ABC         &lt;NA&gt;              1     1.16    47
+ 4 DLBCL109…        4 nci    ABC         &lt;NA&gt;              0     0       75
+ 5 DLBCL112…        2 nci    Unclassifi… Intermed…         1     6.30    76
+ 6 DLBCL109…        3 nci    ABC         &lt;NA&gt;              0     0       41
+ 7 DLBCL109…        1 nci    ABC         &lt;NA&gt;              0     0       54
+ 8 DLBCL115…        3 nci    GCB         Intermed…         0     9.48    57
+ 9 DLBCL115…        2 nci    GCB         Intermed…         0     0       32
+10 DLBCL109…        1 nci    ABC         Intermed…         0     0       56
+# … with 1,179 more rows, and 66 more variables: gender &lt;chr&gt;,
+#   ipi_initial &lt;fct&gt;, pdl1_status &lt;chr&gt;, ldh_abnormal &lt;fct&gt;,
+#   extranodal_sites_2plus &lt;fct&gt;, ps_2plus &lt;fct&gt;,
+#   ann_arbor_stage_3plus &lt;chr&gt;, ipi_high &lt;chr&gt;, case_id &lt;chr&gt;,
+#   filename &lt;chr&gt;, project_id &lt;chr&gt;, days_to_last_follow_up &lt;dbl&gt;,
+#   updated_datetime &lt;dttm&gt;, tumor_stage &lt;chr&gt;, age_at_diagnosis &lt;dbl&gt;,
+#   tissue_or_organ_of_origin &lt;chr&gt;, ann_arbor_clinical_stage &lt;chr&gt;,
+#   progression_or_recurrence &lt;chr&gt;, last_known_disease_status &lt;chr&gt;,
+#   primary_diagnosis &lt;chr&gt;, tumor_grade &lt;chr&gt;, demographic.gender &lt;chr&gt;,
+#   demographic.submitter_id &lt;chr&gt;, demographic.race &lt;chr&gt;,
+#   demographic.ethnicity &lt;chr&gt;, demographic.vital_status &lt;chr&gt;,
+#   size &lt;dbl&gt;, `dbGaP accession` &lt;chr&gt;, Diagnosis &lt;chr&gt;, `Genetic
+#   Subtype` &lt;chr&gt;, `Biopsy Type` &lt;chr&gt;, Treatment__ &lt;chr&gt;, `Ann Arbor
+#   Stage` &lt;dbl&gt;, `LDH Ratio` &lt;dbl&gt;, `ECOG Performance Status` &lt;dbl&gt;,
+#   `Number of Extranodal Sites` &lt;dbl&gt;, `IPI Range` &lt;dbl&gt;,
+#   `Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1
+#   Progression` &lt;dbl&gt;, `Progression_Free Survival _PFS_ Time _yrs` &lt;dbl&gt;,
+#   `Included in Survival Analysis` &lt;chr&gt;, lib_size &lt;int&gt;, lane &lt;fct&gt;,
+#   `AGE IPI` &lt;dbl&gt;, `B symptoms at diagnosis` &lt;chr&gt;, `Response to initial
+#   therapy` &lt;chr&gt;, `Testicular involvement` &lt;chr&gt;, `CNS
+#   Involvement` &lt;chr&gt;, `CNS Relapse` &lt;chr&gt;, `age at diagnosis` &lt;dbl&gt;,
+#   `log2 MYC expr` &lt;dbl&gt;, `log2 BCL2 expr` &lt;dbl&gt;, `log2 BCL6 expr` &lt;dbl&gt;,
+#   `MYC high expr` &lt;dbl&gt;, `BCL2 high expr` &lt;dbl&gt;, `BCL6 high expr` &lt;dbl&gt;,
+#   `MYC IHC` &lt;chr&gt;, `BCL2 IHC` &lt;chr&gt;, `BCL6 IHC` &lt;chr&gt;, `BCL2
+#   translocation (FISH)` &lt;chr&gt;, `MYC translocation (FISH)` &lt;chr&gt;, `BCL6
+#   translocation (FISH)` &lt;chr&gt;, `ABC GCB ratio (RNAseq)` &lt;dbl&gt;,
+#   `Nanostring ABC GCB` &lt;chr&gt;, `Nanostring LPS` &lt;dbl&gt;, `Hans GCB
+#   NonGCB` &lt;chr&gt;, `Genomic Risk Model` &lt;chr&gt;</code></pre>
+<pre class="r"><code># Get names of nonzero weighted gene sets
+gs_coef &lt;- sparsehc$ws %&gt;% as_tibble() %&gt;% dplyr::rename(Wj = V1)</code></pre>
+<pre><code>Warning: `as_tibble.matrix()` requires a matrix with column names or a `.name_repair` argument. Using compatibility `.name_repair`.
+This warning is displayed once per session.</code></pre>
+<pre class="r"><code>retained_gene_sets &lt;- enframe(colnames(score_matrix)) %&gt;% 
+  bind_cols(gs_coef) %&gt;%
+  dplyr::rename(gs = value, index = name) %&gt;%
+  filter(Wj != 0) %&gt;%
+  arrange(desc(Wj)) %&gt;%
+  print(n = 35)</code></pre>
+<pre><code># A tibble: 35 x 3
+   index gs                               Wj
+   &lt;int&gt; &lt;chr&gt;                         &lt;dbl&gt;
+ 1    92 thor_dap12_data             0.348  
+ 2     1 cyt_gs                      0.333  
+ 3    68 thor_cd8a                   0.304  
+ 4    94 thor_tcell_receptors_score  0.277  
+ 5    69 thor_cd8_cd68_ratio         0.262  
+ 6    26 mskcc_cytolyticeffector_gs  0.240  
+ 7   131 thor_g_gimap4               0.233  
+ 8    67 thor_cd68                   0.213  
+ 9    73 thor_ctla4_data             0.197  
+10    70 thor_pd1_data               0.183  
+11     9 imsig_nkcells_gs            0.178  
+12   139 thor_icr_act_score          0.177  
+13    71 thor_pdl1_data              0.169  
+14    28 mskcc_type2ifn_response_gs  0.167  
+15   102 thor_stat1_19272155         0.167  
+16   138 thor_icr_score              0.132  
+17    82 thor_tamsurr_score          0.131  
+18    91 thor_trem1_data             0.122  
+19    72 thor_pd1_pdl1_score         0.116  
+20   137 thor_g_cd3e                 0.116  
+21    30 mskcc_tcellterminal_diff_gs 0.113  
+22    97 thor_igg_19272155           0.108  
+23   140 thor_icr_inhib_score        0.101  
+24   122 thor_bcell_21978456         0.0989 
+25   120 thor_mhc1_21978456          0.0826 
+26   134 thor_g_lilrb4               0.0812 
+27   100 thor_mhc.i_19272155         0.0811 
+28   130 thor_ifit3                  0.0682 
+29   118 thor_il8_21978456           0.0505 
+30    98 thor_interferon_19272155    0.0412 
+31   119 thor_ifn_21978456           0.0330 
+32   127 thor_apm1                   0.0276 
+33    65 thor_chemokine12_score      0.0241 
+34    78 thor_module3_ifn_score      0.0132 
+35    74 thor_bcell_mg_igj           0.00929</code></pre>
+<pre class="r"><code># reset plot parameters
+par(.pardefault)
+
+# plot dendogram
+fviz_dend(sparsehc$hc, 
+          k = 4,
+          palette = &quot;nejm&quot;,
+          show_labels = FALSE, 
+          main = &quot;Sparse Hierarchical Cluster Assignments, k = 4&quot;,
+          rect = TRUE,
+          rect_lty = 2,
+          rect_fill = FALSE,
+          lower_rect = -0.0001)</code></pre>
+<p>PCA using only the retained gene sets from sparse HC</p>
+<pre class="r"><code># filter gene sets
+# make vector of retained gene set names
+keep_gs &lt;- retained_gene_sets$gs
+
+# use vector to filter gene sets
+score_mat_filt &lt;- score_matrix %&gt;% 
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample_id, one_of(keep_gs)) %&gt;%
+  # add cluster assignment
+  left_join(pheno_data, by = &quot;sample_id&quot;) %&gt;%
+  dplyr::select(sample_id, sp_clust, one_of(keep_gs)) %&gt;%
+  mutate(sp_clust = as.factor(sp_clust)) %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 1,189 x 37
+   sample_id sp_clust thor_dap12_data  cyt_gs thor_cd8a thor_tcell_rece…
+   &lt;chr&gt;     &lt;fct&gt;              &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;            &lt;dbl&gt;
+ 1 DLBCL116… 1                 0.655   0.551     -0.446           0.0797
+ 2 DLBCL105… 2                 0.268  -0.323     -0.449          -0.373 
+ 3 DLBCL109… 3                -0.920  -0.918     -0.887          -0.946 
+ 4 DLBCL109… 4                 0.0383  0.296      0.669           0.425 
+ 5 DLBCL112… 2                -0.0405 -0.938     -0.202          -0.753 
+ 6 DLBCL109… 3                -0.990  -0.997     -0.997          -0.995 
+ 7 DLBCL109… 1                -0.0669  0.674     -0.448           0.441 
+ 8 DLBCL115… 3                -0.0697 -0.743     -0.969          -0.833 
+ 9 DLBCL115… 2                 0.269  -0.492     -0.303          -0.384 
+10 DLBCL109… 1                -0.695  -0.0269     0.176          -0.283 
+# … with 1,179 more rows, and 31 more variables:
+#   thor_cd8_cd68_ratio &lt;dbl&gt;, mskcc_cytolyticeffector_gs &lt;dbl&gt;,
+#   thor_g_gimap4 &lt;dbl&gt;, thor_cd68 &lt;dbl&gt;, thor_ctla4_data &lt;dbl&gt;,
+#   thor_pd1_data &lt;dbl&gt;, imsig_nkcells_gs &lt;dbl&gt;, thor_icr_act_score &lt;dbl&gt;,
+#   thor_pdl1_data &lt;dbl&gt;, mskcc_type2ifn_response_gs &lt;dbl&gt;,
+#   thor_stat1_19272155 &lt;dbl&gt;, thor_icr_score &lt;dbl&gt;,
+#   thor_tamsurr_score &lt;dbl&gt;, thor_trem1_data &lt;dbl&gt;,
+#   thor_pd1_pdl1_score &lt;dbl&gt;, thor_g_cd3e &lt;dbl&gt;,
+#   mskcc_tcellterminal_diff_gs &lt;dbl&gt;, thor_igg_19272155 &lt;dbl&gt;,
+#   thor_icr_inhib_score &lt;dbl&gt;, thor_bcell_21978456 &lt;dbl&gt;,
+#   thor_mhc1_21978456 &lt;dbl&gt;, thor_g_lilrb4 &lt;dbl&gt;,
+#   thor_mhc.i_19272155 &lt;dbl&gt;, thor_ifit3 &lt;dbl&gt;, thor_il8_21978456 &lt;dbl&gt;,
+#   thor_interferon_19272155 &lt;dbl&gt;, thor_ifn_21978456 &lt;dbl&gt;,
+#   thor_apm1 &lt;dbl&gt;, thor_chemokine12_score &lt;dbl&gt;,
+#   thor_module3_ifn_score &lt;dbl&gt;, thor_bcell_mg_igj &lt;dbl&gt;</code></pre>
+<pre class="r"><code>sp_pca &lt;- PCA(score_mat_filt[3:37],
+    scale.unit = TRUE,
+    graph = FALSE)
+
+fviz_pca_ind(sp_pca,
+             label = &quot;none&quot;,
+             pointshape = 19,
+             habillage = score_mat_filt$sp_clust,
+             legend.title = &quot;Clusters&quot;) + 
+  dark_theme_gray() +
+  scale_color_jcolors(palette = &quot;pal3&quot;) +
+  scale_fill_jcolors(palette = &quot;pal3&quot;) +
+  geom_convexhull(alpha = 0.3, 
+                  aes(fill = score_mat_filt$sp_clust),
+                  show.legend = FALSE,
+                  color = &quot;#76767666&quot;)</code></pre>
+<pre><code>Inverted geom defaults of fill and color/colour.
+To change them back, use invert_geom_defaults().</code></pre>
+<p><img src="figure/sparse_clustering.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fviz_pca_var(sp_pca)</code></pre>
+<p><img src="figure/sparse_clustering.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Too much loss of information with sparse clustering - keeps primarily variables related to the first principle component, comprised largely of T-cell/IFNgamma related ene sets. 4 cluster model is basically a gradient on that single axis and contains less interesting differentiation among groups. Will continue on with the HCPC clusters.</p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.5.3 (2019-03-11)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Mojave 10.14.4
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] ggConvexHull_0.1.0  devtools_2.1.0      usethis_1.5.1      
+ [4] jcolors_0.0.4       ggdark_0.2.1        viridis_0.5.1      
+ [7] viridisLite_0.3.0   FactoMineR_1.42     factoextra_1.0.5   
+[10] Biobase_2.42.0      BiocGenerics_0.28.0 sparcl_1.0.4       
+[13] forcats_0.4.0       stringr_1.4.0       dplyr_0.8.3        
+[16] purrr_0.3.2         readr_1.3.1         tidyr_0.8.3        
+[19] tibble_2.1.3        ggplot2_3.2.0       tidyverse_1.2.1    
+
+loaded via a namespace (and not attached):
+ [1] nlme_3.1-140         fs_1.3.1             lubridate_1.7.4     
+ [4] httr_1.4.0           rprojroot_1.3-2      tools_3.5.3         
+ [7] backports_1.1.4      utf8_1.1.4           R6_2.4.0            
+[10] lazyeval_0.2.2       colorspace_1.4-1     withr_2.1.2         
+[13] tidyselect_0.2.5     gridExtra_2.3        prettyunits_1.0.2   
+[16] processx_3.4.0       curl_3.3             compiler_3.5.3      
+[19] git2r_0.26.1         cli_1.1.0            rvest_0.3.4         
+[22] flashClust_1.01-2    xml2_1.2.0           desc_1.2.0          
+[25] labeling_0.3         scales_1.0.0         callr_3.3.1         
+[28] digest_0.6.20        rmarkdown_1.14       pkgconfig_2.0.2     
+[31] htmltools_0.3.6      sessioninfo_1.1.1    rlang_0.4.0         
+[34] readxl_1.3.1         rstudioapi_0.10      generics_0.0.2      
+[37] jsonlite_1.6         magrittr_1.5         leaps_3.0           
+[40] Rcpp_1.0.1           munsell_0.5.0        fansi_0.4.0         
+[43] scatterplot3d_0.3-41 stringi_1.4.3        whisker_0.3-2       
+[46] yaml_2.2.0           MASS_7.3-51.4        pkgbuild_1.0.3      
+[49] grid_3.5.3           ggrepel_0.8.1        crayon_1.3.4        
+[52] lattice_0.20-38      haven_2.1.1          hms_0.5.0           
+[55] zeallot_0.1.0        knitr_1.23           ps_1.3.0            
+[58] pillar_1.4.2         ggpubr_0.2.1         ggsignif_0.5.0      
+[61] pkgload_1.0.2        glue_1.3.1           evaluate_0.14       
+[64] remotes_2.1.0        modelr_0.1.4         vctrs_0.2.0         
+[67] testthat_2.1.1       cellranger_1.1.0     gtable_0.3.0        
+[70] assertthat_0.2.1     xfun_0.8             broom_0.5.2         
+[73] memoise_1.1.0        workflowr_1.4.0      cluster_2.1.0       </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
