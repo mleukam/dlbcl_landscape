@@ -1,0 +1,159 @@
+---
+title: "sparse_clustering"
+author: "mleukam"
+date: "2019-07-20"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Setup
+
+Clear the workspace
+```{r}
+rm(list = ls())
+
+# store plotting parameters at startup for later reset
+
+.pardefault <- par(no.readonly = T)
+```
+
+Load packages
+```{r}
+library("tidyverse")
+library("sparcl")
+library("Biobase")
+library("factoextra")
+library("FactoMineR")
+library("viridis")
+library("ggdark")
+library("jcolors")
+```
+
+```{r}
+library("devtools")
+install_github("cmartin/ggConvexHull")
+library("ggConvexHull")
+```
+
+note: after using ggdark, need to restore defaults of fill/color with: 
+"invert_geom_defaults()"
+
+Read in combined expression set (for pheno data)
+```{r}
+combined_es <- readRDS("output/combined_expressionset.rds")
+
+```
+
+Hierarchical sparse clustering: https://rdrr.io/cran/sparcl/man/HierarchicalSparseCluster.html
+
+Manipulating an hclust object
+https://stat.ethz.ch/R-manual/R-patched/library/stats/html/hclust.html
+
+```{r}
+set.seed(818)
+
+# read in data, get cases in rows and variables in columns
+score_matrix <- readRDS("output/dlbcl_total_immune_gset_v4_results.rds") %>%
+  as.matrix() %>%
+  t()
+score_matrix[1:5, 1:5]
+
+# Do tuning parameter selection for sparse hierarchical clustering
+perm.out <- HierarchicalSparseCluster.permute(score_matrix, 
+                                              wbounds = c(1.5,2:6), 
+                                              nperms = 5)
+print(perm.out)
+plot(perm.out)
+str(perm.out)
+
+# Perform sparse hierarchical clustering
+sparsehc <- HierarchicalSparseCluster(dists = perm.out$dists, 
+                                      wbound = perm.out$bestw, 
+                                      method = "complete")
+par(mfrow = c(1, 2))
+plot(sparsehc)
+sparsehc
+str(sparsehc)
+
+# Get cluster assignments
+memb <- cutree(sparsehc$hc, k = 4)
+summary(as.factor(memb))
+memb_df <- enframe(memb) %>%
+  select(sp_clust = value) %>%
+  print()
+
+# Add cluster assignments to phenoData
+pheno_data <- pData(combined_es) %>% 
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  bind_cols(memb_df) %>%
+  dplyr::select(sample_id, sp_clust, everything()) %>%
+  print()
+
+# Get names of nonzero weighted gene sets
+gs_coef <- sparsehc$ws %>% as_tibble() %>% dplyr::rename(Wj = V1)
+retained_gene_sets <- enframe(colnames(score_matrix)) %>% 
+  bind_cols(gs_coef) %>%
+  dplyr::rename(gs = value, index = name) %>%
+  filter(Wj != 0) %>%
+  arrange(desc(Wj)) %>%
+  print(n = 35)
+```
+
+```{r eval=FALSE}
+# reset plot parameters
+par(.pardefault)
+
+# plot dendogram
+fviz_dend(sparsehc$hc, 
+          k = 4,
+          palette = "nejm",
+          show_labels = FALSE, 
+          main = "Sparse Hierarchical Cluster Assignments, k = 4",
+          rect = TRUE,
+          rect_lty = 2,
+          rect_fill = FALSE,
+          lower_rect = -0.0001)
+```
+
+PCA using only the retained gene sets from sparse HC
+
+```{r}
+# filter gene sets
+# make vector of retained gene set names
+keep_gs <- retained_gene_sets$gs
+
+# use vector to filter gene sets
+score_mat_filt <- score_matrix %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  dplyr::select(sample_id, one_of(keep_gs)) %>%
+  # add cluster assignment
+  left_join(pheno_data, by = "sample_id") %>%
+  dplyr::select(sample_id, sp_clust, one_of(keep_gs)) %>%
+  mutate(sp_clust = as.factor(sp_clust)) %>%
+  print()
+
+sp_pca <- PCA(score_mat_filt[3:37],
+    scale.unit = TRUE,
+    graph = FALSE)
+
+fviz_pca_ind(sp_pca,
+             label = "none",
+             pointshape = 19,
+             habillage = score_mat_filt$sp_clust,
+             legend.title = "Clusters") + 
+  dark_theme_gray() +
+  scale_color_jcolors(palette = "pal3") +
+  scale_fill_jcolors(palette = "pal3") +
+  geom_convexhull(alpha = 0.3, 
+                  aes(fill = score_mat_filt$sp_clust),
+                  show.legend = FALSE,
+                  color = "#76767666")
+
+fviz_pca_var(sp_pca)
+```
+
+Too much loss of information with sparse clustering - keeps primarily variables related to the first principle component, comprised largely of T-cell/IFNgamma related ene sets. 4 cluster model is basically a gradient on that single axis and contains less interesting differentiation among groups. Will continue on with the HCPC clusters.
