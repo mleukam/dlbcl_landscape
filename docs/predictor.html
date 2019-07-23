@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="mleukam" />
+
+<meta name="date" content="2019-07-22" />
+
+<title>predictor</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/darkly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Immune Landscape of DLBCL</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">predictor</h1>
+<h4 class="author">mleukam</h4>
+<h4 class="date">2019-07-22</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2019-07-23
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.4.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20190613code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20190613)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20190613code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20190613)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree744674aa8274e9cc381c8686e512662e272e8ed1targetblank744674aa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/744674aa8274e9cc381c8686e512662e272e8ed1" target="_blank">744674a</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree744674aa8274e9cc381c8686e512662e272e8ed1targetblank744674aa" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    data/1-s2.0-S1074761316304320-mmc2.xlsx
+    Ignored:    data/12864_2005_498_MOESM2_ESM.xls
+    Ignored:    data/41591_2018_45_MOESM5_ESM.xlsx
+    Ignored:    data/NIH_PDL1_amp_cases.csv
+    Ignored:    data/NIH_PDL1_nonamp_cases.csv
+    Ignored:    data/PanImmune_GeneSet_Definitions.xlsx
+    Ignored:    data/aliquot.tsv
+    Ignored:    data/azizi_curated.xlsx
+    Ignored:    data/c2_human_immune_genesets.gmt
+    Ignored:    data/dlbcl_total_immune_gset_v1_results.rds
+    Ignored:    data/ds_JCO.18.01583-2.xlsx
+    Ignored:    data/duke_study_driver_mutations_top150_maf.csv
+    Ignored:    data/final_analysis_set.maf
+    Ignored:    data/gdc_clinical_data.json
+    Ignored:    data/gdc_files_and_case_ids.json
+    Ignored:    data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Ignored:    data/genesets/
+    Ignored:    data/gset_ids_complete.rds
+    Ignored:    data/htseq_counts/
+    Ignored:    data/journal.pone.0088309.s001.XLS
+    Ignored:    data/mmc1.xlsx
+    Ignored:    data/nejmoa1801445_appendix_2.xlsx
+    Ignored:    data/reactome_imm_signaling.tsv
+    Ignored:    data/sample.tsv
+    Ignored:    data/sig.rda
+    Ignored:    data/sig_genes.txt
+    Ignored:    data/temp.dgelist_edger.rds
+    Ignored:    data/temp.dgelist_limma.rds
+    Ignored:    docs/.DS_Store
+    Ignored:    docs/assets/Rplot01.pdf
+    Ignored:    docs/assets/Rplot02.pdf
+    Ignored:    docs/assets/Rplot03.pdf
+    Ignored:    docs/assets/gsva4_heatmap_rawscores.pdf
+    Ignored:    output/clust1_vs_others.txt
+    Ignored:    output/clust1_vs_others_dge.rnk
+    Ignored:    output/clust2_vs_others_dge.rnk
+    Ignored:    output/clust3_vs_others_dge.rnk
+    Ignored:    output/clust4_vs_others_dge.rnk
+    Ignored:    output/cluster1_dge.rds
+    Ignored:    output/cluster2_dge.rds
+    Ignored:    output/cluster3_dge.rds
+    Ignored:    output/cluster4_dge.rds
+    Ignored:    output/combined_clin_data.xlsx
+    Ignored:    output/combined_dlbcl_expr_matrix.csv
+    Ignored:    output/combined_es_gsva2_4cluster.rds
+    Ignored:    output/combined_es_gsva4_4cluster.rds
+    Ignored:    output/combined_expressionset.rds
+    Ignored:    output/combined_tpm_matrix.csv
+    Ignored:    output/counts_expressionset_for_limma.rds
+    Ignored:    output/dlbcl_expr_matrix.csv
+    Ignored:    output/dlbcl_total_immune_gset_v2_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v3_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v4_results.rds
+    Ignored:    output/duke_expression_set_cleaned_log.rds
+    Ignored:    output/duke_expressionset.rds
+    Ignored:    output/duke_expressionset_pext.rds
+    Ignored:    output/duke_extended_pheno_data.csv
+    Ignored:    output/expr_matrix.csv
+    Ignored:    output/gsea_res_cluster1.csv
+    Ignored:    output/gset_ids_complete_2.rds
+    Ignored:    output/gset_ids_complete_3.rds
+    Ignored:    output/gset_ids_complete_4.rds
+    Ignored:    output/gsva_v2_4clust_assign.rds
+    Ignored:    output/gsva_v3_4clust_assign.rds
+    Ignored:    output/gsva_v4_4clust_assign.rds
+    Ignored:    output/mc1_score_matrix.csv
+    Ignored:    output/mc2_score_matrix.csv
+    Ignored:    output/mc3_score_matrix.csv
+    Ignored:    output/mc4_score_matrix.csv
+    Ignored:    output/mc5_score_matrix.csv
+    Ignored:    output/mc6_score_matrix.csv
+    Ignored:    output/mc7_score_matrix.csv
+    Ignored:    output/merged_raw_counts.csv
+    Ignored:    output/merged_raw_counts_1.csv
+    Ignored:    output/merged_raw_counts_2.csv
+    Ignored:    output/merged_raw_counts_3.csv
+    Ignored:    output/merged_raw_counts_4.csv
+    Ignored:    output/merged_raw_counts_5.csv
+    Ignored:    output/merged_raw_counts_6.csv
+    Ignored:    output/merged_raw_counts_7.csv
+    Ignored:    output/nci_dlbcl_annotation.csv
+    Ignored:    output/nci_dlbcl_unprocessed_counts.csv
+    Ignored:    output/nci_expressionset.rds
+    Ignored:    output/nci_expressionset_pext.rds
+    Ignored:    output/nci_extended_pheno_data.csv
+    Ignored:    output/networkanal3_clust1.txt
+    Ignored:    output/networkanal3_clust2.txt
+    Ignored:    output/networkanal3_clust3.txt
+    Ignored:    output/networkanal3_clust4.txt
+    Ignored:    output/total_immune_gset_v1.rds
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019.pvals.txt
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019.txt
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019_RAW.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.pvals.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819_RAW.txt
+    Ignored:    output/xcell_input_matrix.csv
+
+Untracked files:
+    Untracked:  code/limmavoom.r
+    Untracked:  code/predictionmodel.r
+    Untracked:  data/gencode.v22.annotation.gtf
+    Untracked:  output/clust1_mut_ranked_maf05.tsv
+    Untracked:  output/clust1_mut_ranked_p05.tsv
+    Untracked:  output/design_for_limma.rds
+    Untracked:  output/dgelist_for_limma.rds
+    Untracked:  output/gencode_v22_exonic_gene_sizes.rds
+    Untracked:  output/tpm_expressionset.rds
+
+Unstaged changes:
+    Modified:   analysis/assign_mutations.Rmd
+    Modified:   analysis/cluster_dge.Rmd
+    Modified:   analysis/deconvolution.Rmd
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/744674aa8274e9cc381c8686e512662e272e8ed1/analysis/predictor.Rmd" target="_blank">744674a</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-23
+</td>
+<td>
+work in progress prediction algorithm
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>The purpose of this notebook is to make a cluster classifier for the HCPC 4-cluster model that can be applied to tumors at UChicago.</p>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>Clear the workspace</p>
+<pre class="r"><code>rm(list = ls())</code></pre>
+<p>Load packages</p>
+<pre class="r"><code>library(&quot;tidyverse&quot;)</code></pre>
+<pre><code>── Attaching packages ─────────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>✔ ggplot2 3.2.0     ✔ purrr   0.3.2
+✔ tibble  2.1.3     ✔ dplyr   0.8.3
+✔ tidyr   0.8.3     ✔ stringr 1.4.0
+✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
+<pre><code>── Conflicts ────────────────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(&quot;caret&quot;)</code></pre>
+<pre><code>Loading required package: lattice</code></pre>
+<pre><code>
+Attaching package: &#39;caret&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:purrr&#39;:
+
+    lift</code></pre>
+<pre class="r"><code>library(&quot;e1071&quot;)
+library(&quot;Biobase&quot;)</code></pre>
+<pre><code>Loading required package: BiocGenerics</code></pre>
+<pre><code>Loading required package: parallel</code></pre>
+<pre><code>
+Attaching package: &#39;BiocGenerics&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:parallel&#39;:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB</code></pre>
+<pre><code>The following objects are masked from &#39;package:dplyr&#39;:
+
+    combine, intersect, setdiff, union</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
+
+    IQR, mad, sd, var, xtabs</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
+
+    anyDuplicated, append, as.data.frame, basename, cbind,
+    colMeans, colnames, colSums, dirname, do.call, duplicated,
+    eval, evalq, Filter, Find, get, grep, grepl, intersect,
+    is.unsorted, lapply, lengths, Map, mapply, match, mget, order,
+    paste, pmax, pmax.int, pmin, pmin.int, Position, rank, rbind,
+    Reduce, rowMeans, rownames, rowSums, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which, which.max,
+    which.min</code></pre>
+<pre><code>Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    &#39;browseVignettes()&#39;. To cite Bioconductor, see
+    &#39;citation(&quot;Biobase&quot;)&#39;, and for packages &#39;citation(&quot;pkgname&quot;)&#39;.</code></pre>
+<p>Read in and format data</p>
+<p><a href="https://topepo.github.io/caret/data-splitting.html" class="uri">https://topepo.github.io/caret/data-splitting.html</a></p>
+<pre class="r"><code>combined_es &lt;- readRDS(&quot;output/combined_es_gsva4_4cluster.rds&quot;)
+
+clust &lt;- pData(combined_es) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  dplyr::select(sample_id, clust) %&gt;%
+  as_tibble() %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 1,189 x 2
+   sample_id  clust
+   &lt;chr&gt;      &lt;fct&gt;
+ 1 DLBCL11667 3    
+ 2 DLBCL10501 1    
+ 3 DLBCL10954 1    
+ 4 DLBCL10984 4    
+ 5 DLBCL11206 1    
+ 6 DLBCL10959 1    
+ 7 DLBCL10985 2    
+ 8 DLBCL11533 1    
+ 9 DLBCL11519 3    
+10 DLBCL10921 2    
+# … with 1,179 more rows</code></pre>
+<pre class="r"><code>expr_df &lt;- t(exprs(combined_es)) %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  print()</code></pre>
+<pre><code># A tibble: 1,189 x 12,654
+   sample_id ENSG00000000003… ENSG00000000419… ENSG00000000457…
+   &lt;chr&gt;                &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+ 1 DLBCL116…            1.02              5.05             2.50
+ 2 DLBCL105…            2.20              6.17             2.83
+ 3 DLBCL109…            1.69              4.92             5.02
+ 4 DLBCL109…            1.71              5.53             4.98
+ 5 DLBCL112…            3.77              5.69             4.85
+ 6 DLBCL109…            1.06              6.08             4.40
+ 7 DLBCL109…            0.411             5.25             4.07
+ 8 DLBCL115…            2.57              6.33             3.56
+ 9 DLBCL115…            1.41              5.39             3.43
+10 DLBCL109…            2.47              5.41             5.13
+# … with 1,179 more rows, and 12,650 more variables:
+#   ENSG00000000460.15 &lt;dbl&gt;, ENSG00000000938.11 &lt;dbl&gt;,
+#   ENSG00000000971.14 &lt;dbl&gt;, ENSG00000001036.12 &lt;dbl&gt;,
+#   ENSG00000001084.9 &lt;dbl&gt;, ENSG00000001167.13 &lt;dbl&gt;,
+#   ENSG00000001460.16 &lt;dbl&gt;, ENSG00000001461.15 &lt;dbl&gt;,
+#   ENSG00000001497.15 &lt;dbl&gt;, ENSG00000001561.6 &lt;dbl&gt;,
+#   ENSG00000001617.10 &lt;dbl&gt;, ENSG00000001629.8 &lt;dbl&gt;,
+#   ENSG00000001630.14 &lt;dbl&gt;, ENSG00000001631.13 &lt;dbl&gt;,
+#   ENSG00000002016.15 &lt;dbl&gt;, ENSG00000002330.12 &lt;dbl&gt;,
+#   ENSG00000002549.11 &lt;dbl&gt;, ENSG00000002586.16 &lt;dbl&gt;,
+#   ENSG00000002587.8 &lt;dbl&gt;, ENSG00000002822.14 &lt;dbl&gt;,
+#   ENSG00000002834.16 &lt;dbl&gt;, ENSG00000002919.13 &lt;dbl&gt;,
+#   ENSG00000002933.6 &lt;dbl&gt;, ENSG00000003056.6 &lt;dbl&gt;,
+#   ENSG00000003137.7 &lt;dbl&gt;, ENSG00000003147.16 &lt;dbl&gt;,
+#   ENSG00000003393.13 &lt;dbl&gt;, ENSG00000003400.13 &lt;dbl&gt;,
+#   ENSG00000003402.18 &lt;dbl&gt;, ENSG00000003436.13 &lt;dbl&gt;,
+#   ENSG00000003509.14 &lt;dbl&gt;, ENSG00000003756.15 &lt;dbl&gt;,
+#   ENSG00000003989.15 &lt;dbl&gt;, ENSG00000004059.9 &lt;dbl&gt;,
+#   ENSG00000004139.12 &lt;dbl&gt;, ENSG00000004142.10 &lt;dbl&gt;,
+#   ENSG00000004399.11 &lt;dbl&gt;, ENSG00000004455.15 &lt;dbl&gt;,
+#   ENSG00000004468.11 &lt;dbl&gt;, ENSG00000004478.7 &lt;dbl&gt;,
+#   ENSG00000004487.14 &lt;dbl&gt;, ENSG00000004534.13 &lt;dbl&gt;,
+#   ENSG00000004660.13 &lt;dbl&gt;, ENSG00000004700.14 &lt;dbl&gt;,
+#   ENSG00000004766.14 &lt;dbl&gt;, ENSG00000004776.10 &lt;dbl&gt;,
+#   ENSG00000004777.17 &lt;dbl&gt;, ENSG00000004779.8 &lt;dbl&gt;,
+#   ENSG00000004799.7 &lt;dbl&gt;, ENSG00000004838.12 &lt;dbl&gt;,
+#   ENSG00000004864.12 &lt;dbl&gt;, ENSG00000004866.17 &lt;dbl&gt;,
+#   ENSG00000004897.10 &lt;dbl&gt;, ENSG00000004961.13 &lt;dbl&gt;,
+#   ENSG00000004975.10 &lt;dbl&gt;, ENSG00000005007.11 &lt;dbl&gt;,
+#   ENSG00000005020.11 &lt;dbl&gt;, ENSG00000005022.5 &lt;dbl&gt;,
+#   ENSG00000005059.14 &lt;dbl&gt;, ENSG00000005075.14 &lt;dbl&gt;,
+#   ENSG00000005100.11 &lt;dbl&gt;, ENSG00000005102.11 &lt;dbl&gt;,
+#   ENSG00000005108.14 &lt;dbl&gt;, ENSG00000005156.10 &lt;dbl&gt;,
+#   ENSG00000005175.8 &lt;dbl&gt;, ENSG00000005187.10 &lt;dbl&gt;,
+#   ENSG00000005189.18 &lt;dbl&gt;, ENSG00000005194.13 &lt;dbl&gt;,
+#   ENSG00000005206.15 &lt;dbl&gt;, ENSG00000005238.18 &lt;dbl&gt;,
+#   ENSG00000005243.8 &lt;dbl&gt;, ENSG00000005249.11 &lt;dbl&gt;,
+#   ENSG00000005302.16 &lt;dbl&gt;, ENSG00000005339.11 &lt;dbl&gt;,
+#   ENSG00000005379.14 &lt;dbl&gt;, ENSG00000005436.12 &lt;dbl&gt;,
+#   ENSG00000005448.15 &lt;dbl&gt;, ENSG00000005469.10 &lt;dbl&gt;,
+#   ENSG00000005471.14 &lt;dbl&gt;, ENSG00000005483.18 &lt;dbl&gt;,
+#   ENSG00000005486.15 &lt;dbl&gt;, ENSG00000005513.9 &lt;dbl&gt;,
+#   ENSG00000005700.13 &lt;dbl&gt;, ENSG00000005801.15 &lt;dbl&gt;,
+#   ENSG00000005810.16 &lt;dbl&gt;, ENSG00000005812.9 &lt;dbl&gt;,
+#   ENSG00000005844.16 &lt;dbl&gt;, ENSG00000005882.10 &lt;dbl&gt;,
+#   ENSG00000005884.16 &lt;dbl&gt;, ENSG00000005889.14 &lt;dbl&gt;,
+#   ENSG00000005893.14 &lt;dbl&gt;, ENSG00000006007.10 &lt;dbl&gt;,
+#   ENSG00000006015.16 &lt;dbl&gt;, ENSG00000006025.10 &lt;dbl&gt;,
+#   ENSG00000006042.10 &lt;dbl&gt;, ENSG00000006062.12 &lt;dbl&gt;,
+#   ENSG00000006118.13 &lt;dbl&gt;, ENSG00000006125.15 &lt;dbl&gt;,
+#   ENSG00000006194.9 &lt;dbl&gt;, ENSG00000006210.6 &lt;dbl&gt;, …</code></pre>
+<pre class="r"><code>d_in &lt;- clust %&gt;%
+  left_join(expr_df) %&gt;%
+  dplyr::select(sample_id, clust, everything()) %&gt;%
+  mutate(clust = as.factor(clust)) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;)</code></pre>
+<pre><code>Joining, by = &quot;sample_id&quot;</code></pre>
+<pre class="r"><code>d_in[1:5, 1:5]</code></pre>
+<pre><code>           clust ENSG00000000003.13 ENSG00000000419.11 ENSG00000000457.12
+DLBCL11667     3           1.019206           5.046223           2.498051
+DLBCL10501     1           2.195116           6.174933           2.826575
+DLBCL10954     1           1.685073           4.918027           5.021139
+DLBCL10984     4           1.707502           5.525384           4.976091
+DLBCL11206     1           3.769356           5.692592           4.853732
+           ENSG00000000460.15
+DLBCL11667           2.419497
+DLBCL10501           4.559405
+DLBCL10954           4.438914
+DLBCL10984           4.295212
+DLBCL11206           4.495919</code></pre>
+<pre class="r"><code># partition data
+set.seed(818)
+trainIndex &lt;- createDataPartition(d_in$clust, p = .75, 
+                                  list = FALSE, 
+                                  times = 1)
+head(trainIndex)</code></pre>
+<pre><code>     Resample1
+[1,]         1
+[2,]         3
+[3,]         4
+[4,]         5
+[5,]         8
+[6,]         9</code></pre>
+<pre class="r"><code>d_train &lt;- d_in[ trainIndex,]
+d_test  &lt;- d_in[-trainIndex,]
+
+
+str(d_train)</code></pre>
+<pre><code>&#39;data.frame&#39;:   893 obs. of  12654 variables:
+ $ clust             : Factor w/ 4 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;: 3 1 4 1 1 3 2 1 4 4 ...
+ $ ENSG00000000003.13: num  1.02 1.69 1.71 3.77 2.57 ...
+ $ ENSG00000000419.11: num  5.05 4.92 5.53 5.69 6.33 ...
+ $ ENSG00000000457.12: num  2.5 5.02 4.98 4.85 3.56 ...
+ $ ENSG00000000460.15: num  2.42 4.44 4.3 4.5 5.21 ...
+ $ ENSG00000000938.11: num  4.66 5.62 6.52 5.95 4.44 ...
+ $ ENSG00000000971.14: num  4.43 5.47 5.28 5.71 6.21 ...
+ $ ENSG00000001036.12: num  4.69 6.04 5.41 5.81 5.49 ...
+ $ ENSG00000001084.9 : num  3.95 6 5.85 6.16 5.26 ...
+ $ ENSG00000001167.13: num  4.77 5.8 6.06 5.74 5.15 ...
+ $ ENSG00000001460.16: num  2.4 4.14 3.4 3.96 3.73 ...
+ $ ENSG00000001461.15: num  3.97 5.54 5.06 5.71 4.78 ...
+ $ ENSG00000001497.15: num  5.14 6.15 6.35 5.94 6.51 ...
+ $ ENSG00000001561.6 : num  3.49 5.1 4.81 6.55 4.42 ...
+ $ ENSG00000001617.10: num  2.12 3.52 6.03 4.76 3.87 ...
+ $ ENSG00000001629.8 : num  5.17 7 6.06 6.28 8.36 ...
+ $ ENSG00000001630.14: num  2.03 3.27 2.09 3 4.92 ...
+ $ ENSG00000001631.13: num  3.94 6 5.54 5.67 8.27 ...
+ $ ENSG00000002016.15: num  3.47 2.77 3.14 3.59 2.92 ...
+ $ ENSG00000002330.12: num  4.24 4.47 4.4 5.66 5 ...
+ $ ENSG00000002549.11: num  6.97 7.48 8.36 7.78 8.3 ...
+ $ ENSG00000002586.16: num  6.66 8.13 7.55 7.62 6.56 ...
+ $ ENSG00000002587.8 : num  2.07 3.05 2.19 3.07 3.21 ...
+ $ ENSG00000002822.14: num  4.62 5.7 5.53 5.59 4.97 ...
+ $ ENSG00000002834.16: num  5.73 8.82 8.76 9.25 8.86 ...
+ $ ENSG00000002919.13: num  4.72 6.44 6.23 7.47 5.87 ...
+ $ ENSG00000002933.6 : num  5.13 6.23 6.99 6.22 5.82 ...
+ $ ENSG00000003056.6 : num  3.92 7.12 7.62 7.59 6.68 ...
+ $ ENSG00000003137.7 : num  0.712 3.471 2.824 2.995 3.219 ...
+ $ ENSG00000003147.16: num  1.25 2.68 2.69 3.76 2.24 ...
+ $ ENSG00000003393.13: num  2.78 4.49 4.44 4.73 4.03 ...
+ $ ENSG00000003400.13: num  2.54 4.92 4.06 4.33 3.14 ...
+ $ ENSG00000003402.18: num  5.82 8.71 8.51 8.14 6.27 ...
+ $ ENSG00000003436.13: num  3.07 4.73 4.4 6.46 4.56 ...
+ $ ENSG00000003509.14: num  4.28 3.84 4.06 4.77 4.4 ...
+ $ ENSG00000003756.15: num  5.73 7.46 7.26 6.26 6.18 ...
+ $ ENSG00000003989.15: num  0.931 3.122 2.683 3.283 3.257 ...
+ $ ENSG00000004059.9 : num  6.21 7.51 7.38 7.43 8.43 ...
+ $ ENSG00000004139.12: num  0.096 3.041 2.915 2.544 1.197 ...
+ $ ENSG00000004142.10: num  5.15 6.94 6.7 7.65 7.24 ...
+ $ ENSG00000004399.11: num  5.35 7.85 7.8 6.98 7.48 ...
+ $ ENSG00000004455.15: num  6.86 7.45 7.26 8.05 8.09 ...
+ $ ENSG00000004468.11: num  5.31 2.44 6.14 7.02 6.3 ...
+ $ ENSG00000004478.7 : num  6.02 7.26 6.91 7.14 8.4 ...
+ $ ENSG00000004487.14: num  5.13 6.41 6.14 6.02 7.48 ...
+ $ ENSG00000004534.13: num  8.26 7.07 7.36 5.71 6.61 ...
+ $ ENSG00000004660.13: num  1.12 1.53 2.96 3.14 1.45 ...
+ $ ENSG00000004700.14: num  3.13 6.54 5.91 6.02 6.41 ...
+ $ ENSG00000004766.14: num  4 5.48 4.86 4.86 4.87 ...
+ $ ENSG00000004776.10: num  -0.27 0.806 1.355 3.888 2.907 ...
+ $ ENSG00000004777.17: num  3.33 3.52 4.4 4.44 2.77 ...
+ $ ENSG00000004779.8 : num  6.45 6.2 5.88 6.34 7.34 ...
+ $ ENSG00000004799.7 : num  4.9 2.73 2.88 5.45 5.76 ...
+ $ ENSG00000004838.12: num  0.175 1.074 0.676 3.357 -0.417 ...
+ $ ENSG00000004864.12: num  3.77 5.52 4.49 4.27 4.94 ...
+ $ ENSG00000004866.17: num  2.12 4.95 4.32 5.61 5.43 ...
+ $ ENSG00000004897.10: num  5.22 6.58 6.1 6.95 7.02 ...
+ $ ENSG00000004961.13: num  3.51 5.35 5.3 5.5 5.08 ...
+ $ ENSG00000004975.10: num  4.59 5.5 5.21 5.04 5.77 ...
+ $ ENSG00000005007.11: num  5.3 7.78 7.67 6.78 7.29 ...
+ $ ENSG00000005020.11: num  7.2 7.95 7.7 7.12 7.1 ...
+ $ ENSG00000005022.5 : num  7.68 8.74 8.72 8.86 9.64 ...
+ $ ENSG00000005059.14: num  7.21 6.03 5.39 5.73 6.87 ...
+ $ ENSG00000005075.14: num  6.41 5.98 6.06 5.96 8.06 ...
+ $ ENSG00000005100.11: num  3.79 5.78 4.58 4.14 5.4 ...
+ $ ENSG00000005102.11: num  1.69 4.87 3.86 3.01 2.56 ...
+ $ ENSG00000005108.14: num  0.32 1.28 1.01 2.01 1.91 ...
+ $ ENSG00000005156.10: num  3 5.09 4.87 5.76 4.77 ...
+ $ ENSG00000005175.8 : num  6.48 6.31 6.14 6.03 6.3 ...
+ $ ENSG00000005187.10: num  0.249 2.469 3.293 3.791 1.717 ...
+ $ ENSG00000005189.18: num  0.813 2.421 2.772 2.958 4.871 ...
+ $ ENSG00000005194.13: num  3.95 6.51 5.79 6.25 6.24 ...
+ $ ENSG00000005206.15: num  4.6 5.63 5.97 4.57 3.76 ...
+ $ ENSG00000005238.18: num  2.87 3.93 4.65 4.52 3.28 ...
+ $ ENSG00000005243.8 : num  1.98 2.5 1.58 3.53 3.46 ...
+ $ ENSG00000005249.11: num  3.91 3.01 5.37 8.1 5.95 ...
+ $ ENSG00000005302.16: num  5.78 6.11 7.18 6.51 5.63 ...
+ $ ENSG00000005339.11: num  5.62 7.26 7.47 5.85 6.14 ...
+ $ ENSG00000005379.14: num  2.14 3.36 4.89 6.45 1.32 ...
+ $ ENSG00000005436.12: num  4.42 4.95 4.12 4.68 4.53 ...
+ $ ENSG00000005448.15: num  3.29 5.05 4.21 4.5 5.13 ...
+ $ ENSG00000005469.10: num  3.14 3.99 3.9 3.81 3 ...
+ $ ENSG00000005471.14: num  0.763 5.279 3.473 2.819 0.318 ...
+ $ ENSG00000005483.18: num  6.28 8.11 7.46 6.48 5.62 ...
+ $ ENSG00000005486.15: num  3.56 5.61 5.64 5.9 4.78 ...
+ $ ENSG00000005513.9 : num  1.7023 2.1261 3.3233 1.0925 0.0205 ...
+ $ ENSG00000005700.13: num  5.33 6.28 5.82 5.88 5.43 ...
+ $ ENSG00000005801.15: num  4.84 4.64 4.62 4.82 4.36 ...
+ $ ENSG00000005810.16: num  4.39 7.33 7.58 6.03 6.39 ...
+ $ ENSG00000005812.9 : num  4.88 6.51 6.18 6.95 6.66 ...
+ $ ENSG00000005844.16: num  4.84 6.43 7.94 6.86 7 ...
+ $ ENSG00000005882.10: num  1.73 4.04 4.23 5.16 4.29 ...
+ $ ENSG00000005884.16: num  0.789 4.175 4.515 7.038 3.756 ...
+ $ ENSG00000005889.14: num  5.04 5.47 6.04 5.18 5.42 ...
+ $ ENSG00000005893.14: num  6.69 6.89 7.39 8.08 7.13 ...
+ $ ENSG00000006007.10: num  4.19 6.1 5.6 6.76 6.19 ...
+ $ ENSG00000006015.16: num  4.81 5.27 5.74 5.84 4.61 ...
+ $ ENSG00000006025.10: num  3.91 4.3 4.78 4.49 3.6 ...
+ $ ENSG00000006042.10: num  1.04 2.28 1.45 5.48 3.61 ...
+  [list output truncated]</code></pre>
+<pre class="r"><code>str(d_test)</code></pre>
+<pre><code>&#39;data.frame&#39;:   296 obs. of  12654 variables:
+ $ clust             : Factor w/ 4 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;: 1 1 2 1 3 4 3 4 2 2 ...
+ $ ENSG00000000003.13: num  2.195 1.06 0.411 2.49 2.016 ...
+ $ ENSG00000000419.11: num  6.17 6.08 5.25 6.06 5.63 ...
+ $ ENSG00000000457.12: num  2.83 4.4 4.07 4.51 4.02 ...
+ $ ENSG00000000460.15: num  4.56 4.88 4.11 4.75 4.51 ...
+ $ ENSG00000000938.11: num  5.02 3.32 7.42 6.01 6.57 ...
+ $ ENSG00000000971.14: num  5.67 4.64 4.07 5.96 6.26 ...
+ $ ENSG00000001036.12: num  4.65 4.24 4.63 5.66 5.55 ...
+ $ ENSG00000001084.9 : num  5.25 5.39 5.39 4.84 5.33 ...
+ $ ENSG00000001167.13: num  6.47 5.36 5.35 5.11 5.49 ...
+ $ ENSG00000001460.16: num  3.42 3.66 2.85 3.32 3.28 ...
+ $ ENSG00000001461.15: num  5.22 4.84 5.27 4.9 4.93 ...
+ $ ENSG00000001497.15: num  6.5 6.62 6.27 6.51 5.94 ...
+ $ ENSG00000001561.6 : num  4.84 4.59 3.48 4.41 4.56 ...
+ $ ENSG00000001617.10: num  3.79 3.49 3.96 3.83 3.41 ...
+ $ ENSG00000001629.8 : num  4.78 5.81 5.76 5.71 6.16 ...
+ $ ENSG00000001630.14: num  1.946 2.96 2.378 0.888 0.902 ...
+ $ ENSG00000001631.13: num  4.72 5.24 4.77 5.4 5.46 ...
+ $ ENSG00000002016.15: num  2.91 3.45 2.97 4.15 3.57 ...
+ $ ENSG00000002330.12: num  6.68 4.59 4.52 4.89 4.38 ...
+ $ ENSG00000002549.11: num  7.22 7.36 7.51 8.27 8.29 ...
+ $ ENSG00000002586.16: num  8.94 8.78 8 8.31 7.47 ...
+ $ ENSG00000002587.8 : num  2.281 1.883 0.912 3.888 3.07 ...
+ $ ENSG00000002822.14: num  5.59 6.1 5.58 5.17 6.12 ...
+ $ ENSG00000002834.16: num  8.75 8.91 9.21 8.2 9.05 ...
+ $ ENSG00000002919.13: num  6.24 6.97 6.39 5.85 6.49 ...
+ $ ENSG00000002933.6 : num  6.26 4.7 5.87 6.95 7.87 ...
+ $ ENSG00000003056.6 : num  6.23 6.96 6.85 6.67 7.06 ...
+ $ ENSG00000003137.7 : num  2.377 3.092 0.276 3.929 4.483 ...
+ $ ENSG00000003147.16: num  2.03 2.26 2.93 2.23 3.17 ...
+ $ ENSG00000003393.13: num  3.67 4.61 3.56 4.58 4.56 ...
+ $ ENSG00000003400.13: num  2.03 2.06 3.93 4.3 4.22 ...
+ $ ENSG00000003402.18: num  6.46 9.23 8.77 8.74 9.1 ...
+ $ ENSG00000003436.13: num  3.77 4.13 2.8 4.57 4.73 ...
+ $ ENSG00000003509.14: num  3.27 4.65 4.32 4.91 4.32 ...
+ $ ENSG00000003756.15: num  5.67 6.82 6.64 8.19 7.09 ...
+ $ ENSG00000003989.15: num  1.5094 2.6417 0.0191 1.6546 3.1086 ...
+ $ ENSG00000004059.9 : num  7.97 6.73 5.96 7.37 7.49 ...
+ $ ENSG00000004139.12: num  3.79 3.26 2.34 3.31 2.95 ...
+ $ ENSG00000004142.10: num  6.95 7.37 6.9 7.1 6.93 ...
+ $ ENSG00000004399.11: num  6.18 6.47 6.67 7.88 8.35 ...
+ $ ENSG00000004455.15: num  6.99 8.25 7.71 8.02 7.56 ...
+ $ ENSG00000004468.11: num  5.97 3.67 4.88 5.68 6.48 ...
+ $ ENSG00000004478.7 : num  7.89 8.73 7.09 7.01 7.52 ...
+ $ ENSG00000004487.14: num  6.85 6.98 7.04 7.19 6.73 ...
+ $ ENSG00000004534.13: num  5.19 6.99 6.74 8.23 7.41 ...
+ $ ENSG00000004660.13: num  0.643 1.931 1.653 2.522 2.279 ...
+ $ ENSG00000004700.14: num  5.26 6.51 5.55 5.48 5.71 ...
+ $ ENSG00000004766.14: num  4.1 4.34 4.26 4.66 5.19 ...
+ $ ENSG00000004776.10: num  0.7902 0.5326 0.0469 1.085 1.8434 ...
+ $ ENSG00000004777.17: num  3.97 4.34 3.93 6.17 4.08 ...
+ $ ENSG00000004779.8 : num  6.26 6.37 5.89 6.49 6.18 ...
+ $ ENSG00000004799.7 : num  3.552 3.352 2.019 0.984 2.647 ...
+ $ ENSG00000004838.12: num  -0.467 1.54 0.534 2.248 0.658 ...
+ $ ENSG00000004864.12: num  5.18 4.31 3.88 4.72 4.41 ...
+ $ ENSG00000004866.17: num  4.6 4.02 4.4 4.8 4.56 ...
+ $ ENSG00000004897.10: num  5.4 6.93 6.46 6.65 6.33 ...
+ $ ENSG00000004961.13: num  4.42 5.49 4.92 4.76 5.22 ...
+ $ ENSG00000004975.10: num  5.13 5.72 5.3 5.81 5.5 ...
+ $ ENSG00000005007.11: num  7.47 8.15 7.34 7.57 7.74 ...
+ $ ENSG00000005020.11: num  6.44 7.57 7.57 6.46 7.77 ...
+ $ ENSG00000005022.5 : num  9.05 9.15 8.9 8.93 9.04 ...
+ $ ENSG00000005059.14: num  5.88 4.54 5.45 5.94 6.04 ...
+ $ ENSG00000005075.14: num  6.2 5.73 5.51 5.92 6.09 ...
+ $ ENSG00000005100.11: num  4.37 6.23 5.34 5.54 5.16 ...
+ $ ENSG00000005102.11: num  0.643 2.583 2.499 0.874 4.477 ...
+ $ ENSG00000005108.14: num  0.743 0.91 0.665 1.269 1.204 ...
+ $ ENSG00000005156.10: num  4.06 5.6 4.81 4.57 5.02 ...
+ $ ENSG00000005175.8 : num  5.7 6.35 5.96 6.11 6.02 ...
+ $ ENSG00000005187.10: num  0.836 1.259 2.563 2.544 1.685 ...
+ $ ENSG00000005189.18: num  2.7 2.91 2.83 4.12 3.34 ...
+ $ ENSG00000005194.13: num  6.45 6.19 6.15 5.77 5.6 ...
+ $ ENSG00000005206.15: num  5.07 5.37 5.19 6.95 5.81 ...
+ $ ENSG00000005238.18: num  3 3.57 3.64 4.89 4.42 ...
+ $ ENSG00000005243.8 : num  2.74 1.07 1.57 4.04 2.28 ...
+ $ ENSG00000005249.11: num  2.882 0.941 3.227 4.032 4.71 ...
+ $ ENSG00000005302.16: num  6.1 7.53 5.2 5.93 6.29 ...
+ $ ENSG00000005339.11: num  5.76 6.72 6.77 6.42 6.21 ...
+ $ ENSG00000005379.14: num  1.33 3.78 5.69 4.77 4.62 ...
+ $ ENSG00000005436.12: num  3.77 3.62 4.44 4.12 4.04 ...
+ $ ENSG00000005448.15: num  3.99 5.8 3.31 6.38 4.96 ...
+ $ ENSG00000005469.10: num  3.19 2.75 3.14 3.4 3.89 ...
+ $ ENSG00000005471.14: num  0.694 1.366 4.665 2.198 5.221 ...
+ $ ENSG00000005483.18: num  5.62 6.86 6.56 6.64 6.76 ...
+ $ ENSG00000005486.15: num  5.75 5.11 5.24 5.31 5.73 ...
+ $ ENSG00000005513.9 : num  2.123 0.287 0.534 3.567 3.176 ...
+ $ ENSG00000005700.13: num  4.73 5.35 5.78 6.11 5.55 ...
+ $ ENSG00000005801.15: num  4.64 5.22 4.5 5.84 5.4 ...
+ $ ENSG00000005810.16: num  5.43 7.13 7.38 7.28 6.85 ...
+ $ ENSG00000005812.9 : num  5.75 5.68 5.49 5.67 6.11 ...
+ $ ENSG00000005844.16: num  5.2 7.4 7.67 8.04 8.49 ...
+ $ ENSG00000005882.10: num  4.22 4.07 4.06 3.65 3.4 ...
+ $ ENSG00000005884.16: num  3.13 3.93 3.81 5.33 4.69 ...
+ $ ENSG00000005889.14: num  6.13 4.74 4.6 5.29 5.01 ...
+ $ ENSG00000005893.14: num  7.42 6.4 6.25 7.02 7.57 ...
+ $ ENSG00000006007.10: num  5.62 5.91 5.16 5.6 5.77 ...
+ $ ENSG00000006015.16: num  5.04 5.18 5.37 6.07 5.65 ...
+ $ ENSG00000006025.10: num  3.85 4.64 4.7 5.82 5.07 ...
+ $ ENSG00000006042.10: num  3.775 1.488 -0.129 3.978 2.045 ...
+  [list output truncated]</code></pre>
+<pre class="r"><code># set seed
+set.seed(818)
+
+# set parameters for 10-fold CV, repeated 3 times
+fitControl &lt;- trainControl(method = &quot;repeatedcv&quot;,
+                           number = 10,
+                           repeats = 3,
+                           verboseIter = TRUE,
+                           )
+
+# train model
+knn_fit &lt;- train(clust ~ ., 
+            data = d_train,
+            method = &quot;knn&quot;, 
+            trControl = fitControl,
+            preprocess = c(&quot;center&quot;, &quot;scale&quot;),
+            tunelength = 10)
+
+prediction &lt;- predict(knn_fit, d_test)
+xtab &lt;- table(d_test$clust, prediction)
+xtab</code></pre>
+<p>Caret review: <a href="http://www.rebeccabarter.com/blog/2017-11-17-caret_tutorial/" class="uri">http://www.rebeccabarter.com/blog/2017-11-17-caret_tutorial/</a></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.5.3 (2019-03-11)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Mojave 10.14.4
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] Biobase_2.42.0      BiocGenerics_0.28.0 e1071_1.7-2        
+ [4] caret_6.0-84        lattice_0.20-38     forcats_0.4.0      
+ [7] stringr_1.4.0       dplyr_0.8.3         purrr_0.3.2        
+[10] readr_1.3.1         tidyr_0.8.3         tibble_2.1.3       
+[13] ggplot2_3.2.0       tidyverse_1.2.1    
+
+loaded via a namespace (and not attached):
+ [1] httr_1.4.0         jsonlite_1.6       splines_3.5.3     
+ [4] foreach_1.4.4      prodlim_2018.04.18 modelr_0.1.4      
+ [7] assertthat_0.2.1   stats4_3.5.3       cellranger_1.1.0  
+[10] yaml_2.2.0         ipred_0.9-9        pillar_1.4.2      
+[13] backports_1.1.4    glue_1.3.1         digest_0.6.20     
+[16] rvest_0.3.4        colorspace_1.4-1   recipes_0.1.6     
+[19] htmltools_0.3.6    Matrix_1.2-17      plyr_1.8.4        
+[22] timeDate_3043.102  pkgconfig_2.0.2    broom_0.5.2       
+[25] haven_2.1.1        scales_1.0.0       whisker_0.3-2     
+[28] gower_0.2.1        lava_1.6.5         git2r_0.26.1      
+[31] generics_0.0.2     withr_2.1.2        nnet_7.3-12       
+[34] lazyeval_0.2.2     cli_1.1.0          survival_2.44-1.1 
+[37] magrittr_1.5       crayon_1.3.4       readxl_1.3.1      
+[40] evaluate_0.14      fs_1.3.1           fansi_0.4.0       
+[43] nlme_3.1-140       MASS_7.3-51.4      xml2_1.2.0        
+[46] class_7.3-15       tools_3.5.3        data.table_1.12.2 
+[49] hms_0.5.0          munsell_0.5.0      compiler_3.5.3    
+[52] rlang_0.4.0        grid_3.5.3         iterators_1.0.10  
+[55] rstudioapi_0.10    rmarkdown_1.14     gtable_0.3.0      
+[58] ModelMetrics_1.2.2 codetools_0.2-16   reshape2_1.4.3    
+[61] R6_2.4.0           lubridate_1.7.4    knitr_1.23        
+[64] utf8_1.1.4         zeallot_0.1.0      workflowr_1.4.0   
+[67] rprojroot_1.3-2    stringi_1.4.3      Rcpp_1.0.1        
+[70] vctrs_0.2.0        rpart_4.1-15       tidyselect_0.2.5  
+[73] xfun_0.8          </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
