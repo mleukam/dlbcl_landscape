@@ -58,8 +58,8 @@ Download additional gene sets
 https://cran.r-project.org/web/packages/msigdbr/vignettes/msigdbr-intro.html
 
 ```{r}
-# use msigdbr to retreive all "C2" curated gene sets from MSigDB
-m_df = msigdbr(species = "Homo sapiens", category = "C2")
+# use msigdbr to retreive human gene sets from MSigDB
+m_df = msigdbr(species = "Homo sapiens")
 
 # review subcategories
 summary(as.factor(m_df$gs_subcat))

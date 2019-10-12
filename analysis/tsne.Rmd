@@ -1,0 +1,209 @@
+---
+title: "tsne"
+author: "mleukam"
+date: "2019-10-06"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Setup
+
+```{r}
+library(caret)  
+library(Rtsne)
+library(dbscan)
+```
+
+## Load data
+
+```{r}
+combined_es <- readRDS("output/combined_expressionset.rds")
+```
+
+## Clean data
+
+Select gene sets from initial library
+```{r}
+gset_ids_complete_4 <- readRDS("output/gset_ids_complete_4.rds")
+gset_ids_complete_4
+
+names.initial <- names(gset_ids_complete_4) %>%
+  enframe() %>%
+  dplyr::select(gs_name = value) %>%
+  print()
+
+# remove B-cell related gene set names and gene sets used for descriptions of clusters only
+# review using View function
+# review unpublished uchi_t_inflamed_gs
+remove.names <- c("cyt_gs", "dhit_gs", "imsig_bcells_gs", "thor_bcell_mg_igj", "thor_bcell_receptors_score", "thor_b_cell_pca_16704732", "thor_bcell_21978456", 	"thor_gp2_immune_bcell_score", "uchi_t_inflamed_gs")
+
+names.handfiltered <- names.initial %>%
+  dplyr::filter(!gs_name %in% remove.names) %>%
+  pull(gs_name)
+head(names.handfiltered)
+
+gene_sets_1 <- enframe(gset_ids_complete_4) %>%
+  dplyr::rename(gs_name_1 = name, genes_1 = value) %>%
+  print()
+
+gene_sets_2 <- enframe(gset_ids_complete_4) %>%
+  dplyr::rename(gs_name_2 = name, genes_2 = value)
+
+# make a table of pairwise comparisons for gene set names
+library(caTools)
+comb <- combs(names.handfiltered, 2) %>%
+  as.data.frame() %>%
+  as_tibble() %>%
+  dplyr::rename(gs_name_1 = V1, gs_name_2 = V2) %>%
+  left_join(gene_sets_1, by = "gs_name_1") %>%
+  left_join(gene_sets_2, by = "gs_name_2") %>%
+      print()
+
+# define function to find overlap of gene set names
+overlappy <- function(genes_1, genes_2){
+  prct <- (2 * length(intersect(genes_1, genes_2))) / (length(genes_1) + length(genes_2))
+  prct
+}
+
+comb_prct <- comb %>% 
+  mutate(prct = map2_dbl(genes_1, genes_2, overlappy)) %>%
+  arrange(desc(prct)) %>%
+  print(n = 100)
+hist(comb_prct$prct)
+
+# get a list of gene sets to cut
+# will cut gene sets with 2/3 genes shared or more
+# 17 gene sets meet the criteria
+# since column choice randomly selected, will cut column two
+gs_cut <- comb_prct %>%
+  dplyr::filter(prct > 0.666) %>%
+  pull(gs_name_2) %>%
+  print()
+
+names.lessoverlap <- names.handfiltered %>%
+  enframe() %>%
+  dplyr::select(gs_name = value) %>%
+  dplyr::filter(!gs_name %in% gs_cut) %>%
+  pull(gs_name)
+print(names.lessoverlap)
+length(names.lessoverlap)
+# n = 121
+
+raw_score_matrix <- readRDS("output/dlbcl_total_immune_gset_v4_results.rds") %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gs_names")
+raw_score_matrix[1:5, 1:5]
+dim(raw_score_matrix)
+
+score_matrix <- raw_score_matrix %>%
+  as_tibble() %>%
+  dplyr::filter(gs_names %in% names.lessoverlap) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gs_names") %>%
+  t()
+score_matrix[1:5, 1:5]
+dim(score_matrix)
+  
+```
+
+## tSNE
+
+https://www.r-bloggers.com/playing-with-dimensions-from-clustering-pca-t-sne-to-carl-sagan/
+
+```{r}
+## Rtsne function may take some minutes to complete...
+set.seed(818)  
+
+tsne_model_1 = Rtsne(as.matrix(score_matrix), 
+                     check_duplicates = FALSE, 
+                     pca = TRUE, 
+                     perplexity = 30, 
+                     theta = 0.5, 
+                     dims = 2)
+
+## getting the two dimension matrix
+d_tsne_1 = as.data.frame(tsne_model_1$Y)  
+
+## plotting the results without clustering
+ggplot(d_tsne_1, aes(x = V1, y = V2)) +  
+  geom_point(size = 0.25) +
+  guides(colour = guide_legend(override.aes = list(size = 6))) +
+  xlab("") + ylab("") +
+  ggtitle("t-SNE") +
+  theme_classic2() +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  scale_colour_brewer(palette = "Set2")
+```
+
+Creating the cluster models
+Next piece of code will create the k-means and hierarchical cluster models. To then assign the cluster number (1, 2 or 3) to which each input case belongs.
+
+```{r}
+## keeping original data
+d_tsne_1_original = d_tsne_1
+
+## Creating k-means clustering model, and assigning the result to the data used to create the tsne
+fit_cluster_kmeans <- kmeans(scale(d_tsne_1), 4)  
+d_tsne_1_original$cl_kmeans <- factor(fit_cluster_kmeans$cluster)
+head(d_tsne_1_original$cl_kmeans)
+
+## Creating hierarchical cluster model, and assigning the result to the data used to create the tsne
+fit_cluster_hierarchical <- hclust(dist(scale(d_tsne_1)))
+
+## setting 4 clusters as output
+d_tsne_1_original$cl_hierarchical <- factor(cutree(fit_cluster_hierarchical, k = 4)) 
+head(d_tsne_1_original$cl_hierarchical)
+
+## Now time to plot the result of each cluster model, based on the t-SNE map.
+
+plot_cluster <- function(data, var_cluster, palette)  
+{
+  ggplot(data, aes_string(x = "V1", y = "V2", color = var_cluster)) +
+  geom_point(size = 0.25) +
+  guides(colour = guide_legend(override.aes = list(size = 6))) +
+  xlab("") + ylab("") +
+  ggtitle("") +
+  theme_light(base_size = 20) +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        legend.direction = "horizontal", 
+        legend.position = "bottom",
+        legend.box = "horizontal") + 
+    scale_colour_brewer(palette = palette) 
+}
+
+
+plot_k <- plot_cluster(d_tsne_1_original, "cl_kmeans", "Set2")  
+plot_h <- plot_cluster(d_tsne_1_original, "cl_hierarchical", "Set1")
+
+## and finally: putting the plots side by side with gridExtra lib...
+library(gridExtra)  
+grid.arrange(plot_k, plot_h, ncol = 2) 
+```
+
+#### Compare to PCA-based clustering
+```{r}
+gsva_4_cluster_hcpc <- readRDS("output/dlbcl_gsva4_4cluster_hcpc.rds")
+
+```
+
+## HDBSCAN density clustering
+```{r}
+cl <- hdbscan(score_matrix, minPts = 5)
+cl
+```
+
+## Spectrum Clustering
+```{r}
+library(Spectrum)
+test1 <- Spectrum(t(score_matrix), 
+                  method = 3, 
+                  runrange = FALSE, 
+                  fixk = 4, 
+                  showdimred = TRUE, 
+                  showheatmap = TRUE, 
+                  visualisation = c("tsne"))
+
+```

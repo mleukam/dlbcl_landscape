@@ -7,8 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-The purpose of this notebook is to make a cluster classifier for the HCPC 4-cluster model that can be applied to tumors at UChicago.
-
+The purpose of this notebook is to process the RNAseq data from UChicago in the same way as the outside data used to generate the clusters, run GSVA and then predict their projection on the PCA map with clusters in order to assign clusters to the primary tumor samples. 
 ## Setup
 
 Clear the workspace
@@ -18,79 +17,662 @@ rm(list = ls())
 
 Load packages
 ```{r}
+# core packages
 library("tidyverse")
-library("caret")
-library("e1071")
+
+# analysis
 library("Biobase")
+library("GSVA")
+library("FactoMineR")
+
+# core imaging packages
+library("ggsci")
+library("ggpubr")
+library("viridis")
+library("RColorBrewer")
+library("ggdark")
+
+# specific imaging packages
+library("ggConvexHull")
+library("factoextra")
 ```
 
-Read in and format data
+Read in log-transformed, TMM-normalized counts in CPM from PD-L1 paper, filtered for expression using the cutoff CPM >1 in half of cases, and filtered for protein coding genes only.
 
-https://topepo.github.io/caret/data-splitting.html
+Read in Gencode v22 GTF for translating gene names
 
 ```{r}
-combined_es <- readRDS("output/combined_es_gsva4_4cluster.rds")
+uchi_expr_source <- read_csv("data/PDL1dlbcl.rnaseq.kallisto.raw.txi.coding.cpm1.TMM.logCPM.sm24.csv")
 
-clust <- pData(combined_es) %>%
-  rownames_to_column(var = "sample_id") %>%
-  dplyr::select(sample_id, clust) %>%
-  as_tibble() %>%
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
+```
+
+## Data cleaning
+```{r}
+# format expression matrix
+uchi_expr_source[1:5, 1:5]
+uchi_expr_df <- uchi_expr_source %>%
+  tidyr::separate(X1,
+                  into = c("gene_name", "geneID_split"),
+                  sep = "!") %>%
   print()
 
-expr_df <- t(exprs(combined_es)) %>%
-  as.data.frame() %>%
-  rownames_to_column(var = "sample_id") %>%
+# gencode v27 was used to generate rownames of uchi matrix
+# will convert to gencode v22 to match gene sets
+geneID_split <- str_split(gencode_gtf$gene_id, pattern = "\\.", simplify = TRUE) %>% 
   as_tibble() %>%
+  dplyr::select(geneID_split = V1)
+
+gencode_gtf_split <- gencode_gtf %>% 
+  bind_cols(geneID_split) %>%
+  dplyr::select(gene_id_v22 = gene_id, geneID_split, everything()) %>%
   print()
 
-d_in <- clust %>%
-  left_join(expr_df) %>%
-  dplyr::select(sample_id, clust, everything()) %>%
-  mutate(clust = as.factor(clust)) %>%
+# check how many gene ids are missing in v22 that are named in v29
+setdiff(uchi_expr_df$geneID_split, gencode_gtf_split$geneID_split)
+# 37
+
+# merge gene name data with expression matrix, select gencode v22 symbols, convert to matrix
+uchi_expr_matrix <- uchi_expr_df %>%
+  left_join(gencode_gtf_split) %>%
+  dplyr::select(gene_id_v22, geneID_split, gene_name, everything()) %>%
+  dplyr::select(-gene_status, -gene_name, -level, -gene_type) %>%
+  dplyr::select(-havana_gene, -geneID_split) %>%
+  drop_na(gene_id_v22) %>%
   as.data.frame() %>%
-  column_to_rownames(var = "sample_id")
+  column_to_rownames(var = "gene_id_v22") %>%
+  as.matrix()
 
-d_in[1:5, 1:5]
+uchi_expr_matrix[1:5, 1:5]
+```
 
-# partition data
+## GSVA
+
+Read in gene sets used in GSVA v4
+```{r}
+gset_ids <- readRDS("output/gset_ids_complete_4.rds")
+```
+
+```{r}
+library(parallel)
+
+uc_gs_matrix <- gsva(
+	expr = uchi_expr_matrix, 
+	gset.idx.list = gset_ids, 
+	annotation = NULL, 
+	method = "gsva", 
+	verbose = TRUE
+	)
+```
+
+#### Filter
+
+Remove gene sets that were removed from the original PCA due to multicollinearity
+```{r}
+# 22 gene sets 0.96 correlation and above in original analysis
+
+removesets <- c("thor_module11_prolif_score", 
+                "thor_ifn_21978456",
+                "thor_mhc.i_19272155",
+                "thor_t_cell_pca_16704732",
+                "thor_icr_score",
+                "beijing_cd8_c1_lef1_gs",
+                "thor_minterferon_cluster_21214954",
+                "thor_g_hla-dpa1",
+                "thor_apm2",
+                "thor_tcclassii_score",
+                "thor_ifit3", 
+                "beijing_cd4_c3_gnly_gs",
+                "thor_b_cell_pca_16704732",
+                "thor_interferon_cluster_21214954",
+                "thor_interferon_19272155",
+                "thor_immune_cell_cluster_21214954",
+                "thor_lck_19272155",
+                "thor_module4_tcellbcell_score")
+
+# 11 gene sets meet the criteria
+nrow(uc_gs_matrix)
+gs_matrix_filtered_df <- uc_gs_matrix %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_set") %>%
+  dplyr::filter(!gene_set %in% removesets)
+nrow(gs_matrix_filtered_df)
+
+uc_sample_matrix_filtered <- gs_matrix_filtered_df %>%
+  column_to_rownames(var = "gene_set") %>%
+  as.matrix() %>%
+  t()
+
+uc_sample_matrix_filtered[1:5, 1:5]
+
+```
+
+## Project new samples on PCA
+
+Read in PCA models from GSVA v4 gene sets on combined DLBCL RNAseq dataset (Duke + NCI, n = 1189, 143 gene sets). Clustered into 4 groups using HCPC. These are all from the [GSVA v4 score analysis notebook](visualizing_gsva_scores_4.html).
+
+```{r}
 set.seed(818)
-trainIndex <- createDataPartition(d_in$clust, p = .75, 
-                                  list = FALSE, 
-                                  times = 1)
-head(trainIndex)
+dlbcl_pca <- readRDS("output/dlbcl_gsva4_4cluster_pca.rds")
+dlbcl_hcpc <- readRDS("output/dlbcl_gsva4_4cluster_hcpc.rds")
 
-d_train <- d_in[ trainIndex,]
-d_test  <- d_in[-trainIndex,]
+# logCPM expression set that also has gene set matrix, cluster and phenotype data, n = 1189, gene sets = 125 (filtered for colinearity from 143 original gene sets).
+combined_es_gsva4 <- readRDS("output/combined_es_gsva4_4cluster.rds")
+colnames(pData(combined_es_gsva4))
+pdata <- pData(combined_es_gsva4)
+```
 
+```{r}
+# object: an object of class PCA
+# newdata: A data frame or a matrix in which to look for variables with which to predict.
+# newdata must contain columns with the same names as the original data.
+# usage: predict(object, newdata, ...)
+set.seed(818)
+pred_uchi <- predict(dlbcl_pca, uc_sample_matrix_filtered)
 
-str(d_train)
-str(d_test)
+# extract values for plotting
+uchi_gs_df <- uc_sample_matrix_filtered %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble()
+uchi_gs_df$pc1 <- pred_uchi$coord[, 1]
+uchi_gs_df$pc2 <- pred_uchi$coord[, 2] 
+```
+
+```{r}
+# visualize
+library(RColorBrewer)
+
+fviz_cluster(dlbcl_hcpc,
+             geom = "point",
+             pointshape = 19,
+             show.clust.cent = TRUE,  
+             main = "UChicago samples mapped on immune response clusters") +
+  scale_color_d3() +
+  scale_fill_d3() +
+  geom_label(data = uchi_gs_df, 
+             aes(x = pc1, y = pc2, label = sample_id), color = "white", fill = "black") + 
+  theme_classic2() +
+  theme(legend.position = "none")
+  
+
+set.seed(818)
+plot_pca <- PCA(pdata[, 1:125], graph = FALSE)
+
+uchi_pca <- fviz_pca_ind(plot_pca,
+             label = "none",
+             habillage = pdata$clust,
+             alpha = 0.4,
+             pointshape = 19,
+             show.legend.text = FALSE,
+             palette = "d3",
+             addEllipses = FALSE) +
+  geom_convexhull(alpha = 0.2, 
+                  aes(fill = pdata$clust, color = pdata$clust),
+                  show.legend = FALSE) +
+  geom_point(data = uchi_gs_df, 
+             aes(x = pc1, y = pc2), 
+             color = "red", 
+             shape = 19, 
+             size = 2.5) + 
+  geom_label(data = uchi_gs_df, aes(x = pc1, y = pc2, label = uchi_gs_df$sample_id)) +
+  labs(title = "Primary samples projected on clusters", subtitle = "PCA of immune gene set expression scores") +
+  theme_classic2()
+uchi_pca
+```
+
+## Apply phenotype data from uchicago samples
+
+Read in metadata table
+Provided by James Godfrey from prior Kline lab experiments
+Light formatting in Excel (marked missing data as 'NA', renamed variables to legal names in R), saved as CSV
+```{r}
+# remove patient identifiers before display
+uchi_pheno_data <- read_csv("data/uchi_metadata.csv") %>%
+  dplyr::select(-mrn, -accession) %>%
+  print()
+
+# read in cluster labels
+uchi_clust_assign <- read_csv("output/uchi_cluster_assignments.csv") %>%
+  print()
+
+uchi_pheno_clust <- uchi_pheno_data %>%
+  left_join(uchi_clust_assign) %>%
+  dplyr::select(sample_id, cluster, everything()) %>%
+  print()
+```
+
+Evaluate IHC scores and PD-L1 amp status
+```{r}
+## CD4 ------------------------
+cd4_by_clust <- uchi_pheno_clust %>%
+  group_by(cluster) %>%
+  summarize(n(), 
+            mean = mean(cd4_ihc_score, na.rm = TRUE),
+            sd = sd(cd4_ihc_score, na.rm = TRUE)) %>%
+  print()
+  
+library(xtable)
+compare_means(cd4_ihc_score ~ cluster, 
+              data = uchi_pheno_clust)
+              
+xtable(compare_means(cd4_ihc_score ~ cluster, 
+              data = uchi_pheno_clust))
+
+# plot
+uchi_pheno_clust <- uchi_pheno_clust %>%
+  mutate(cluster = as.factor(cluster))
+invert_geom_defaults()
+
+# plot
+uchi_pheno_clust <- uchi_pheno_clust %>%
+  mutate(cluster = as.factor(cluster))
+invert_geom_defaults()
+
+cd4box <- ggplot(data = uchi_pheno_clust,
+                 aes(x = cluster,
+                     y = cd4_ihc_score,
+                     fill = cluster)) +
+  geom_boxplot() +
+  scale_fill_nejm() +
+  stat_compare_means(comparisons = list(c("4", "1"))) +
+  theme_classic2() +
+  labs(title = "CD4 IHC expression score by cluster", subtitle = "UChicago samples") +
+  ylab("CD4 IHC score")
+cd4box
+
+# compare and plot 1 vs 4 only
+uchi_pheno_1v4 <- uchi_pheno_clust %>%
+  dplyr::filter(cluster %in% c(1,4)) %>%
+  mutate(cluster = fct_drop(cluster)) %>%
+  mutate(cluster = fct_recode(cluster,
+                              "Inflamed" = "4",
+                              "Cold" = "1")) %>% 
+  dplyr::select(sample_id, cluster, cd4_ihc_score, cd8_ihc_score) %>%
+  gather(key = cd4cd8, value = ihc_score, -sample_id, -cluster) %>%
+  mutate(cd4cd8 = as.factor(cd4cd8)) %>%
+  mutate(cd4cd8 = fct_recode(cd4cd8, 
+                             "CD4" = "cd4_ihc_score",
+                             "CD8" = "cd8_ihc_score")) %>%
+  dplyr::rename(`Immunogenomic\nCluster` = cluster) %>%
+  group_by(cd4cd8) %>%
+  print()
+
+mypal = c("#0072B5", "#BC3C29")
+
+cd4box_4v1 <- ggplot(data = uchi_pheno_1v4,
+                 aes(x = `Immunogenomic\nCluster`,
+                     y = ihc_score,
+                     fill = `Immunogenomic\nCluster`)) +
+  geom_boxplot() +
+  scale_fill_manual(values = mypal) +
+  stat_compare_means(label.y = 75, label.x = 0.7, method = "t.test") +
+  theme_classic2() +
+  labs(title = "CD4 Immunohistochemical Score", subtitle = "Comparison of 'Inflamed' and 'Cold' clusters") +
+  ylab("CD4 IHC Score") +
+  xlab("Cluster Name") +
+  theme(legend.position = "none")
+
+cd4box_4v1
+
+## CD8 ------------------------
+box_4v1 <- ggplot(data = uchi_pheno_1v4,
+                 aes(x = `Immunogenomic\nCluster`,
+                     y = ihc_score,
+                     fill = `Immunogenomic\nCluster`)) +
+  geom_boxplot() +
+  scale_fill_manual(values = mypal) +
+  stat_compare_means(label.y = 75, label.x = 0.7, method = "t.test") +
+  theme_classic2() +
+  labs(title = "Immunohistochemical Score", subtitle = "Comparison of 'Inflamed' and 'Cold' clusters") +
+  ylab("CD8 IHC Score") +
+  xlab("Cluster Name") +
+  theme(legend.position = "none") +
+  facet_wrap(uchi_pheno_1v4$cd4cd8)
+
+box_4v1
+
+cd8_by_clust <- uchi_pheno_clust %>%
+  group_by(cluster) %>%
+  summarize(n(), 
+            mean = mean(cd8_ihc_score, na.rm = TRUE),
+            sd = sd(cd8_ihc_score, na.rm = TRUE)) %>%
+  print()
+
+compare_means(cd8_ihc_score ~ cluster, data = uchi_pheno_clust)
+
+# plot
+uchi_pheno_clust <- uchi_pheno_clust %>%
+  mutate(`Immunogenomic\nCluster` = as.factor(cluster))
+
+cd8box <- ggplot(data = uchi_pheno_clust,
+                 aes(x = `Immunogenomic\nCluster`,
+                     y = cd8_ihc_score,
+                     fill = `Immunogenomic\nCluster`)) +
+  geom_boxplot() +
+  scale_fill_nejm() +
+  stat_compare_means(comparisons = list(c("4", "2"))) +
+  theme_classic2() +
+  labs(title = "CD8 IHC expression score by cluster", subtitle = "UChicago samples") +
+  ylab("CD8 IHC score")
+cd8box
+
+mypal = c("#0072B5", "#BC3C29")
+
+cd4cd8_box <- ggplot(data = uchi_pheno_1v4,
+                     aes(x = `Immunogenomic\nCluster`,
+                         y = ihc_score,
+                         fill = `Immunogenomic\nCluster`)) +
+  geom_boxplot() +
+  theme_classic2() +
+  labs(title = "CD4 and CD8 Immunohistochemistry",
+       subtitle = "Comparison of 'Inflamed' and 'Cold' clusters") +
+  xlab("") +
+  ylab("Cells per high-power field") +
+  scale_fill_manual(values = mypal) +
+  ylim(0, 70)
+
+cd4cd8_box
+
+```
+
+```{r}
+## MHCI ------------------------
+mhc1_by_clust <- uchi_pheno_clust %>%
+  mutate(mhc1_ihc_score = as.factor(mhc1_ihc_score)) %>%
+  mutate(mhc1_ihc_score = fct_recode(mhc1_ihc_score,
+                                     "present" = "Present",
+                                     "decreased_absent" = "Decreased",
+                                     "decreased_absent" = "Absent")) %>%
+  drop_na(mhc1_ihc_score) %>%
+  group_by(cluster) %>%
+  count(mhc1_ihc_score) %>%
+  print()
+
+# make table
+# add row for zero counts 
+mhc1_table <- mhc1_by_clust %>%
+  ungroup() %>%
+  add_row(cluster = 2, 
+          mhc1_ihc_score = "decreased_absent",
+          n = 0) %>%
+  arrange(cluster) %>%
+  spread(key = mhc1_ihc_score, value = n) %>%
+  print()
+
+# test for significant differences among any group
+fisher.test(mhc1_table[, 2:3])
+
+# test for significant differences between group 1 and 4
+mhc1_table %>% 
+  dplyr::filter(cluster %in% c(1,4)) %>%
+  dplyr::select(2,3) %>%
+  fisher.test()
+
+# test for 1/4 vs 2/3
+mhc1_1423 <- uchi_pheno_clust %>%
+  ungroup() %>%
+  mutate(cluster = as.factor(cluster)) %>%
+  mutate(twocluster_ind = fct_recode(cluster, 
+                                     "14" = "1",
+                                     "14" = "4",
+                                     "23" = "2",
+                                     "23" = "3")) %>%
+  mutate(mhc1_ihc_score = fct_recode(mhc1_ihc_score, 
+                                     "AbsentDecreased" = "Decreased",
+                                     "AbsentDecreased" = "Absent",
+                                     "Present" = "Present")) %>%
+  print()
+
+table(mhc1_1423$twocluster_ind, 
+      mhc1_1423$mhc1_ihc_score)
+      
+fisher.test(table(mhc1_1423$twocluster_ind, mhc1_1423$mhc1_ihc_score))
+
+# test for 4 vs else
+mhc1_4va <- uchi_pheno_clust %>%
+  ungroup() %>%
+  mutate(cluster = as.factor(cluster)) %>%
+  mutate(twocluster_ind = fct_recode(cluster, 
+                                     "4" = "4",
+                                     "123" = "1",
+                                     "123" = "2",
+                                     "123" = "3")) %>%
+  mutate(mhc1_ihc_score = fct_recode(mhc1_ihc_score, 
+                                     "AbsentDecreased" = "Decreased",
+                                     "AbsentDecreased" = "Absent",
+                                     "Present" = "Present")) %>%
+  print()
+
+table(mhc1_4va$twocluster_ind, 
+      mhc1_4va$mhc1_ihc_score)
+      
+fisher.test(table(mhc1_4va$twocluster_ind, mhc1_4va$mhc1_ihc_score))
+
+## MHCII ------------------------
+mhc2_by_clust <- uchi_pheno_clust %>%
+  mutate(mhc2_ihc_score = as.factor(mhc2_ihc_score)) %>%
+  mutate(mhc2_ihc_score = fct_recode(mhc2_ihc_score,
+                                     "present" = "Present",
+                                     "decreased_absent" = "Decreased",
+                                     "decreased_absent" = "Absent")) %>%
+  drop_na(mhc2_ihc_score) %>%
+  group_by(cluster) %>%
+  count(mhc2_ihc_score) %>%
+  print()
+
+# make table
+mhc2_table <- mhc2_by_clust %>%
+  arrange(cluster) %>%
+  spread(key = mhc2_ihc_score, value = n) %>%
+  print()
+
+# test for significant differences among any group
+fisher.test(mhc2_table[, 2:3])
+
+# test for significant differences between group 1 and 4
+mhc2_table %>% 
+  dplyr::filter(cluster %in% c(1,4)) %>%
+  dplyr::select(2,3) %>%
+  fisher.test()
+
+# test for 1/4 vs 2/3
+mhc2_1423 <- uchi_pheno_clust %>%
+  ungroup() %>%
+  mutate(cluster = as.factor(cluster)) %>%
+  mutate(twocluster_ind = fct_recode(cluster, 
+                                     "14" = "1",
+                                     "14" = "4",
+                                     "23" = "2",
+                                     "23" = "3")) %>%
+  mutate(mhc2_ihc_score = fct_recode(mhc2_ihc_score, 
+                                     "AbsentDecreased" = "Decreased",
+                                     "AbsentDecreased" = "Absent",
+                                     "Present" = "Present")) %>%
+  print()
+
+table(mhc2_1423$twocluster_ind, 
+      mhc2_1423$mhc2_ihc_score)
+      
+fisher.test(table(mhc2_1423$twocluster_ind, mhc2_1423$mhc2_ihc_score))
+
 ```
 
 
-```{r eval = FALSE}
-# set seed
-set.seed(818)
 
-# set parameters for 10-fold CV, repeated 3 times
-fitControl <- trainControl(method = "repeatedcv",
-                           number = 10,
-                           repeats = 3,
-                           verboseIter = TRUE,
-                           )
+```{r}
+## PDL1 ------------------------
+pdl1_exp_by_clust <- uchi_pheno_clust %>%
+  group_by(cluster) %>%
+  summarize(n(), 
+            mean = mean(pdl1_ihc_score, na.rm = TRUE),
+            sd = sd(pdl1_ihc_score, na.rm = TRUE)) %>%
+  print()
 
-# train model
-knn_fit <- train(clust ~ ., 
-            data = d_train,
-            method = "knn", 
-            trControl = fitControl,
-            preprocess = c("center", "scale"),
-            tunelength = 10)
+compare_means(pdl1_ihc_score ~ cluster, data = uchi_pheno_clust)
 
-prediction <- predict(knn_fit, d_test)
-xtab <- table(d_test$clust, prediction)
-xtab
+# lump copy gain in with non-amp
+pdl1amp_by_clust <- uchi_pheno_clust %>%
+  mutate(pdl1_locus_status = as.factor(pdl1_locus_status)) %>%
+  mutate(pdl1_locus_status = fct_recode(pdl1_locus_status,
+                                     "amplified" = "amplified",
+                                     "nonamp" = "copy_gain",
+                                     "nonamp" = "disomic",
+                                     "nonamp" = "translocated and copy gain")) %>%
+  drop_na(pdl1_locus_status) %>%
+  group_by(cluster) %>%
+  count(pdl1_locus_status) %>%
+  print()
+
+# make table
+# add row for zero counts 
+pdl1_amp_table <- pdl1amp_by_clust %>%
+  ungroup() %>%
+  add_row(cluster = 2, 
+          pdl1_locus_status = "amplified",
+          n = 0) %>%
+   add_row(cluster = 3, 
+          pdl1_locus_status = "amplified",
+          n = 0) %>%
+  arrange(cluster) %>%
+  spread(key = pdl1_locus_status, value = n) %>%
+  print()
+
+# test for significant differences among any group
+fisher.test(pdl1_amp_table[ , 2:3])
+
+# consider copy gain and amp together
+pdl1amp_by_clust_cg <- uchi_pheno_clust %>%
+  mutate(pdl1_locus_status = as.factor(pdl1_locus_status)) %>%
+  mutate(pdl1_locus_status = fct_recode(pdl1_locus_status,
+                                     "amp_or_cg" = "amplified",
+                                     "amp_or_cg" = "copy_gain",
+                                     "nonamp" = "disomic",
+                                     "amp_or_cg" = "translocated and copy gain")) %>%
+  drop_na(pdl1_locus_status) %>%
+  group_by(cluster) %>%
+  count(pdl1_locus_status) %>%
+  print()
+
+# make table
+# add row for zero counts 
+pdl1_cg_table <- pdl1amp_by_clust_cg %>%
+  ungroup() %>%
+  add_row(cluster = 2, 
+          pdl1_locus_status = "amp_or_cg",
+          n = 0) %>%
+  arrange(cluster) %>%
+  spread(key = pdl1_locus_status, value = n) %>%
+  print()
+
+# test for significant differences among any group
+fisher.test(pdl1_cg_table[, 2:3])
+
+# test for significant differences between group 1 and 4
+pdl1_cg_table %>% 
+  dplyr::filter(cluster %in% c(1,4)) %>%
+  dplyr::select(2:3) %>%
+  fisher.test()
+
+## test for significant differences between 4 and all
+pdl1amp_by_clust_cg_4va <- uchi_pheno_clust %>%
+  mutate(pdl1_locus_status = as.factor(pdl1_locus_status)) %>%
+  mutate(pdl1_locus_status = fct_recode(pdl1_locus_status,
+                                     "amp_or_cg" = "amplified",
+                                     "amp_or_cg" = "copy_gain",
+                                     "nonamp" = "disomic",
+                                     "amp_or_cg" = "translocated and copy gain")) %>%
+  mutate(cluster4va = ifelse(cluster == 4, 4, 123)) %>%
+  mutate(cluster4va = as.factor(cluster4va)) %>%
+  drop_na(pdl1_locus_status) %>%
+  group_by(cluster4va) %>%
+  count(pdl1_locus_status) %>%
+  spread(key = pdl1_locus_status, value = n) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "cluster4va") %>%
+  as.matrix() %>%
+  print()
+
+fisher.test(pdl1amp_by_clust_cg_4va)
 ```
 
-Caret review: 
-http://www.rebeccabarter.com/blog/2017-11-17-caret_tutorial/
+Immune evasion by IHC
+```{r}
+immune_evasion_table <- uchi_pheno_clust %>%
+  mutate(cluster4va = ifelse(cluster == 4, 4, 123)) %>%
+  mutate(cluster4va = as.factor(cluster4va)) %>%
+  mutate(pdl1_locus_status = as.factor(pdl1_locus_status)) %>%
+  mutate(pdl1_locus_status = fct_recode(pdl1_locus_status,
+                                     "amp_or_cg" = "amplified",
+                                     "amp_or_cg" = "copy_gain",
+                                     "nonamp" = "disomic",
+                                     "amp_or_cg" = "translocated and copy gain")) %>% 
+  mutate(mhc1_ihc_score = fct_recode(mhc1_ihc_score, 
+                                     "AbsentDecreased" = "Decreased",
+                                     "AbsentDecreased" = "Absent",
+                                     "Present" = "Present")) %>%
+  group_by(cluster4va, pdl1_locus_status, mhc1_ihc_score) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  spread(mhc1_ihc_score, n, fill = 0)
+
+immune_evasion_table
+
+# add up all cases with either pd-l1 or mhc loss compared to those with neither alteration
+immune_evasion_matrix <- matrix(c(5, 6, 1, 7), nrow = 2)
+rownames(immune_evasion_matrix) <- c("cluster_4", "cluster_1_2_3")
+colnames(immune_evasion_matrix) <- c("pdl1_amp_or_mhc1_loss", "normal")
+immune_evasion_matrix
+fisher.test(immune_evasion_matrix)
+```
+
+
+Plot PD-L1 status on cluster map
+```{r}
+# fix sample_id annotation for uchi_gs_df
+uchi_pheno_clust_fix <- uchi_pheno_clust %>%
+  mutate(sample_id = ifelse(sample_id == "JG1", "JG01", sample_id)) %>%
+  mutate(sample_id = ifelse(sample_id == "JG3", "JG03", sample_id))
+
+# combine pheno data with PCA coordinates
+uchi_pheno_clust_pca <- uchi_pheno_clust_fix %>%
+  left_join(uchi_gs_df) %>%
+  dplyr::select(sample_id, cluster, pc1, pc2, everything()) %>%
+  print()
+
+uchi_pdl1_highamp_for_plot <- uchi_pheno_clust_pca %>%
+  mutate(pdl1_locus_status = fct_recode(pdl1_locus_status,
+                                     "amplified" = "amplified",
+                                     "copy_gain" = "copy_gain",
+                                     "nonamp" = "disomic",
+                                     "copy_gain" = "translocated and copy gain"))
+
+summary(uchi_pdl1_highamp_for_plot$pdl1_locus_status)
+
+# set up colors - need 4 for clusters and 2 for pdl1 status
+mypal <- c("#767676", "#767676", "#767676", "#767676", "red", "blue", "black")
+
+# use plotPCa background from prior code chunk
+uchi_pdl1_pca <- fviz_pca_ind(plot_pca,
+             label = "none",
+             habillage = "none",
+             alpha = 0.2,
+             pointshape = 19,
+             show.legend.text = FALSE,
+             addEllipses = FALSE) +
+  geom_convexhull(alpha = 0, 
+                  aes(fill = pdata$clust, color = pdata$clust),
+                  show.legend = FALSE) +
+  geom_point(data = uchi_pdl1_highamp_for_plot, 
+             aes(x = pc1, 
+                 y = pc2,
+                 color = pdl1_locus_status),
+             shape = 19, 
+             size = 3) +
+  labs(title = "UChicago PD-L1amp vs non-amp cases", subtitle = "PCA of immune gene set expression scores") +
+  scale_color_manual(values = mypal) +
+  theme_classic2()
+uchi_pdl1_pca
+```
+
+

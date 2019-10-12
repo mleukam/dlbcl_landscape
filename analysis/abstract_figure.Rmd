@@ -1,0 +1,112 @@
+---
+title: "Figure for ASH Abstract"
+author: "mleukam"
+date: "2019-07-30"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+Design of figure for ASH abstract
+
+## Setup
+
+Clear the workspace
+```{r}
+rm(list = ls())
+```
+
+Load packages
+```{r}
+# core packages
+library("tidyverse")
+
+# analysis
+
+# core imaging packages
+library("ggsci")
+library("ggpubr")
+library("viridis")
+library("RColorBrewer")
+# library("ggdark")
+
+# specific imaging packages
+library("ggConvexHull")
+library("factoextra")
+```
+
+## Gene expression scores on cluster map
+
+Load data
+```{r}
+tpm_cyt_es <- readRDS("output/tpm_cyt_expressionset.rds")
+pheno_data <- pData(tpm_cyt_es)
+tpm_matrix <- exprs(tpm_cyt_es)
+```
+
+```{r}
+# plot cytotoxic score on combined GSVA PCA plot
+dlbcl_pca <- PCA(pheno_data[, 2:126], graph = FALSE)
+
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = log(pheno_data$CYT),
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "CYT score\n(log scale)") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "CYT score by cluster", subtitle = "Gene set expression PCA") +
+  scale_color_viridis()
+
+mean_table <- pheno_data %>%
+  dplyr::select(CYT, clust) %>%
+  group_by(clust) %>%
+  summarize(mean = mean(CYT)) %>% 
+  print()
+
+sig <- pheno_data %>%
+  dplyr::select(CYT, clust) %>%
+  as_tibble() %>%
+  compare_means(CYT ~ clust, ., ) %>%
+  print()
+
+# plot t-helper score on combined GSVA PCA plot
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data$beijing_cd4_c1_ccr7_gs,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "CD4/C1/CCR7\nGSVA score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "CD4/C1/CCR7 score by cluster", 
+       subtitle = "Gene set expression PCA") +
+  scale_color_viridis()
+
+# plot t-helper score on combined GSVA PCA plot
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data$thor_tgfb_score_21050467,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "TGFbeta-related\nGSVA score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "TGFbeta-related gene set expression", 
+       subtitle = "Gene set expression PCA") +
+  scale_color_viridis()
+
+```
+
+## Deconvolution
+

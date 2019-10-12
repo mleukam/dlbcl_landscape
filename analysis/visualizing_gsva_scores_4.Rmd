@@ -29,12 +29,8 @@ library("NbClust")
 library("jcolors")
 library("ggdark")
 library("viridis")
-```
-
-```{r}
-library("devtools")
-install_github("cmartin/ggConvexHull")
 library("ggConvexHull")
+library("broom")
 ```
 
 NB: need to transfer scripts to `/code/`:
@@ -51,7 +47,12 @@ combined_es <- readRDS("output/combined_expressionset.rds")
 pheno_data <- pData(combined_es)
 ```
 
-## Set up PD-L1 groups
+# Quick Checks
+
+#### Does this clustering separate PD-L1amp cases?
+
+PD-L1 is a known immune inflamed phenotype. Can this clustering method show some grouping of PD-L1 distinct from the background?
+
 ```{r}
 str(pheno_data)
 summary(as.factor(pheno_data$pdl1_status))
@@ -116,9 +117,31 @@ fviz_pca_var(dlbcl_pca, col.var = "contrib",
   theme(axis.line = element_line(color = "#767676")) +
   geom_hline(yintercept = 0, color = "#76767666") +
   geom_vline(xintercept = 0, color = "#76767666")
+
+# visualize PCA -- white
+fviz_pca_ind(dlbcl_pca,
+             label = "none",
+             habillage = pdl1_comb_exprs_filt$pdl1_status,
+             palette = "nejm",
+             addEllipses = TRUE,
+             ggtheme = theme_classic()) +
+  theme(axis.line = element_line(color = "#767676")) +
+  geom_hline(yintercept = 0, color = "black", alpha = 0.3) +
+  geom_vline(xintercept = 0, color = "black", alpha = 0.3) +
+  ggtitle("Combined Thorsson and new gene sets \nPD-L1amp vs nonamp, NCI data only")
+
+fviz_pca_var(dlbcl_pca, col.var = "contrib",
+             gradient.cols = "tron",
+             label = "none",
+             ggtheme = theme_classic()) + 
+  theme(axis.line = element_line(color = "#767676")) +
+  geom_hline(yintercept = 0, color = "#76767666") +
+  geom_vline(xintercept = 0, color = "#76767666")
 ```
 
-## Set up Duke/NCI groups
+#### Is there a batch effect by source of data? 
+
+Set up Duke/NCI groups
 ```{r}
 str(pheno_data)
 summary(as.factor(pheno_data$source))
@@ -164,7 +187,6 @@ fviz_pca_ind(dlbcl_pca,
 
 fviz_pca_var(dlbcl_pca, col.var = "contrib",
              gradient.cols = "tron",
-             label = "none",
              ggtheme = dark_theme_gray()) +
   geom_hline(yintercept = 0, color = "white", alpha = 0.3) +
   geom_vline(xintercept = 0, color = "white", alpha = 0.3)
@@ -178,10 +200,29 @@ fviz_contrib(dlbcl_pca, choice = "var", axes = 1, top = 15) +
 fviz_contrib(dlbcl_pca, choice = "var", axes = 2, top = 15) +
   dark_theme_classic() +
   theme(axis.text.x = element_text(angle = 80, hjust = 1))
+
+# visualize PCA -- white
+fviz_pca_ind(dlbcl_pca,
+             label = "none",
+             habillage = dukenci_comb_exprs$source,
+             palette = "nejm",
+             addEllipses = TRUE,
+             ggtheme = theme_classic()) +
+  theme(axis.line = element_line(color = "#767676")) +
+  geom_hline(yintercept = 0, color = "black", alpha = 0.3) +
+  geom_vline(xintercept = 0, color = "black", alpha = 0.3) +
+  ggtitle("Combined Thorsson and new gene sets \nDuke vs NCI data sources")
+
+fviz_pca_var(dlbcl_pca, col.var = "contrib",
+             gradient.cols = "tron",
+             label = "none",
+             ggtheme = theme_classic()) +
+  geom_hline(yintercept = 0, color = "black", alpha = 0.3) +
+  geom_vline(xintercept = 0, color = "black", alpha = 0.3)
 ```
 
-#### Heatmap of raw results
-```{r}
+#### Heatmap of raw GSVA results
+```{r eval=FALSE}
 ht <- Heatmap(gs_matrix, name = "GSVA Score", 
                 row_title = "Gene Sets",
                 show_row_names = TRUE,
@@ -191,7 +232,7 @@ ht <- Heatmap(gs_matrix, name = "GSVA Score",
 ht
 ```
 
-## Clustering
+# Clustering
 
 #### Determine suitability of data for clustering
 
@@ -200,17 +241,29 @@ First visualize similarity among observations with distance matrix
 # create pearson correlation matrix
 sample_matrix <- t(gs_matrix)
 dlbcl_dist <- get_dist(sample_matrix, 
-                       stand = TRUE, 
+                       stand = TRUE,
                        method = "pearson")
+```
+
+Plot results
+```{r eval=FALSE}
 fviz_dist(dlbcl_dist, show_labels = FALSE) +
   dark_theme_gray() +
   scale_fill_viridis() +
   theme(axis.ticks = element_blank(), axis.text = element_blank())
+
+ggsave("docs/assets/fvis_dist_1.png", 
+       device = png(),
+       width = 6.67, 
+       height = 6.67, 
+       units = "in")
 ```
+
+![](assets/fvis_dist_1.png)
 
 Get Hopkins statistic of clusterability
 ```{r}
-# Compute Hopkins statistic for iris dataset
+# Compute Hopkins statistic 
 # Below 0.5 is considered "clusterable"
 dlbcl_tend <- hopkins(gs_matrix, n = nrow(gs_matrix) - 1, header = FALSE)
 dlbcl_tend
@@ -221,10 +274,14 @@ dlbcl_tend
 gs_cor <- cor(gs_matrix, method = c("pearson"))
 library(corrplot)
 source("http://www.sthda.com/upload/rquery_cormat.r")
+```
 
+```{r eval=FALSE}
 # view gene set correlation heatmap
 cortables <- rquery.cormat(t(gs_matrix), graphType = "heatmap")
+```
 
+```{r}
 # reformat gene set correlation table and view
 corflat <- rquery.cormat(t(gs_matrix), type = "flatten", graph = FALSE)
 corflat_tbl <- corflat$r %>% as_tibble() %>% arrange(desc(cor)) %>% print(n = 30)
@@ -247,6 +304,7 @@ removesets <- c("thor_module11_prolif_score",
                 "thor_immune_cell_cluster_21214954",
                 "thor_lck_19272155",
                 "thor_module4_tcellbcell_score")
+
 # 11 gene sets meet the criteria
 nrow(gs_matrix)
 gs_matrix_filtered_df <- gs_matrix %>%
@@ -260,7 +318,6 @@ sample_matrix_filtered <- gs_matrix_filtered_df %>%
   as.matrix() %>%
   t()
 sample_matrix_filtered[1:5, 1:5]
-
 ```
 
 Repeat similarity among observations with distance matrix
@@ -269,13 +326,23 @@ Repeat similarity among observations with distance matrix
 dlbcl_dist <- get_dist(sample_matrix_filtered, 
                        stand = TRUE, 
                        method = "pearson")
+```
 
+```{r eval=FALSE}
+# plot results
 fviz_dist(dlbcl_dist, show_labels = FALSE) +
   dark_theme_gray() +
   scale_fill_viridis() +
   theme(axis.ticks = element_blank(), axis.text = element_blank())
 
+ggsave("docs/assets/fvis_dist_2.png", 
+       device = png(),
+       width = 6.67, 
+       height = 6.67, 
+       units = "in")
 ```
+
+![](assets/fvis_dist_2.png)
 
 Repeat Hopkins statistic of clusterability
 ```{r}
@@ -319,13 +386,21 @@ nb <- NbClust(sample_matrix_filtered,
 
 Divide into groups with HCPC
 ```{r}
+set.seed(818)
 dlbcl_pca <- PCA(sample_matrix_filtered, ncp = 10, graph = FALSE)
 dlbcl_hcpc <- HCPC(dlbcl_pca, min = 4, max = 20, graph.scale = "sqrt-inertia", graph = TRUE)
 ```
 
+Write out models for later prediction
 ```{r}
+saveRDS(dlbcl_pca, "output/dlbcl_gsva4_4cluster_pca.rds")
+saveRDS(dlbcl_hcpc, "output/dlbcl_gsva4_4cluster_hcpc.rds")
+```
+
+```{r eval=FALSE}
 fviz_dend(dlbcl_hcpc, 
           k = 4,
+          type = "phylogenic",
           palette = "nejm",
           show_labels = FALSE, 
           rect = TRUE,
@@ -333,7 +408,7 @@ fviz_dend(dlbcl_hcpc,
           rect_lty = 3,
           rect_fill = FALSE, 
           lower_rect = -1,
-          phylo_layout = "layout_with_drl"
+          phylo_layout = "layout_as_tree"
           )
 ```
 
@@ -342,11 +417,18 @@ Visualize samples with cluster label on PCA plot
 fviz_cluster(dlbcl_hcpc,
              geom = "point",
              show.clust.cent = TRUE,  
-             main = "Factor map", 
-             ggtheme = dark_theme_gray()
+             main = "Immune Response Clusters on GSVA Principal Components", 
+             pointshape = 19,
+             theme_classic2()
              ) +
-  scale_color_jcolors(palette = "pal3") +
-  scale_fill_jcolors(palette = "pal3")
+  scale_fill_d3() +
+  scale_color_d3() +
+  theme_classic2() +
+  geom_hline(yintercept = 0, linetype = 3) +
+  geom_vline(xintercept = 0, linetype = 3) +
+  theme(legend.position = "none")
+
+#500 x 700
 ```
 
 Compare cluster assignments at the individual level.
@@ -420,6 +502,38 @@ ncol(pheno_clust_data)
 # columns 1-125 are gene set expression matrix, columns 126-195 are phenotype data
 ```
 
+#### Get PD-L1 for evaluable cases
+```{r}
+pdl1 <- pheno_clust_data %>% 
+  dplyr::select(source, clust, pdl1_status) %>%
+  dplyr::filter(source == "nci") %>%
+  group_by(clust, pdl1_status) %>%
+  drop_na(pdl1_status) %>%
+  tally() %>%
+  spread(key = pdl1_status, value = n) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "clust") %>%
+  print()
+
+fisher.test(pdl1, simulate.p.value = TRUE, B = 1e6)
+
+percentages <- pdl1 %>%
+  mutate(percent = high_amplified / (low_amplified + `non-amplified`)) %>%
+  print()
+
+c2v3 <- pdl1 %>%
+  dplyr::slice(2:3) %>%
+  print()
+
+fisher.test(c2v3, simulate.p.value = TRUE, B = 1e6)
+
+c1v4 <- pdl1 %>%
+  dplyr::slice(1,4) %>%
+  print()
+
+fisher.test(c1v4, simulate.p.value = TRUE, B = 1e6)
+```
+
 Plots
 Source for overriding shape change with habillage argument: https://github.com/kassambara/factoextra/issues/20
 
@@ -449,6 +563,30 @@ pheno_clust_data$alpha_var <- fct_recode(pheno_clust_data$amp_or_not,
   as.numeric()
 summary(pheno_clust_data$alpha_var)
 
+### LIGHT PLOT
+dlbcl_pca <- PCA(pheno_clust_data[, 1:125], graph = FALSE)
+
+mytitle <- expression(paste(italic("PD-L1"), " amplified cases by cluster"))
+
+pdl1_pca1 <- fviz_pca_ind(dlbcl_pca,
+             label = "none",
+             habillage = pheno_clust_data$amp_or_not,
+             pointshape = 19,
+             alpha.ind = pheno_clust_data$alpha_var,
+             show.legend.text = FALSE,
+             palette = "d3",
+             addEllipses = FALSE,
+             mean.point = FALSE,
+             ggtheme = theme_classic2()
+             ) +
+  geom_convexhull(alpha = 0.3, 
+                  aes(fill = pheno_clust_data$clust),
+                  show.legend = FALSE,
+                  color = "#76767666") +
+  ggtitle(mytitle)
+pdl1_pca1
+
+### DARK PLOT
 # get colors
 mypal = pal_tron()(6)
 
@@ -470,11 +608,31 @@ pdl1_pca <- fviz_pca_ind(dlbcl_pca,
   ggtitle("Gene set PCA: PDL1 high amp by cluster")
 pdl1_pca
 
+## plot for abstract
+invert_geom_defaults()
+
+pdl1_pca2 <- fviz_pca_ind(dlbcl_pca,
+             label = "none",
+             habillage = pheno_clust_data$amp_or_not,
+             pointshape = 19,
+             alpha.ind = pheno_clust_data$alpha_var,
+             show.legend.text = FALSE,
+             palette = "nejm",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()
+             ) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_clust_data$clust),
+                  show.legend = FALSE,
+                  color = "black") +
+  ggtitle("Gene set PCA: PDL1 high amp by cluster")
+pdl1_pca2
+
 # get counts by cluster
 table(pheno_clust_data$amp_or_not, pheno_clust_data$clust)
 
-# plot cytotoxic score on combined GSVA PCA plot
-dlbcl_pca <- PCA(pheno_clust_data[, 1:60], graph = FALSE)
+# plot cytotoxic GSVA score on combined GSVA PCA plot
+dlbcl_pca <- PCA(pheno_clust_data[, 1:125], graph = FALSE)
 fviz_pca_ind(dlbcl_pca, 
              col.ind = pheno_clust_data$cyt_gs,
              label = "none",
@@ -488,7 +646,7 @@ fviz_pca_ind(dlbcl_pca,
   ggtitle("Gene set PCA: CYT GSVA by cluster") +
   scale_color_viridis()
 
-# plot cytotoxic score on combined GSVA PCA plot
+# plot DHIT score on combined GSVA PCA plot
 dlbcl_pca <- PCA(pheno_clust_data[, 1:125], graph = FALSE)
 fviz_pca_ind(dlbcl_pca, 
              col.ind = pheno_clust_data$dhit_gs,
@@ -513,7 +671,7 @@ summary(as.factor(pheno_clust_data$abc_gcb_rna))
 # get PCA values
 dlbcl_pca <- PCA(pheno_clust_data[, 1:125], graph = FALSE)
 
-# plot
+# dark plot
 fviz_pca_ind(dlbcl_pca, 
              col.ind = pheno_clust_data$abc_gcb_rna,
              pointshape = 19,
@@ -527,6 +685,25 @@ fviz_pca_ind(dlbcl_pca,
                   color = "white") +
   ggtitle("Gene set PCA: Cell of origin by cluster") +
   scale_color_jcolors(palette = "pal3")
+
+invert_geom_defaults()
+
+# light plot
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_clust_data$abc_gcb_rna,
+             pointshape = 19,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "Cell of Origin") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_clust_data$clust),
+                  show.legend = FALSE,
+                  color = "black") +
+  ggtitle("Gene set PCA: Cell of origin by cluster") +
+  scale_color_nejm()
+
+# variable plot
 
 fviz_pca_var(dlbcl_pca, col.var = "contrib",
              gradient.cols = "tron",
@@ -561,6 +738,7 @@ Ratios
 |-------|-----------|-----------|-----------|-----------|
 
 ```{r}
+# reformat data for comparisons and plotting
 coo_data <- pheno_clust_data %>%
   as.data.frame() %>%
   rownames_to_column(var = "sample_id") %>%
@@ -570,9 +748,158 @@ coo_data <- pheno_clust_data %>%
   as_tibble()
 coo_data
 
-coo_sum <- coo_data %>%
-  count(abc_gcb_rna, clust)
+# make table for comparison of proportions
+coo_table <- coo_data %>% 
+  count(clust, abc_gcb_rna) %>% 
+  tidyr::spread(key = clust, value = n) %>% 
+  as.data.frame() %>% 
+  column_to_rownames(var = "abc_gcb_rna") %>%
+  as.data.frame() %>% 
+  rownames_to_column(var = "coo") %>% 
+  dplyr::rename(cold = `1`, 
+                intermediate_t = `2`, 
+                intermediate_m = `3`, 
+                inflamed = `4`) %>%
+  mutate(tot = cold + intermediate_t + intermediate_m + inflamed) %>% 
+  mutate(not_cold = tot - cold) %>% 
+  mutate(not_intermediate_t = tot - intermediate_t) %>% 
+  mutate(not_intermediate_m = tot - intermediate_m) %>%
+  mutate(not_inflamed = tot - inflamed)
 
+# test for differences in cluster 1 proportions
+clust1 <- coo_table %>%
+  dplyr::select(coo, cold, not_cold) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "coo") %>%
+  as.matrix() %>%
+  print()
+
+clust1_p <- tidy(chisq.test(clust1)) %>%
+  print()
+
+clust1_prop <- clust1 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "coo") %>%
+  as_tibble() %>% 
+  mutate(proportion = cold / (cold + not_cold)) %>%
+  mutate(clust = rep("1", nrow(.))) %>%
+  print()
+
+# test for differences in cluster 2 proportions
+clust2 <- coo_table %>%
+  dplyr::select(coo, intermediate_t, not_intermediate_t) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "coo") %>%
+  as.matrix() %>%
+  print()
+
+clust2_p <- tidy(chisq.test(clust2)) %>%
+  print()
+
+clust2_prop <- clust2 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "coo") %>%
+  as_tibble() %>% 
+  mutate(proportion = intermediate_t / (intermediate_t + not_intermediate_t)) %>%
+  mutate(clust = rep("2", nrow(.))) %>%
+  print()
+
+# test for differences in cluster 3 proportions
+clust3 <- coo_table %>%
+  dplyr::select(coo, intermediate_m, not_intermediate_m) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "coo") %>%
+  as.matrix() %>%
+  print()
+
+clust3_p <- tidy(chisq.test(clust3)) %>%
+  print()
+
+clust3_prop <- clust3 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "coo") %>%
+  as_tibble() %>% 
+  mutate(proportion = intermediate_m / (intermediate_m + not_intermediate_m)) %>%
+  mutate(clust = rep("3", nrow(.))) %>%
+  print()
+
+# test for differences in cluster 4 proportions
+clust4 <- coo_table %>%
+  dplyr::select(coo, inflamed, not_inflamed) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "coo") %>%
+  as.matrix() %>%
+  print()
+
+clust4_p <- tidy(chisq.test(clust4)) %>%
+  print()
+
+clust4_prop <- clust4 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "coo") %>%
+  as_tibble() %>% 
+  mutate(proportion = inflamed / (inflamed + not_inflamed)) %>%
+  mutate(clust = rep("4", nrow(.))) %>%
+  print()
+
+coo_sum_prop <- coo_sum %>%
+  dplyr::rename(coo = abc_gcb_rna) %>%
+  left_join(clust1_prop, by = c("coo", "clust")) %>%
+  dplyr::select(-cold, -not_cold) %>%
+  left_join(clust2_prop, by = c("coo", "clust")) %>%
+  dplyr::select(-intermediate_t, -not_intermediate_t) %>%
+  left_join(clust3_prop, by = c("coo", "clust")) %>%
+  dplyr::select(-intermediate_m, -not_intermediate_m) %>%
+  left_join(clust4_prop, by = c("coo", "clust")) %>%
+  dplyr::select(-inflamed, -not_inflamed) %>%
+  mutate(proportion = coalesce(proportion.x, 
+                               proportion.y, 
+                               proportion.x.x, 
+                               proportion.y.y)) %>%
+  dplyr::select(-proportion.x, 
+                -proportion.y, 
+                -proportion.x.x, 
+                -proportion.y.y) %>%
+  mutate(percent = round((proportion * 100), 1)) %>%
+  mutate(percent = paste0(percent, "%")) %>%
+  mutate(clust = as.factor(clust)) %>%
+  mutate(clust = fct_recode(clust, "Cold" = "1",
+                            "Intermediate-T" = "2",
+                            "Intermediate-M" = "3",
+                            "Inflamed" = "4")) %>%
+  print()
+
+# make data frae containing all p-values
+pvals <- bind_rows(clust1_p, clust2_p, clust3_p, clust4_p) %>%
+  bind_cols(clust = c("Cold", "Intermediate-T", "Intermediate-M", "Inflamed")) %>%
+  mutate(p.value = round(p.value, 3)) %>%
+  print()
+               
+# light plot
+coo_bar <- ggplot(coo_sum_prop, 
+                  aes(x = coo,
+                      y = n,
+                      fill = coo)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ clust) +
+  theme_classic2() +
+  scale_color_nejm() +
+  scale_fill_nejm() +
+  labs(title = "Cell of origin by cluster",
+       fill = "Cell of Origin",
+       x = "",
+       y = "Number of cases") +
+  geom_text(aes(label = percent), vjust = 2, color = "white") +
+  geom_text(data = pvals, 
+            aes(y = 185, 
+                x = 1, 
+                label = paste0("p = ", p.value), 
+                group = clust), 
+                inherit.aes = FALSE)
+  
+coo_bar 
+
+# dark plot
 coo_bar <- ggplot(coo_sum, 
                   aes(x = abc_gcb_rna,
                       y = n,
@@ -596,18 +923,38 @@ coo_bar
 library("survival")
 library("survminer")
 
-surv_clust <- Surv(time = pheno_clust_data$os_years, pheno_clust_data$os_status)
+pheno_clust_data_surv <- pheno_clust_data %>%
+  drop_na(os_years) %>%
+  drop_na(os_status) %>%
+  mutate(five_yr_os = ifelse(os_years > 5, 5, os_years)) %>%
+  mutate(five_yr_status = ifelse(os_years > 5, 0, os_status)) %>%
+  mutate(clust = fct_recode(clust, "Cold" = "1",
+                            "Intermediate-T" = "2",
+                            "Intermediate-M" = "3",
+                            "Inflamed" = "4"))
+surv_clust <- Surv(pheno_clust_data_surv$five_yr_os,
+                   pheno_clust_data_surv$five_yr_status)
 
 fit1 <- survfit(surv_clust ~ clust, 
-                data = pheno_clust_data)
-plot1 <- ggsurvplot(fit1, 
-                    data = pheno_clust_data, 
-                    pval = TRUE, 
-                    pval.method = TRUE)
-plot1$plot + 
-  dark_theme_gray() +
-  scale_color_jcolors(palette = "pal3")
+                data = pheno_clust_data_surv)
 
+survdiff(surv_clust ~ clust, 
+                data = pheno_clust_data_surv)
+
+plot1 <- ggsurvplot(fit1, 
+                    data = pheno_clust_data_surv, 
+                    pval = TRUE, 
+                    pval.method = TRUE,
+                    risk.table = TRUE,
+                    palette = "d3",
+                    tables.height = 0.3,
+                    ggtheme = theme_classic2(),
+                    title = "Overall survival by immune response cluster",
+                    legend.title = "Cluster", 
+                    legend = "right",
+                    tables.y.text = FALSE,
+                    ylab = "Time in years")
+plot1
 
 fit2 <- survfit(surv_clust ~ clust + abc_gcb_rna, 
                 data = pheno_clust_data)
@@ -616,9 +963,7 @@ fit2_sum <- surv_summary(fit2)
 
 plot2 <- ggsurvplot(fit2, data = pheno_clust_data, pval = FALSE)
 plot2$plot + 
-  facet_wrap(~ clust) + 
-  dark_theme_gray() +
-  scale_color_viridis(discrete = TRUE)
+  facet_wrap(~ clust)
 ```
 
 ```{r}
@@ -650,5 +995,3 @@ combined_es_4cluster
 saveRDS(combined_es_4cluster, "output/combined_es_gsva4_4cluster.rds")
 ```
 
-
-```

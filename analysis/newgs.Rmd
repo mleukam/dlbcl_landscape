@@ -30,7 +30,7 @@ _NB: all of the following signatures were downloaded on 7/1/2019_
 
 * Simple 2 gene set of CYT score: `log-average of GZMA and PRF1 expression in TPMs` from [Rooney et al Cell 2015](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4856474/). This has been associated with somatic mutations in 34 genes. 
 * DHIT signature as a marker of immune exclusion [Ennishi et al JCO 2019](https://ascopubs.org/doi/full/10.1200/JCO.18.01583) -- ranked gene list in table S9
-* Cell-type-specific immune signatures for oncology derived from tissue experiements in [Nirmal et al CIR 2018](http://cancerimmunolres.aacrjournals.org/content/6/11/1388.figures-only), downloaded as RDA file from github: https://github.com/ajitjohnson/imsig/blob/master/data/sig.rda 
+* Cell-type-specific immune signatures for oncology derived from tissue experiments in [Nirmal et al CIR 2018](http://cancerimmunolres.aacrjournals.org/content/6/11/1388.figures-only), downloaded as RDA file from github: https://github.com/ajitjohnson/imsig/blob/master/data/sig.rda 
 * Differentially expressed genes used for immune-related clustering in breast cancer single-cell RNAseq experiments published by MSKCC group in [Azizi et al Cell 2018](https://www.cell.com/cell/fulltext/S0092-8674(18)30723-2#%20). Gene lists downloaded as xlsx file from table S4. 
 * Detailed single cell T-cell profiling with RNAseq published in [Guo et al Nature Medicine 2018](https://www.nature.com/articles/s41591-018-0045-3). T-cell cluster representative genes as xls file (supplemental table 3) downloaded from journal site. 
 * Treg signatures in NSCLC and CRC https://www.ncbi.nlm.nih.gov/pubmed/27851914 published in [De Simone et al Immunity 2016](https://www.sciencedirect.com/science/article/pii/S1074761316304320?via%3Dihub#app3) 

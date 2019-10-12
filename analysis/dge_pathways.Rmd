@@ -17,6 +17,9 @@ rm(list = ls())
 Load basic packages
 ```{r}
 library("tidyverse")
+library("fgsea")
+library("org.Hs.eg.db")
+library("msigdbr")
 ```
 
 Read in data
@@ -49,6 +52,21 @@ library("clusterProfiler")
 Prepare data - input for enrichGO test is simple vector of gene names
 Will pass gene names that meet cutoff criteria for adj.p.val and logFC from DGE experiment.
 
+Add Entrez identifiers to gencode lookup table
+```{r}
+gencode_symbols <- gencode_gtf %>%
+  pull(gene_name)
+  
+entrez <- mapIds(org.Hs.eg.db, gencode_symbols, 'ENTREZID', 'SYMBOL') %>%
+  enframe() %>%
+  dplyr::rename(gene_name = name, entrez_id = value) %>%
+  print()
+
+gencode_ent <- gencode_gtf %>%
+  left_join(entrez) %>%
+  print()
+```
+
 ```{r}
 # set adjusted pval cutoff
 p_cut <- 0.001
@@ -60,7 +78,7 @@ summary(ttable_list[[3]]$logFC)
 summary(ttable_list[[4]]$logFC)
 
 # set logFC cutoff at average of 3rd quartile fold-change (upregulated genes only)
-l_cut <- (0.277162 + 0.192066 + 0.15353 + 0.26075) / 4
+l_cut <- (0.23247 + 0.178593 + 0.1258525 + 0.126851) / 4
 
 # get gene list of entrez IDs that pass cutoff for each cluster from DGE
 go_gene_list <- ttable_list %>%
@@ -126,28 +144,6 @@ nrow(ttable_df_list[[4]])
 
 http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html
 
-Load packages
-```{r}
-library("fgsea")
-library("org.Hs.eg.db")
-library("msigdbr")
-```
-
-Add Entrez identifiers to gencode lookup table
-```{r}
-gencode_symbols <- gencode_gtf %>%
-  pull(gene_name)
-  
-entrez <- mapIds(org.Hs.eg.db, gencode_symbols, 'ENTREZID', 'SYMBOL') %>%
-  enframe() %>%
-  dplyr::rename(gene_name = name, entrez_id = value) %>%
-  print()
-
-gencode_ent <- gencode_gtf %>%
-  left_join(entrez) %>%
-  print()
-```
-
 Create ranked lists following this tutorial: https://bioinformatics-core-shared-training.github.io/cruk-summer-school-2018/RNASeq2018/html/06_Gene_set_testing.nb.html
 
 Downloading gene sets from MSigDB: https://cran.r-project.org/web/packages/msigdbr/vignettes/msigdbr-intro.html
@@ -200,15 +196,6 @@ str(hall_gs_list)
 ```
 
 #### GSEA
-
-Format data for JAVA GSEA app
-Needs to be in a specific text format
-http://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/File:Txt_format_snapshot.gif
-
-```{r}
-
-
-```
 
 ```{r}
 # define function to run hallmark gsea on each toptable
@@ -311,4 +298,229 @@ enframe(rtable_list[[4]]) %>%
   drop_na(gene_name) %>%
   dplyr::select(`#HGNC_symbol` = gene_name, logFC = value) %>%
   write_delim("output/clust4_vs_others_dge.rnk", delim = "\t", col_names = FALSE)
+```
+
+## Hallmark GSEA
+```{r}
+# Get hallmark gene sets from MSigDb (human)
+msigdbr_show_species()
+m_df = msigdbr(species = "Homo sapiens", category = "H")
+m_df
+
+# format for fgsea
+gs_list_hallmark = m_df %>% 
+  split(x = .$gene_symbol, f = .$gs_name)
+str(gs_list_hallmark)
+
+# Get all human gene sets for relevant biological processes
+# Include Hallmark and curated C2 biological process sets
+# Exclude chromosome position gene sets
+# Exclude miRNA / regulatory motif gene sets
+# Include GO terms (C5)
+# Include computational gene sets from cancer microarray data (C4)
+# Include microarray 'oncogenic' signatures
+# Include immunologic signatures, manual curation from human and mouse studies (C7)
+m_df_total = msigdbr(species = "Homo sapiens") %>%
+  dplyr::filter(gs_cat %in% c("H", "C2", "C4", "C5", "C7"))
+m_df_total
+
+# get number of gene sets in each category
+summary(as.factor(m_df_total$gs_cat))
+
+# format for fgsea
+gs_list_total = m_df_total %>% 
+  split(x = .$gene_symbol, f = .$gs_name)
+str(gs_list_total)
+```
+
+```{r}
+# read in toptables
+cluster1_dge <- readRDS("output/cluster1_dge.rds")
+cluster2_dge <- readRDS("output/cluster2_dge.rds")
+cluster3_dge <- readRDS("output/cluster3_dge.rds")
+cluster4_dge <- readRDS("output/cluster4_dge.rds")
+```
+
+Source for GSEA file prep (supplemental method 1): https://www.nature.com/articles/s41596-018-0103-9
+Reimand et al "Pathway enrichment analysis and visualization of omics data using g:Profiler, GSEA, Cytoscape and EnrichmentMap" Nature Methods Jan 2019
+
+Create a two-column rank (.RNK) file of all gene IDs and corresponding scores to for GSEA pre-ranked analysis. To run GSEA in pre-ranked mode, you need a two column RNK file with gene/protein/probe name (column 1) and the associated score (column 2). The first column should contain the same type of gene IDs used in the pathway gene-set (GMT) file. GSEA will look for enrichment in the set of most differentially
+expressed genes at the top of the list as well as those at the bottom of the list. Genes at the top of the list are more highly expressed in class A of samples while genes at the bottom are highly expressed in class B. A score can be computed by multiplying direction (sign) of fold change and logarithm of p-value for each gene.
+
+```{r}
+# change gene ids to gene symbol
+cluster1_dge_names <- cluster1_dge %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  left_join(gencode_gtf, by = "gene_id") %>%
+  dplyr::distinct(gene_name, .keep_all = TRUE) %>%
+  dplyr::select(gene_name, everything()) %>%
+  dplyr::select(-gene_id, -gene_type, -gene_status, -level, -havana_gene) 
+cluster1_dge_names
+
+cluster2_dge_names <- cluster2_dge %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  left_join(gencode_gtf, by = "gene_id") %>%
+  dplyr::distinct(gene_name, .keep_all = TRUE) %>%
+  dplyr::select(gene_name, everything()) %>%
+  dplyr::select(-gene_id, -gene_type, -gene_status, -level, -havana_gene) 
+cluster2_dge_names
+
+cluster3_dge_names <- cluster3_dge %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  left_join(gencode_gtf, by = "gene_id") %>%
+  dplyr::distinct(gene_name, .keep_all = TRUE) %>%
+  dplyr::select(gene_name, everything()) %>%
+  dplyr::select(-gene_id, -gene_type, -gene_status, -level, -havana_gene) 
+cluster3_dge_names
+
+cluster4_dge_names <- cluster4_dge %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  left_join(gencode_gtf, by = "gene_id") %>%
+  dplyr::distinct(gene_name, .keep_all = TRUE) %>%
+  dplyr::select(gene_name, everything()) %>%
+  dplyr::select(-gene_id, -gene_type, -gene_status, -level, -havana_gene) 
+cluster4_dge_names
+
+# calculate ranks
+ranks_clust1 <- sign(cluster1_dge_names$logFC) * -log10(cluster1_dge_names$P.Value)
+names(ranks_clust1) <- cluster1_dge_names$gene_name
+ranks_clust1 <- sort(ranks_clust1, decreasing = TRUE)
+head(ranks_clust1)
+tail(ranks_clust1)
+summary(duplicated(names(ranks_clust1)))
+
+ranks_clust2 <- sign(cluster2_dge_names$logFC) * -log10(cluster2_dge_names$P.Value)
+names(ranks_clust2) <- cluster2_dge_names$gene_name
+ranks_clust2 <- sort(ranks_clust2, decreasing = TRUE)
+head(ranks_clust2)
+tail(ranks_clust2)
+summary(duplicated(names(ranks_clust2)))
+
+ranks_clust3 <- sign(cluster3_dge_names$logFC) * -log10(cluster3_dge_names$P.Value)
+names(ranks_clust3) <- cluster3_dge_names$gene_name
+ranks_clust3 <- sort(ranks_clust3, decreasing = TRUE)
+head(ranks_clust3)
+tail(ranks_clust3)
+summary(duplicated(names(ranks_clust3)))
+
+ranks_clust4 <- sign(cluster4_dge_names$logFC) * -log10(cluster3_dge_names$P.Value)
+names(ranks_clust4) <- cluster4_dge_names$gene_name
+ranks_clust4 <- sort(ranks_clust4, decreasing = TRUE)
+head(ranks_clust4)
+tail(ranks_clust4)
+summary(duplicated(names(ranks_clust4)))
+```
+
+#### Hallmark gene sets only
+
+Source: http://bioconductor.org/packages/devel/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html
+
+Purrr functions
+
+```{r}
+library(BiocParallel)
+
+fgsea_hallmark <- function(ranks){
+  temp <- fgsea(pathways = gs_list_hallmark, 
+                                  stats = ranks,
+                                  minSize = 15, 
+                                  maxSize = 500,
+                                  nperm = 10000)
+  
+  collapsedPathways <- collapsePathways(temp[order(pval)][padj < 0.01],
+                                        gs_list_hallmark, 
+                                        ranks)
+  mainPathways <- temp[pathway %in% collapsedPathways$mainPathways][
+                         order(-NES)]
+  mainPathways
+}
+
+# test function
+ranks <- ranks_clust1
+fgsea_hallmark(ranks)[1:5, 1:5]
+
+# make list of rank stat vectors
+ranklist <- list(ranks_clust1,
+                 ranks_clust2,
+                 ranks_clust3, 
+                 ranks_clust4)
+                 
+
+# apply function to list
+hallmark_results <- map(ranklist, fgsea_hallmark)
+
+# display function
+mainpaths <- function(df){
+  pathways <- df %>% pull(pathway)
+  pathways
+}
+
+# apply display function to results
+map(hallmark_results, mainpaths)
+
+# plots
+pathways1 <- hallmark_results[[1]] %>% arrange(desc(abs(NES))) %>% pull(pathway)
+ranks = ranklist[[1]]
+plot1 <- plotGseaTable(gs_list_hallmark[pathways1], 
+                       ranks, 
+                       hallmark_results[[1]])
+
+```
+
+#### Larger collection of gene sets
+```{r}
+fgsea_total <- function(ranks){
+  temp <- fgsea(pathways = gs_list_total, 
+                                  stats = ranks,
+                                  minSize = 15, 
+                                  maxSize = 500,
+                                  nperm = 10000)
+  
+  collapsedPathways <- collapsePathways(temp[order(pval)][padj < 0.01],
+                                        gs_list_total, 
+                                        ranks)
+  mainPathways <- temp[pathway %in% collapsedPathways$mainPathways][
+                         order(abs(NES))]
+  mainPathways
+}
+
+# test function
+ranks <- ranks_clust1
+fgsea_total(ranks)[1:5, 1:5]
+
+# make list of rank stat vectors
+ranklist <- list(ranks_clust1,
+                 ranks_clust2,
+                 ranks_clust3, 
+                 ranks_clust4)
+
+# apply function to list
+total_results <- map(ranklist, fgsea_total)
+
+# display function
+mainpaths <- function(df){
+  pathways <- df %>% pull(pathway)
+  pathways
+}
+
+# apply display function to results
+map(total_results, mainpaths)
+
+# plots
+pathways1 <- total_results[[1]] %>% 
+  arrange(abs(NES)) %>% 
+  dplyr::slice(1:20) %>% 
+  pull(pathway)
+ranks <- ranklist[[1]]
+plot1 <- plotGseaTable(gs_list_total[pathways1], 
+                       ranks, 
+                       total_results[[1]])
 ```

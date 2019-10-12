@@ -1,0 +1,24 @@
+\documentclass{article}
+
+\usepackage{Sweave}
+\begin{document}
+\input{CD4_IHC-concordance}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rlllrrlll}
+  \hline
+ & .y. & group1 & group2 & p & p.adj & p.format & p.signif & method \\
+  \hline
+1 & cd4\_ihc\_score & 4 & 3 & 0.57 & 1.00 & 0.571 & ns & Wilcoxon \\
+  2 & cd4\_ihc\_score & 4 & 1 & 0.04 & 0.21 & 0.043 & * & Wilcoxon \\
+  3 & cd4\_ihc\_score & 4 & 2 & 0.54 & 1.00 & 0.537 & ns & Wilcoxon \\
+  4 & cd4\_ihc\_score & 3 & 1 & 0.22 & 0.89 & 0.222 & ns & Wilcoxon \\
+  5 & cd4\_ihc\_score & 3 & 2 & 1.00 & 1.00 & 1.000 & ns & Wilcoxon \\
+  6 & cd4\_ihc\_score & 1 & 2 & 0.01 & 0.08 & 0.013 & * & Wilcoxon \\
+   \hline
+\end{tabular}
+\end{table}
+
+
+\end{document}

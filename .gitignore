@@ -592,3 +592,10 @@ output/networkanal3_clust4.txt
 output/xcell_input_matrix.csv
 *.txt
 *.csv
+*.tif
+*.qptiff
+docs/assets/fvis_dist_1.png
+data/gencode.v22.annotation.gtf
+output/limma_voom_elist_1.rds
+output/tpm_expressionset.rds
+output/tpm_cyt_expressionset.rds
