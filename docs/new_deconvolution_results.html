@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="mleukam" />
+
+<meta name="date" content="2020-02-23" />
+
+<title>new_deconvolution_results</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/darkly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Immune Landscape of DLBCL</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">new_deconvolution_results</h1>
+<h4 class="author">mleukam</h4>
+<h4 class="date">2020-02-23</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-05-09
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20190613code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20190613)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20190613code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20190613)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreedbd51e2ef8e0ab7f06280afaea0703957e9a8e71targetblankdbd51e2a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/dbd51e2ef8e0ab7f06280afaea0703957e9a8e71" target="_blank">dbd51e2</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreedbd51e2ef8e0ab7f06280afaea0703957e9a8e71targetblankdbd51e2a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    NCI_mutations_vs_deconvolution.csv
+    Ignored:    analysis/figure/
+    Ignored:    data/.DS_Store
+    Ignored:    data/1-s2.0-S1074761316304320-mmc2.xlsx
+    Ignored:    data/12864_2005_498_MOESM2_ESM.xls
+    Ignored:    data/41591_2018_45_MOESM5_ESM.xlsx
+    Ignored:    data/CCLE_sample_info_file_2012-10-18.txt
+    Ignored:    data/NIH_PDL1_amp_cases.csv
+    Ignored:    data/NIH_PDL1_nonamp_cases.csv
+    Ignored:    data/PDL1dlbcl.rnaseq.kallisto.raw.txi.coding.cpm1.TMM.logCPM.sm24.csv
+    Ignored:    data/PanImmune_GeneSet_Definitions.xlsx
+    Ignored:    data/aliquot.tsv
+    Ignored:    data/azizi_curated.xlsx
+    Ignored:    data/c2_human_immune_genesets.gmt
+    Ignored:    data/dlbcl_total_immune_gset_v1_results.rds
+    Ignored:    data/ds_JCO.18.01583-2.xlsx
+    Ignored:    data/duke_study_driver_mutations_top150_maf.csv
+    Ignored:    data/final_analysis_set.maf
+    Ignored:    data/gdc_clinical_data.json
+    Ignored:    data/gdc_files_and_case_ids.json
+    Ignored:    data/gencode.v22.annotation.gtf
+    Ignored:    data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Ignored:    data/genesets/
+    Ignored:    data/gset_ids_complete.rds
+    Ignored:    data/histo_metadata_dlbcl_landscape.csv
+    Ignored:    data/journal.pone.0088309.s001.XLS
+    Ignored:    data/mmc1.xlsx
+    Ignored:    data/nejmoa1801445_appendix_2.xlsx
+    Ignored:    data/reactome_imm_signaling.tsv
+    Ignored:    data/sample.tsv
+    Ignored:    data/sig.rda
+    Ignored:    data/sig_genes.txt
+    Ignored:    data/temp.dgelist_edger.rds
+    Ignored:    data/temp.dgelist_limma.rds
+    Ignored:    data/uchi_metadata.csv
+    Ignored:    logs/
+    Ignored:    output/.DS_Store
+    Ignored:    output/NCI_mutations_vs_deconvolution.csv
+    Ignored:    output/clust1_vs_others.txt
+    Ignored:    output/clust1_vs_others_dge.rnk
+    Ignored:    output/clust2_vs_others_dge.rnk
+    Ignored:    output/clust3_vs_others_dge.rnk
+    Ignored:    output/clust4_vs_others_dge.rnk
+    Ignored:    output/cluster1_dge.rds
+    Ignored:    output/cluster2_dge.rds
+    Ignored:    output/cluster3_dge.rds
+    Ignored:    output/cluster4_dge.rds
+    Ignored:    output/combined_clin_data.xlsx
+    Ignored:    output/combined_dlbcl_expr_matrix.csv
+    Ignored:    output/combined_es_gsva2_4cluster.rds
+    Ignored:    output/combined_es_gsva4_4cluster.rds
+    Ignored:    output/combined_expressionset.rds
+    Ignored:    output/combined_tpm_matrix.csv
+    Ignored:    output/counts_expressionset_for_limma.rds
+    Ignored:    output/dlbcl_expr_matrix.csv
+    Ignored:    output/dlbcl_total_immune_gset_v2_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v3_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v4_results.rds
+    Ignored:    output/duke_expression_set_cleaned_log.rds
+    Ignored:    output/duke_expressionset.rds
+    Ignored:    output/duke_expressionset_pext.rds
+    Ignored:    output/duke_extended_pheno_data.csv
+    Ignored:    output/expr_matrix.csv
+    Ignored:    output/gsea_res_cluster1.csv
+    Ignored:    output/gset_ids_complete_2.rds
+    Ignored:    output/gset_ids_complete_3.rds
+    Ignored:    output/gset_ids_complete_4.rds
+    Ignored:    output/gsva_v2_4clust_assign.rds
+    Ignored:    output/gsva_v3_4clust_assign.rds
+    Ignored:    output/gsva_v4_4clust_assign.rds
+    Ignored:    output/limma_voom_elist_1.rds
+    Ignored:    output/merged_raw_counts.csv
+    Ignored:    output/nci_dlbcl_annotation.csv
+    Ignored:    output/nci_dlbcl_unprocessed_counts.csv
+    Ignored:    output/nci_expressionset.rds
+    Ignored:    output/nci_expressionset_pext.rds
+    Ignored:    output/nci_extended_pheno_data.csv
+    Ignored:    output/networkanal3_clust1.txt
+    Ignored:    output/networkanal3_clust2.txt
+    Ignored:    output/networkanal3_clust3.txt
+    Ignored:    output/networkanal3_clust4.txt
+    Ignored:    output/total_immune_gset_v1.rds
+    Ignored:    output/tpm_cyt_expressionset.rds
+    Ignored:    output/tpm_expressionset.rds
+    Ignored:    output/uchi_cluster_assignments.csv
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019.pvals.txt
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019.txt
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019_RAW.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.pvals.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819_RAW.txt
+    Ignored:    output/xcell_input_matrix.csv
+
+Untracked files:
+    Untracked:  NCI_mutations_vs_deconvolution.xls
+    Untracked:  analysis/correlation_clusters.Rmd
+    Untracked:  analysis/mif.Rmd
+    Untracked:  analysis/new_signature_matrix.Rmd
+    Untracked:  analysis/table1.Rmd
+    Untracked:  analysis/visualizing_gsva_scores_5.Rmd
+    Untracked:  batch1_cell_counts.pdf
+    Untracked:  data/cibersort/
+    Untracked:  data/gistic_results_nci/
+    Untracked:  es_10k_hgnc/
+    Untracked:  output/ASH_ORAL_figures.png
+    Untracked:  output/ASH_ORAL_figures/
+    Untracked:  output/Rplot.pdf
+    Untracked:  output/Rplot01.pdf
+    Untracked:  output/batch1_cell_seg_df.rds
+    Untracked:  output/batch1_summary_cell_seg_df.rds
+    Untracked:  output/colored_hclust_plot_by_group.pdf
+    Untracked:  output/colored_hclust_plot_by_samples.pdf
+    Untracked:  output/combined_counts_dge.rds
+    Untracked:  output/combined_expr_matrix_for_signature_unprocessed.rmd
+    Untracked:  output/dgelist_pheno_data.rds
+    Untracked:  output/dlbcl_final_signature_matrix.tsv
+    Untracked:  output/dlbcl_gsva5_4cluster_hcpc.rds
+    Untracked:  output/dlbcl_gsva5_4cluster_pca.rds
+    Untracked:  output/dlbcl_uchi_batch1_mixture.tsv
+    Untracked:  output/duke_dlbcl_mixture.tsv
+    Untracked:  output/gse_69030_probes.tsv
+    Untracked:  output/hclust_labeled_by_cell_type.pdf
+    Untracked:  output/mif_pilot_data_plot.pdf
+    Untracked:  output/nci_dlbcl_mixture.tsv
+    Untracked:  output/phenodata_for_signature_matrix.rmd
+    Untracked:  output/reference_matrix_file.tsv
+    Untracked:  output/table1.html
+    Untracked:  output/uchi_deconvolution_batch_1.rds
+    Untracked:  output/uchi_pheno_clust
+    Untracked:  output/var_contribution_axis2.pdf
+    Untracked:  output/venn.png
+    Untracked:  output/venn.png.2020-02-23_11-17-47.log
+    Untracked:  output/venn.png.2020-02-23_11-17-56.log
+    Untracked:  output/venn.png.2020-02-23_11-20-44.log
+    Untracked:  preprocessed_data_for_signature_matrix_es.rds
+
+Unstaged changes:
+    Modified:   .gitignore
+    Deleted:    Rplot.pdf
+    Deleted:    Rplot001.png
+    Deleted:    Rplot002.png
+    Deleted:    Rplot01.pdf
+    Modified:   analysis/abstract_figure.Rmd
+    Modified:   analysis/assign_mutations.Rmd
+    Modified:   analysis/cluster_dge.Rmd
+    Modified:   analysis/deconvolution.Rmd
+    Modified:   analysis/dge_pathways.Rmd
+    Modified:   analysis/dukedata.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/predictor.Rmd
+    Modified:   analysis/sparse_clustering.Rmd
+    Modified:   analysis/visualizing_gsva_scores_4.Rmd
+    Deleted:    data/DLBCL_histo/JG55/HE/14-1464/14-1464_Scan1_annotations.xml.lock
+    Modified:   output/design_for_limma.rds
+    Modified:   output/dgelist_for_limma.rds
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/dbd51e2ef8e0ab7f06280afaea0703957e9a8e71/analysis/new_deconvolution_results.Rmd" target="_blank">dbd51e2</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2020-05-09
+</td>
+<td>
+wflow_publish(“analysis/new_deconvolution_results.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>Clear workspace</p>
+<pre class="r"><code>rm(list = ls())</code></pre>
+<p>Prevent knitting from executing chunks</p>
+<pre class="r"><code>knitr::opts_chunk$set(eval = FALSE)</code></pre>
+<p>Load packages</p>
+<pre class="r"><code># plotting
+library(ggsci)
+library(ggpubr)
+library(viridis)
+library(ComplexHeatmap)
+library(circlize)
+library(scales)
+library(ggConvexHull)
+
+# correlation
+library(corrplot)
+source(&quot;http://www.sthda.com/upload/rquery_cormat.r&quot;)
+
+# clustering
+library(FactoMineR)
+library(factoextra)
+library(cluster)
+
+# survival analysis
+library(survival)
+library(survminer)
+
+# utility
+library(rlang)
+library(broom)
+library(Biobase)
+library(stats)
+
+# base tidyverse
+library(tidyverse)</code></pre>
+</div>
+<div id="read-in-data" class="section level2">
+<h2>Read in data</h2>
+<pre class="r"><code>nci_decon &lt;- read_csv(&quot;data/cibersort/NCI/abs_cell_number_estimate_022320/CIBERSORTx_Job2_Results.csv&quot;)
+
+duke_decon &lt;- read_csv(&quot;data/cibersort/Duke/abs_cell_number_estimate_022320/CIBERSORTx_Job3_Results.csv&quot;)
+
+combined_decon &lt;- nci_decon %&gt;%
+  bind_rows(duke_decon) %&gt;%
+  print()</code></pre>
+</div>
+<div id="boxplots-by-gsva-cluster" class="section level2">
+<h2>Boxplots by GSVA cluster</h2>
+<p>Read in cluster assignment and combine</p>
+<pre class="r"><code>gsva4_es &lt;- readRDS(&quot;output/combined_es_gsva4_4cluster.rds&quot;)
+
+gsva_clust_assgn &lt;- pData(gsva4_es) %&gt;% 
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  dplyr::select(sample_id, clust) %&gt;%
+  as_tibble() %&gt;%
+  print()
+
+decon_res &lt;- combined_decon %&gt;%
+  rename(sample_id = Mixture) %&gt;%
+  left_join(gsva_clust_assgn) %&gt;%
+  dplyr::select(sample_id, clust, everything()) %&gt;%
+  print()
+
+cd8_plot &lt;- ggplot(decon_res, 
+                   aes(x = clust, y = cd8_eff, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = &quot;Cluster&quot;, labels = c(&quot;Cold&quot;,   &quot;Intermediate-T&quot;, &quot;Intermediate-M&quot;, &quot;Inflamed&quot;)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;CD8 Deconvolution Score&quot;) +
+  stat_compare_means() +
+  ggtitle(&quot;CD8&quot;)
+cd8_plot
+
+th1_plot &lt;- ggplot(decon_res, 
+                   aes(x = clust, y = th1_rest, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = &quot;Cluster&quot;, labels = c(&quot;Cold&quot;,   &quot;Intermediate-T&quot;, &quot;Intermediate-M&quot;, &quot;Inflamed&quot;)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Th1 Deconvolution Score&quot;) +
+  stat_compare_means() +
+  ggtitle(&quot;Th1&quot;)
+th1_plot
+
+th2_plot &lt;- ggplot(decon_res, 
+                   aes(x = clust, y = th2_rest, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = &quot;Cluster&quot;, labels = c(&quot;Cold&quot;,   &quot;Intermediate-T&quot;, &quot;Intermediate-M&quot;, &quot;Inflamed&quot;)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Th2 Deconvolution Score&quot;) +
+  stat_compare_means() +
+  ggtitle(&quot;Th2&quot;)
+th2_plot
+
+mac_1_plot &lt;- ggplot(decon_res, 
+                   aes(x = clust, y = mac_1, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+      scale_fill_d3(name = &quot;Cluster&quot;, labels = c(&quot;Cold&quot;,   &quot;Intermediate-T&quot;, &quot;Intermediate-M&quot;, &quot;Inflamed&quot;)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Macrophage Type 1 Deconvolution Score&quot;) +
+  stat_compare_means() +
+  ggtitle(&quot;Macrophage Type 1&quot;)
+mac_1_plot
+
+mac_2_plot &lt;- ggplot(decon_res, 
+                   aes(x = clust, y = mac_2, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+      scale_fill_d3(name = &quot;Cluster&quot;, labels = c(&quot;Cold&quot;,   &quot;Intermediate-T&quot;, &quot;Intermediate-M&quot;, &quot;Inflamed&quot;)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Macrophage Type 2 Deconvolution Score&quot;) +
+   stat_compare_means() +
+    ggtitle(&quot;Macrophage Type 2&quot;)
+mac_2_plot
+
+mac_3_plot &lt;- ggplot(decon_res, 
+                   aes(x = clust, y = mac_3, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+    scale_fill_d3(name = &quot;Cluster&quot;, labels = c(&quot;Cold&quot;,   &quot;Intermediate-T&quot;, &quot;Intermediate-M&quot;, &quot;Inflamed&quot;)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Macrophage Type 3 Deconvolution Score&quot;) +
+   stat_compare_means() +
+    ggtitle(&quot;Macrophage Type 3&quot;)
+mac_3_plot
+
+mac_4_plot &lt;- ggplot(decon_res, 
+                   aes(x = clust, y = mac_4, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+  scale_fill_d3(name = &quot;Cluster&quot;, labels = c(&quot;Cold&quot;,   &quot;Intermediate-T&quot;, &quot;Intermediate-M&quot;, &quot;Inflamed&quot;)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Macrophage Type 4 Deconvolution Score&quot;) +
+   stat_compare_means() +
+    ggtitle(&quot;Macrophage Type 4&quot;)
+mac_4_plot
+
+mac_5_plot &lt;- ggplot(decon_res, 
+                   aes(x = clust, y = mac_5, fill = clust)) +
+  geom_boxplot() +
+  theme_classic2() + 
+  scale_fill_d3(name = &quot;Cluster&quot;, labels = c(&quot;Cold&quot;, &quot;Intermediate-T&quot;, &quot;Intermediate-M&quot;, &quot;Inflamed&quot;)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Macrophage Type 5 Deconvolution Score&quot;) +
+   stat_compare_means() +
+    ggtitle(&quot;Macrophage Type 5&quot;)
+mac_5_plot
+
+mac_6_plot &lt;- ggplot(decon_res, 
+                   aes(x = clust, y = mac_6, fill = clust)) +
+  geom_boxplot() +
+  theme_classic2() + 
+  scale_fill_d3(name = &quot;Cluster&quot;, labels = c(&quot;Cold&quot;, &quot;Intermediate-T&quot;, &quot;Intermediate-M&quot;, &quot;Inflamed&quot;)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Macrophage Type 6 Deconvolution Score&quot;) +
+   stat_compare_means() +
+    ggtitle(&quot;Macrophage Type 6&quot;)
+mac_6_plot</code></pre>
+</div>
+<div id="survival-analysis" class="section level2">
+<h2>Survival analysis</h2>
+<p>Read in clinical data</p>
+<pre class="r"><code>nci_pheno_data &lt;- read_csv(&quot;output/nci_extended_pheno_data.csv&quot;) %&gt;% print()
+
+nci_surv_frame &lt;- nci_pheno_data %&gt;%
+  dplyr::select(sample_id,
+                os_status = `Status at Follow_up_ 0 Alive_ 1 Dead`,
+                os_years = `Follow_up Time _yrs`,
+                pfs_status = `Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1 Progression`,
+                pfs_years = `Progression_Free Survival _PFS_ Time _yrs`) %&gt;%
+  print()
+
+nci_extremes &lt;- nci_decon %&gt;%
+  mutate(cd8_groups = ntile(cd8_eff, 5)) %&gt;%
+  mutate(th1_groups = ntile(th1_rest, 5)) %&gt;%
+  mutate(th2_groups = ntile(th2_rest, 5)) %&gt;%
+  mutate(treg_groups = ntile(treg, 5)) %&gt;%
+  mutate(nk_groups = ntile(nk_rest, 5)) %&gt;%
+  mutate(mac1_groups = ntile(mac_1, 5)) %&gt;%
+  mutate(mac2_groups = ntile(mac_2, 5)) %&gt;%
+  mutate(mac3_groups = ntile(mac_3, 5)) %&gt;%
+  mutate(mac4_groups = ntile(mac_4, 5)) %&gt;%
+  mutate(mac5_groups = ntile(mac_5, 5)) %&gt;%
+  mutate(mac6_groups = ntile(mac_6, 5)) %&gt;%
+  mutate(mac7_groups = ntile(mac_7, 5)) %&gt;%
+  dplyr::select(sample_id = Mixture, cd8_groups, th1_groups, th2_groups, treg_groups, nk_groups, mac1_groups, mac2_groups, mac3_groups, mac4_groups, mac5_groups, mac6_groups, mac7_groups) %&gt;%
+  print()
+
+nci_surv_frame_groups &lt;- nci_surv_frame %&gt;%
+  left_join(nci_extremes) %&gt;%
+  print()
+
+nci_cd8_extremes &lt;- nci_surv_frame_groups %&gt;%
+  dplyr::filter(cd8_groups %in% c(&quot;1&quot;, &quot;5&quot;)) %&gt;%
+  dplyr::select(sample_id, cd8_groups, os_years, os_status, pfs_years, pfs_status) %&gt;%
+  print()
+nci_cd8_os_object &lt;- Surv(time = nci_cd8_extremes$os_years,
+                   event = nci_cd8_extremes$os_status)
+fit_cd8 &lt;- survfit(nci_cd8_os_object ~ cd8_groups,
+                   data = nci_cd8_extremes)
+ggsurvplot(fit_cd8, data = nci_cd8_extremes, pval = TRUE)
+
+nci_th1_extremes &lt;- nci_surv_frame_groups %&gt;%
+  dplyr::filter(th1_groups %in% c(&quot;1&quot;, &quot;5&quot;)) %&gt;%
+  dplyr::select(sample_id, th1_groups, os_years, os_status, pfs_years, pfs_status) %&gt;%
+  print()
+nci_th1_os_object &lt;- Surv(time = nci_th1_extremes$os_years,
+                   event = nci_th1_extremes$os_status)
+fit_th1 &lt;- survfit(nci_th1_os_object ~ th1_groups,
+                   data = nci_th1_extremes)
+ggsurvplot(fit_th1, data = nci_th1_extremes, pval = TRUE)
+
+nci_th2_extremes &lt;- nci_surv_frame_groups %&gt;%
+  dplyr::filter(th2_groups %in% c(&quot;1&quot;, &quot;5&quot;)) %&gt;%
+  dplyr::select(sample_id, th2_groups, os_years, os_status, pfs_years, pfs_status) %&gt;%
+  print()
+nci_th2_os_object &lt;- Surv(time = nci_th2_extremes$os_years,
+                   event = nci_th2_extremes$os_status)
+fit_th2 &lt;- survfit(nci_th2_os_object ~ th2_groups,
+                   data = nci_th2_extremes)
+ggsurvplot(fit_th2, data = nci_th2_extremes, pval = TRUE)
+
+nci_treg_extremes &lt;- nci_surv_frame_groups %&gt;%
+  dplyr::filter(treg_groups %in% c(&quot;1&quot;, &quot;5&quot;)) %&gt;%
+  dplyr::select(sample_id, treg_groups, os_years, os_status, pfs_years, pfs_status) %&gt;%
+  print()
+nci_treg_os_object &lt;- Surv(time = nci_treg_extremes$os_years,
+                   event = nci_treg_extremes$os_status)
+fit_treg &lt;- survfit(nci_treg_os_object ~ treg_groups,
+                   data = nci_treg_extremes)
+ggsurvplot(fit_treg, data = nci_treg_extremes, pval = TRUE)
+
+nci_mac1_extremes &lt;- nci_surv_frame_groups %&gt;%
+  dplyr::filter(mac1_groups %in% c(&quot;1&quot;, &quot;5&quot;)) %&gt;%
+  dplyr::select(sample_id, mac1_groups, os_years, os_status, pfs_years, pfs_status) %&gt;%
+  print()
+nci_mac1_os_object &lt;- Surv(time = nci_mac1_extremes$os_years,
+                   event = nci_mac1_extremes$os_status)
+fit_mac1 &lt;- survfit(nci_mac1_os_object ~ mac1_groups,
+                   data = nci_mac1_extremes)
+ggsurvplot(fit_mac1, data = nci_mac1_extremes, pval = TRUE)
+
+nci_mac2_extremes &lt;- nci_surv_frame_groups %&gt;%
+  dplyr::filter(mac2_groups %in% c(&quot;1&quot;, &quot;5&quot;)) %&gt;%
+  dplyr::select(sample_id, mac2_groups, os_years, os_status, pfs_years, pfs_status) %&gt;%
+  print()
+nci_mac2_os_object &lt;- Surv(time = nci_mac2_extremes$os_years,
+                   event = nci_mac2_extremes$os_status)
+fit_mac2 &lt;- survfit(nci_mac2_os_object ~ mac2_groups,
+                   data = nci_mac2_extremes)
+ggsurvplot(fit_mac2, data = nci_mac2_extremes, pval = TRUE)
+
+nci_mac3_extremes &lt;- nci_surv_frame_groups %&gt;%
+  dplyr::filter(mac3_groups %in% c(&quot;1&quot;, &quot;5&quot;)) %&gt;%
+  dplyr::select(sample_id, mac3_groups, os_years, os_status, pfs_years, pfs_status) %&gt;%
+  print()
+nci_mac3_os_object &lt;- Surv(time = nci_mac3_extremes$os_years,
+                   event = nci_mac3_extremes$os_status)
+fit_mac3 &lt;- survfit(nci_mac3_os_object ~ mac3_groups,
+                   data = nci_mac3_extremes)
+ggsurvplot(fit_mac3, data = nci_mac3_extremes, pval = TRUE)
+
+nci_mac4_extremes &lt;- nci_surv_frame_groups %&gt;%
+  dplyr::filter(mac4_groups %in% c(&quot;1&quot;, &quot;5&quot;)) %&gt;%
+  dplyr::select(sample_id, mac4_groups, os_years, os_status, pfs_years, pfs_status) %&gt;%
+  print()
+nci_mac4_os_object &lt;- Surv(time = nci_mac4_extremes$os_years,
+                   event = nci_mac4_extremes$os_status)
+fit_mac4 &lt;- survfit(nci_mac4_os_object ~ mac4_groups,
+                   data = nci_mac4_extremes)
+ggsurvplot(fit_mac4, data = nci_mac4_extremes, pval = TRUE)
+
+nci_mac5_extremes &lt;- nci_surv_frame_groups %&gt;%
+  dplyr::filter(mac5_groups %in% c(&quot;1&quot;, &quot;5&quot;)) %&gt;%
+  dplyr::select(sample_id, mac5_groups, os_years, os_status, pfs_years, pfs_status) %&gt;%
+  print()
+nci_mac5_os_object &lt;- Surv(time = nci_mac5_extremes$os_years,
+                   event = nci_mac5_extremes$os_status)
+fit_mac5 &lt;- survfit(nci_mac5_os_object ~ mac5_groups,
+                   data = nci_mac5_extremes)
+ggsurvplot(fit_mac5, data = nci_mac5_extremes, pval = TRUE)
+
+nci_mac6_extremes &lt;- nci_surv_frame_groups %&gt;%
+  dplyr::filter(mac6_groups %in% c(&quot;1&quot;, &quot;5&quot;)) %&gt;%
+  dplyr::select(sample_id, mac6_groups, os_years, os_status, pfs_years, pfs_status) %&gt;%
+  print()
+nci_mac6_os_object &lt;- Surv(time = nci_mac6_extremes$os_years,
+                   event = nci_mac6_extremes$os_status)
+fit_mac6 &lt;- survfit(nci_mac6_os_object ~ mac6_groups,
+                   data = nci_mac6_extremes)
+ggsurvplot(fit_mac6, data = nci_mac6_extremes, pval = TRUE)
+
+nci_mac7_extremes &lt;- nci_surv_frame_groups %&gt;%
+  dplyr::filter(mac7_groups %in% c(&quot;1&quot;, &quot;5&quot;)) %&gt;%
+  dplyr::select(sample_id, mac7_groups, os_years, os_status, pfs_years, pfs_status) %&gt;%
+  print()
+nci_mac7_os_object &lt;- Surv(time = nci_mac7_extremes$os_years,
+                   event = nci_mac7_extremes$os_status)
+fit_mac7 &lt;- survfit(nci_mac7_os_object ~ mac7_groups,
+                   data = nci_mac7_extremes)
+ggsurvplot(fit_mac7, data = nci_mac7_extremes, pval = TRUE)</code></pre>
+</div>
+<div id="mutations" class="section level2">
+<h2>Mutations</h2>
+<pre class="r"><code># rename nci decon columns
+nci_decons &lt;- nci_decon %&gt;% 
+  rename(sample_id = Mixture) %&gt;%
+  print()
+
+# collapse columns to larger groups
+
+
+# get column names
+decon_names &lt;- colnames(nci_decons)[2:27]
+decon_names
+
+# DLBCL mutation data
+muts_dlbcl &lt;- read_delim(&quot;data/final_analysis_set.maf&quot;, 
+    &quot;\t&quot;, escape_double = FALSE, trim_ws = TRUE) %&gt;%
+  dplyr::select(Tumor_Sample_Barcode, everything()) %&gt;%
+  dplyr::select(sample_id = Tumor_Sample_Barcode, 
+                Hugo_Symbol) %&gt;%
+  distinct(sample_id, Hugo_Symbol) %&gt;%
+  dplyr::mutate(n = rep(1, length.out = nrow(.))) %&gt;%
+  spread(key = Hugo_Symbol, value = n, fill = 0) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  as.matrix()
+muts_dlbcl[1:5, 1:5]
+str(muts_dlbcl)
+
+# keep only those columns with &gt;5% mutations
+muts_5 &lt;- muts_dlbcl[, colSums(muts_dlbcl) &gt; 24]
+str(muts_5)
+# reduces to 96 candidate genes
+
+muts_5_df &lt;- muts_5 %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  print()
+
+mut_names &lt;- colnames(muts_5_df)[-1]
+mut_names
+
+# get all permutations of selected mutations and deconvolution
+perms &lt;- expand.grid(mut_names, decon_names) %&gt;%
+  rename(mut_names = Var1, decon_names = Var2) %&gt;%
+  mutate(mut_names = as.character(mut_names)) %&gt;%
+  mutate(decon_names = as.character(decon_names))
+str(perms)
+
+# write function to compare deconvolution scores by mutation
+decon_vs_mut &lt;- function(mut_name, decon_name){
+  mut &lt;- muts_5_df %&gt;%
+    filter(!! rlang::sym(mut_name) == 1) %&gt;%
+    select(sample_id) %&gt;%
+    left_join(nci_decons) %&gt;%
+    pull(!! rlang::sym(decon_name))
+  nonmut &lt;- muts_5_df %&gt;%
+    filter(!! rlang::sym(mut_name) == 0) %&gt;%
+    select(sample_id) %&gt;%
+    left_join(nci_decons) %&gt;%
+    pull(!! rlang::sym(decon_name))
+  tidy(t.test(mut, nonmut)) %&gt;%
+    bind_cols(&quot;gene&quot; = mut_name) %&gt;%
+    bind_cols(&quot;cell_type&quot; = decon_name) %&gt;%
+    bind_cols(&quot;mut_number&quot; = length(mut)) %&gt;%
+    bind_cols(&quot;nonmut_number&quot; = length(nonmut)) %&gt;%
+    mutate(mut_rate = length(mut) / (length(mut) + length(nonmut))) %&gt;%
+    mutate(mut_mean = sum(mut, na.rm = TRUE) / length(mut)) %&gt;%
+    mutate(nonmut_mean = sum(nonmut, na.rm = TRUE) / length(nonmut)) %&gt;%
+    mutate(change = (mut_mean - nonmut_mean)) %&gt;%
+    select(gene, cell_type, p.value, change, mut_mean, nonmut_mean, mut_rate, mut_number, nonmut_number, everything())
+}
+
+# test function
+decon_vs_mut(&quot;EZH2&quot;, &quot;cd8_eff&quot;)
+
+mutation_correlations &lt;- map2_dfr(perms$mut_names, 
+                                  perms$decon_names, 
+                                  decon_vs_mut)
+
+mut_decon_corr &lt;- mutation_correlations %&gt;%
+  arrange(p.value) %&gt;%
+  mutate(p.adj = p.adjust(p.value, method = &quot;BH&quot;)) %&gt;%
+  dplyr::select(gene, cell_type, p.value, p.adj, everything()) %&gt;%
+  print()
+  
+mut_decon_corr %&gt;% 
+  write_csv(&quot;output/NCI_mutations_vs_deconvolution.csv&quot;)</code></pre>
+</div>
+<div id="validate-results" class="section level2">
+<h2>Validate results</h2>
+</div>
+<div id="clustering-by-deconvolution---abandoned" class="section level2">
+<h2>Clustering by deconvolution - Abandoned</h2>
+<p>Roughly following: <a href="https://www.nature.com/articles/s41467-018-05570-1#Sec12" class="uri">https://www.nature.com/articles/s41467-018-05570-1#Sec12</a></p>
+<p>Correlation</p>
+<pre class="r"><code>nci_score_mat &lt;- nci_decon %&gt;% 
+  dplyr::select(-Mixture, -`P-value`, -Correlation, -RMSE, -`Absolute score (sig.score)`) %&gt;%
+  as.matrix()
+rownames(nci_score_mat) &lt;- nci_results$Mixture
+nci_score_mat[1:5, 1:5]
+dim(nci_score_mat)
+summary(nci_score_mat)
+# estimate correlation with each of the other cell types
+rquery.cormat(nci_score_mat)
+
+cormat &lt;- rquery.cormat(nci_score_mat, graphType = &quot;heatmap&quot;)
+cormat</code></pre>
+<p>Clustering</p>
+<pre class="r"><code>set.seed(818)
+PCA(nci_score_mat, scale.unit = TRUE, ncp = 5, graph = TRUE)
+res.pca &lt;- PCA(nci_score_mat, graph = FALSE)
+eig.val &lt;- get_eigenvalue(res.pca)
+eig.val
+fviz_eig(res.pca, addlabels = TRUE, ylim = c(0, 50))
+fviz_pca_var(res.pca, col.var = &quot;contrib&quot;,
+             gradient.cols = c(&quot;#00AFBB&quot;, &quot;#E7B800&quot;, &quot;#FC4E07&quot;)
+             )
+
+var &lt;- get_pca_var(res.pca)
+var
+
+corrplot(var$cos2, is.corr = FALSE)
+fviz_contrib(res.pca, choice = &quot;var&quot;, axes = 1)
+fviz_contrib(res.pca, choice = &quot;var&quot;, axes = 2)
+
+fviz_pca_ind(res.pca)
+
+ind.p &lt;- fviz_pca_ind(res.pca, geom = &quot;point&quot;)
+ggpubr::ggpar(ind.p,
+              title = &quot;Principal Component Analysis&quot;,
+              caption = &quot;Source: factoextra&quot;,
+              xlab = &quot;PC1&quot;, ylab = &quot;PC2&quot;,
+              ggtheme = theme_gray(), palette = &quot;jco&quot;
+              )
+
+# what is the optimal number of clusters?
+fviz_nbclust(nci_score_mat, FUNcluster = cluster::pam, method = &quot;gap_stat&quot;) 
+fviz_nbclust(nci_score_mat, FUNcluster = cluster::pam, method = &quot;silhouette&quot;) 
+fviz_nbclust(nci_score_mat, FUNcluster = cluster::pam, method = &quot;wss&quot;) </code></pre>
+<p>Heatmap</p>
+<pre class="r"><code>scale_mat &lt;- nci_score_mat %&gt;% 
+  apply(1, rescale)
+scale_mat[1:5, 1:5]
+f1 = colorRamp2(seq(min(t(scale_mat)), max(t(scale_mat)), length = 3), c(&quot;blue&quot;, &quot;#EEEEEE&quot;, &quot;red&quot;))
+hm &lt;- Heatmap(t(scale_mat),
+              col = f1,
+              show_row_names = FALSE,
+              heatmap_legend_param = list(title = &quot;Relative\nCell\nFraction&quot;)
+              )
+hm</code></pre>
+<p>Partioning clustering <a href="http://www.sthda.com/english/wiki/the-ultimate-guide-to-partitioning-clustering" class="uri">http://www.sthda.com/english/wiki/the-ultimate-guide-to-partitioning-clustering</a></p>
+<pre class="r"><code>pam.res &lt;- pam(nci_score_mat, 3)
+print(pam.res)
+fviz_cluster(pam.res, 
+             stand = TRUE, 
+             axes = c(1:2), 
+             geom = &quot;point&quot;, 
+             show.clust.cent = FALSE) +
+  theme_classic2() +
+  scale_color_d3() +
+  scale_fill_d3()
+fviz_cluster(pam.res, stand = TRUE, axes = c(1,3), geom = &quot;point&quot;, show.clust.cent = FALSE)
+pam.res$clustering</code></pre>
+<p>Build phenodata and pull in GSVA results</p>
+<pre class="r"><code>gs_matrix &lt;- readRDS(&quot;output/dlbcl_total_immune_gset_v4_results.rds&quot;)
+gs_matrix[, 1:5]
+str(gs_matrix)
+
+combined_es &lt;- readRDS(&quot;output/combined_expressionset.rds&quot;)
+pheno_data &lt;- pData(combined_es)
+
+nci_pdata &lt;- pData(combined_es) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  print()
+cluster_pdata &lt;- pam.res$clustering %&gt;%
+  enframe() %&gt;%
+  dplyr::rename(sample_id = name, pam_clust = value) %&gt;%
+  left_join(nci_pdata, by = &quot;sample_id&quot;) %&gt;%
+  print()</code></pre>
+<p>Make comparisons between my clusters and ABC/GCB</p>
+<pre class="r"><code>table(cluster_pdata$pam_clust, cluster_pdata$abc_gcb_rna)
+table(cluster_pdata$`Genetic Subtype`, cluster_pdata$pam_clust)
+
+cpdata_tbl &lt;- cluster_pdata %&gt;%
+  as_tibble() %&gt;%
+  mutate(pam_clust = as.factor(pam_clust)) %&gt;%
+  dplyr::rename(pfs_status = `Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1 Progression`) %&gt;%
+  dplyr::rename(pfs_years = `Progression_Free Survival _PFS_ Time _yrs`) %&gt;%
+  print()
+
+library(table1)
+table1(~ factor(gender) +
+       age +
+       factor(ipi_initial) +
+       factor(ann_arbor_clinical_stage) +
+       factor(abc_gcb_rna) +
+       factor(pdl1_status) +
+       factor(`Genetic Subtype`) | pam_clust, data = cpdata_tbl)
+
+library(survival)
+library(survminer)
+
+# OS
+# set up survival object
+surv_os &lt;- survfit(Surv(os_years, os_status) ~ pam_clust, data = cpdata_tbl)
+# plot
+plot1 &lt;- ggsurvplot(surv_os, data = as.data.frame(cpdata_tbl), pval = TRUE, palette = &quot;nejm&quot;) +
+  ylab(&quot;OS probability&quot;) +
+  xlab(&quot;Time (years)&quot;)
+
+plot2 &lt;- ggsurvplot_facet(surv_os, 
+                          data = as.data.frame(cpdata_tbl), 
+                          facet.by = c(&quot;abc_gcb_rna&quot;), 
+                          pval = TRUE, 
+                          palette = &quot;nejm&quot;) +
+  ylab(&quot;OS probability&quot;) +
+  xlab(&quot;Time (years)&quot;)
+plot2
+
+# PFS
+surv_pfs &lt;- survfit(Surv(pfs_years, pfs_status) ~ pam_clust, data = cpdata_tbl)
+ggsurvplot(surv_pfs, data = cpdata_tbl, pval = TRUE, palette = &quot;nejm&quot;) +
+  ylab(&quot;PFS probability&quot;) +
+  xlab(&quot;Time (years)&quot;)
+
+plot3 &lt;- ggsurvplot_facet(surv_pfs, 
+                          data = as.data.frame(cpdata_tbl), 
+                          facet.by = c(&quot;abc_gcb_rna&quot;), 
+                          pval = TRUE, 
+                          palette = &quot;nejm&quot;) +
+  ylab(&quot;PFS probability&quot;) +
+  xlab(&quot;Time (years)&quot;)
+plot3</code></pre>
+<p>Plot scores on cluster map</p>
+<pre class="r"><code>tpm_cyt_es &lt;- readRDS(&quot;output/tpm_cyt_expressionset.rds&quot;)
+tpm_pheno_data &lt;- pData(tpm_cyt_es) %&gt;% 
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;% 
+  as_tibble() %&gt;% 
+  print()
+tpm_matrix &lt;- exprs(tpm_cyt_es)
+
+nci_results_ref &lt;- nci_decon %&gt;% 
+  dplyr::rename(sample_id = Mixture)
+
+pdata &lt;- cluster_pdata %&gt;% 
+  left_join(tpm_pheno_data, by = &quot;sample_id&quot;) %&gt;%
+  left_join(nci_results_ref) %&gt;%
+  mutate(pam_clust = as.factor(pam_clust)) %&gt;%
+  print()
+
+
+# CYT score
+fviz_pca_ind(res.pca, 
+             col.ind = log(pdata$CYT),
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;CYT score\n(log scale)&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 3) +
+  labs(title = &quot;CYT score by cluster&quot;) +
+  scale_color_viridis()
+
+# CYT score
+fviz_pca_ind(res.pca, 
+             col.ind = log(pdata$CYT),
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;CYT score\n(log scale)&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 3) +
+  labs(title = &quot;CYT score by cluster&quot;) +
+  scale_color_viridis()
+
+# CD8 activation
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$mskcc_cd8activation_gs,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;MSKCC CD8 \nactivation score&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 3) +
+  labs(title = &quot;MSKCC CD8 activation score by cluster&quot;) +
+  scale_color_viridis()
+
+# t cell anergy score
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$mskcc_anergy_gs,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;MSKCC \nanergy score&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 3) +
+  labs(title = &quot;MSKCC T cell anergy score by cluster&quot;) +
+  scale_color_viridis()
+
+# IFN-gamma activity
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$thor_ifng_score_21050467,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;IFNg score&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 3) +
+  labs(title = &quot;IFNg gene set score by cluster&quot;) +
+  scale_color_viridis()
+
+# CSF1 response
+thor_csf1_response
+
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$thor_csf1_response,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;CSF1 \nresponse score&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 3) +
+  labs(title = &quot;CSF1 response score by cluster&quot;) +
+  scale_color_viridis()
+
+# CSF1 response
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$imsig_macrophages_gs,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;Macrophage gene\nset score&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 3) +
+  labs(title = &quot;Macrophage gene set score by cluster&quot;) +
+  scale_color_viridis()
+
+# CSF1 response
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$imsig_macrophages_gs,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;Macrophage gene\nset score&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 3) +
+  labs(title = &quot;Macrophage gene set score by cluster&quot;) +
+  scale_color_viridis()
+
+# CSF1 response
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$mskcc_hypoxia_regulated_gs,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;TGFb gene\nset score&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 3) +
+  labs(title = &quot;TGFb gene set score by cluster&quot;) +
+  scale_color_viridis()</code></pre>
+<p>Deconvolution results on cluster map</p>
+<pre class="r"><code>fviz_pca_ind(res.pca, 
+             col.ind = pdata$cd8_eff,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;CD8_eff score&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 3) +
+  labs(title = &quot;CD8_eff deconvolution by cluster&quot;) +
+  scale_color_viridis()</code></pre>
+<p>Boxplots</p>
+<pre class="r"><code>pdata_decon &lt;- pdata %&gt;% dplyr::select(1, 2, 273:298) %&gt;%
+  gather(key = cell_type, value = score, -sample_id, -pam_clust) %&gt;%
+  mutate(cell_type = as.factor(cell_type)) %&gt;%
+  print()
+
+pdata_decon_selected &lt;- pdata_decon %&gt;%
+  dplyr::filter(cell_type %in% c(&quot;cd8_eff&quot;, &quot;cd8_mem&quot;, &quot;mac_2&quot;, &quot;mac_3&quot;, &quot;mac_5&quot;, &quot;mac_7&quot;, &quot;th1_act&quot;, &quot;th1_rest&quot;, &quot;th2_act&quot;, &quot;th2_rest&quot;)) %&gt;%
+  mutate(cell_type = fct_drop(cell_type)) %&gt;%
+  print()
+
+box1 &lt;- ggplot(pdata_decon, aes(x = cell_type, y = score, fill = cell_type)) +
+  geom_boxplot() +
+  facet_grid(facets = &quot;pam_clust&quot;) +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 90))
+box1
+
+box2 &lt;- ggplot(pdata_decon_selected, aes(x = cell_type, y = score, fill = cell_type)) +
+  geom_boxplot() +
+  facet_grid(facets = &quot;pam_clust&quot;) +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 90))
+box2
+
+pdata_decon_selected %&gt;% dplyr::filter(cell_type == &quot;cd8_eff&quot;) %&gt;% ggplot(aes(x = cell_type, y = score, fill = pam_clust)) +
+  geom_boxplot() +
+  facet_wrap(facets = &quot;pam_clust&quot;) +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 90))
+
+pdata_decon_selected %&gt;% dplyr::filter(cell_type == &quot;mac_3&quot;) %&gt;% ggplot(aes(x = cell_type, y = score, fill = pam_clust)) +
+  geom_boxplot() +
+  facet_wrap(facets = &quot;pam_clust&quot;) +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 90))
+
+pdata_decon_selected %&gt;% dplyr::filter(cell_type == &quot;th2_rest&quot;) %&gt;% ggplot(aes(x = cell_type, y = score, fill = pam_clust)) +
+  geom_boxplot() +
+  facet_wrap(facets = &quot;pam_clust&quot;) +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 90))
+  
+View(pdata_decon_selected %&gt;% group_by(pam_clust, cell_type) %&gt;% summarize(mean = mean(score)))</code></pre>
+<p>comparing to UCH results</p>
+<pre class="r"><code>uchi_results &lt;- read_csv(&quot;data/cibersort/UChi/absolute_cell_number_estimate_22320/CIBERSORTx_Job4_Results.csv&quot;) 
+
+cell_seg_df &lt;- readRDS(&quot;output/uchi_deconvolution_batch_1.rds&quot;) %&gt;%
+  separate(sample, into = c(&quot;number&quot;, &quot;initials&quot;, sep = &quot;-&quot;)) %&gt;%
+  mutate(sample_id = paste0(&quot;JG&quot;, number)) %&gt;%
+  dplyr::select(sample_id, everything()) %&gt;%
+  dplyr::select(-number, -initials, -`-`) %&gt;%
+  dplyr::mutate(phenotype = ifelse(phenotype == &quot;CTL_CD8+&quot;, &quot;cd8_eff&quot;, phenotype)) %&gt;%
+  print()
+
+cell_density &lt;- cell_seg_df %&gt;%
+  dplyr::select(sample_id, phenotype, cell_density_per_mm) %&gt;%
+  print()
+
+uchi_results_df_cd8 &lt;- uchi_results %&gt;%
+  gather(key = phenotype, value = score, -Mixture) %&gt;%
+  dplyr::rename(sample_id = Mixture) %&gt;%
+  left_join(cell_density) %&gt;%
+  dplyr::filter(phenotype == &quot;cd8_eff&quot;) %&gt;%
+  drop_na(cell_density_per_mm) %&gt;%
+  print()
+
+ggplot(data = uchi_results_df_cd8, aes(x = score, y = cell_density_per_mm)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;) +
+  theme_classic2()</code></pre>
+<p>Get predicted clusters</p>
+<pre class="r"><code>uchi_score_mat &lt;- uchi_results %&gt;% 
+  dplyr::select(-Mixture, -`P-value`, -Correlation, -RMSE, -`Absolute score (sig.score)`) %&gt;%
+  as.matrix()
+rownames(uchi_score_mat) &lt;- uchi_results$Mixture
+uchi_score_mat[1:5, 1:5]
+dim(uchi_score_mat)
+summary(uchi_score_mat)
+
+# object: an object of class PCA
+# newdata: A data frame or a matrix in which to look for variables with which to predict.
+# newdata must contain columns with the same names as the original data.
+# usage: predict(object, newdata, ...)
+set.seed(818)
+pred_uchi &lt;- predict(res.pca, uchi_score_mat)
+
+# extract values for plotting
+uchi_gs_df &lt;- uchi_score_mat %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble()
+uchi_gs_df$pc1 &lt;- pred_uchi$coord[, 1]
+uchi_gs_df$pc2 &lt;- pred_uchi$coord[, 2] 
+
+
+fviz_cluster(pam.res, 
+             stand = TRUE, 
+             axes = c(1:2), 
+             geom = &quot;point&quot;, 
+             show.clust.cent = FALSE) +
+  theme_classic2() +
+  scale_color_d3() +
+  scale_fill_d3() +
+  geom_point(data = uchi_gs_df, 
+             aes(x = pc1, y = pc2), 
+             color = &quot;red&quot;, 
+             shape = 19, 
+             size = 2.5) + 
+  geom_label(data = uchi_gs_df, aes(x = pc1, y = pc2, label = uchi_gs_df$sample_id))</code></pre>
+<p>Mutations Read in NCI mutation data</p>
+<pre class="r"><code># read in significance rank list from MutSig2CV
+mutsig_siggenes &lt;- read_delim(&quot;data/sig_genes.txt&quot;, &quot;\t&quot;)
+
+# read in final analysis MAF from MutSig2CV
+final_analysis_set &lt;- read_delim(
+  &quot;data/final_analysis_set.maf&quot;, &quot;\t&quot;)
+
+# repair nonstandard variant classification
+final_analysis_set$Variant_Classification &lt;- str_replace(final_analysis_set$Variant_Classification, &quot;Start_Codon_Del&quot;, &quot;Translation_Start_Site&quot;)
+
+final_analysis_set$Variant_Classification &lt;- str_replace(final_analysis_set$Variant_Classification, &quot;Stop_Codon_Ins&quot;, &quot;Nonstop_Mutation&quot;)
+
+final_analysis_set &lt;- as.data.frame(final_analysis_set)
+
+nci_mut_by_sample &lt;- final_analysis_set %&gt;%
+  dplyr::select(sample_id = Tumor_Sample_Barcode, Hugo_Symbol) %&gt;%
+  mutate(Hugo_Symbol = ifelse(Hugo_Symbol == &quot;MLL2&quot;, &quot;KMT2D&quot;, Hugo_Symbol)) %&gt;%
+  as_tibble() %&gt;%
+  print()
+  
+# remove duplicate mutations in the same patient and same gene
+unique_mut &lt;- nci_mut_by_sample %&gt;%
+  distinct(sample_id, Hugo_Symbol, .keep_all = TRUE) %&gt;%
+  print()
+
+clust_assgn &lt;- pdata %&gt;% 
+  dplyr::select(sample_id, pam_clust) %&gt;%
+  as_tibble() %&gt;%
+  print()
+
+# get the total n
+clust_assgn %&gt;% distinct(sample_id) %&gt;% nrow()
+
+mut_clust &lt;- unique_mut %&gt;%
+  left_join(clust_assgn) %&gt;%
+  print()
+
+# Get mutation counts per gene for each cluster and combine back to a single table
+
+# get number of cases in the cluster
+mut_clust %&gt;% dplyr::filter(pam_clust == &quot;1&quot;) %&gt;% distinct(sample_id) %&gt;% nrow()
+mut_clust %&gt;% dplyr::filter(pam_clust == &quot;2&quot;) %&gt;% distinct(sample_id) %&gt;% nrow()
+mut_clust %&gt;% dplyr::filter(pam_clust == &quot;3&quot;) %&gt;% distinct(sample_id) %&gt;% nrow()
+
+# get counts by gene for clusters and compare each cluster for significance against pooled counts from each other cluster
+
+# first get mutation counts for each gene per cluster and create column for counts of unmutated genes
+cluster_1 &lt;- mut_clust %&gt;%
+  dplyr::filter(pam_clust == &quot;1&quot;) %&gt;%
+  dplyr::select(-pam_clust) %&gt;%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %&gt;%
+  count(Hugo_Symbol) %&gt;%
+  dplyr::rename(c1_mut = n) %&gt;%
+  mutate(c1_nonmut = 279 - c1_mut) %&gt;%
+  print()
+
+cluster_2 &lt;- mut_clust %&gt;%
+  dplyr::filter(pam_clust == &quot;2&quot;) %&gt;%
+  dplyr::select(-pam_clust) %&gt;%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %&gt;%
+  count(Hugo_Symbol) %&gt;%
+  dplyr::rename(c2_mut = n) %&gt;%
+  mutate(c2_nonmut = 119 - c2_mut) %&gt;%
+  print() 
+
+cluster_3 &lt;- mut_clust %&gt;%
+  dplyr::filter(pam_clust == &quot;3&quot;) %&gt;%
+  dplyr::select(-pam_clust) %&gt;%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %&gt;%
+  count(Hugo_Symbol) %&gt;%
+  dplyr::rename(c3_mut = n) %&gt;%
+  mutate(c3_nonmut = 80 - c3_mut) %&gt;%
+  print() 
+
+mut_counts_by_cluster &lt;- cluster_1 %&gt;%
+  full_join(cluster_2) %&gt;%
+  full_join(cluster_3) %&gt;%
+  replace_na(list(c1_mut = 0, c2_mut = 0, c3_mut = 0)) %&gt;%
+  replace_na(list(c1_nonmut = 0, c2_nonmut = 0, c3_nonmut = 0)) %&gt;%
+  arrange(desc(c3_mut)) %&gt;%
+  print()
+
+mut_counts_matrix &lt;- as.data.frame(mut_counts_by_cluster) %&gt;%
+  column_to_rownames(var = &quot;Hugo_Symbol&quot;) %&gt;%
+  as.matrix()
+
+cutoff &lt;- 1189 * 0.05
+
+mut_counts_filtered &lt;- mut_counts_by_cluster %&gt;%
+  mutate(mut_totals = c1_mut + c2_mut + c3_mut) %&gt;%
+  filter(mut_totals &gt; cutoff) %&gt;%
+  print()
+
+clust1_vs_pool &lt;- mut_counts_filtered %&gt;%
+  mutate(pool_mut = c2_mut + c3_mut) %&gt;%
+  mutate(pool_nonmut = c2_nonmut + c3_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c1_mut, c1_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+sig &lt;- clust1_vs_pool %&gt;%
+  nest(-Hugo_Symbol) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  arrange(p.value)
+
+clust_1_summary &lt;- sig %&gt;%
+  left_join(clust1_vs_pool) %&gt;%
+  mutate(p_adj = p.adjust(p.value, method = &quot;BH&quot;)) %&gt;%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %&gt;%
+  mutate(c1_rate = c1_mut / (c1_mut + c1_nonmut)) %&gt;%
+  print()
+
+clust1_vs_pool &lt;- mut_counts_filtered %&gt;%
+  mutate(pool_mut = c2_mut + c3_mut) %&gt;%
+  mutate(pool_nonmut = c2_nonmut + c3_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c1_mut, c1_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+sig &lt;- clust1_vs_pool %&gt;%
+  nest(-Hugo_Symbol) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  arrange(p.value)
+
+clust_1_summary &lt;- sig %&gt;%
+  left_join(clust1_vs_pool) %&gt;%
+  mutate(p_adj = p.adjust(p.value, method = &quot;BH&quot;)) %&gt;%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %&gt;%
+  mutate(c1_rate = c1_mut / (c1_mut + c1_nonmut)) %&gt;%
+  print()</code></pre>
+<pre class="r"><code>clust2_vs_pool &lt;- mut_counts_filtered %&gt;%
+  mutate(pool_mut = c1_mut + c3_mut) %&gt;%
+  mutate(pool_nonmut = c1_nonmut + c3_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c2_mut, c2_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+sig &lt;- clust2_vs_pool %&gt;%
+  nest(-Hugo_Symbol) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  arrange(p.value)
+
+clust_2_summary &lt;- sig %&gt;%
+  left_join(clust2_vs_pool) %&gt;%
+  mutate(p_adj = p.adjust(p.value, method = &quot;BH&quot;)) %&gt;%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %&gt;%
+  print()</code></pre>
+<pre class="r"><code>clust3_vs_pool &lt;- mut_counts_filtered %&gt;%
+  mutate(pool_mut = c1_mut + c2_mut) %&gt;%
+  mutate(pool_nonmut = c1_nonmut + c2_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c3_mut, c3_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+sig &lt;- clust3_vs_pool %&gt;%
+  nest(-Hugo_Symbol) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  arrange(p.value)
+
+clust_3_summary &lt;- sig %&gt;%
+  left_join(clust3_vs_pool) %&gt;%
+  mutate(p_adj = p.adjust(p.value, method = &quot;BH&quot;)) %&gt;%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %&gt;%
+  print()</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
