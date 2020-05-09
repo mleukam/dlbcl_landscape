@@ -7,11 +7,15 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Setup
+# Setup
 
 Clear the workspace
 ```{r}
 rm(list = ls())
+```
+
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
 ```
 
 Load basic packages
@@ -38,7 +42,13 @@ names(ttable_list) <- c("cluster1_dge", "cluster2_dge", "cluster3_dge", "cluster
 gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
 ```
 
-## GO with clusterProfiler
+# GO Enrichment
+
+#### GO with TopGO
+
+https://bioconductor.org/packages/release/bioc/vignettes/topGO/inst/doc/topGO.pdf
+
+#### GO with clusterProfiler
 
 Vignettes and tutorials from the author used to generate this analysis:
 https://guangchuangyu.github.io/2016/01/go-analysis-using-clusterprofiler/
@@ -67,6 +77,7 @@ gencode_ent <- gencode_gtf %>%
   print()
 ```
 
+Decide which genes to use for enrichment
 ```{r}
 # set adjusted pval cutoff
 p_cut <- 0.001
@@ -105,22 +116,75 @@ str(go_gene_universe)
 # get enriched/overrepresented GO lists for cluster 1 DGE
 ego1 <- enrichGO(gene = go_gene_list[[1]],
                  OrgDb = org.Hs.eg.db,
-                 ont = "ALL",
+                 ont = "BP",
                  pvalueCutoff = 0.05,
                  pAdjustMethod = "BH",
                  universe = go_gene_universe,
                  qvalueCutoff = 0.1)
 # http://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/
 
-ego1_simp <- simplify(ego1, 
+# convert to gene names
+ego1 <- setReadable(ego1, OrgDb = org.Hs.eg.db)
+
+# plot
+dotplot(ego1, showCategory = 30)
+
+ego1_simp <- clusterProfiler::simplify(ego1, 
                       cutoff = 0.7,
                       by = "p.adjust",
                       select_fun = min)
-
-
 ```
 
-## GSEA
+```{r}
+# get enriched/overrepresented GO lists for cluster 2 DGE
+ego2 <- enrichGO(gene = go_gene_list[[2]],
+                 OrgDb = org.Hs.eg.db,
+                 ont = "BP",
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "BH",
+                 universe = go_gene_universe,
+                 qvalueCutoff = 0.1)
+# http://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/
+
+# convert to gene names
+ego2 <- setReadable(ego2, OrgDb = org.Hs.eg.db)
+
+# plot
+dotplot(ego2, showCategory = 30)
+
+ego2_simp <- clusterProfiler::simplify(ego2, 
+                      cutoff = 0.7,
+                      by = "p.adjust",
+                      select_fun = min)
+```
+
+```{r}
+# get enriched/overrepresented GO lists for cluster 3 DGE
+ego2 <- enrichGO(gene = go_gene_list[[3]],
+                 OrgDb = org.Hs.eg.db,
+                 ont = "BP",
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "BH",
+                 universe = go_gene_universe,
+                 qvalueCutoff = 0.1)
+# http://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/
+
+# convert to gene names
+ego2 <- setReadable(ego1, OrgDb = org.Hs.eg.db)
+
+# plot
+dotplot(ego2, showCategory = 30)
+
+ego2_simp <- clusterProfiler::simplify(ego2, 
+                      cutoff = 0.7,
+                      by = "p.adjust",
+                      select_fun = min)
+```
+
+
+# FGSEA
+
+#### Rank lists
 
 Filtering by FC and adjusted P-value
 ```{r}
@@ -177,7 +241,7 @@ m_df = msigdbr(species = "Homo sapiens")
 gs_df <- m_df %>%
   mutate(gs_idname = paste0(gs_cat, ".", gs_id, ".", gs_name)) %>%
   dplyr::select(gs_idname, entrez_gene) %>%
-  nest(key = entrez_gene) %>%
+  nest(data = entrez_gene) %>%
   arrange(desc(gs_idname))
 
 gs_list <- map(gs_df$data, pull) %>%
@@ -199,31 +263,50 @@ str(hall_gs_list)
 
 ```{r}
 # define function to run hallmark gsea on each toptable
-fgsea_hall_batch <- function(ranklist){
-  fgseaRes <- fgsea(pathways = hall_gs_list, 
-                  stats = ranklist,
-                  minSize = 15,
-                  maxSize = 200,
-                  nperm = 10000)
-  fgseaRes
+library(BiocParallel)
+
+fgsea_hallmark <- function(ranklist){
+  temp <- fgsea(pathways = hall_gs_list, 
+                                  stats = ranklist,
+                                  minSize = 15, 
+                                  maxSize = 500,
+                                  nperm = 10000)
+  
+  collapsedPathways <- collapsePathways(temp[order(pval)][padj < 0.01],
+                                        hall_gs_list, 
+                                        ranklist)
+  mainPathways <- temp[pathway %in% collapsedPathways$mainPathways][
+                         order(-NES)]
+  mainPathways
 }
 
 # apply function to list of cluster toptables
-hallmark_gsea_results <- map(rtable_list, fgsea_hall_batch)
+hallmark_gsea_results <- map(rtable_list, fgsea_hallmark)
 
 # review results
-map(hallmark_gsea_results, function(df){dplyr::select(df, "pathway", "ES", "padj") %>% arrange(ES)})
+# review results
+map(hallmark_gsea_results, function(df){as_tibble(df) %>% 
+    dplyr::filter(padj < 0.01) %>% 
+    dplyr::select("pathway", "ES", "padj") %>% 
+    arrange(desc(ES))})
+
 ```
 
 ```{r}
 # define function to run gsea on each toptable
 fgsea_batch <- function(ranklist){
-  fgseaRes <- fgsea(pathways = gs_list, 
-                  stats = ranklist,
-                  minSize = 15,
-                  maxSize = 1000,
-                  nperm = 10000)
-  fgseaRes
+  temp <- fgsea(pathways = gs_list, 
+                                  stats = ranklist,
+                                  minSize = 15, 
+                                  maxSize = 500,
+                                  nperm = 10000)
+  
+  collapsedPathways <- collapsePathways(temp[order(pval)][padj < 0.01],
+                                        gs_list, 
+                                        ranklist)
+  mainPathways <- temp[pathway %in% collapsedPathways$mainPathways][
+                         order(-NES)]
+  mainPathways
 }
 
 # apply function to list of cluster toptables
@@ -231,7 +314,6 @@ gsea_results <- map(rtable_list, fgsea_batch)
 
 # review results
 map(gsea_results, function(df){as_tibble(df) %>% 
-    dplyr::filter(padj < 0.01) %>% 
     dplyr::select("pathway", "ES", "padj") %>% 
     arrange(desc(ES))})
 ```
@@ -300,7 +382,8 @@ enframe(rtable_list[[4]]) %>%
   write_delim("output/clust4_vs_others_dge.rnk", delim = "\t", col_names = FALSE)
 ```
 
-## Hallmark GSEA
+#### Hallmark gene sets
+
 ```{r}
 # Get hallmark gene sets from MSigDb (human)
 msigdbr_show_species()
@@ -419,7 +502,7 @@ tail(ranks_clust4)
 summary(duplicated(names(ranks_clust4)))
 ```
 
-#### Hallmark gene sets only
+#### Hallmark GSEA
 
 Source: http://bioconductor.org/packages/devel/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html
 

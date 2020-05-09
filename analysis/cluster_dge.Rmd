@@ -14,6 +14,10 @@ Clear the workspace
 rm(list = ls())
 ```
 
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 Load packages
 ```{r}
 library("tidyverse")
@@ -24,6 +28,8 @@ library("ggdark")
 library("ggsci")
 library("viridis")
 library("sva")
+library(ggpubr)
+
 ```
 
 Read in data
@@ -79,7 +85,7 @@ dplot1 <- ggplot(tidy_counts, aes(intensity)) +
   theme(legend.position = "none") +
   xlim(-5, 100) +
   ggtitle("Density plot of counts for NCI DLBCL") +
-  dark_theme_gray()
+  theme_classic2()
 dplot1
 
 dplot2 <- ggplot(tidy_counts, aes(log(intensity))) +
@@ -87,7 +93,7 @@ dplot2 <- ggplot(tidy_counts, aes(log(intensity))) +
   theme(legend.position = "none") +
   xlim(-20, 20) +
   ggtitle("Density plot of log(counts) for NCI DLBCL") +
-  dark_theme_gray()
+  theme_classic2()
 dplot2
 ```
 
@@ -138,7 +144,7 @@ dplot1 <- ggplot(tidy_counts, aes(counts)) +
   theme(legend.position = "none") +
   xlim(-5, 100) +
   ggtitle("Density plot of filtered counts for NCI DLBCL") +
-  dark_theme_gray()
+  theme_classic2()
 dplot1
 
 dplot2 <- ggplot(tidy_counts, aes(log(counts))) +
@@ -451,6 +457,7 @@ head(design)
 
 # write out DGElist and design
 saveRDS(dge, "output/dgelist_for_limma.rds")
+saveRDS(pheno_data, "output/dgelist_pheno_data.rds")
 saveRDS(design, "output/design_for_limma.rds")
 ```
 
@@ -659,4 +666,5 @@ saveRDS(cluster2_dge, "output/cluster2_dge.rds")
 saveRDS(cluster3_dge, "output/cluster3_dge.rds")
 saveRDS(cluster4_dge, "output/cluster4_dge.rds")
 ```
+
 

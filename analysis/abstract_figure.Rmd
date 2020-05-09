@@ -16,12 +16,17 @@ Clear the workspace
 rm(list = ls())
 ```
 
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 Load packages
 ```{r}
 # core packages
 library("tidyverse")
 
 # analysis
+library(FactoMineR)
 
 # core imaging packages
 library("ggsci")
@@ -48,6 +53,13 @@ tpm_matrix <- exprs(tpm_cyt_es)
 # plot cytotoxic score on combined GSVA PCA plot
 dlbcl_pca <- PCA(pheno_data[, 2:126], graph = FALSE)
 
+# variables in each direction
+fviz_pca_var(dlbcl_pca)
+fviz_contrib(dlbcl_pca, choice = "var", axes = 1)
+fviz_contrib(dlbcl_pca, choice = "var", axes = 2)
+ggsave("output/var_contribution_axis2.pdf", plot = last_plot(), width = 22, height = 7, units = "in")
+
+# CYT score
 fviz_pca_ind(dlbcl_pca, 
              col.ind = log(pheno_data$CYT),
              label = "none",
@@ -62,6 +74,21 @@ fviz_pca_ind(dlbcl_pca,
   labs(title = "CYT score by cluster", subtitle = "Gene set expression PCA") +
   scale_color_viridis()
 
+# Plot for ASH presentation, no cluster lines
+cyt_pca <- fviz_pca_ind(dlbcl_pca, 
+             col.ind = log(pheno_data$CYT),
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "CYT score\n(log scale)") +
+  labs(title = "Cytolytic activity score") +
+  xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  scale_color_viridis()
+
+ggsave("output/ASH_ORAL_figures/cyt_pca.png", plot = cyt_pca, height = 4, width = 6, units = "in")
+
+##
 mean_table <- pheno_data %>%
   dplyr::select(CYT, clust) %>%
   group_by(clust) %>%
@@ -74,7 +101,7 @@ sig <- pheno_data %>%
   compare_means(CYT ~ clust, ., ) %>%
   print()
 
-# plot t-helper score on combined GSVA PCA plot
+# plot CD4 naive score on combined GSVA PCA plot
 fviz_pca_ind(dlbcl_pca, 
              col.ind = pheno_data$beijing_cd4_c1_ccr7_gs,
              label = "none",
@@ -86,11 +113,25 @@ fviz_pca_ind(dlbcl_pca,
                   show.legend = FALSE,
                   color = "black",
                   linetype = 1) +
-  labs(title = "CD4/C1/CCR7 score by cluster", 
+  labs(title = "CD4+ T-cell score", 
        subtitle = "Gene set expression PCA") +
   scale_color_viridis()
 
-# plot t-helper score on combined GSVA PCA plot
+# Plot for ASH presentation, no cluster lines
+cd4_pca <- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data$beijing_cd4_c1_ccr7_gs,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "GSVA\nscore") +
+  labs(title = "CD4+ T-cell single cell gene set expression") +
+  xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  scale_color_viridis()
+
+ggsave("output/ASH_ORAL_figures/cd4_pca.png", plot = cd4_pca, height = 4, width = 6, units = "in")
+
+# plot macrophage score on combined GSVA PCA plot
 fviz_pca_ind(dlbcl_pca, 
              col.ind = pheno_data$thor_tgfb_score_21050467,
              label = "none",
@@ -106,7 +147,201 @@ fviz_pca_ind(dlbcl_pca,
        subtitle = "Gene set expression PCA") +
   scale_color_viridis()
 
+# Plot for ASH presentation, no cluster lines
+tgfb_pca <- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data$thor_tgfb_score_21050467,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "GSVA\nscore") +
+  labs(title = "TGFbeta co-expression module gene set expression") +
+  xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  scale_color_viridis()
+
+ggsave("output/ASH_ORAL_figures/tgfb_pca.png", plot = tgfb_pca, height = 4, width = 6, units = "in")
+
+
 ```
 
-## Deconvolution
+## Deconvolution scores on cluster map 
+```{r}
+# read in Xcell results
+xc_results <- read_delim("output/xCell_combined_tpm_matrix_xCell_2225072019.txt", 
+                         "\t", 
+                         escape_double = FALSE, 
+                         trim_ws = TRUE) %>%
+  dplyr::rename(cell_type = X1) %>% 
+  as.data.frame() %>%
+  column_to_rownames(var = "cell_type") %>%
+  as.matrix %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+# merge xcell results with pca results
+pheno_data_xc <- pheno_data %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  left_join(xc_results) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id")
+
+dim(pheno_data_xc)
+colnames(pheno_data_xc)
+pheno_data_xc[1:5, 1:5]
+
+#---------------------------------------------
+
+# plot macrophage score on combined GSVA PCA plot
+decon_th1 <- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$`Th1 cells`,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "Xcell\nscore") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "Deconvolution score for Th1 cells", 
+       subtitle = "Gene set expression PCA") +
+  xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  scale_color_viridis()
+
+decon_th1
+
+ggsave("output/ASH_ORAL_figures/decon_th1.png", decon_th1, height = 4.2, width = 6, units = "in")
+
+#---------------------------------------------
+decon_th2 <- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$`Th2 cells`,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "Xcell\nscore") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "Deconvolution score for Th2 cells", 
+       subtitle = "Gene set expression PCA") +
+      xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  scale_color_viridis()
+
+decon_th2
+
+ggsave("output/ASH_ORAL_figures/decon_th2.png", decon_th2, height = 4.2, width = 6, units = "in")
+
+#---------------------------------------------
+decon_aDC <- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$aDC,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "Xcell\nscore") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "Deconvolution score for activated dendritic cells", 
+       subtitle = "Gene set expression PCA") +
+    xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  scale_color_viridis()
+
+decon_aDC
+
+ggsave("output/ASH_ORAL_figures/decon_dc.png", decon_aDC, height = 4.2, width = 6, units = "in")
+
+#--------------------------------------
+
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$Tregs,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "Xcell\nscore") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "Deconvolution score for Tregs", 
+       subtitle = "Gene set expression PCA") +
+    xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  scale_color_viridis()
+
+#--------------------------------------
+decon_m1 <- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$`Macrophages M1`,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "Xcell\nscore") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "Deconvolution score for M1 Macrophages", 
+       subtitle = "Gene set expression PCA") +
+    xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  scale_color_viridis()
+
+decon_m1
+
+ggsave("output/ASH_ORAL_figures/decon_m1.png", decon_m1, height = 4.2, width = 6, units = "in")
+#--------------------------------------
+
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$`Macrophages M2`,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "Xcell\nscore") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "Deconvolution score for M2 Macrophages", 
+       subtitle = "Gene set expression PCA") +
+    xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  scale_color_viridis()
+
+#--------------------------------------------
+
+decon_cd8 <- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$`CD8+ T-cells`,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "Xcell\nscore") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "Deconvolution score for CD8+ T-cells", 
+       subtitle = "Gene set expression PCA") +
+    xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  scale_color_viridis()
+
+decon_cd8
+
+ggsave("output/ASH_ORAL_figures/decon_cd8.png", decon_cd8, height = 4.2, width = 6, units = "in")
+```
 

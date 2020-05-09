@@ -34,6 +34,10 @@ Clear workspace
 rm(list = ls())
 ```
 
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 Load packages
 ```{r}
 library("tidyverse")
@@ -152,13 +156,13 @@ expr_duke[1:5, 1:5]
 # gencode v29 was used to generate rownames of expr_duke matrix
 # GDC standard is gencode v22, which is source of NCI data
 # will convert to gencode v22 to match rows of NCI data
-geneID_split <- str_split(gencode_gtf$gene_id, pattern = "\\.", simplify = TRUE) %>% 
+geneID_split <- str_split(gencode_gtf$gene_id, pattern = "\\.", simplify = TRUE) %>%
   as_tibble() %>%
   dplyr::select(geneID_split = V1)
 
 gencode_gtf_split <- gencode_gtf %>% 
   bind_cols(geneID_split) %>%
-  dplyr::select(gene_id_v22 = gene_id, geneID_split, everything()) %>%
+  dplyr::select(gene_id_v22 = gene_id, gene_name, geneID_split, everything()) %>%
   print()
 
 row__names <- rownames(expr_duke) %>%
@@ -182,8 +186,20 @@ expr_duke_df <- expr_duke %>%
   dplyr::select(-gene_status, -gene_name, -level, -havana_gene) %>%
   print()
 
+# same but for hugo gene names
+expr_duke_hgnc <- expr_duke %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id_v29") %>%
+  as_tibble() %>%
+  mutate(geneID_split = str_replace(gene_id_v29, pattern = "\\.*", "")) %>%
+  dplyr::select(gene_id_v29, geneID_split, everything()) %>%
+  left_join(gencode_gtf_split) %>%
+  dplyr::select(gene_name, geneID_split, gene_type, everything()) %>%
+  dplyr::select(-gene_status, -gene_id_v29, -gene_id_v22, -level, -havana_gene) %>%
+  print()
+
 # check how many gene ids are missing from version 22  
-summary(is.na(expr_duke_df$gene_id_v22))
+summary(is.na(expr_duke_hgnc$gene_name))
 
 # check the gene types in the expression matrix
 summary(as.factor(expr_duke_df$gene_type))
@@ -193,6 +209,9 @@ summary(as.factor(expr_duke_df$gene_type))
 ```{r}
 # filter for protein coding genes only
 expr_duke_filtered <- expr_duke_df %>% 
+  dplyr::filter(gene_type == "protein_coding")
+
+expr_duke_hgnc_filtered <- expr_duke_hgnc %>% 
   dplyr::filter(gene_type == "protein_coding")
   
 # any missing gene ids also protein coding genes?
@@ -204,22 +223,35 @@ expr_duke_protcoding <- expr_duke_filtered %>%
   as.data.frame() %>%
   column_to_rownames(var = "gene_id_v22") %>%
   as.matrix()
-
 str(expr_duke_protcoding)
 expr_duke_protcoding[1:5, 1:5]
+
+expr_duke_hgnc_protcoding <- expr_duke_hgnc_filtered %>%
+  dplyr::select(-geneID_split, -gene_type, -gene_name) %>%
+  as.matrix()
+rownames(expr_duke_hgnc_protcoding) <- expr_duke_hgnc_filtered$gene_name
+expr_duke_hgnc_protcoding_ave <- avereps(expr_duke_hgnc_protcoding)
+str(expr_duke_hgnc_protcoding_ave)
+expr_duke_hgnc_protcoding_ave[1:5, 1:5]
 ```
 
 #### Subset cases based on protein coding library coverage
 ```{r}
 expr_duke_protcoding[1:5, 1:5]
 
+expr_duke_hgnc_protcoding_ave[1:5, 1:5]
+
 gene_coverage_threshold <- 12000
 
 ncol(expr_duke_protcoding)
 expr_duke_subset <- expr_duke_protcoding[, colSums(expr_duke_protcoding != 0) > gene_coverage_threshold]
-
 expr_duke_subset[1:5, 1:5]
 ncol(expr_duke_subset)
+
+ncol(expr_duke_hgnc_protcoding_ave)
+expr_duke_hgnc_subset <- expr_duke_hgnc_protcoding_ave[, colSums(expr_duke_hgnc_protcoding_ave != 0) > gene_coverage_threshold]
+expr_duke_hgnc_subset[1:5, 1:5]
+ncol(expr_duke_hgnc_subset)
 ```
 
 #### Convert to CPM
@@ -228,7 +260,39 @@ ncol(expr_duke_subset)
 expr_duke_cpm <- cpm(expr_duke_subset, log = FALSE)
 str(expr_duke_cpm)
 expr_duke_cpm[1:5, 1:5]
+
+expr_duke_hgnc_cpm <- cpm(expr_duke_hgnc_subset, log = FALSE)
+str(expr_duke_hgnc_cpm)
+expr_duke_hgnc_cpm[1:5, 1:5]
+
 ```
+
+Write out mixture file for deconvolution
+```{r}
+# TMM normalization
+hgnc_norm_factors <- calcNormFactors(expr_duke_hgnc_cpm, method = "TMM")
+summary(hgnc_norm_factors)
+
+# convert expression matrix to dataframe
+expr_duke_hgnc_cpm_df <- as.data.frame(expr_duke_hgnc_cpm)
+
+# apply factor to each column
+total_cpm_norm_duke <- map2_dfc(expr_duke_hgnc_cpm_df, hgnc_norm_factors, `*`)
+total_cpm_norm_duke <- as.data.frame(expr_duke_hgnc_cpm_df)
+total_cpm_norm_duke[1:5, 1:5]
+str(total_cpm_norm_duke)
+duke_dlbcl_mixture <- total_cpm_norm_duke %>%
+  rownames_to_column(var = "GeneSymbol") %>%
+  as_tibble() %>%
+  print()
+
+write_delim(duke_dlbcl_mixture, 
+            "output/duke_dlbcl_mixture.tsv",
+            delim = "\t",
+            col_names = TRUE)
+
+```
+
 
 #### Initial density plots
 ```{r}

@@ -14,6 +14,10 @@ Clear the workspace
 rm(list = ls())
 ```
 
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 Load packages
 ```{r}
 library(maftools)
@@ -22,6 +26,9 @@ library(RColorBrewer)
 library(knitr)
 library(ggpubr)
 library(ggsci)
+library(Biobase)
+library(BiocGenerics)
+library(parallel)
 ```
 
 ## Read in and clean data
@@ -80,6 +87,17 @@ unique_mut <- combined_mut %>%
 
 nrow(combined_mut)
 nrow(unique_mut)
+```
+
+#### Read in deconvolution data
+```{r}
+nci_decon <- read_csv("data/cibersort/NCI/abs_cell_number_estimate_022320/CIBERSORTx_Job2_Results.csv")
+
+duke_decon <- read_csv("data/cibersort/Duke/abs_cell_number_estimate_022320/CIBERSORTx_Job3_Results.csv")
+
+combined_decon <- nci_decon %>%
+  bind_rows(duke_decon) %>%
+  print()
 ```
 
 Read in cluster assignment and combine
@@ -153,6 +171,7 @@ cluster_4 <- mut_clust %>%
   dplyr::rename(c4_mut = n) %>%
   mutate(c4_nonmut = 317 - c4_mut) %>%
   print() 
+
 mut_counts_by_cluster <- cluster_1 %>%
   full_join(cluster_2) %>%
   full_join(cluster_3) %>%
@@ -211,6 +230,20 @@ clust_1_summary <- sig %>%
   dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
   mutate(c1_rate = c1_mut / (c1_mut + c1_nonmut)) %>%
   print()
+
+clust_1_plotdata <- clust_1_summary %>%
+  mutate(pool_rate = pool_mut / pool_nonmut) %>%
+  select(Hugo_Symbol, c1_rate, pool_rate, p_adj) %>%
+  pivot_longer(cols = c(c1_rate, pool_rate),
+               names_to = "c1_vs_pool", 
+               values_to = "mut_rate") %>%
+  dplyr::filter(p_adj < 0.26)
+clust_1_plotdata
+
+clust_1_plot <- ggplot(data = clust_1_plotdata,
+                       aes(x = Hugo_Symbol, y = mut_rate, group = c1_vs_pool, fill = c1_vs_pool)) +
+  geom_col(position = "dodge")
+clust_1_plot
 ```
 
 ```{r}
@@ -395,7 +428,38 @@ clust4_clust1_summary <- sig %>%
   left_join(clust4_vs_clust1) %>%
   mutate(p_adj = p.adjust(p.value, method = "BH")) %>%
   dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
+  arrange(p_adj) %>%
   print()
+
+clust_14_plotdata <- clust4_clust1_summary %>%
+  mutate(c4_rate = c4_mut / (c4_nonmut + c4_mut)) %>%
+  mutate(c1_rate = c1_mut / (c1_nonmut + c1_mut) ) %>%
+  mutate(difference = (c4_rate - c1_rate)^2) %>%
+  arrange(desc(difference)) %>%
+  slice(1:10) %>%
+  select(Hugo_Symbol, c1_rate, c4_rate, difference) %>%
+  mutate(Hugo_Symbol = as_factor(Hugo_Symbol)) %>%
+  mutate(Hugo_Symbol = fct_reorder(Hugo_Symbol, difference, .desc = TRUE)) %>%
+  pivot_longer(cols = c(c1_rate, c4_rate),
+               names_to = "c1_vs_c4", 
+               values_to = "mut_rate") %>%
+  mutate(c1_vs_c4 = as.factor(c1_vs_c4)) %>%
+  mutate(c1_vs_c4 = fct_recode(c1_vs_c4, "Inflamed" = "c4_rate",
+                               "Cold" = "c1_rate")) %>%
+  mutate(c1_vs_c4 = fct_relevel(c1_vs_c4, "Cold", "Inflamed")) %>%
+  print()
+
+clust_14_plot <- ggplot(data = clust_14_plotdata,
+                       aes(x = Hugo_Symbol, 
+                           y = mut_rate, 
+                           group = c1_vs_c4, 
+                           fill = c1_vs_c4)) +
+  geom_col(position = "dodge") +
+  theme_classic2() +
+  scale_fill_d3(name = "Cluster") +
+  xlab("") +
+  ylab("Mutation Rate")
+clust_14_plot
 
 # Test significance in intermedite clusters compared to each other
 clust2_vs_clust3 <- mut_counts_filtered %>%
@@ -416,6 +480,37 @@ clust2_clust3_summary <- sig %>%
   mutate(p_adj = p.adjust(p.value, method = "BH")) %>%
   dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
   print()
+
+clust_23_plotdata <- clust2_clust3_summary %>%
+  mutate(c2_rate = c2_mut / (c2_nonmut + c2_mut) ) %>%
+  mutate(c3_rate = c3_mut / (c3_nonmut + c3_mut) ) %>%
+  mutate(difference = (c3_rate - c2_rate)^2) %>%
+  arrange(desc(difference)) %>%
+  slice(1:10) %>%
+  select(Hugo_Symbol, c2_rate, c3_rate, difference) %>%
+  mutate(Hugo_Symbol = as_factor(Hugo_Symbol)) %>%
+  mutate(Hugo_Symbol = fct_reorder(Hugo_Symbol, difference, .desc = TRUE)) %>%
+  pivot_longer(cols = c(c2_rate, c3_rate),
+               names_to = "c2_vs_c3", 
+               values_to = "mut_rate") %>%
+  mutate(c2_vs_c3 = as.factor(c2_vs_c3)) %>%
+  mutate(c2_vs_c3 = fct_recode(c2_vs_c3, "Intermediate-T" = "c2_rate",
+                               "Intermediate-M" = "c3_rate")) %>%
+  mutate(c2_vs_c3 = fct_relevel(c2_vs_c3, "Intermediate-T", "Intermediate-M")) %>%
+  print()
+
+clust_23_plot <- ggplot(data = clust_23_plotdata,
+                       aes(x = Hugo_Symbol, 
+                           y = mut_rate, 
+                           group = c2_vs_c3, 
+                           fill = c2_vs_c3)) +
+  geom_col(position = "dodge") +
+  theme_classic2() +
+  scale_fill_d3(name = "Cluster") +
+  xlab("") +
+  ylab("Mutation Rate")
+clust_23_plot
+
 ```
 
 ## g:Profiler input
@@ -435,6 +530,8 @@ cluster_1_maf <- mut_clust %>%
   mutate(MAF = c1_mut/352) %>%
   arrange(desc(MAF)) %>%
   left_join(mut_counts_by_cluster) %>%
+  # filter out MAF with at least 1% MAF
+  dplyr::filter(MAF > 0.01) %>%
   print()
   
 clust1_vs_pool <- cluster_1_maf %>%
@@ -444,19 +541,327 @@ clust1_vs_pool <- cluster_1_maf %>%
   print()
 
 clust_1_ranked <- clust1_vs_pool %>%
-  nest(-Hugo_Symbol) %>%
+  nest(data = c(c1_mut, c1_nonmut, pool_mut, pool_nonmut)) %>%
   mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
   mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
   mutate(stats = map(fisher, ~broom::glance(.x))) %>%
   unnest(stats) %>%
   dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
-  dplyr::filter(p.value < 0.05) %>%
+  # dplyr::filter(p.value < 0.05) %>%
   left_join(cluster_1_maf) %>%
-  arrange(MAF) %>%
+  arrange(desc(MAF)) %>%
   dplyr::select(Hugo_Symbol) %>%
   print()
 
-write_delim(clust_1_ranked, "output/clust1_mut_ranked_p05.tsv", delim = "\t", col_names = FALSE)
+#-----------------------------------
+cluster_2_maf <- mut_clust %>%
+  dplyr::filter(clust == "2") %>%
+  dplyr::select(-clust) %>%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %>%
+  count(Hugo_Symbol) %>%
+  dplyr::rename(c2_mut = n) %>%
+  mutate(MAF = c2_mut/277) %>%
+  arrange(desc(MAF)) %>%
+  left_join(mut_counts_by_cluster) %>%
+  # filter out MAF with at least 1% MAF
+  dplyr::filter(MAF > 0.01) %>%
+  print()
+  
+clust2_vs_pool <- cluster_2_maf %>%
+  mutate(pool_mut = c1_mut + c3_mut + c4_mut) %>%
+  mutate(pool_nonmut = c1_nonmut + c3_nonmut + c4_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c2_mut, c2_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+clust_2_ranked <- clust2_vs_pool %>%
+  nest(data = c(c2_mut, c2_nonmut, pool_mut, pool_nonmut)) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  # dplyr::filter(p.value < 0.05) %>%
+  left_join(cluster_2_maf) %>%
+  arrange(desc(MAF)) %>%
+  dplyr::select(Hugo_Symbol) %>%
+  print()
+
+#-----------------------------------
+cluster_3_maf <- mut_clust %>%
+  dplyr::filter(clust == "3") %>%
+  dplyr::select(-clust) %>%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %>%
+  count(Hugo_Symbol) %>%
+  dplyr::rename(c3_mut = n) %>%
+  mutate(MAF = c3_mut/222) %>%
+  arrange(desc(MAF)) %>%
+  left_join(mut_counts_by_cluster) %>%
+  # filter out MAF with at least 1% MAF
+  dplyr::filter(MAF > 0.01) %>%
+  print()
+  
+clust3_vs_pool <- cluster_3_maf %>%
+  mutate(pool_mut = c2_mut + c1_mut + c4_mut) %>%
+  mutate(pool_nonmut = c2_nonmut + c1_nonmut + c4_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c3_mut, c3_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+clust_3_ranked <- clust3_vs_pool %>%
+  nest(data = c(c3_mut, c3_nonmut, pool_mut, pool_nonmut)) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  # dplyr::filter(p.value < 0.05) %>%
+  left_join(cluster_3_maf) %>%
+  arrange(desc(MAF)) %>%
+  dplyr::select(Hugo_Symbol) %>%
+  print()
+
+#-----------------------------------
+cluster_4_maf <- mut_clust %>%
+  dplyr::filter(clust == "4") %>%
+  dplyr::select(-clust) %>%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %>%
+  count(Hugo_Symbol) %>%
+  dplyr::rename(c4_mut = n) %>%
+  mutate(MAF = c4_mut/317) %>%
+  arrange(desc(MAF)) %>%
+  left_join(mut_counts_by_cluster) %>%
+  # filter out MAF with at least 1% MAF
+  dplyr::filter(MAF > 0.01) %>%
+  print()
+  
+clust4_vs_pool <- cluster_4_maf %>%
+  mutate(pool_mut = c2_mut + c1_mut + c3_mut) %>%
+  mutate(pool_nonmut = c2_nonmut + c1_nonmut + c3_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c4_mut, c4_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+clust_4_ranked <- clust4_vs_pool %>%
+  nest(data = c(c4_mut, c4_nonmut, pool_mut, pool_nonmut)) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  # dplyr::filter(p.value < 0.05) %>%
+  left_join(cluster_4_maf) %>%
+  arrange(desc(MAF)) %>%
+  dplyr::select(Hugo_Symbol) %>%
+  print()
+
+#-----------------------------------
+
+mutations <- list(c1 = pull(clust_1_ranked, Hugo_Symbol), c2 = pull(clust_2_ranked, Hugo_Symbol), c3 = pull(clust_3_ranked, Hugo_Symbol), c4 = pull(clust_4_ranked, Hugo_Symbol))
+
+library(gprofiler2)
+gostres <- gost(query = mutations,
+                organism = "hsapiens", 
+                ordered_query = TRUE, 
+                multi_query = TRUE, 
+                significant = TRUE, 
+                exclude_iea = FALSE, 
+                measure_underrepresentation = FALSE, 
+                evcodes = FALSE, 
+                user_threshold = 0.05, 
+                correction_method = "g_SCS", 
+                domain_scope = "annotated", 
+                custom_bg = NULL, 
+                numeric_ns = "", 
+                sources = NULL, 
+                as_short_link = TRUE)
+gostres
+
+
 ```
 
+## Display mutation density versus PCA from GSVA v4/v5
+```{r}
+dlbcl_pca <- readRDS("output/dlbcl_gsva5_4cluster_pca.rds")
+dlbcl_hcpc <- readRDS("output/dlbcl_gsva5_4cluster_hcpc.rds")
 
+hcpc_clust <- dlbcl_hcpc$data.clust %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  dplyr::select(sample_id, clust)
+
+# get coordinates for each sample and merge with total mutation data
+# merge with cluster assignment
+pca_ind_coord <- dlbcl_pca$ind$coord %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  left_join(unique_mut) %>%
+  left_join(hcpc_clust) %>%
+  print()
+
+pca_ind_coord %>%
+  group_by(Hugo_Symbol) %>%
+  summarize(mean_dim1 = mean(Dim.1), n = n()) %>%
+  dplyr::filter(n > 25) %>%
+  arrange(desc(mean_dim1))
+
+pca_ind_coord %>%
+  group_by(Hugo_Symbol) %>%
+  summarize(mean_dim2 = mean(Dim.2), n = n()) %>%
+  dplyr::filter(n > 25) %>%
+  arrange(desc(mean_dim2))
+```
+
+MYD88
+```{r}
+pca_ind_coord %>%
+  dplyr::filter(Hugo_Symbol == "MYD88") %>%
+  ggplot(aes(x = Dim.1, y = Dim.2)) + 
+    geom_bin2d(bins = 8) +
+    scale_fill_continuous(type = "viridis") +
+    theme_classic2()
+
+pca_ind_coord %>%
+  dplyr::filter(Hugo_Symbol == "MYD88") %>%
+  ggplot(aes(x = Dim.1)) +
+  geom_density() +
+  geom_vline(xintercept = 0) +
+  geom_vline(aes(xintercept = mean(Dim.1)), 
+             color = "blue", 
+             linetype = "dashed", 
+             size = 1)
+```
+
+MYC
+```{r}
+pca_ind_coord %>%
+  dplyr::filter(Hugo_Symbol == "MYC") %>%
+  ggplot(aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 12) +
+    scale_fill_continuous(type = "viridis") +
+    theme_classic2()
+
+pca_ind_coord %>%
+  dplyr::filter(Hugo_Symbol == "EZH2") %>%
+  ggplot(aes(x = Dim.1)) +
+  geom_density() +
+  geom_vline(xintercept = 0) +
+  geom_vline(aes(xintercept = mean(Dim.1)), 
+             color = "blue", 
+             linetype = "dashed", 
+             size = 1) +
+  theme_classic2() +
+  ylab("Mutation frequency")
+```
+
+TP53
+```{r}
+tp53_ind_coord <- pca_ind_coord %>%
+  dplyr::filter(Hugo_Symbol == "TP53")
+
+ggplot(data = tp53_ind_coord,
+       aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 12) +
+    scale_fill_continuous(type = "viridis") +
+    theme_classic2()
+
+ggplot(data = tp53_ind_coord,
+       aes(x = Dim.1)) +
+  geom_density() +
+  geom_vline(xintercept = 0) +
+  geom_vline(data = tp53_ind_coord,
+             aes(xintercept = mean(Dim.1)), 
+             color = "blue", 
+             linetype = "dashed", 
+             size = 1) +
+  theme_classic2() +
+  ylab("Mutation frequency") +
+  geom_density(data = tp53_ind_coord, aes(x = Dim.2)) +
+  geom_vline(data = tp53_ind_coord,
+             aes(xintercept = mean(Dim.1)), 
+             color = "red", 
+             linetype = "dashed", 
+             size = 1)
+```
+
+SOCS1
+```{r}
+socs1_ind_coord <- pca_ind_coord %>%
+  dplyr::filter(Hugo_Symbol == "SOCS1")
+
+foxo1_ind_coord <- pca_ind_coord %>%
+  dplyr::filter(Hugo_Symbol == "FOXO1")
+
+ggplot(data = socs1_ind_coord,
+       aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 12) +
+    scale_fill_continuous(type = "viridis") +
+    theme_classic2()
+
+ggplot(data = foxo1_ind_coord,
+       aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 10) +
+    scale_fill_continuous(type = "viridis") +
+    theme_classic2()
+
+ggplot(data = socs1_ind_coord,
+       aes(x = Dim.1)) +
+  geom_density(color = "blue") +
+  geom_vline(xintercept = 0) +
+  geom_vline(data = socs1_ind_coord,
+             aes(xintercept = mean(Dim.1)), 
+             color = "blue", 
+             linetype = "dashed", 
+             size = 1) +
+  theme_classic2() +
+  ylab("Mutation frequency") +
+  geom_density(data = foxo1_ind_coord, aes(x = Dim.1), color = "red") +
+  geom_vline(data = foxo1_ind_coord,
+             aes(xintercept = mean(Dim.1)), 
+             color = "red", 
+             linetype = "dashed", 
+             size = 1)
+
+jak1_ind_coord <- pca_ind_coord %>%
+  dplyr::filter(Hugo_Symbol == "JAK1")
+
+s1pr2_ind_coord <- pca_ind_coord %>%
+  dplyr::filter(Hugo_Symbol == "S1PR2")
+
+ggplot(data = jak1_ind_coord,
+       aes(x = Dim.2)) +
+  geom_density(color = "red") +
+  geom_vline(xintercept = 0) +
+  geom_vline(data = jak1_ind_coord,
+             aes(xintercept = mean(Dim.2)), 
+             color = "red", 
+             linetype = "dashed", 
+             size = 1) +
+  theme_classic2() +
+  ylab("Mutation frequency") +
+  geom_density(data = s1pr2_ind_coord, aes(x = Dim.2), color = "blue") +
+  geom_vline(data = s1pr2_ind_coord,
+             aes(xintercept = mean(Dim.2)), 
+             color = "blue", 
+             linetype = "dashed", 
+             size = 1)
+
+ggplot(data = s1pr2_ind_coord,
+       aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 5) +
+    scale_fill_continuous(type = "viridis") +
+    theme_classic2() +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "grey", size = 1)
+
+ggplot(data = jak1_ind_coord,
+       aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 5) +
+    scale_fill_continuous(type = "viridis") +
+    theme_classic2() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey", size = 1)
+
+```
+
+SOCS1, oncogene or tumor suppressor: https://www.sciencedirect.com/science/article/abs/pii/S1043466616300059
