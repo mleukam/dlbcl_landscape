@@ -11,9 +11,9 @@
 
 <meta name="author" content="mleukam" />
 
-<meta name="date" content="2019-06-27" />
+<meta name="date" content="2020-01-23" />
 
-<title>Merge Duke and NCI datasets</title>
+<title>visualizing_gsva_scores_5</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -377,9 +377,9 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Merge Duke and NCI datasets</h1>
+<h1 class="title toc-ignore">visualizing_gsva_scores_5</h1>
 <h4 class="author">mleukam</h4>
-<h4 class="date">2019-06-27</h4>
+<h4 class="date">2020-01-23</h4>
 
 </div>
 
@@ -697,7 +697,7 @@ Message
 Rmd
 </td>
 <td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/3b9db7d138cc2bb849acc70f8218adc98120712a/analysis/merge.Rmd" target="_blank">3b9db7d</a>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/3b9db7d138cc2bb849acc70f8218adc98120712a/analysis/visualizing_gsva_scores_5.Rmd" target="_blank">3b9db7d</a>
 </td>
 <td>
 mleukam
@@ -709,142 +709,6 @@ mleukam
 wflow_publish(c(“analysis/merge.Rmd”, “analysis/mif.Rmd”,
 </td>
 </tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/f1ed7b84631b39254e3501bf48f0c8c4a881e54f/docs/merge.html" target="_blank">f1ed7b8</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-07-14
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/fe5d4fd9041e164bdf73f0c225e86c757de78434/analysis/merge.Rmd" target="_blank">fe5d4fd</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-07-14
-</td>
-<td>
-fixed duke raw counts
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/f8d62657160144c0f130a04e653dec62c00690e7/docs/merge.html" target="_blank">f8d6265</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-07-02
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/8ec17b0e52437052b3a76c521495fce411c69e01/analysis/merge.Rmd" target="_blank">8ec17b0</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-07-02
-</td>
-<td>
-new gene sets for take 2 GSVA
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/10b3bdd301c7bc263f5a0a0aed8cda5167a2eca9/docs/merge.html" target="_blank">10b3bdd</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-30
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/d9718424cb00f80972c6f9255b3db01b0c1f815a/analysis/merge.Rmd" target="_blank">d971842</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-30
-</td>
-<td>
-working notebook for merging expression and phenotype
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/5a57ec091786bd8b0362d31767fd966d90be89cd/docs/merge.html" target="_blank">5a57ec0</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-28
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/42da9d5893be09775a582da78b8bec151d4ea9bf/analysis/merge.Rmd" target="_blank">42da9d5</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-28
-</td>
-<td>
-major overhaul of Duke count processing, updates of NCI pheno data
-</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -852,404 +716,448 @@ major overhaul of Duke count processing, updates of NCI pheno data
 </div>
 </div>
 </div>
-<p>The purpose of this notebook is to merge the RNAseq data from NCI (downloaded as raw counts from GDC) and Duke (processed from sequence data) into a single gene expression matrix.</p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+</div>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
-<p>Clear workspace</p>
-<pre class="r"><code>rm(list = ls())</code></pre>
+<pre class="r"><code># Clear the workspace
+rm(list = ls())</code></pre>
 <pre class="r"><code>knitr::opts_chunk$set(eval = FALSE)</code></pre>
+<pre class="r"><code># store base R plotting parameters at startup for later reset
+.pardefault &lt;- par(no.readonly = T)
+
+# set seed
+set.seed(818)</code></pre>
 <p>Load packages</p>
-<pre class="r"><code>library(&quot;tidyverse&quot;)
-library(&quot;sva&quot;)
-library(&quot;Biobase&quot;)
-library(&quot;viridis&quot;)
-library(&quot;ggdark&quot;)
-library(&quot;jcolors&quot;)
+<pre class="r"><code>library(&quot;Biobase&quot;)
+library(&quot;factoextra&quot;)
+library(&quot;FactoMineR&quot;)
+library(&quot;ggConvexHull&quot;)
 library(&quot;ggsci&quot;)
-library(&quot;ggpubr&quot;)</code></pre>
-<p>Read in expressionsets</p>
-<pre class="r"><code>duke_es &lt;- readRDS(&quot;output/duke_expressionset_pext.rds&quot;)
+library(&quot;ggpubr&quot;)
+library(&quot;viridis&quot;)
+library(&quot;tidyverse&quot;)
+library(&quot;ComplexHeatmap&quot;)
+library(&quot;caTools&quot;)</code></pre>
+<p>note: after using ggdark, need to restore defaults of fill/color with: “invert_geom_defaults()”</p>
+<p>Read in combined expression set (for pheno data) and GSVA scores</p>
+<pre class="r"><code>gs_matrix &lt;- readRDS(&quot;output/dlbcl_total_immune_gset_v4_results.rds&quot;)
+gs_matrix[, 1:5]
+str(gs_matrix)
 
-nci_es &lt;- readRDS(&quot;output/nci_expressionset_pext.rds&quot;)</code></pre>
-</div>
-<div id="batch-correction-duke-expression-data" class="section level2">
-<h2>Batch correction Duke expression data</h2>
-<p>Following examples and suggestions in vignette here: <a href="https://bioconductor.org/packages/release/bioc/vignettes/sva/inst/doc/sva.pdf" class="uri">https://bioconductor.org/packages/release/bioc/vignettes/sva/inst/doc/sva.pdf</a> and examples here: <a href="http://jtleek.com/genstats/inst/doc/02_13_batch-effects.html" class="uri">http://jtleek.com/genstats/inst/doc/02_13_batch-effects.html</a></p>
-<p>Duke expression data did not go through GDC pipeline and may contain batch effects carried over from raw sequence data. Duke pheno data includes lanes, which will be examined for batch effect using SVA ComBat function</p>
-<pre class="r"><code>pheno &lt;- pData(duke_es)
-edata &lt;- exprs(duke_es)
+combined_es &lt;- readRDS(&quot;output/combined_expressionset.rds&quot;)
+pheno_data &lt;- pData(combined_es)</code></pre>
+<p>Select gene sets from initial library</p>
+<pre class="r"><code>gset_ids_complete_4 &lt;- readRDS(&quot;output/gset_ids_complete_4.rds&quot;)
+gset_ids_complete_4
 
-# There is a single &quot;NA&quot; value in the lane assignments. Will review and decide whether to keep or not for further analysis
-which(is.na(pheno$lane))
-pheno[225,]
-
-# The sample looks otherwise complete and with a large enough library size compared to others. Will set to &quot;unknown&quot; and keep. Because one batch now will only have one member, will have to adjust means only and not variance (cannot calculate variance from one sample)
-
-# The ComBat function adjusts for known batches using an empirical Bayesian framework. In order to use the function, you must have a known batch variable in your dataset.
-batch = pheno$lane %&gt;% as.data.frame() %&gt;%
-  dplyr::rename(lane = 1) %&gt;%
-  mutate(lane = as.character(lane)) %&gt;%
-  replace(is.na(.), &quot;unknown&quot;) %&gt;%
-  mutate(lane = as.factor(lane)) %&gt;%
-  pull(lane)
-summary(batch)
-# Note that adjustment variables will be treated as given to the ComBat function. This means if you are trying to adjust for a categorical variable with p different levels, you will need to give ComBat p-1 indicator variables for this covariate.
-modlane &lt;- model.matrix(~ lane, data = pheno)
-
-# We need to create a model matrix for the adjustment variables, including the variable of interest. Note that you do not include batch in creating this model matrix - it will be included later in the ComBat function. In this case there are no other adjustment variables so we simply fit an intercept term.
-modcombat &lt;- model.matrix(~ 1, data = pheno)
-
-# apply combat to get &quot;cleaned data matrix&quot;
-# will use the mean.only=TRUE option for correction for lanes that only adjusts the mean of the batch effects across batches (default adjusts the mean and variance). This option is recommended for cases where milder batch effects are expected (so no need to adjust the variance), or in cases where the variances are expected to be different across batches due to the biology.
-
-# plot the before
-batch_df &lt;- enframe(batch) %&gt;%
-  dplyr::select(lane = value)
-edata_df &lt;- as.data.frame(t(edata)) %&gt;%
-  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
-  as_tibble() %&gt;%
-  bind_cols(batch_df) %&gt;%
-  dplyr::select(sample_id, lane, everything()) %&gt;%
-  gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id, -lane) %&gt;%
-  group_by(lane) %&gt;%
+names.initial &lt;- names(gset_ids_complete_4) %&gt;%
+  enframe() %&gt;%
+  dplyr::select(gs_name = value) %&gt;%
   print()
 
-before_box &lt;- ggplot(edata_df, 
-                     aes(x = lane,
-                         y = intensity, 
-                         group = lane)) +
-  geom_boxplot(aes(fill = lane)) +
-  geom_hline(yintercept = 5, 
-             color = &quot;#767676&quot;, 
-             linetype = 2) +
-  dark_theme_gray() +
-  scale_color_manual(&quot;white&quot;) + 
-  scale_fill_viridis(discrete = TRUE, 
-                     option = &quot;plasma&quot;)
+# remove B-cell related gene set names and gene sets used for descriptions of clusters only
+# review using View function
+# review unpublished uchi_t_inflamed_gs
+remove.names &lt;- c(&quot;cyt_gs&quot;, &quot;dhit_gs&quot;, &quot;imsig_bcells_gs&quot;, &quot;thor_bcell_mg_igj&quot;, &quot;thor_bcell_receptors_score&quot;, &quot;thor_b_cell_pca_16704732&quot;, &quot;thor_bcell_21978456&quot;,     &quot;thor_gp2_immune_bcell_score&quot;, &quot;uchi_t_inflamed_gs&quot;)
 
-before_box
+names.handfiltered &lt;- names.initial %&gt;%
+  dplyr::filter(!gs_name %in% remove.names) %&gt;%
+  pull(gs_name)
+head(names.handfiltered)
 
-# pretty minimal differences in mean and distribution
-
-# apply batch correction
-combat_edata &lt;- ComBat(dat = edata,
-                       batch = batch,
-                       mod = modcombat,
-                       mean.only = TRUE,
-                       par.prior = TRUE, 
-                       prior.plots = FALSE)
-
-# plot the after
-batch_df &lt;- enframe(batch) %&gt;%
-  dplyr::select(lane = value)
-combat_edata_df &lt;- as.data.frame(t(combat_edata)) %&gt;%
-  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
-  as_tibble() %&gt;%
-  bind_cols(batch_df) %&gt;%
-  dplyr::select(sample_id, lane, everything()) %&gt;%
-  gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id, -lane) %&gt;%
-  group_by(lane) %&gt;%
+gene_sets_1 &lt;- enframe(gset_ids_complete_4) %&gt;%
+  dplyr::rename(gs_name_1 = name, genes_1 = value) %&gt;%
   print()
 
-after_box &lt;- ggplot(combat_edata_df, aes(x = lane, y = intensity, group = lane)) +
-  geom_boxplot(aes(fill = lane)) +
-  geom_hline(yintercept = 5, 
-             color = &quot;#767676&quot;, 
-             linetype = 2) +
-  dark_theme_gray() +
-  scale_color_manual(&quot;white&quot;) + 
-  scale_fill_viridis(discrete = TRUE, 
-                     option = &quot;plasma&quot;)
-after_box
+gene_sets_2 &lt;- enframe(gset_ids_complete_4) %&gt;%
+  dplyr::rename(gs_name_2 = name, genes_2 = value)
 
-# even more better :-)</code></pre>
-</div>
-<div id="combine-expression-data" class="section level2">
-<h2>Combine expression data</h2>
-<p>Use Duke expression data that is batch-corrected for lanes</p>
-<pre class="r"><code>duke_exprs &lt;- combat_edata %&gt;% 
+# make a table of pairwise comparisons for gene set names
+comb &lt;- combs(names.handfiltered, 2) %&gt;%
   as.data.frame() %&gt;%
-  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
   as_tibble() %&gt;%
-  dplyr::select(gene_id, everything()) %&gt;%
+  dplyr::rename(gs_name_1 = V1, gs_name_2 = V2) %&gt;%
+  left_join(gene_sets_1, by = &quot;gs_name_1&quot;) %&gt;%
+  left_join(gene_sets_2, by = &quot;gs_name_2&quot;) %&gt;%
+      print()
+
+# define function to find overlap of gene set names
+overlappy &lt;- function(genes_1, genes_2){
+  prct &lt;- (2 * length(intersect(genes_1, genes_2))) / (length(genes_1) + length(genes_2))
+  prct
+}
+
+comb_prct &lt;- comb %&gt;% 
+  mutate(prct = map2_dbl(genes_1, genes_2, overlappy)) %&gt;%
+  arrange(desc(prct)) %&gt;%
+  print(n = 100)
+hist(comb_prct$prct)
+
+# get a list of gene sets to cut
+# will cut gene sets with 2/3 genes shared or more
+# 17 gene sets meet the criteria
+# since column choice randomly selected, will cut column two
+gs_cut &lt;- comb_prct %&gt;%
+  dplyr::filter(prct &gt; 0.666) %&gt;%
+  pull(gs_name_2) %&gt;%
   print()
 
-nci_exprs &lt;- exprs(nci_es) %&gt;% 
-  as.data.frame() %&gt;%
-  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
-  as_tibble() %&gt;%
-  dplyr::select(gene_id, everything()) %&gt;%
+names.lessoverlap &lt;- names.handfiltered %&gt;%
+  enframe() %&gt;%
+  dplyr::select(gs_name = value) %&gt;%
+  dplyr::filter(!gs_name %in% gs_cut) %&gt;%
+  pull(gs_name)
+print(names.lessoverlap)
+length(names.lessoverlap)
+# n = 121
+
+filt_gs &lt;- enframe(gset_ids_complete_4) %&gt;%
+  dplyr::rename(gs_name = name, genes = value) %&gt;%
+  dplyr::filter(gs_name %in% names.lessoverlap) %&gt;%
   print()
-
-# filter rownames to only keep intersecting rows
-duke_genes &lt;- duke_exprs %&gt;% pull(gene_id)
-length(duke_genes)
-nci_genes &lt;- nci_exprs %&gt;% pull(gene_id)
-length(nci_genes)
-
-combined_genes &lt;- intersect(duke_genes, nci_genes)
-length(combined_genes)
-head(combined_genes)
-
-duke_exprs_filt &lt;- duke_exprs %&gt;%
-  dplyr::filter(gene_id %in% combined_genes)
-nrow(duke_exprs_filt)
-
-nci_exprs_filt &lt;- nci_exprs %&gt;%
-  dplyr::filter(gene_id %in% combined_genes)
-nrow(nci_exprs_filt)
-
-combined_exprs &lt;- nci_exprs_filt %&gt;%
-  left_join(duke_exprs_filt, by = &quot;gene_id&quot;) %&gt;%
-  as.data.frame() %&gt;%
-  column_to_rownames(var = &quot;gene_id&quot;) %&gt;%
-  as.matrix()
-dim(combined_exprs)
-combined_exprs[1:10, 1:6]</code></pre>
-</div>
-<div id="combine-phenotype-data" class="section level2">
-<h2>Combine phenotype data</h2>
-<p>Overlapping data (NCI = Duke)</p>
-<ul>
-<li><code>Gene Expression Subgroup</code> = <code>ABC GCB (RNAseq)</code> – no reformatting</li>
-<li><code>IPI range</code> = <code>IPI</code> – NCI dataset split into two numbers and save both high and low IPI. Merge Duke data with low IPI (presumably at diagnosis?)</li>
-<li><code>IPI Group</code> = <code>IPI groups</code> – no reformatting</li>
-<li><code>Status at Follow_up_ 0 Alive_ 1 Dead</code> = <code>Censored</code> – no reformatting</li>
-<li><code>Follow_up Time _yrs</code> = <code>Overall Survival years</code> – no reformatting</li>
-<li><code>Gender</code> = <code>Gender</code></li>
-<li><code>Age</code> = <code>Age at diagnosis</code> - Duke dataset, remove decimals, remove <code>age_at_diagnosis</code> from NCI dataset</li>
-<li><code>ann_arbor_clinical_stage</code> = <code>AnnArbor stage IPI</code> - NCI dataset to be converted to numeric and then converted to indicator for stage 3/4 per IPI</li>
-<li><code>ECOG Performance Status</code> = <code>ECOG IPI</code> - NCI dataset to be converted to indicator for ECOG 2+ vs ECOG 0-1 per IPI</li>
-<li><code>Number of Extranodal Sites</code> = <code>multiple extranodal IPI</code> - NCI dataset to be converted to indicator for &gt;1 extranodal sites</li>
-<li><code>LDH Ratio</code> = <code>LDH IPI</code> - NCI dataset to be converted to indicator for raio &gt;1 per IPI</li>
-</ul>
-<pre class="r"><code># pull out pheno_data
-nci_pheno &lt;- pData(nci_es) %&gt;%
-  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
-  as_tibble() %&gt;%
-  print()
-
-duke_pheno &lt;- pData(duke_es) %&gt;%
-  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
-  as_tibble() %&gt;%
-  print()</code></pre>
-<div id="format-nci-data-for-merge" class="section level4">
-<h4>Format NCI data for merge</h4>
-<pre class="r"><code>ipi_highlow &lt;- nci_pheno$`IPI Range` %&gt;%
-  str_split_fixed(pattern = &quot;&quot;, n = 2) %&gt;%
-  as_tibble() %&gt;%
-  dplyr::rename(ipi_low = V1) %&gt;%
-  mutate(ipi_high = ifelse(V2 == &quot;&quot;, ipi_low, V2)) %&gt;%
-  dplyr::select(-V2) %&gt;%
-  print()
-
-nci_pheno_ipi &lt;- nci_pheno %&gt;% 
-  bind_cols(ipi_highlow) %&gt;%
-  dplyr::select(sample_id, ipi_initial = ipi_low, ipi_high, everything()) %&gt;%
-  print()
-
-nci_pheno_formatted &lt;- nci_pheno_ipi %&gt;%
-  dplyr::rename(abc_gcb_rna = `Gene Expression Subgroup`,
-                ipi_group = `IPI Group`,
-                os_status = `Status at Follow_up_ 0 Alive_ 1 Dead`,
-                os_years = `Follow_up Time _yrs`,
-                gender = Gender, 
-                age = Age) %&gt;%
-  dplyr::select(sample_id, abc_gcb_rna, ipi_group, os_status, os_years, gender, age, everything()) %&gt;%
-  mutate(ann_arbor_stage_3plus = as.factor(ann_arbor_clinical_stage)) %&gt;%
-  mutate(ann_arbor_stage_3plus = fct_recode(ann_arbor_stage_3plus,
-                                            &quot;1&quot; = &quot;Stage III&quot;,
-                                            &quot;1&quot; = &quot;Stage IV&quot;,
-                                            &quot;0&quot; = &quot;Stage I&quot;,
-                                            &quot;0&quot; = &quot;Stage II&quot;,
-                                            &quot;NA&quot; = &quot;Not Reported&quot;)) %&gt;%
-  dplyr::select(sample_id, ann_arbor_stage_3plus, everything()) %&gt;%
-  mutate(ps_2plus = as.numeric(`ECOG Performance Status`)) %&gt;%
-  mutate(ps_2plus = ifelse(ps_2plus &gt; 1, 1, 0),
-         ps_2plus = as.factor(ps_2plus)) %&gt;%
-  dplyr::select(sample_id, ps_2plus, everything()) %&gt;%
-  mutate(extranodal_sites_2plus = as.numeric(`Number of Extranodal Sites`)) %&gt;%
-  mutate(extranodal_sites_2plus = ifelse(extranodal_sites_2plus &gt; 1, 1, 0)) %&gt;%
-  dplyr::select(sample_id, extranodal_sites_2plus, everything()) %&gt;%
-  mutate(extranodal_sites_2plus = as.factor(extranodal_sites_2plus)) %&gt;%
-  mutate(ldh_abnormal = ifelse(`LDH Ratio` &gt; 1, 1, 0),
-         ldh_abnormal = as.factor(ldh_abnormal),
-         ipi_initial = as.factor(ipi_initial)) %&gt;%
-  dplyr::select(sample_id, ldh_abnormal, everything()) %&gt;%
-  print()</code></pre>
-</div>
-<div id="format-duke-data-for-merge" class="section level4">
-<h4>Format Duke data for merge</h4>
-<pre class="r"><code>duke_pheno_formatted &lt;- duke_pheno %&gt;%
-  dplyr::rename(abc_gcb_rna = `ABC GCB (RNAseq)`,
-                ipi_group = `IPI groups`,
-                os_status = `Censored`,
-                os_years = `Overall Survival years`,
-                gender = Gender) %&gt;%
-  mutate(age = (str_split_fixed(`age at diagnosis`, &quot;\\.&quot;, n = 2))[,1]) %&gt;%
-  dplyr::select(sample_id, age, abc_gcb_rna, ipi_group, os_status, os_years, gender, everything()) %&gt;%
-  dplyr::rename(ann_arbor_stage_3plus = `AnnArbor stage IPI`,
-                ps_2plus = `ECOG IPI`,
-                extranodal_sites_2plus = `multiple extranodal IPI`,
-                ldh_abnormal = `LDH IPI`,
-                ipi_initial = IPI) %&gt;%
-  mutate(ps_2plus = as.factor(ps_2plus),
-         ann_arbor_stage_3plus = as.factor(ann_arbor_stage_3plus),
-         extranodal_sites_2plus = as.factor(extranodal_sites_2plus),
-         ldh_abnormal = as.factor(ldh_abnormal),
-         ipi_initial = as.factor(ipi_initial)) %&gt;%
-  mutate(age = as.numeric(age)) %&gt;%
-  print()</code></pre>
-</div>
-<div id="merge-pheno-data" class="section level4">
-<h4>Merge pheno data</h4>
-<pre class="r"><code>combined_pheno &lt;- nci_pheno_formatted %&gt;%
-  bind_rows(duke_pheno_formatted) %&gt;%
-  dplyr::select(sample_id, abc_gcb_rna, ipi_group, os_status, os_years, age, gender, ipi_initial, pdl1_status, everything())</code></pre>
-</div>
-</div>
-<div id="remake-expressionset" class="section level2">
-<h2>Remake expressionset</h2>
-<pre class="r"><code>pheno_data_df &lt;- as.data.frame(combined_pheno) %&gt;%
-  column_to_rownames(var = &quot;sample_id&quot;)
-
-v_metadata &lt;- data.frame(
-  labelDescription = colnames(pheno_data_df),
-  row.names = colnames(pheno_data_df) )
+filt_gs_list &lt;- as.list(filt_gs$genes)
+names(filt_gs_list) &lt;- as.character(filt_gs$gs_name)
+head(filt_gs_list)
   
-phenoData &lt;- new(&quot;AnnotatedDataFrame&quot;, 
-                 data = pheno_data_df, 
-                 varMetadata = v_metadata)
-phenoData
+raw_score_matrix &lt;- readRDS(&quot;output/dlbcl_total_immune_gset_v4_results.rds&quot;) %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gs_names&quot;)
+raw_score_matrix[1:5, 1:5]
+dim(raw_score_matrix)
 
-annotation &lt;- as.character(&quot;Duke RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in &gt;12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. NCI RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed.&quot;)
-
-# assemble expressionset
-combined_es &lt;- ExpressionSet(
-  assayData = combined_exprs,
-  phenoData = phenoData,
-  annotation = annotation)
-combined_es</code></pre>
-</div>
-<div id="batch-correction-between-dukenci" class="section level2">
-<h2>Batch correction between Duke/NCI</h2>
-<p>Following documentation as above</p>
-<pre class="r"><code># create marker variable for Duke vs NCI in pheno data
-pheno_df &lt;- pData(combined_es) %&gt;%
-  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+score_matrix &lt;- raw_score_matrix %&gt;%
   as_tibble() %&gt;%
-  mutate(source = ifelse(grepl(&quot;duke_&quot;, sample_id),&quot;duke&quot;,&quot;nci&quot;)) %&gt;%
-  mutate(source = as.factor(source)) %&gt;%
-  dplyr::select(sample_id, source, everything()) %&gt;%
-  # also fix gcb_abc column factors
-  mutate(abc_gcb_rna = as.character(abc_gcb_rna)) %&gt;%
-  mutate(abc_gcb_rna = ifelse(abc_gcb_rna == &quot;Unclass&quot;, &quot;Unclassified&quot;, abc_gcb_rna)) %&gt;%
-  mutate(abc_gcb_rna = as.factor(abc_gcb_rna)) %&gt;%
+  dplyr::filter(gs_names %in% names.lessoverlap) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;gs_names&quot;) %&gt;%
+  t()
+score_matrix[1:5, 1:5]
+dim(score_matrix)</code></pre>
+<p>Get total number of genes</p>
+<pre class="r"><code># get a table of final genes in each gene set by filtered gene set name
+filt_genes &lt;- enframe(gset_ids_complete_4) %&gt;%
+  dplyr::rename(gs_name = name, genes = value) %&gt;%
+  dplyr::filter(gs_name %in% names.handfiltered) %&gt;%
+  dplyr::filter(!gs_name %in% gs_cut) %&gt;%
   print()
 
-# convert back to regular dataframe with rownames for downstream processing
-pheno_d &lt;- as.data.frame(pheno_df) %&gt;%
+# vector of all genes
+genes &lt;- filt_genes %&gt;%
+  pull(genes) %&gt;%
+  as_vector()
+
+# get number of unique genes
+genes %&gt;%
+  unique() %&gt;%
+  length()
+
+# frequency table
+freq_tab &lt;- filt_genes %&gt;%
+  unnest() %&gt;%
+  group_by(genes) %&gt;%
+  count(genes) %&gt;%
+  arrange(desc(n)) %&gt;%
+  mutate(prop = n / 121) %&gt;%
+  print()
+
+# mean frequency
+freq_tab %&gt;% pull(n) %&gt;% as.numeric() %&gt;% mean()
+
+# get hugo symbols for genes
+# read in conversion table for gene IDs
+gencode_gtf &lt;- read_tsv(&quot;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&quot;) %&gt;%
+  print()
+freq_tab_hugo &lt;- freq_tab %&gt;%
+  dplyr::rename(gene_id = genes) %&gt;%
+  left_join(gencode_gtf) %&gt;%
+  dplyr::select(gene_name, n, prop, gene_id) %&gt;%
+  print()</code></pre>
+</div>
+<div id="quick-checks" class="section level2">
+<h2>Quick Checks</h2>
+<div id="does-this-clustering-separate-pd-l1amp-cases" class="section level4">
+<h4>Does this clustering separate PD-L1amp cases?</h4>
+<p>PD-L1 is a known immune inflamed phenotype. Can this clustering method show some grouping of PD-L1 distinct from the background?</p>
+<pre class="r"><code>str(pheno_data)
+summary(as.factor(pheno_data$pdl1_status))
+pheno_data_tbl &lt;- as.data.frame(pheno_data) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  mutate(pdl1_status = replace_na(pdl1_status, &quot;not_assessed&quot;)) %&gt;%
+  mutate(pdl1_status = ifelse(pdl1_status == &quot;non-amplified&quot;, 
+                              &quot;non_amplified&quot;, pdl1_status))
+
+summary(as.factor(pheno_data_tbl$pdl1_status))
+
+group_table &lt;- pheno_data_tbl %&gt;%
+  dplyr::select(sample_id, pdl1_status)
+group_table
+
+# merge group data into gsva matrix
+pdl1_comb_exprs &lt;- as.data.frame(score_matrix) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(group_table) %&gt;%
+  mutate(pdl1_status = as.factor(pdl1_status)) %&gt;%
+  dplyr::select(sample_id, pdl1_status, everything()) %&gt;%
+  as.data.frame() %&gt;%
   column_to_rownames(var = &quot;sample_id&quot;)
+pdl1_comb_exprs[1:5, 1:5]</code></pre>
+<p>PCA plot of results</p>
+<pre class="r"><code># remove low amplified and samples not assessed
+nrow(pdl1_comb_exprs)
+pdl1_comb_exprs_filt &lt;- pdl1_comb_exprs %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  dplyr::filter(pdl1_status %in% c(&quot;high_amplified&quot;, &quot;non_amplified&quot;)) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;)
+nrow(pdl1_comb_exprs_filt)
+pdl1_comb_exprs_filt[1:5, 1:5]
 
-# define batch as source marker
-batch = pheno_df$source
-summary(batch)
+# get PCA values
+dlbcl_pca &lt;- PCA(pdl1_comb_exprs_filt[-1], scale.unit = TRUE, graph = FALSE)
 
-# boxplot by data source
-# plot the before
-batch_df &lt;- enframe(batch) %&gt;%
-  dplyr::select(source = value)
-edata_df &lt;- as.data.frame(t(exprs(combined_es))) %&gt;%
+# get eigenvalues
+eig_val &lt;- get_eigenvalue(dlbcl_pca)
+eig_val
+fviz_eig(dlbcl_pca, addlabels = TRUE, ylim = c(0, 50))
+ind &lt;- get_pca_ind(dlbcl_pca)
+
+pdl1_status &lt;- pdl1_comb_exprs_filt$pdl1_status
+
+# visualize PCA -- white
+fviz_pca_ind(dlbcl_pca,
+             label = &quot;none&quot;,
+             habillage = pdl1_comb_exprs_filt$pdl1_status,
+             palette = &quot;nejm&quot;,
+             addEllipses = TRUE,
+             ggtheme = theme_classic()) +
+  theme(axis.line = element_line(color = &quot;#767676&quot;)) +
+  ggtitle(&quot;Combined Thorsson and new gene sets \nPD-L1amp vs nonamp, NCI data only&quot;)
+
+fviz_pca_var(dlbcl_pca, col.var = &quot;contrib&quot;,
+             gradient.cols = &quot;tron&quot;,
+             label = &quot;none&quot;,
+             ggtheme = theme_classic()) + 
+  theme(axis.line = element_line(color = &quot;#767676&quot;))</code></pre>
+</div>
+<div id="is-there-a-batch-effect-by-source-of-data" class="section level4">
+<h4>Is there a batch effect by source of data?</h4>
+<p>Set up Duke/NCI groups</p>
+<pre class="r"><code>str(pheno_data)
+summary(as.factor(pheno_data$source))
+group_table &lt;- as.data.frame(pheno_data) %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  dplyr::select(sample_id, source)
+
+# merge group data into gsva matrix
+dukenci_comb_exprs &lt;- as.data.frame(score_matrix) %&gt;%
   rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
   as_tibble() %&gt;%
-  bind_cols(batch_df) %&gt;%
+  left_join(group_table) %&gt;%
   dplyr::select(sample_id, source, everything()) %&gt;%
-  gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id, -source) %&gt;%
-  group_by(source) %&gt;%
-  print()
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  mutate(source = as.factor(source))</code></pre>
+<p>PCA Plot of results</p>
+<pre class="r"><code># get PCA values
+dlbcl_pca &lt;- PCA(dukenci_comb_exprs[-1], scale.unit = TRUE, graph = FALSE)
 
-before_box &lt;- ggplot(edata_df, 
-                     aes(x = source, 
-                         y = intensity, 
-                         group = source)) +
-  geom_boxplot(aes(fill = source)) +
-  geom_hline(yintercept = 5, 
-             color = &quot;#767676&quot;, 
-             linetype = 2) +
-  dark_theme_gray() +
-  scale_color_manual(&quot;white&quot;) + 
-  scale_fill_viridis(discrete = TRUE, 
-                     option = &quot;plasma&quot;)
+# get eigenvalues
+eig_val &lt;- get_eigenvalue(dlbcl_pca)
+eig_val
+fviz_eig(dlbcl_pca, addlabels = TRUE, ylim = c(0, 50))
+ind &lt;- get_pca_ind(dlbcl_pca)
 
-before_box
-# small but notable differences in mean and distribution
-# will use the NCI data as the &quot;ground truth&quot; for normalization given higher read counts overall and standardized count pipeline through GDC
+pdl1_status &lt;- dukenci_comb_exprs$pdl1_status
 
-# Note that adjustment variables will be treated as given to the ComBat function. This means if you are trying to adjust for a categorical variable with p different levels, you will need to give ComBat p-1 indicator variables for this covariate.
-modsource &lt;- model.matrix(~ source, data = pheno_d)
+# visualize PCA -- white
+fviz_pca_ind(dlbcl_pca,
+             label = &quot;none&quot;,
+             habillage = dukenci_comb_exprs$source,
+             palette = &quot;nejm&quot;,
+             addEllipses = TRUE,
+             ggtheme = theme_classic()) +
+  theme(axis.line = element_line(color = &quot;#767676&quot;)) +
+  ggtitle(&quot;Combined Thorsson and new gene sets \nDuke vs NCI data sources&quot;)
 
-# We need to create a model matrix for the adjustment variables, including the variable of interest. Note that you do not include batch in creating this model matrix - it will be included later in the ComBat function. In this case there are no other adjustment variables so we simply fit an intercept term.
-modcombat &lt;- model.matrix(~ 1, data = pheno_d)
+varplot &lt;- fviz_pca_var(dlbcl_pca, col.var = &quot;contrib&quot;,
+             gradient.cols = &quot;tron&quot;,
+             ggtheme = theme_classic2())
+varplot
 
-# apply batch correction
-combined_combat_edata &lt;- ComBat(dat = exprs(combined_es),
-                       batch = batch,
-                       mod = modcombat,
-                       par.prior = TRUE,
-                       prior.plots = FALSE,
-                       mean.only = FALSE,
-                       ref.batch = &quot;nci&quot;)
+# Contributions of variables to PC1
+fviz_contrib(dlbcl_pca, choice = &quot;var&quot;, axes = 1, top = 15) + 
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1))
 
-after_df &lt;- as.data.frame(t(combined_combat_edata)) %&gt;%
-  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+# Contributions of variables to PC2
+fviz_contrib(dlbcl_pca, choice = &quot;var&quot;, axes = 2, top = 15) +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1))
+
+# Contributions of variables to PC3
+fviz_contrib(dlbcl_pca, choice = &quot;var&quot;, axes = 3, top = 15) +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1))
+
+# Contributions of variables to PC4
+fviz_contrib(dlbcl_pca, choice = &quot;var&quot;, axes = 4, top = 15) +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1))
+
+# annotate variables
+CTL_activity
+macrophage_activity
+proliferation
+plasma_cell</code></pre>
+</div>
+<div id="heatmap-of-raw-gsva-results" class="section level4">
+<h4>Heatmap of raw GSVA results</h4>
+<pre class="r"><code>ht &lt;- Heatmap(score_matrix, name = &quot;GSVA Score&quot;, 
+                row_title = &quot;Gene Sets&quot;,
+                show_row_names = TRUE,
+                column_title = paste0(&quot;GSVA scores for Duke and NCI samples&quot;), 
+                show_column_names = FALSE,
+                column_title_side = &quot;bottom&quot;)
+ht</code></pre>
+</div>
+</div>
+<div id="clustering" class="section level2">
+<h2>Clustering</h2>
+<p>Determine suitability of data for clustering</p>
+<p>First visualize similarity among observations with distance matrix</p>
+<pre class="r"><code># create pearson correlation matrix
+dlbcl_dist &lt;- get_dist(score_matrix, 
+                       stand = TRUE,
+                       method = &quot;pearson&quot;)</code></pre>
+<p>Plot results</p>
+<pre class="r"><code>fviz_dist(dlbcl_dist, show_labels = FALSE) +
+  scale_fill_viridis() +
+  theme(axis.ticks = element_blank(), axis.text = element_blank())
+
+ggsave(&quot;docs/assets/fvis_dist_1.png&quot;, 
+       device = png(),
+       width = 6.67, 
+       height = 6.67, 
+       units = &quot;in&quot;)</code></pre>
+<p>Get Hopkins statistic of clusterability</p>
+<pre class="r"><code># Compute Hopkins statistic 
+# Below 0.5 is considered &quot;clusterable&quot;
+library(clustertend)
+dlbcl_tend &lt;- hopkins(score_matrix, n = nrow(score_matrix) - 1, header = FALSE)
+dlbcl_tend</code></pre>
+<div id="filter-out-highly-correlated-gene-sets" class="section level4">
+<h4>Filter out highly correlated gene sets</h4>
+<pre class="r"><code>gs_cor &lt;- cor(score_matrix, method = c(&quot;pearson&quot;))
+library(corrplot)
+source(&quot;http://www.sthda.com/upload/rquery_cormat.r&quot;)</code></pre>
+<pre class="r"><code># view gene set correlation heatmap
+cortables &lt;- rquery.cormat(t(gs_matrix), graphType = &quot;heatmap&quot;)</code></pre>
+<pre class="r"><code># reformat gene set correlation table and view
+corflat &lt;- rquery.cormat(score_matrix, type = &quot;flatten&quot;, graph = FALSE)
+corflat_tbl &lt;- corflat$r %&gt;% as_tibble() %&gt;% arrange(desc(cor)) %&gt;% print(n = 30)
+
+# 7 gene sets 0.96 correlation and above. 
+removesets &lt;- c(&quot;imsig_proliferation_gs&quot;, 
+                &quot;beijing_cd8_c1_lef1_gs&quot;,
+                &quot;imsig_interferon_gs&quot;,
+                &quot;beijing_cd8_c3_cx3cr1_gs&quot;,
+                &quot;thor_module3_ifn_score&quot;,
+                &quot;thor_lck_19272155 &quot;,
+                &quot;imsig_tcells_gs&quot;)
+
+ncol(score_matrix)
+gs_matrix_filtered_df &lt;- t(score_matrix) %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_set&quot;) %&gt;%
+  dplyr::filter(!gene_set %in% removesets)
+nrow(gs_matrix_filtered_df)
+
+sample_matrix_filtered &lt;- gs_matrix_filtered_df %&gt;%
+  column_to_rownames(var = &quot;gene_set&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+sample_matrix_filtered[1:5, 1:5]
+dim(sample_matrix_filtered)
+
+# plot results
+fviz_dist(dlbcl_dist, show_labels = FALSE) +
+  scale_fill_viridis() +
+  theme(axis.ticks = element_blank(), axis.text = element_blank())
+
+ggsave(&quot;docs/assets/fvis_dist_2.png&quot;, 
+       device = png(),
+       width = 6.67, 
+       height = 6.67, 
+       units = &quot;in&quot;)</code></pre>
+<p>Repeat similarity among observations with distance matrix</p>
+<pre class="r"><code># create pearson correlation matrix
+dlbcl_dist2 &lt;- get_dist(sample_matrix_filtered, 
+                       stand = TRUE, 
+                       method = &quot;pearson&quot;)</code></pre>
+<p>Repeat Hopkins statistic of clusterability</p>
+<pre class="r"><code># Compute Hopkins statistic for iris dataset
+# Below 0.5 is considered &quot;clusterable&quot;
+dlbcl_tend &lt;- hopkins(sample_matrix_filtered,
+                      n = nrow(gs_matrix_filtered_df) - 1, 
+                      header = FALSE)
+dlbcl_tend</code></pre>
+<p>Determine optimal number of clusters</p>
+<pre class="r"><code># Method 1: Elbow Method Using FactoExtra 
+fviz_nbclust(sample_matrix_filtered, 
+             FUNcluster = kmeans, 
+             method = &quot;wss&quot;) 
+
+# Method 2: Silhouette in FactoExtra
+fviz_nbclust(sample_matrix_filtered, 
+             kmeans, method = &quot;silhouette&quot;) + 
+  theme_classic()
+
+# GAP STAT Using Facto Extra 
+fviz_nbclust(sample_matrix_filtered, 
+             kmeans, nstart = 25, 
+             method = &quot;gap_stat&quot;, 
+             nboot = 500) + #nboot is # of bootstrap sample - must be included
+  labs(subtitle = &quot;Gap Statistic Method&quot;)
+
+# summary method: NbClust
+nb &lt;- NbClust(sample_matrix_filtered, 
+              distance = &quot;euclidean&quot;, 
+              min.nc = 2, 
+              max.nc = 10, 
+              method = &quot;kmeans&quot;)</code></pre>
+</div>
+</div>
+<div id="clustering-1" class="section level2">
+<h2>Clustering</h2>
+<p>Divide into groups with HCPC</p>
+<pre class="r"><code>set.seed(818)
+dlbcl_pca &lt;- PCA(sample_matrix_filtered, ncp = 10, graph = FALSE)
+dlbcl_hcpc &lt;- HCPC(dlbcl_pca, nb.clust = 4)</code></pre>
+<p>Write out models for later prediction</p>
+<pre class="r"><code>saveRDS(dlbcl_pca, &quot;output/dlbcl_gsva5_4cluster_pca.rds&quot;)
+saveRDS(dlbcl_hcpc, &quot;output/dlbcl_gsva5_4cluster_hcpc.rds&quot;)</code></pre>
+<p>Get variable plot</p>
+<pre class="r"><code>varplot &lt;- fviz_pca_var(dlbcl_pca, 
+             col.var = &quot;contrib&quot;,
+             gradient.cols = &quot;tron&quot;, 
+             label = &quot;none&quot;,
+             ggtheme = theme_classic2())
+             
+varplot
+
+var_coord &lt;- dlbcl_pca$var$coord %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_set&quot;) %&gt;%
   as_tibble() %&gt;%
-  bind_cols(batch_df) %&gt;%
-  dplyr::select(sample_id, source, everything()) %&gt;%
-  gather(key = &quot;gene_id&quot;, value = &quot;intensity&quot;, -sample_id, -source) %&gt;%
-  group_by(source) %&gt;%
   print()
 
-after_box &lt;- ggplot(after_df, 
-                    aes(x = source, 
-                        y = intensity, 
-                        group = source)) +
-  geom_boxplot(aes(fill = source)) +
-  geom_hline(yintercept = 5, 
-             color = &quot;#767676&quot;, 
-             linetype = 2) +
-  dark_theme_gray() +
-  scale_color_manual(&quot;white&quot;) + 
-  scale_fill_tron()
-after_box</code></pre>
-</div>
-<div id="final-expressionset" class="section level2">
-<h2>Final Expressionset</h2>
-<pre class="r"><code># use updated pheno data frame from last chunk
-v_metadata &lt;- data.frame(
-  labelDescription = colnames(pheno_d),
-  row.names = colnames(pheno_d) )
-  
-phenoData &lt;- new(&quot;AnnotatedDataFrame&quot;, 
-                 data = pheno_d, 
-                 varMetadata = v_metadata)
-phenoData
-
-annotation &lt;- as.character(&quot;Duke RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in &gt;12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected using ComBat by sequencing lane. NCI RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected for NCI vs Duke source using ComBat&quot;)
-
-# assemble expressionset
-combined_es &lt;- ExpressionSet(
-  assayData = combined_combat_edata,
-  phenoData = phenoData,
-  annotation = annotation)
-combined_es</code></pre>
-</div>
-<div id="write-out-for-cluster" class="section level2">
-<h2>Write out for cluster</h2>
-<pre class="r"><code># write expression data as csv for large file transfer/reading on the cluster
-combined_exprs &lt;- exprs(combined_es)
-combined_csv &lt;- as.data.frame(combined_exprs) %&gt;% rownames_to_column(var = &quot;gene&quot;) %&gt;% as_tibble() %&gt;% select(gene, everything()) %&gt;% print() 
-write_csv(combined_csv, &quot;output/combined_dlbcl_expr_matrix.csv&quot;)</code></pre>
-<pre class="r"><code>saveRDS(combined_es, &quot;output/combined_expressionset.rds&quot;)</code></pre>
+ggplot(data = var_coord) +
+  coord_polar() +
+  geom_segment(aes(x = 0, y = 0, xend = Dim.1))</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

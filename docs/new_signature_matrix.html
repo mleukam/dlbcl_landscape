@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="mleukam" />
+
+<meta name="date" content="2020-02-20" />
+
+<title>new_signature_matrix</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/darkly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Immune Landscape of DLBCL</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">new_signature_matrix</h1>
+<h4 class="author">mleukam</h4>
+<h4 class="date">2020-02-20</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-05-09
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20190613code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20190613)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20190613code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20190613)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree3b9db7d138cc2bb849acc70f8218adc98120712atargetblank3b9db7da"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/3b9db7d138cc2bb849acc70f8218adc98120712a" target="_blank">3b9db7d</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetree3b9db7d138cc2bb849acc70f8218adc98120712atargetblank3b9db7da" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    NCI_mutations_vs_deconvolution.csv
+    Ignored:    data/.DS_Store
+    Ignored:    data/1-s2.0-S1074761316304320-mmc2.xlsx
+    Ignored:    data/12864_2005_498_MOESM2_ESM.xls
+    Ignored:    data/41591_2018_45_MOESM5_ESM.xlsx
+    Ignored:    data/CCLE_sample_info_file_2012-10-18.txt
+    Ignored:    data/NIH_PDL1_amp_cases.csv
+    Ignored:    data/NIH_PDL1_nonamp_cases.csv
+    Ignored:    data/PDL1dlbcl.rnaseq.kallisto.raw.txi.coding.cpm1.TMM.logCPM.sm24.csv
+    Ignored:    data/PanImmune_GeneSet_Definitions.xlsx
+    Ignored:    data/aliquot.tsv
+    Ignored:    data/azizi_curated.xlsx
+    Ignored:    data/c2_human_immune_genesets.gmt
+    Ignored:    data/dlbcl_total_immune_gset_v1_results.rds
+    Ignored:    data/ds_JCO.18.01583-2.xlsx
+    Ignored:    data/duke_study_driver_mutations_top150_maf.csv
+    Ignored:    data/final_analysis_set.maf
+    Ignored:    data/gdc_clinical_data.json
+    Ignored:    data/gdc_files_and_case_ids.json
+    Ignored:    data/gencode.v22.annotation.gtf
+    Ignored:    data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Ignored:    data/genesets/
+    Ignored:    data/gset_ids_complete.rds
+    Ignored:    data/histo_metadata_dlbcl_landscape.csv
+    Ignored:    data/journal.pone.0088309.s001.XLS
+    Ignored:    data/mmc1.xlsx
+    Ignored:    data/nejmoa1801445_appendix_2.xlsx
+    Ignored:    data/reactome_imm_signaling.tsv
+    Ignored:    data/sample.tsv
+    Ignored:    data/sig.rda
+    Ignored:    data/sig_genes.txt
+    Ignored:    data/temp.dgelist_edger.rds
+    Ignored:    data/temp.dgelist_limma.rds
+    Ignored:    data/uchi_metadata.csv
+    Ignored:    logs/
+    Ignored:    output/.DS_Store
+    Ignored:    output/NCI_mutations_vs_deconvolution.csv
+    Ignored:    output/clust1_vs_others.txt
+    Ignored:    output/clust1_vs_others_dge.rnk
+    Ignored:    output/clust2_vs_others_dge.rnk
+    Ignored:    output/clust3_vs_others_dge.rnk
+    Ignored:    output/clust4_vs_others_dge.rnk
+    Ignored:    output/cluster1_dge.rds
+    Ignored:    output/cluster2_dge.rds
+    Ignored:    output/cluster3_dge.rds
+    Ignored:    output/cluster4_dge.rds
+    Ignored:    output/combined_clin_data.xlsx
+    Ignored:    output/combined_dlbcl_expr_matrix.csv
+    Ignored:    output/combined_es_gsva2_4cluster.rds
+    Ignored:    output/combined_es_gsva4_4cluster.rds
+    Ignored:    output/combined_expressionset.rds
+    Ignored:    output/combined_tpm_matrix.csv
+    Ignored:    output/counts_expressionset_for_limma.rds
+    Ignored:    output/dlbcl_expr_matrix.csv
+    Ignored:    output/dlbcl_total_immune_gset_v2_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v3_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v4_results.rds
+    Ignored:    output/duke_expression_set_cleaned_log.rds
+    Ignored:    output/duke_expressionset.rds
+    Ignored:    output/duke_expressionset_pext.rds
+    Ignored:    output/duke_extended_pheno_data.csv
+    Ignored:    output/expr_matrix.csv
+    Ignored:    output/gsea_res_cluster1.csv
+    Ignored:    output/gset_ids_complete_2.rds
+    Ignored:    output/gset_ids_complete_3.rds
+    Ignored:    output/gset_ids_complete_4.rds
+    Ignored:    output/gsva_v2_4clust_assign.rds
+    Ignored:    output/gsva_v3_4clust_assign.rds
+    Ignored:    output/gsva_v4_4clust_assign.rds
+    Ignored:    output/limma_voom_elist_1.rds
+    Ignored:    output/merged_raw_counts.csv
+    Ignored:    output/nci_dlbcl_annotation.csv
+    Ignored:    output/nci_dlbcl_unprocessed_counts.csv
+    Ignored:    output/nci_expressionset.rds
+    Ignored:    output/nci_expressionset_pext.rds
+    Ignored:    output/nci_extended_pheno_data.csv
+    Ignored:    output/networkanal3_clust1.txt
+    Ignored:    output/networkanal3_clust2.txt
+    Ignored:    output/networkanal3_clust3.txt
+    Ignored:    output/networkanal3_clust4.txt
+    Ignored:    output/total_immune_gset_v1.rds
+    Ignored:    output/tpm_cyt_expressionset.rds
+    Ignored:    output/tpm_expressionset.rds
+    Ignored:    output/uchi_cluster_assignments.csv
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019.pvals.txt
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019.txt
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019_RAW.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.pvals.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819_RAW.txt
+    Ignored:    output/xcell_input_matrix.csv
+
+Untracked files:
+    Untracked:  NCI_mutations_vs_deconvolution.xls
+    Untracked:  analysis/correlation_clusters.Rmd
+    Untracked:  batch1_cell_counts.pdf
+    Untracked:  data/cibersort/
+    Untracked:  data/gistic_results_nci/
+    Untracked:  es_10k_hgnc/
+    Untracked:  output/ASH_ORAL_figures.png
+    Untracked:  output/ASH_ORAL_figures/
+    Untracked:  output/Rplot.pdf
+    Untracked:  output/Rplot01.pdf
+    Untracked:  output/batch1_cell_seg_df.rds
+    Untracked:  output/batch1_summary_cell_seg_df.rds
+    Untracked:  output/colored_hclust_plot_by_group.pdf
+    Untracked:  output/colored_hclust_plot_by_samples.pdf
+    Untracked:  output/combined_counts_dge.rds
+    Untracked:  output/combined_expr_matrix_for_signature_unprocessed.rmd
+    Untracked:  output/dgelist_pheno_data.rds
+    Untracked:  output/dlbcl_final_signature_matrix.tsv
+    Untracked:  output/dlbcl_gsva5_4cluster_hcpc.rds
+    Untracked:  output/dlbcl_gsva5_4cluster_pca.rds
+    Untracked:  output/dlbcl_uchi_batch1_mixture.tsv
+    Untracked:  output/duke_dlbcl_mixture.tsv
+    Untracked:  output/gse_69030_probes.tsv
+    Untracked:  output/hclust_labeled_by_cell_type.pdf
+    Untracked:  output/mif_pilot_data_plot.pdf
+    Untracked:  output/nci_dlbcl_mixture.tsv
+    Untracked:  output/phenodata_for_signature_matrix.rmd
+    Untracked:  output/reference_matrix_file.tsv
+    Untracked:  output/table1.html
+    Untracked:  output/uchi_deconvolution_batch_1.rds
+    Untracked:  output/uchi_pheno_clust
+    Untracked:  output/var_contribution_axis2.pdf
+    Untracked:  output/venn.png
+    Untracked:  output/venn.png.2020-02-23_11-17-47.log
+    Untracked:  output/venn.png.2020-02-23_11-17-56.log
+    Untracked:  output/venn.png.2020-02-23_11-20-44.log
+    Untracked:  preprocessed_data_for_signature_matrix_es.rds
+
+Unstaged changes:
+    Modified:   .gitignore
+    Deleted:    Rplot.pdf
+    Deleted:    Rplot001.png
+    Deleted:    Rplot002.png
+    Deleted:    Rplot01.pdf
+    Modified:   analysis/cyt.Rmd
+    Modified:   analysis/deconvolution.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/newgs.Rmd
+    Modified:   analysis/predictor.Rmd
+    Modified:   analysis/preprocessing_count_data.Rmd
+    Deleted:    data/DLBCL_histo/JG55/HE/14-1464/14-1464_Scan1_annotations.xml.lock
+    Modified:   output/design_for_limma.rds
+    Modified:   output/dgelist_for_limma.rds
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/3b9db7d138cc2bb849acc70f8218adc98120712a/analysis/new_signature_matrix.Rmd" target="_blank">3b9db7d</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2020-05-09
+</td>
+<td>
+wflow_publish(c(“analysis/merge.Rmd”, “analysis/mif.Rmd”,
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>Deriving a novel signature matrix.</p>
+<p>LM22 - the main micro-array-derived deconvolution signature matrix used in CIBERTSORTx has some issues that render it less usable for DLBCL.</p>
+<ol style="list-style-type: decimal">
+<li><p>Genes expressed in non-hematopoetic cancers were filtered out, but in our case, the cancer is of hematopoetic origin.</p></li>
+<li><p>B-cells were included in the analysis, which are again the source of the cancer and might be making the result less trustworthy.</p></li>
+<li><p>The macrophage datasets were limited.</p></li>
+</ol>
+<p>The plan will be to aggregate a number of purified/sorted cell types for a micro-array derived signature matrix, to filter out housekeeping genes, and to filter out highly expressed DLBCL genes as well as generally expressed solid tumor genes.</p>
+<p>From CIBERSORTx article: <a href="https://www.nature.com/articles/s41587-019-0114-2#Sec9" class="uri">https://www.nature.com/articles/s41587-019-0114-2#Sec9</a></p>
+<pre><code>Briefly, next generation sequencing datasets were downloaded and analyzed using the authors’ normalization settings unless otherwise specified; these consisted of transcripts per million (TPM), reads per kilobase of transcript per million (RPKM) or fragments per kilobase of transcript per million (FPKM) space. For analyses in log2 space, we added 1 to expression values prior to log2 adjustment. Affymetrix microarray datasets were summarized and normalized as described in ‘Gene expression profiling – Microarrays’ (Supplementary Note 1), using the robust multi-array averaging (RMA) method in cases where bulk tissues and ground truth cell subsets were profiled on the same Affymetrix platform, and otherwise using MAS5 normalization.</code></pre>
+<p>From: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5998872/" class="uri">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5998872/</a></p>
+<p>Chen SH, Kuo WY, Su SY, Chung WC, Ho JM, Lu HH, Lin CY. A gene profiling deconvolution approach to estimating immune cell composition from complex tissues. BMC Bioinformatics. 2018 May 8;19(Suppl 4):154. doi: 10.1186/s12859-018-2069-6. PMID: 29745829; PMCID: PMC5998872.</p>
+<pre><code>To define a set of feature genes for deconvolution, we first eliminate genes that are unsuitable for building model. Two methods were adopted. We use datasets and enrichment score (ES) described in Benita et al. [13] to define genes that expressed in normal tissues by the criteria of ES&gt;0 in more than 5% of observed tissue types. Besides, genes that expressed in cancer cells are collected from cancer cell line encyclopedia [14] in the criteria of log2 transformed expression level&gt;7. The two lists are used as black lists to remove genes expressed in normal tissues and cancer cells from the candidate list.</code></pre>
+<p>For this project, we will use the list of housekeeping genes from: “Human housekeeping genes revisited” E. Eisenberg and E.Y. Levanon, Trends in Genetics, 29 (2013) as the first filter. List of housekeeping genes downloaded from author’s website: <a href="https://www.tau.ac.il/~elieis/HKG/" class="uri">https://www.tau.ac.il/~elieis/HKG/</a></p>
+<div id="set-up-workspace" class="section level2">
+<h2>Set up workspace</h2>
+<p>Clear workspace prior to analysis and load necessary packages</p>
+<pre class="r"><code>rm(list = ls())</code></pre>
+<pre class="r"><code>knitr::opts_chunk$set(eval = FALSE)</code></pre>
+<pre class="r"><code># data downloader
+library(GEOquery)
+
+# microarray wrangling
+library(lumi)
+library(lumiHumanIDMapping)
+library(affy)
+library(Biobase)
+
+# database lookup
+library(gprofiler2)
+library(pd.hugene.2.0.st)
+library(lumiHumanAll.db)
+
+# clustering
+library(stats)
+library(dendextend)
+library(gtools)
+
+# plotting
+library(ggsci)
+library(ggpubr)
+library(viridis)
+library(VennDiagram)
+
+# differential gene expression
+library(edgeR)
+library(limma)
+
+# tidyverse base functions
+library(tidyverse)</code></pre>
+<p>Load source document - hand assembled in Excel from literature source and database search using GEO web application</p>
+<pre class="r"><code>masterlist &lt;- read_csv(&quot;data/sig_mat_pheno_data.csv&quot;) %&gt;%
+  print()
+
+dataset_list &lt;- masterlist %&gt;%
+  pull(dataset) %&gt;%
+  unique() %&gt;%
+  as.list() %&gt;%
+  # last gse is macrophage illumina dataset - will handle separately
+  .[1:9] %&gt;%
+  print()</code></pre>
+</div>
+<div id="download-metadata-and-expression-data" class="section level2">
+<h2>Download metadata and expression data</h2>
+<pre class="r"><code># function for download
+getter &lt;- function(x){
+  getGEO(x)
+}
+
+# apply to nonmacrophage list
+gse_list &lt;- map(dataset_list, getter)
+
+# load macrophage gse from prior experiments
+gse46903 &lt;- readRDS(&quot;~/tcga_macs/data/gse_46903.rds&quot;)
+
+# function to get phenodata from gse lists (first element is expression set)
+pdata_puller &lt;- function(x){
+  y &lt;- x[[1]]
+  pData(y) %&gt;%
+    rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+    as_tibble()
+}
+
+# apply to gse list
+pdata_list &lt;- map(gse_list, pdata_puller)
+map(pdata_list, colnames)
+agg_pdata_nomac &lt;- bind_rows(pdata_list)
+
+# get phenodata from the gse lists that have two elements
+second_pass &lt;- list(unlist(gse_list[1]), unlist(gse_list[4]))
+
+pdata_pull2 &lt;- function(x){
+  y &lt;- x[[2]]
+  pData(y) %&gt;%
+    rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+    as_tibble()
+}
+
+second_pass_pdata &lt;- map(second_pass, pdata_pull2)
+
+# add macrophage data
+mac_pdata &lt;- gse46903[[1]] %&gt;%
+  pData() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  print()
+
+agg_pdata &lt;- bind_rows(agg_pdata_nomac, second_pass_pdata, mac_pdata) 
+
+# pull out only selected samples
+selected_cases &lt;- masterlist$sample_id
+selected_pdata &lt;- agg_pdata %&gt;%
+  dplyr::filter(sample_id %in% selected_cases) %&gt;%
+  print()
+
+# are any missing?
+setdiff(masterlist$sample_id, selected_pdata$sample_id)
+# NO</code></pre>
+<p>done on cluster due to space on laptop issues</p>
+<pre class="r"><code>download_list &lt;- masterlist %&gt;%
+  pull(dataset) %&gt;%
+  unique() %&gt;%
+  as.list() %&gt;%
+  print()
+
+# download raw data
+# getGEOSuppFiles(&quot;GSE26347&quot;, makeDirectory = TRUE, baseDir = &quot;/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files&quot;, fetch_files = TRUE)
+
+# getGEOSuppFiles(&quot;GSE43769&quot;, makeDirectory = TRUE, baseDir = &quot;/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files&quot;, fetch_files = TRUE)
+
+# getGEOSuppFiles(&quot;GSE22886&quot;, makeDirectory = TRUE, baseDir = &quot;/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files&quot;, fetch_files = TRUE)
+
+# getGEOSuppFiles(&quot;GSE4527&quot;, makeDirectory = TRUE, baseDir = &quot;/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files&quot;, fetch_files = TRUE)
+
+# getGEOSuppFiles(&quot;GSE11292&quot;, makeDirectory = TRUE, baseDir = &quot;/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files&quot;, fetch_files = TRUE)
+
+# getGEOSuppFiles(&quot;GSE69030&quot;, makeDirectory = TRUE, baseDir = &quot;/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files&quot;, fetch_files = TRUE)
+
+# getGEOSuppFiles(&quot;GSE69030&quot;, makeDirectory = TRUE, baseDir = &quot;/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files&quot;, fetch_files = TRUE)
+
+# getGEOSuppFiles(&quot;GSE66384&quot;, makeDirectory = TRUE, baseDir = &quot;/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files&quot;, fetch_files = TRUE)
+
+# getGEOSuppFiles(&quot;GSE47189&quot;, makeDirectory = TRUE, baseDir = &quot;/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files&quot;, fetch_files = TRUE)
+
+# CEL files not available for GSE 3982</code></pre>
+</div>
+<div id="import-cel-files-to-batch-objects" class="section level2">
+<h2>Import CEL files to batch objects</h2>
+<pre class="r"><code>### GSE26347 ### ------------------------------------------------
+# Affymetrix HG-U133_Plus2 and HG-U133A
+filenames_GSE26347 &lt;- list.files(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347&quot;)
+data_GSE26347 &lt;- ReadAffy(filenames_GSE26347) ##read data in working directory
+
+setwd(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/&quot;)
+# unpack files
+untar(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/GSE26347_RAW.tar&quot;, exdir = &quot;data&quot;)
+cels_GSE26347 &lt;- list.files(&quot;data/&quot;)
+length(cels_GSE26347)
+sapply(paste(&quot;data&quot;, cels_GSE26347, sep = &quot;/&quot;), gunzip)
+# make filepath vector
+filenames_GSE26347 &lt;- list.files(&quot;data/&quot;)
+head(filenames_GSE26347)
+filepath_GSE26347 &lt;- paste0(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/data/&quot;, filenames_GSE26347)
+# sets 1 and 2 were done on one platform and set 3 on another platform. Will need to import separately
+index_GSE26347_set3 &lt;- grep(&quot;_Set3&quot;, filepath_GSE26347) %&gt;% print()
+filepath_GSE26347_set3 &lt;- filepath_GSE26347[index_GSE26347_set3] %&gt;% print()
+filepath_GSE26347_set1_2 &lt;- filepath_GSE26347[-index_GSE26347_set3] %&gt;% print()
+# create AffyBatch objects
+data_GSE26347_set1_2 &lt;- ReadAffy(filenames = filepath_GSE26347_set1_2)
+data_GSE26347_set3 &lt;- ReadAffy(filenames = filepath_GSE26347_set3)
+# save AffyBatch objects
+saveRDS(data_GSE26347_set1_2, &quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/affybatch_data_GSE26347_set1_2.rds&quot;)
+saveRDS(data_GSE26347_set3, &quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/affybatch_data_GSE26347_set3.rds&quot;)
+
+### GSE4527 ### -----------------------------------------------
+## [HG-U133A] Affymetrix Human Genome U133A Array
+setwd(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE4527/&quot;)
+# unpack files
+untar(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE4527/GSE4527_RAW.tar&quot;, exdir = &quot;data&quot;)
+cels_GSE4527 &lt;- list.files(&quot;data/&quot;)
+length(cels_GSE4527)
+sapply(paste(&quot;data&quot;, cels_GSE4527, sep = &quot;/&quot;), gunzip)
+# make filepath vector
+# only need GSM101519 and GSM101521 -- avoid the problem of two platforms
+filenames_GSE4527 &lt;- list.files(&quot;data/&quot;) %&gt;% 
+  .[c(2,4)] %&gt;% print()
+filepath_GSE4527 &lt;- paste0(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE4527/data/&quot;, filenames_GSE4527) %&gt;% print()
+# create AffyBatch object
+data_GSE4527 &lt;- ReadAffy(filenames = filepath_GSE4527)
+saveRDS(data_GSE4527, &quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE4527/affybatch_data_GSE4527.rds&quot;)
+
+### GSE43769 ### -----------------------------------------------
+## [HG-U133_Plus_2] Affymetrix Human Genome U133 Plus 2.0 Array
+setwd(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE43769/&quot;)
+# unpack files
+untar(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE43769/GSE43769_RAW.tar&quot;, exdir = &quot;data&quot;)
+cels_GSE43769 &lt;- list.files(&quot;data/&quot;)
+length(cels_GSE43769)
+sapply(paste(&quot;data&quot;, cels_GSE43769, sep = &quot;/&quot;), gunzip)
+# make filepath vector
+filenames_GSE43769 &lt;- list.files(&quot;data/&quot;)
+filepath_GSE43769 &lt;- paste0(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE43769/data/&quot;, filenames_GSE43769) %&gt;% print()
+# create AffyBatch object
+data_GSE43769 &lt;- ReadAffy(filenames = filepath_GSE43769)
+saveRDS(data_GSE43769, &quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE43769/affybatch_data_GSE43769.rds&quot;)
+
+### GSE22886 ### -----------------------------------------------
+## [HG-U133A] Affymetrix Human Genome U133A Array
+setwd(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/&quot;)
+# unpack files
+untar(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/GSE22886_RAW.tar&quot;, exdir = &quot;data&quot;)
+cels_GSE22886 &lt;- list.files(&quot;data/&quot;)
+length(cels_GSE22886)
+sapply(paste(&quot;data&quot;, cels_GSE22886, sep = &quot;/&quot;), gunzip)
+# make filepath vector
+filenames_GSE22886 &lt;- list.files(&quot;data/&quot;) %&gt;% print()
+filepath_GSE22886 &lt;- paste0(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/data/&quot;, filenames_GSE22886) %&gt;% print()
+# there is a large number of files in this archive - will subset just for the ones used in the signature matrix
+subset_GSE22886 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE22886&quot;) %&gt;%
+  pull(sample_id) %&gt;% 
+  paste0(., &quot;.CEL&quot;) %&gt;%
+  print()
+filepath_subset_GSE22886 &lt;- paste0(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/data/&quot;, subset_GSE22886) %&gt;% print()
+# create AffyBatch object
+data_GSE22886 &lt;- ReadAffy(filenames = filepath_subset_GSE22886)
+saveRDS(data_GSE22886, &quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/affybatch_data_GSE22886.rds&quot;)
+
+### GSE11292 ### -----------------------------------------------
+## [HG-U133_Plus_2] Affymetrix Human Genome U133 Plus 2.0 Array
+setwd(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/&quot;)
+# unpack files
+untar(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/GSE11292_RAW.tar&quot;, exdir = &quot;data&quot;)
+cels_GSE11292 &lt;- list.files(&quot;data/&quot;)
+length(cels_GSE11292)
+sapply(paste(&quot;data&quot;, cels_GSE11292, sep = &quot;/&quot;), gunzip)
+# make filepath vector
+filenames_GSE11292 &lt;- list.files(&quot;data/&quot;)
+filepath_GSE11292 &lt;- paste0(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/data/&quot;, filenames_GSE11292) %&gt;% print()
+# there is a large number of files in this archive - will subset just for the ones used in the signature matrix
+subset_GSE11292 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE11292&quot;) %&gt;%
+  pull(sample_id) %&gt;% 
+  paste0(., &quot;.CEL&quot;) %&gt;%
+  print()
+filepath_subset_GSE11292 &lt;- paste0(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/data/&quot;, subset_GSE11292) %&gt;% print()
+# create AffyBatch object
+data_GSE11292 &lt;- ReadAffy(filenames = filepath_subset_GSE11292)
+saveRDS(data_GSE11292, &quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/affybatch_data_GSE11292.rds&quot;)
+
+### GSE106087 ### -----------------------------------------------
+## [PrimeView] Affymetrix Human Gene Expression Array
+setwd(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE106087/&quot;)
+# unpack files
+untar(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE106087/GSE106087_RAW.tar&quot;, exdir = &quot;data&quot;)
+cels_GSE106087 &lt;- list.files(&quot;data/&quot;)
+length(cels_GSE106087)
+sapply(paste(&quot;data&quot;, cels_GSE106087, sep = &quot;/&quot;), gunzip)
+# make filepath vector
+filenames_GSE106087 &lt;- list.files(&quot;data/&quot;)
+filepath_GSE106087 &lt;- paste0(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE106087/data/&quot;, filenames_GSE106087) %&gt;% print()
+# create AffyBatch object
+data_GSE106087 &lt;- ReadAffy(filenames = filepath_GSE106087)
+saveRDS(data_GSE106087, &quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE106087/affybatch_data_GSE106087.rds&quot;)
+
+### GSE66384 ### -----------------------------------------------
+## [PrimeView] Affymetrix Human Gene Expression Array
+setwd(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE66384/&quot;)
+# unpack files
+untar(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE66384/GSE66384_RAW.tar&quot;, exdir = &quot;data&quot;)
+cels_GSE66384 &lt;- list.files(&quot;data/&quot;)
+length(cels_GSE66384)
+sapply(paste(&quot;data&quot;, cels_GSE66384, sep = &quot;/&quot;), gunzip)
+# make filepath vector
+filenames_GSE66384 &lt;- list.files(&quot;data/&quot;)
+filepath_GSE66384 &lt;- paste0(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE66384/data/&quot;, filenames_GSE66384) %&gt;% print()
+# create AffyBatch object
+data_GSE66384 &lt;- ReadAffy(filenames = filepath_GSE66384)
+saveRDS(data_GSE66384, &quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE66384/affybatch_data_GSE66384.rds&quot;)
+
+### GSE69030 ### -----------------------------------------------
+## [HuGene-2_0-st] Affymetrix Human Gene 2.0 ST Array [transcript (gene) version]
+## Requires oligo package to import
+## Not compatible with Affy
+library(oligo)
+setwd(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE69030/&quot;)
+# unpack files
+untar(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE69030/GSE69030_RAW.tar&quot;, exdir = &quot;data&quot;)
+cels_GSE69030 &lt;- list.files(&quot;data/&quot;)
+length(cels_GSE69030)
+sapply(paste(&quot;data&quot;, cels_GSE69030, sep = &quot;/&quot;), gunzip)
+# make filepath vector
+file_index_GSE69030 &lt;- list.files(&quot;data/&quot;) %&gt;% grep(&quot;.CEL&quot;, .) %&gt;% print()
+filenames_GSE69030 &lt;- list.files(&quot;data/&quot;) %&gt;% .[file_index_GSE69030] %&gt;% print()
+filepath_GSE69030 &lt;- paste0(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE69030/data/&quot;, filenames_GSE69030) %&gt;% print()
+# import with oligo
+data_GSE69030 &lt;- read.celfiles(filepath_GSE69030)
+saveRDS(data_GSE69030, &quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE69030/affybatch_data_GSE69030.rds&quot;)</code></pre>
+<p>Normalization and background correction Subset cases Summarize at gene level</p>
+<pre class="r"><code># read in Affy batch
+data_GSE26347_set1_2 &lt;- readRDS(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/affybatch_data_GSE26347_set1_2.rds&quot;)
+# convert to expression table with RMA background correction
+expr_GSE26347_set1_2 &lt;- affy::rma(data_GSE26347_set1_2) %&gt;% 
+  exprs() %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  separate(sample_name, into = c(&quot;sample_id&quot;, NA)) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+expr_GSE26347_set1_2[1:5, 1:5]
+# subset cases
+subset_cases_26347 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE26347&quot;) %&gt;%
+  dplyr::filter(platform_code == &quot;GPL570&quot;) %&gt;%
+  pull(sample_id) %&gt;%
+  print()
+selected_GSE26347_set1_2 &lt;- expr_GSE26347_set1_2[, subset_cases_26347]
+dim(selected_GSE26347_set1_2)
+
+# read in Affy batch
+data_GSE26347_set3 &lt;- readRDS(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/affybatch_data_GSE26347_set3.rds&quot;)
+# convert to expression table with RMA background correction
+expr_GSE26347_set3 &lt;- affy::rma(data_GSE26347_set3) %&gt;% 
+  exprs() %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  separate(sample_name, into = c(&quot;sample_id&quot;, NA)) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+expr_GSE26347_set3[1:5, 1:5]
+# subset cases
+subset_cases_26347 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE26347&quot;) %&gt;%
+  dplyr::filter(platform_code == &quot;GPL3921&quot;) %&gt;%
+  pull(sample_id) %&gt;%
+  print()
+selected_GSE26347_set3 &lt;- expr_GSE26347_set3[, subset_cases_26347]
+dim(selected_GSE26347_set3)
+
+# read in Affy batch
+data_GSE4527 &lt;- readRDS(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE4527/affybatch_data_GSE4527.rds&quot;)
+# convert to expression table with RMA background correction
+expr_GSE4527 &lt;- affy::rma(data_GSE4527) %&gt;% 
+  exprs() %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  separate(sample_name, into = c(&quot;sample_id&quot;, NA)) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+expr_GSE4527[1:5, ]
+# subset cases
+subset_cases_GSE4527 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE4527&quot;) %&gt;%
+  pull(sample_id) %&gt;%
+  print()
+selected_GSE4527 &lt;- expr_GSE4527[, subset_cases_GSE4527]
+dim(selected_GSE4527)
+
+# read in Affy batch
+data_GSE43769 &lt;- readRDS(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE43769/affybatch_data_GSE43769.rds&quot;)
+# convert to expression table with RMA background correction
+expr_GSE43769 &lt;- affy::rma(data_GSE43769) %&gt;% 
+  exprs() %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  separate(sample_name, into = c(&quot;sample_id&quot;, NA)) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+expr_GSE43769[1:5, ]
+# subset cases
+subset_cases_GSE43769 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE43769&quot;) %&gt;%
+  pull(sample_id) %&gt;%
+  print()
+selected_GSE43769 &lt;- expr_GSE43769[, subset_cases_GSE43769]
+dim(selected_GSE43769)
+
+# this was read in with oligo, not affy package
+data_GSE69030 &lt;- readRDS(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE69030/affybatch_data_GSE69030.rds&quot;)
+# convert to expression table with RMA background correction
+expr_GSE69030 &lt;- oligo::rma(data_GSE69030) %&gt;% 
+  exprs() %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  separate(sample_name, into = c(&quot;sample_id&quot;, NA)) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+expr_GSE69030[1:5, ]
+# subset cases
+subset_cases_GSE69030 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE69030&quot;) %&gt;%
+  pull(sample_id) %&gt;%
+  print()
+selected_GSE69030 &lt;- expr_GSE69030[, subset_cases_GSE69030]
+dim(selected_GSE69030)
+
+# read in Affy batch
+data_GSE66384 &lt;- readRDS(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE66384/affybatch_data_GSE66384.rds&quot;)
+# convert to expression table with RMA background correction
+expr_GSE66384 &lt;- affy::rma(data_GSE66384) %&gt;% 
+  exprs() %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  separate(sample_name, into = c(&quot;sample_id&quot;, NA)) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+expr_GSE66384[1:5, ]
+# subset cases
+subset_cases_GSE66384 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE66384&quot;) %&gt;%
+  pull(sample_id) %&gt;%
+  print()
+selected_GSE66384 &lt;- expr_GSE66384[, subset_cases_GSE66384]
+dim(selected_GSE66384)
+
+# read in Affy batch
+data_GSE106087 &lt;- readRDS(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE106087/affybatch_data_GSE106087.rds&quot;)
+# convert to expression table with RMA background correction
+expr_GSE106087 &lt;- affy::rma(data_GSE106087) %&gt;% 
+  exprs() %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  separate(sample_name, into = c(&quot;sample_id&quot;, NA)) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+expr_GSE106087[1:5, ]
+# subset cases
+subset_cases_GSE106087 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE106087&quot;) %&gt;%
+  pull(sample_id) %&gt;%
+  print()
+selected_GSE106087 &lt;- expr_GSE106087[, subset_cases_GSE106087]
+dim(selected_GSE106087)
+
+# read in Affy batch
+data_GSE11292 &lt;- readRDS(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/affybatch_data_GSE11292.rds&quot;)
+# convert to expression table with RMA background correction
+expr_GSE11292 &lt;- affy::rma(data_GSE11292) %&gt;% 
+  exprs() %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  separate(sample_name, into = c(&quot;sample_id&quot;, NA)) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+expr_GSE11292[1:5, ]
+# subset cases
+subset_cases_GSE11292 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE11292&quot;) %&gt;%
+  pull(sample_id) %&gt;%
+  print()
+selected_GSE11292 &lt;- expr_GSE11292[, subset_cases_GSE11292]
+dim(selected_GSE11292)
+
+# read in Affy batch
+data_GSE22886 &lt;- readRDS(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/affybatch_data_GSE22886.rds&quot;)
+# convert to expression table with RMA background correction
+expr_GSE22886 &lt;- affy::rma(data_GSE22886) %&gt;% 
+  exprs() %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  separate(sample_name, into = c(&quot;sample_id&quot;, NA)) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+expr_GSE22886[1:5, ]
+# subset cases
+subset_cases_GSE22886 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE22886&quot;) %&gt;%
+  pull(sample_id) %&gt;%
+  print()
+selected_GSE22886 &lt;- expr_GSE22886[, subset_cases_GSE22886]
+dim(selected_GSE22886)</code></pre>
+<p>Load expression matrices for those already imported or lacking CEL files</p>
+<pre class="r"><code>### GSE3982 ### ----------------------------------------------------
+expr_GSE3982 &lt;- gse_list[[6]] %&gt;% 
+  .[[1]] %&gt;% 
+  exprs()
+expr_GSE3982[1:5, 1:5]
+# subset cases
+subset_cases_3982 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE3982&quot;) %&gt;%
+  pull(sample_id) %&gt;%
+  print()
+selected_GSE3982 &lt;- expr_GSE3982[, subset_cases_3982] %&gt;%
+  log2()
+dim(selected_GSE3982)
+selected_GSE3982[1:5, 1:5] 
+
+### GSE47189 ### ------------------------------------------------------
+# macrophage gene sets with illumina bead chips downloaded as raw (non-normalized) counts
+expr_GSE47189 &lt;- readRDS(&quot;~/tcga_macs/output/expression_set.rds&quot;) %&gt;%
+  exprs()
+expr_GSE47189[1:5, 1:5]
+# need to change column names to GEO sample_ids
+pdata_lookup &lt;- pData(readRDS(&quot;~/tcga_macs/output/expression_set.rds&quot;)) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(geo_id, raw_id) %&gt;%
+  print()
+# subset cases
+expr_geo_GSE47189 &lt;- t(expr_GSE47189) %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;raw_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(pdata_lookup) %&gt;%
+  dplyr::select(geo_id, everything()) %&gt;%
+  dplyr::select(-raw_id) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;geo_id&quot;) %&gt;%
+  as.matrix() %&gt;%
+  t()
+expr_geo_GSE47189[1:5, 1:5]
+
+subset_cases_47189 &lt;- masterlist %&gt;%
+  dplyr::filter(dataset == &quot;GSE47189&quot;) %&gt;%
+  pull(sample_id) %&gt;%
+  print()
+selected_GSE47189 &lt;- expr_geo_GSE47189[, subset_cases_47189]
+dim(selected_GSE47189)</code></pre>
+<p>Convert probes to ensembl gene IDs</p>
+<pre class="r"><code>raw_probe_expr_list &lt;- list(&quot;GSE26347_12&quot; = selected_GSE26347_set1_2, 
+                            &quot;GSE26347_3&quot; = selected_GSE26347_set3,
+                            &quot;GSE4527&quot; = selected_GSE4527,
+                            &quot;GSE43769&quot; = selected_GSE43769,
+                            &quot;GSE22886&quot; = selected_GSE22886,
+                            &quot;GSE11292&quot; = selected_GSE11292,
+                            &quot;GSE106087&quot; = selected_GSE106087,
+                            &quot;GSE66384&quot; = selected_GSE66384,
+                            &quot;GSE3982&quot; = selected_GSE3982)
+                            
+
+# define function for g:convert
+converter &lt;- function(expr_mat){
+  ensg_lookup &lt;- gconvert(query = rownames(expr_mat), 
+           organism = &quot;hsapiens&quot;,
+           target = &quot;HGNC&quot;, 
+           mthreshold = 1,
+           numeric_ns = &quot;AFFY_HUEX_1_0_ST_V2&quot;,
+           filter_na = TRUE) %&gt;%
+    dplyr::select(input, target)
+  expr_df &lt;- expr_mat %&gt;%
+    as.data.frame() %&gt;%
+    rownames_to_column(var = &quot;input&quot;) %&gt;%
+    as_tibble() %&gt;%
+    left_join(ensg_lookup) %&gt;%
+    dplyr::select(-input) %&gt;%
+    dplyr::select(ensembl_gene_id = target, everything()) %&gt;%
+    dplyr::filter(!is.na(ensembl_gene_id)) %&gt;%
+    as.data.frame()
+  expr_mat_ensembl &lt;- expr_df[-1] %&gt;%
+    as.matrix
+  rownames(expr_mat_ensembl) &lt;- expr_df[,1]
+  collapsed_expr &lt;- avereps(expr_mat_ensembl)
+  collapsed_expr
+}
+
+# apply function to expression sets with probe names
+ensg_expr_list &lt;- map(raw_probe_expr_list, converter)
+
+# convert to dataframes
+ensg_expr_df_list &lt;- map(ensg_expr_list, function(x){
+  x %&gt;%
+    as.data.frame() %&gt;%
+    rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+    as_tibble()
+})
+# join as single dataframe
+# just missing GSE47189 and GSE69030
+ensg_expr_subtotal &lt;- ensg_expr_df_list %&gt;% 
+  reduce(left_join, by = &quot;gene_id&quot;)
+
+# convert lumi probe IDs to gene names
+# use R object in lumiHumanAll.db
+lumi_lookup &lt;- as.list(lumiHumanAllALIAS2PROBE) %&gt;%
+  enframe() %&gt;%
+  dplyr::rename(gene_name = name, probe_id = value) %&gt;%
+  unnest(probe_id) %&gt;%
+  print()
+
+# convert to gene id, drop all unmapped probes
+ensg_expr_GSE47189_df &lt;- selected_GSE47189 %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;probe_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(lumi_lookup) %&gt;%
+  dplyr::select(probe_id, gene_name, everything()) %&gt;%
+  drop_na(gene_name) %&gt;%
+  dplyr::select(-probe_id)
+ensg_mat_GSE47189 &lt;- ensg_expr_GSE47189_df[-1] %&gt;% 
+  as.matrix()
+rownames(ensg_mat_GSE47189) &lt;- ensg_expr_GSE47189_df$gene_name
+# collapse multiple mapped probes by averaging
+ensg_expr_GSE47189 &lt;- avereps(ensg_mat_GSE47189)
+ensg_expr_GSE47189[1:5, 1:5]
+dim(ensg_expr_GSE47189)
+# prepare for left join with main expression matrix
+ensg_GSE47189 &lt;- ensg_expr_GSE47189 %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  print()
+
+# read in annotation file for HuGene-2_0-st-v1 Transcript Cluster Annotations, CSV, Release 36 from affymetrix website: http://www.affymetrix.com/support/technical/byproduct.affx?product=hugene-1_0-st-v1
+
+HuGene_2_0_st_v1_na36_hg19_transcript &lt;- read_csv(&quot;/Volumes/kline-lab/dlbcl_sig_matrix_data/HuGene-2_0-st-v1.na36.hg19.transcript.csv&quot;, 
+                                                 skip = 23) 
+
+lookup_hugene_2 &lt;- HuGene_2_0_st_v1_na36_hg19_transcript %&gt;%
+  select(transcript_cluster_id, probeset_id, gene_assignment) %&gt;%
+  separate(gene_assignment, into = c(&quot;refseq_id&quot;, &quot;hugo_name&quot;, &quot;long_name&quot;), sep = &quot;//&quot;) %&gt;%
+  mutate(hugo_name = str_trim(hugo_name, side = &quot;both&quot;)) %&gt;%
+  mutate(refseq_id = str_trim(refseq_id, side = &quot;both&quot;)) %&gt;%
+  mutate(long_name = str_trim(long_name, side = &quot;both&quot;)) %&gt;%
+  print()
+
+lookup_hugene_2_hgnc &lt;- lookup_hugene_2 %&gt;%
+  dplyr::select(probeset_id, hugo_name) %&gt;%
+  mutate(probeset_id = as.character(probeset_id)) %&gt;%
+  print()
+
+GSE69030_esbl_df &lt;- selected_GSE69030 %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;probeset_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(lookup_hugene_2_hgnc) %&gt;%
+  dplyr::select(probeset_id, hugo_name, everything()) %&gt;%
+  drop_na(hugo_name) %&gt;%
+  dplyr::select(-probeset_id) %&gt;%
+  print()
+
+ensg_mat_GSE69030 &lt;- GSE69030_esbl_df[-1] %&gt;% 
+  as.matrix()
+rownames(ensg_mat_GSE69030) &lt;- GSE69030_esbl_df$hugo_name
+# collapse multiple mapped probes by averaging
+ensg_expr_GSE69030 &lt;- avereps(ensg_mat_GSE69030)
+ensg_expr_GSE69030[1:5, 1:5]
+dim(ensg_expr_GSE69030)
+# prepare for left join with main expression matrix
+ensg_GSE69030 &lt;- ensg_expr_GSE69030 %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  print()
+  
+# Combine all expression matrices into a single matrix
+ensg_expr_total &lt;- ensg_expr_subtotal %&gt;% 
+  left_join(ensg_GSE47189) %&gt;%
+  left_join(ensg_GSE69030) %&gt;%
+  drop_na(gene_id) %&gt;%
+  print()
+
+ensg_mat &lt;- ensg_expr_total[-1] %&gt;% 
+  as.matrix()
+rownames(ensg_mat) &lt;- ensg_expr_total$gene_id
+# collapse multiple mapped probes by averaging
+ensg_mat_total &lt;- avereps(ensg_mat)
+ensg_mat_total[1:5, 1:5]
+dim(ensg_mat_total)
+
+saveRDS(ensg_mat_total, &quot;output/combined_expr_matrix_for_signature_unprocessed.rmd&quot;)</code></pre>
+<p>Prepare pheno data</p>
+<pre class="r"><code>pheno &lt;- colnames(ensg_mat_total) %&gt;%
+  enframe() %&gt;%
+  dplyr::select(sample_id = value) %&gt;%
+  left_join(masterlist) %&gt;%
+  left_join(selected_pdata) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;)
+pheno[1:5, 1:5]
+saveRDS(pheno, &quot;output/phenodata_for_signature_matrix.rmd&quot;)
+
+identical(colnames(ensg_mat_total), rownames(pheno))
+
+metadata &lt;- data.frame(colnames(pheno))
+rownames(metadata) &lt;- colnames(pheno)
+metadata
+
+phenoData &lt;- new(&quot;AnnotatedDataFrame&quot;,
+                 data = pheno, 
+                 varMetadata = metadata)
+
+
+annotation &lt;- &quot;CEL files downloaded where available for each dataset and background corrected following annotation in phenodata (RMA for Affymetrix and RSN for Illumina chips). GSE3982 had no available CEL files and was downloaded as MAS5 normalized data which was then log2 transformed to match RMA. Individual samples chosen as representative populations and assigned to groups by hand after literature review. Summarized at gene level with HGNC gene names. Probes that did not map to a gene name were dropped and duplicate gene names averaged. Combined into single expression matrix in log2 space.&quot;
+
+experimentData &lt;- new(&quot;MIAME&quot;,
+                      name = &quot;Mike Leukam&quot;, 
+                      lab = &quot;Justin Kline Lab&quot;,
+                      contact = &quot;mleukam@medicine.bsd.uchicago.edu&quot;,
+                      title = &quot;Construction of DLBCL-specific signature matrix&quot;,
+                      abstract = &quot;pending&quot;,
+                      url = &quot;www.medicine.uchicago.edu&quot;,
+                      other = list(notes = &quot;aggregated from prior experiments&quot;))</code></pre>
+<p>Make expression set</p>
+<pre class="r"><code>preprocessed_sig_matrix_es &lt;- ExpressionSet(
+  assayData = ensg_mat_total,
+  phenoData = phenoData,
+  experimentData = experimentData,
+  annotation = annotation)
+preprocessed_sig_matrix_es
+
+saveRDS(preprocessed_sig_matrix_es, &quot;preprocessed_data_for_signature_matrix_es.rds&quot;)</code></pre>
+</div>
+<div id="blacklist" class="section level2">
+<h2>Blacklist</h2>
+<p>From: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5998872/" class="uri">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5998872/</a></p>
+<p>Chen SH, Kuo WY, Su SY, Chung WC, Ho JM, Lu HH, Lin CY. A gene profiling deconvolution approach to estimating immune cell composition from complex tissues. BMC Bioinformatics. 2018 May 8;19(Suppl 4):154. doi: 10.1186/s12859-018-2069-6. PMID: 29745829; PMCID: PMC5998872.</p>
+<pre><code>To define a set of feature genes for deconvolution, we first eliminate genes that are unsuitable for building model. Two methods were adopted. We use datasets and enrichment score (ES) described in Benita et al. [13] to define genes that expressed in normal tissues by the criteria of ES&gt;0 in more than 5% of observed tissue types. Besides, genes that expressed in cancer cells are collected from cancer cell line encyclopedia [14] in the criteria of log2 transformed expression level&gt;7. The two lists are used as black lists to remove genes expressed in normal tissues and cancer cells from the candidate list.</code></pre>
+<p>For this project, we will use the list of housekeeping genes from: “Human housekeeping genes revisited” E. Eisenberg and E.Y. Levanon, Trends in Genetics, 29 (2013) as the first filter. List of housekeeping genes downloaded from author’s website: <a href="https://www.tau.ac.il/~elieis/HKG/" class="uri">https://www.tau.ac.il/~elieis/HKG/</a></p>
+<pre class="r"><code>hk_genes &lt;- read_delim(&quot;~/tcga_macs/data/HK_genes.tsv&quot;, 
+                       delim = &quot;\t&quot;, 
+                       col_names = c(&quot;hgnc_name&quot;, &quot;refseq_name&quot;), 
+                       trim_ws = TRUE)
+hk_genes
+
+blacklist_hk_genes &lt;- hk_genes %&gt;%
+  pull(hgnc_name)
+head(blacklist_hk_genes)
+length(blacklist_hk_genes)</code></pre>
+<p>Broad Cancer Cell Line Encyclopedia (CCLE) RNAseq gene expression data for 1019 cell lines (raw read counts) downloaded from website: www.broadinstitute.org/ccle. Version last updated: Jan 2, 2019 File moved to data folder</p>
+<p>For this project, only genes highly expressed in DLBCL will be included in the blacklist</p>
+<pre class="r"><code># read in as matrix
+ccle &lt;- CePa::read.gct(&quot;~/tcga_macs/data/CCLE_RNAseq_genes_counts_20180929.gct&quot;)
+dim(ccle)
+
+# read in annotation file
+ccle_annotation &lt;- read_delim(&quot;data/CCLE_sample_info_file_2012-10-18.txt&quot;, 
+    &quot;\t&quot;, escape_double = FALSE, trim_ws = TRUE) %&gt;%
+  dplyr::select(ccle_name = `CCLE name`, site = `Site Primary`, histology = Histology, hist_subtype = `Hist Subtype1`) %&gt;%
+  print()
+
+# select DLBCL cell lines
+ccle_dlbcl_lines &lt;- ccle_annotation %&gt;%
+  dplyr::filter(grepl(&quot;lymphoma&quot;, hist_subtype)) %&gt;%
+  dplyr::filter(grepl(&quot;diffuse_large_B_cell&quot;, hist_subtype)) %&gt;%
+  pull(ccle_name) %&gt;%
+  print()
+
+# filter for dlbcl cell lines
+ccle_dlbcl &lt;- ccle %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  dplyr::select(one_of(ccle_dlbcl_lines), gene_id) %&gt;%
+  column_to_rownames(var = &quot;gene_id&quot;) %&gt;%
+  as.matrix()
+
+ccle_dlbcl[1:5, 1:5]
+str(ccle_dlbcl)
+
+# log transform
+log2_ccle &lt;- log2(ccle_dlbcl)
+
+# read in gene_id to gene_name conversion table
+gencode_gtf &lt;- read_tsv(&quot;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&quot;) %&gt;%
+  separate(gene_id, into = c(&quot;gene_id&quot;, &quot;version&quot;), sep = &quot;\\.&quot;) %&gt;%
+  dplyr::select(gene_id, gene_name) %&gt;%
+  print()
+
+# get average gene expression across all cancer cell lines
+ccle_log_means &lt;- rowMeans(log2_ccle, na.rm = FALSE, dims = 1)
+hist(ccle_log_means)
+cancer_genes_high &lt;- ccle_log_means[ccle_log_means &gt; 12]
+length(cancer_genes_high)
+hist(cancer_genes_high)
+head(cancer_genes_high)
+blacklist_dlbcl_genes &lt;- names(cancer_genes_high) %&gt;% 
+  enframe() %&gt;%
+  dplyr::select(gene_id = value) %&gt;%
+  separate(gene_id, into = c(&quot;gene_id&quot;, &quot;version&quot;), sep = &quot;\\.&quot;, remove = TRUE) %&gt;%
+  left_join(gencode_gtf) %&gt;%
+  dplyr::filter(!is.na(gene_name)) %&gt;%
+  pull(gene_name)
+head(blacklist_dlbcl_genes)
+length(blacklist_dlbcl_genes)</code></pre>
+<p>Make combined blacklist</p>
+<pre class="r"><code>blacklist &lt;- unique(c(blacklist_dlbcl_genes, blacklist_hk_genes))
+length(blacklist)
+head(blacklist)</code></pre>
+</div>
+<div id="cluster" class="section level2">
+<h2>Cluster</h2>
+<pre><code>Data from the 22 cell types (the signature set, 113 arrays) are quantile normalized before detecting differentially expressed genes. In order to prevent the datasets containing bias experiment result, clustering on gene profiling is applied. The clustering method is complete linkage and in the Euclidean distance. The inconsistency of gene profiling clusters and cell type labels is further analyzed for an advanced outlier judgment. </code></pre>
+<pre class="r"><code># expression set created above
+# contains background-corrected data
+# also contains metadata from GEO and cell type assignment
+# expression in terms of hugo gene names
+es_preprocessed &lt;- readRDS(&quot;preprocessed_data_for_signature_matrix_es.rds&quot;)
+
+# retreive preprocessed expression data
+expr_preprocessed &lt;- exprs(es_preprocessed)
+summary(as.factor(expr_preprocessed &lt; 0))
+summary(expr_preprocessed)
+summary(as.factor(is.na(expr_preprocessed)))
+# negative numbers can be introduced by RMA normalization if probe intensity is lower than the background probes - this will be addressed with an offset
+# NAs are probably introduced by different gene coverage of the various different probesets and should be removed
+expr_pre &lt;- expr_preprocessed %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  drop_na() %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;gene_id&quot;) %&gt;%
+  as.matrix()
+summary(as.factor(expr_pre &lt; 0))
+summary(expr_pre)
+summary(as.factor(is.na(expr_pre)))
+expr_pre[expr_pre &lt; 0] &lt;- 0.01
+expr_pre[expr_pre == 0] &lt;- 0.01
+summary(as.factor(expr_pre &lt; 0))
+summary(expr_pre)
+summary(as.factor(is.na(expr_pre)))
+range(expr_pre)
+
+# quantile normalize using limma function
+expr_norm &lt;- limma::normalizeBetweenArrays(expr_pre, 
+                                           method = &quot;quantile&quot;)
+
+summary(as.factor(expr_norm &lt; 0))
+summary(as.factor(is.na(expr_norm)))
+range(expr_norm)
+
+## Clustering gene expression to examine phenotype labels
+set.seed(818)
+
+# select 1000 highest probes with highest variation
+# input is normalized expression matrix with zero expression genes removed
+myvars &lt;- apply(expr_norm, 1, var, na.rm = TRUE) 
+myvars &lt;- sort(myvars, decreasing = TRUE) 
+myvars &lt;- myvars[1:1000] 
+expr_onek &lt;- expr_norm[names(myvars), ] 
+dim(expr_onek) 
+
+cell_type &lt;- as.numeric(as.factor(pData(es_preprocessed)$abreviated_name))</code></pre>
+<pre class="r"><code># heirarchical cluster
+dend &lt;- t(expr_onek) %&gt;% 
+  scale() %&gt;% 
+  dist() %&gt;% 
+  hclust(method = &quot;ward.D2&quot;) %&gt;% 
+  as.dendrogram() %&gt;%
+  color_branches(clusters = cell_type) %&gt;%
+  set(&quot;labels&quot;, pData(es_preprocessed)$abreviated_name)
+plot(dend)
+
+ggd1 &lt;- as.ggdend(dend)
+ggplot(ggd1)
+
+dend2 &lt;- t(expr_onek) %&gt;% 
+  scale() %&gt;% 
+  dist() %&gt;% 
+  hclust(method = &quot;ward.D2&quot;) %&gt;% 
+  as.dendrogram() %&gt;%
+  color_branches(clusters = cell_type) %&gt;%
+  set(&quot;labels&quot;, rownames(pData(es_preprocessed)))
+plot(dend2)
+
+ggd2 &lt;- as.ggdend(dend2)
+ggplot(ggd2)
+
+# suggested pdf size 36&quot;w x 30&quot;h</code></pre>
+<pre class="r"><code># subset the data to remove the CD8 naive group (cannot be separated from CD8 T-effector cells) and the out-of-place T-regs enveloped by neutrophils
+# done by hand in excel spreadsheet for masterlist
+# so now it shows up at the start of the notebook... time travel
+pheno_data_subset &lt;- masterlist %&gt;%
+  dplyr::filter(!is.na(cell_type)) %&gt;%
+  print()
+
+keep_cases &lt;- pheno_data_subset %&gt;%
+  pull(sample_id)
+dim(expr_norm)
+expr_norm_subset &lt;- expr_norm[, keep_cases]
+dim(expr_norm_subset)</code></pre>
+<p>Now will remove blacklist genes</p>
+<pre><code>To define a set of feature genes for deconvolution, we first eliminate genes that are unsuitable for building model. Two methods were adopted.</code></pre>
+<pre class="r"><code>dim(pheno_data_subset)
+
+expr_norm_subset_filtered_df &lt;- expr_norm_subset %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::filter(!gene_name %in% blacklist) %&gt;%
+  print()
+expr_norm_subset_filtered &lt;- expr_norm_subset_filtered_df[-1] %&gt;%
+  as.matrix()
+rownames(expr_norm_subset_filtered) &lt;- expr_norm_subset_filtered_df$gene_name
+
+expr_norm_subset_filtered[1:5, 1:5]
+dim(expr_norm_subset_filtered)</code></pre>
+<p>Filter genes by protein expression</p>
+<pre class="r"><code># tidy data
+edata_tbl &lt;- expr_norm_subset_filtered %&gt;% 
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  gather(key = &quot;sample_id&quot;, value = &quot;intensity&quot;, -gene_name) %&gt;%
+  group_by(sample_id)
+
+# find &quot;valley&quot; in density plot for low value filtering
+dplot &lt;- ggplot(edata_tbl, aes(intensity, color = sample_id)) +
+  geom_density() + 
+  theme(legend.position = &quot;none&quot;) +
+  geom_vline(xintercept = 4)
+dplot
+
+# remove any probes without at least expression value 4 in at least 3 samples (smallest group)
+dataMatrix &lt;- as.data.frame(expr_norm_subset_filtered)
+mat_stats &lt;- data.frame(total = apply(dataMatrix, 1, function(x) sum(
+      x &gt; 4, na.rm = TRUE)))
+keep = which(mat_stats$total &gt;= 3) 
+
+dim(dataMatrix)
+selDataMatrix = dataMatrix[keep,] %&gt;% as.matrix()
+dim(selDataMatrix)
+
+# gather list of selected probes
+geneList &lt;- rownames(selDataMatrix)
+
+# get phenodata for groups
+dim(pheno_data_subset)</code></pre>
+</div>
+<div id="differential-gene-expression" class="section level2">
+<h2>Differential gene expression</h2>
+<p>From: Chen SH, Kuo WY, Su SY, Chung WC, Ho JM, Lu HH, Lin CY. A gene profiling deconvolution approach to estimating immune cell composition from complex tissues. BMC Bioinformatics. 2018 May 8;19(Suppl 4):154. doi: 10.1186/s12859-018-2069-6. PMID: 29745829; PMCID: PMC5998872.</p>
+<pre><code>To select genes that can be the representative features of a cell type, we run the statistical analysis between each two immune cell type pairs. Firstly, the differentially expressed genes (DEGs) are detected using two-sided unequal variance T-test with a significant criterion in q-value &lt;0.3. Secondly, we sort the DEGs of each comparing pair by the absolute value of log fold change of gene expression level in descending order. Third, a top G (G=5 to 100) ranked DEGs are selected from each pair to build a union set of a signature gene list (top G signature gene list) and to derive top G signature matrix, the expression profiles for each top G signature gene list. Condition number [15] which is associated with the linear equation is introduced to define the choice of G and calculated with “kappa” function in R.</code></pre>
+<p>Development of LM22 from CIBERSORT paper:</p>
+<p>Newman AM, Liu CL, Green MR, Gentles AJ, Feng W, Xu Y, Hoang CD, Diehn M, Alizadeh AA. Robust enumeration of cell subsets from tissue expression profiles. Nat Methods. 2015 May;12(5):453-7. doi: 10.1038/nmeth.3337. Epub 2015 Mar 30. PMID: 25822800; PMCID: PMC4739640.</p>
+<pre><code>We obtained GEP data from the public domain for 22 leukocyte subsets profiled on the HGU133A platform (Supplementary Table 1). Probesets were preprocessed as described above. Significantly differentially expressed genes between each population and all other populations were identified using a two-sided unequal variance t-test. Genes with a q-value &lt; 0.3 (false discovery rate29) were considered significant.
+
+For each leukocyte subset, significant genes were ordered by decreasing fold change compared to other cell subsets, and the top G marker genes from each cell subset were combined into a signature matrix BG. We iterated G from 50 to 200 across all subsets, and retained the signature matrix with the lowest condition number (condition number = 11.4; G = 102; n = 547 distinct genes; Supplementary Table 1).
+
+To prevent genes expressed on non-hematopoietic cell types from confounding deconvolution results, we also used two gene filtration strategies. First, we identified genes with enriched expression in non-hematopoietic cells or tissues using the Gene Enrichment Profiler, an online compendium of diverse cells and tissues profiled on HGU133A (http://xavierlab2.mgh.harvard.edu/EnrichmentProfiler/)30. Gene Enrichment Profiler calculates an enrichment score (ES) for a given gene in a given cell or tissue type based on the sum of linear model coefficients from all pairwise comparisons of that gene with other samples. For each gene and cell or tissue type with ES &gt; 0, we determined the fraction of non-hematopoietic cell or tissue samples in the Gene Enrichment Profiler database, and excluded genes from the signature matrix with a non-hematopoietic fraction &gt;0.05. As a second filtration step, we omitted all genes from further analysis with a mean log2 expression level ≥7 in all non-hematopoietic cancer cell lines profiled in the Cancer Cell Line Encyclopedia (CCLE) (pre-normalized gene expression data were extracted from CCLE_Expression_Entrez_2012-09-29.txt, downloaded from the Broad Institute). We termed the final signature matrix ‘LM22’.</code></pre>
+<p>Summary of plan:</p>
+<p><em>Step 1:</em> Get DEGs of each cluster compaired pairwise to others using limma. Select only those genes with adj.P.Val &gt; 0.3 for each comparison. <em>Step 1b:</em> Apply blacklist and remove housekeeping and cancer genes from list</p>
+<p><em>Step 2:</em> Sort each comparison’s ttable by logFC in descending order</p>
+<p><em>Step 3:</em>. For each G value from 25-200, make an vector of the top G genes from each comparison. Filter the expression matrix for only those genes and create a list of 95 expression matrices (one for each value of G). Calculate the condition number for each expression matrix using the <code>kappa</code> function and choose the one with the lowest condition number. This will be the signature gene list. <em>Step 3b:</em> Create the signature gene matrix by averaging columns by each cluster and filtering rows by the signature gene list.</p>
+<div id="step-1-and-2" class="section level4">
+<h4>Step 1 and 2</h4>
+<pre class="r"><code># set up design matrix
+rnames &lt;- rownames(pheno_data_subset)
+groups &lt;- as.factor(pheno_data_subset$cell_type)
+batch &lt;- as.factor(pheno_data_subset$platform_code)
+design &lt;- model.matrix(~0 + groups)
+colnames(design) &lt;- gsub(&quot;groups&quot;, &quot;&quot;, colnames(design))
+rownames(design) &lt;- rnames
+head(design)
+
+# make contrasts
+unique_groups &lt;- as.character(unique(groups))
+unique_groups
+
+# get permutations
+conts &lt;- as.data.frame(permutations(n = length(unique_groups), r = 2, v = unique_groups)) %&gt;%
+  mutate(cont = paste0(V1, &quot;-&quot;, V2)) %&gt;%
+  pull(cont)
+conts
+  
+# define contrasts
+contr.matrix &lt;- makeContrasts(contrasts = conts, levels = design)
+contr.matrix[1:5, 1:5]
+dim(contr.matrix)
+
+# fit linear models
+fit &lt;- lmFit(selDataMatrix, design)
+fit2 &lt;- contrasts.fit(fit, contr.matrix)
+fit2 &lt;- eBayes(fit2)
+
+# make a list from to length of conts
+numlist &lt;- as.list(seq(1, length(conts)))
+
+# define a function to get toptables and combine in a list
+toptabler &lt;- function(numlist, fit){
+  topTable(fit2, coef = numlist, 
+           adjust.method = &quot;BH&quot;,
+           sort.by = &quot;none&quot;,
+           number = Inf)
+}
+
+# iterate function over number list
+ttables &lt;- map(numlist, toptabler)
+head(ttables[[1]])
+
+# define a funtion to get selected columns from toptables
+maketables &lt;- function(ttable_list){
+  ttable_list %&gt;%
+    rownames_to_column(var = &quot;gene_name&quot;) %&gt;%
+    dplyr::select(gene_name, logFC, adj.P.Val) %&gt;%
+    as_tibble() %&gt;%
+    # select only those with adj.P.Val &lt; 0.3
+    dplyr::filter(adj.P.Val &lt; 0.3) %&gt;%
+    # filter against the blacklist
+    dplyr::filter(!gene_name %in% blacklist) %&gt;%
+    # sort by logFC
+    arrange(desc(logFC)) %&gt;%
+    # remove any unnamed genes
+    dplyr::filter(!is.na(gene_name)) %&gt;%
+    # remove duplicates
+    distinct(gene_name, .keep_all = TRUE)
+}
+
+# apply function to list of toptables
+tables &lt;- map(ttables, maketables)
+tables[[1]]
+names(tables) &lt;- conts
+head(tables)
+# convert to nested dataframe
+table_df &lt;- enframe(tables)
+table_df</code></pre>
+</div>
+<div id="step-3" class="section level4">
+<h4>Step 3</h4>
+<pre class="r"><code># use for loop to slice dataframe column 195 times from 5:200
+for (g in 5:200) {
+  new_col_name &lt;- paste0(&quot;gvalue_&quot;, g)
+  table_df &lt;- table_df %&gt;%
+    mutate(!!sym(new_col_name) := map(value, 
+                                      function(x){dplyr::slice(x, 1:{g})}))
+}
+
+# get just the g columns and get the gene names
+# convert to list
+g_genes &lt;- table_df %&gt;%
+  dplyr::select(starts_with(&quot;gvalue_&quot;)) %&gt;%
+  mutate_all(~map(., function(x){dplyr::select(x, gene_name)})) %&gt;%
+  mutate_all(~map(., unlist)) %&gt;%
+  map(., unlist) 
+str(g_genes)
+
+# get unique values only
+g_genes_union &lt;- map(g_genes, unique)
+str(g_genes_union)</code></pre>
+</div>
+<div id="step-3b" class="section level4">
+<h4>Step 3b</h4>
+<p>Format expression matrix</p>
+<pre class="r"><code># average expression by cell type
+cell_type_lookup &lt;- pheno_data_subset[, c(&quot;sample_id&quot;, &quot;cell_type&quot;)]
+
+exp_tbl &lt;- selDataMatrix %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(cell_type_lookup) %&gt;%
+  dplyr::select(cell_type, everything(), -sample_id) %&gt;%
+  print()
+
+cluster_matrix &lt;- exp_tbl[-1] %&gt;% as.matrix()
+cluster_matrix[1:5, 1:5]
+rownames(cluster_matrix) &lt;- pull(exp_tbl, cell_type)
+cluster_matrix[1:5, 1:5]
+
+# collapse rownames by averaging expression for shared cluster assignment
+cluster_matrix &lt;- avereps(cluster_matrix) %&gt;% t()
+cluster_matrix[1:5, 1:5]
+dim(cluster_matrix)
+
+# convert to df for downstream analysis
+cluster_exp_df &lt;- cluster_matrix %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_name&quot;) %&gt;%
+  as_tibble() %&gt;%
+  print()</code></pre>
+<p>Calculate the condition number for each expression matrix and create the signature matrix</p>
+<pre class="r"><code># create a list of expression matrices and filter by union genes
+exp_subsetter &lt;- function(gene_vect){
+  cluster_exp_df %&gt;%
+    dplyr::filter(gene_name %in% gene_vect) %&gt;%
+    as.data.frame() %&gt;%
+    column_to_rownames(var = &quot;gene_name&quot;) %&gt;%
+    as.matrix()
+}
+
+g_expr_mat_list &lt;- map(g_genes_union, exp_subsetter)
+map(g_expr_mat_list, dim)
+str(g_expr_mat_list)
+
+condition_numbers &lt;- map_dbl(g_expr_mat_list, kappa) %&gt;% 
+  enframe() %&gt;%
+  mutate(gval = gsub(&quot;gvalue_&quot;, &quot;&quot;, name)) %&gt;%
+  mutate(gval = as.numeric(gval)) %&gt;%
+  print()
+
+ggplot(data = condition_numbers, aes(x = gval, y = value)) +
+  geom_point() +
+  geom_line() +
+  ylab(&quot;Condition Number&quot;) +
+  xlab(&quot;G-value&quot;)
+
+condition_numbers %&gt;% arrange(value) %&gt;% print()
+# condition number for gvalue 22 is a significant local minimum and will be chosen 
+
+sig_matrix &lt;- g_expr_mat_list[[&quot;gvalue_22&quot;]]
+
+# get descriptive statistics
+# G = 22
+dim(sig_matrix)
+# 964 genes
+kappa(sig_matrix)</code></pre>
+</div>
+<div id="compare-signature-matrix-to-established-gene-sets" class="section level4">
+<h4>Compare signature matrix to established gene sets</h4>
+<p>Read in LM22 from: <a href="https://cibersortx.stanford.edu/download.php" class="uri">https://cibersortx.stanford.edu/download.php</a></p>
+<pre class="r"><code>lm22 &lt;- read_delim(&quot;~/tcga_macs/data/LM22.txt&quot;, &quot;\t&quot;, 
+    escape_double = FALSE, trim_ws = TRUE)
+
+lm22_genes &lt;- pull(lm22, `Gene symbol`)
+dlbcl_sig_matrix_genes &lt;- rownames(sig_matrix)
+
+venn.diagram(x = list(lm22_genes, dlbcl_sig_matrix_genes),
+             category.names = c(&quot;LM22 Signature Genes&quot; , 
+                                &quot;DLBCL Custom \nSignature Genes&quot;),
+             filename = &quot;output/venn.png&quot;,
+             output = TRUE ,
+             imagetype = &quot;png&quot;,
+             height = 600, 
+          width = 600, 
+          resolution = 300,
+          compression = &quot;lzw&quot;,
+          lwd = 1.5,
+          col = c(&quot;red&quot;, &quot;blue&quot;),
+          fill = c(alpha(&quot;red&quot;, 0.3), alpha(&quot;blue&quot;, 0.3)),
+          cex = 1.1,
+          fontfamily = &quot;sans&quot;,
+          cat.cex = 0.5,
+          cat.default.pos = &quot;outer&quot;,
+          cat.pos = c(-5, 5),
+          cat.dist = c(0.055, 0.09),
+          cat.fontfamily = &quot;sans&quot;,
+          cat.col = c(&quot;red&quot;, &quot;blue&quot;))</code></pre>
+</div>
+<div id="format-signature-matrix-for-cibertsortx" class="section level4">
+<h4>Format signature matrix for CIBERTSORTx</h4>
+<pre><code>Reference sample file format:
+Tab-delimited tabular input format (.txt) with no double quotations and no missing entries. 
+
+Gene symbols in column 1; Reference cell phenotype labels in row 1.
+
+Cells with the same phenotype should have the same phenotypic label.
+
+Remove any non-assigned cells before uploading the file to CIBERSORTx.
+
+CIBERSORTx will automatically normalize the input data such that the sum of all normalized reads are the same for each transcriptome. If a gene length-normalized expression matrix is provided (e.g., RPKM), then the signature matrix will be in TPM (transcripts per million). If a count matrix is provided, the signature matrix will be in CPM (counts per million). Regardless of the input, the signature matrix and mixture files should be represented in the same normalization space.
+
+Data should be in non-log space. Note: if maximum expression value is &lt;50; CIBERSORTx will assume that data are in log space, and will anti-log all expression values by 2x.</code></pre>
+<pre class="r"><code># needs to be in linear, not log format
+# log2 values were generated from import from raw lumi data, along with RSN normalization
+# will anti-log the data to return to linear space
+# expression matrix filtered for protein expression above:
+expr_norm_subset[1:5, 1:5]
+linear_exp &lt;- 2^(expr_norm_subset)
+linear_exp[1:5, 1:5]
+
+cell_type_lookup &lt;- pheno_data_subset[, c(&quot;sample_id&quot;, &quot;cell_type&quot;)]
+
+linear_exp_tbl &lt;- linear_exp %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(cell_type_lookup) %&gt;%
+  dplyr::select(cell_type, everything(), -sample_id) %&gt;%
+  print()
+
+lin_cluster_matrix &lt;- linear_exp_tbl[-1] %&gt;% as.matrix()
+rownames(lin_cluster_matrix) &lt;- pull(linear_exp_tbl, cell_type)
+lin_cluster_matrix[1:5, 1:5]
+# normalize matrix by cpm
+lin_cluster_cpm &lt;- cpm(t(lin_cluster_matrix))
+lin_cluster_cpm[1:5, 1:5]
+# collapse rownames by averaging expression for shared cluster assignment
+lin_cluster_ave &lt;- avereps(t(lin_cluster_cpm))
+lin_cluster_ave[1:5, 1:5]
+dim(lin_cluster_ave)
+lin_cluster_rot &lt;- t(lin_cluster_ave)
+lin_cluster_rot[1:5, 1:5]
+dim(lin_cluster_rot)
+# filter for signature genes
+lin_cluster_df &lt;- lin_cluster_rot %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;GeneSymbol&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::filter(GeneSymbol %in% dlbcl_sig_matrix_genes) %&gt;%
+  print()
+
+# read out for use in CIBERSORTx
+lin_cluster_df %&gt;% write_tsv(&quot;output/dlbcl_final_signature_matrix.tsv&quot;)</code></pre>
+</div>
+</div>
+<div id="create-reference-file" class="section level2">
+<h2>Create Reference File</h2>
+<pre><code>The reference sample file is an input file required for custom signature genes file generation by CIBERSORT and consists of a table of the gene expression profiles of reference sample cell populations that will be compared to each other as defined in the phenotype classes file to generate the custom signature genes file.
+
+Reference file formatting requirements. Improperly formatted files may cause CIBERSORTx to fail to run.
+
+Tab-delimited tabular input format (.txt) with no double quotations and no missing entries.
+Gene symbols in column 1; Reference cell population labels in row 1. Replicate populations can have the same label.
+It is highly recommended that replicate population columns be placed adjacent to each other, as this will make it easier for you to create your phenotype classes file.
+Gene symbols should be of the same type as those used in the Mixture file. For example, if HUGO symbols were used in the Mixture file, HUGO symbols should also be used for the reference sample file. Non-HUGO symbols can be used so long as they are used in both the Mixture and reference sample files.
+We strongly recommend 50% or greater overlap in genes between the mixture and signature genes files. If the overlap is less than 50%, this may affect performance and accuracy.
+Data should be in non-log space. Note: if maximum expression value is &lt;50; CIBERSORTx will assume that data are in log space, and will anti-log all expression values by 2x.
+</code></pre>
+<pre class="r"><code># needs to be in linear, not log format
+# log2 values were generated from import from raw lumi data, along with RSN normalization
+# will anti-log the data to return to linear space
+# expression matrix filtered for protein expression above:
+expr_norm_subset[1:5, 1:5]
+linear_exp &lt;- 2^(expr_norm_subset)
+linear_exp[1:5, 1:5]
+
+cell_type_lookup &lt;- pheno_data_subset[, c(&quot;sample_id&quot;, &quot;cell_type&quot;)]
+
+linear_exp_tbl &lt;- linear_exp %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(cell_type_lookup) %&gt;%
+  dplyr::select(cell_type, everything(), -sample_id) %&gt;%
+  print()
+
+lin_cluster_matrix &lt;- linear_exp_tbl[-1] %&gt;% as.matrix()
+rownames(lin_cluster_matrix) &lt;- pull(linear_exp_tbl, cell_type)
+lin_cluster_matrix[1:5, 1:5]
+# normalize matrix by cpm
+lin_cluster_cpm &lt;- cpm(t(lin_cluster_matrix))
+lin_cluster_cpm[1:5, 1:5]
+# collapse rownames by averaging expression for shared cluster assignment
+lin_cluster_ave &lt;- avereps(t(lin_cluster_cpm))
+lin_cluster_ave[1:5, 1:5]
+dim(lin_cluster_ave)
+lin_cluster_rot &lt;- t(lin_cluster_ave)
+lin_cluster_rot[1:5, 1:5]
+dim(lin_cluster_rot)
+line_cluster_df &lt;- lin_cluster_rot %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;GeneSymbol&quot;) %&gt;%
+  as_tibble() %&gt;%
+  print()
+
+write_delim(line_cluster_df, &quot;output/reference_matrix_file.tsv&quot;, delim = &quot;\t&quot;)</code></pre>
+</div>
+<div id="prepare-mixtures" class="section level2">
+<h2>Prepare mixtures</h2>
+<pre><code>Mixture file formatting requirements. Improperly formatted files may cause CIBERSORTx to fail to run.
+Gene symbols in column 1; Mixture labels in row 1
+Given the significant difference between counts (e.g., CPM) and gene length-normalized expression data (e.g., TPM) we recommend that the signature matrix and mixture files be represented in the same normalization space whenever possible.
+Data should be in non-log space. Note: if maximum expression value is less than 50; CIBERSORTx will assume that data are in log space, and will anti-log all expression values by 2x.
+CIBERSORTx will add an unique identifier to each redundant gene symbol, however we recommend that users remove redundancy prior to file upload.
+CIBERSORTx performs a feature selection and therefore typically does not use all genes in the signature matrix. It is generally ok if some genes are missing from the user’s mixture file. If less than 50% of signature matrix genes overlap, CIBERSORTx will issue a warning.</code></pre>
+<pre class="r"><code># read in dlbcl data
+dlbcl_nci_total &lt;- read_csv(&quot;output/nci_dlbcl_unprocessed_counts.csv&quot;, trim_ws = TRUE)
+
+# read in conversion table for gene IDs
+gencode_gtf &lt;- read_tsv(&quot;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&quot;)
+
+
+# and change to hugo gene names
+renamer &lt;- function(dataframe) {
+  df1 &lt;- dataframe %&gt;%
+    dplyr::rename(gene_id = gene) %&gt;%
+    left_join(gencode_gtf) %&gt;%
+    dplyr::filter(gene_type == &quot;protein_coding&quot;) %&gt;%
+    dplyr::select(gene_name, everything()) %&gt;%
+    dplyr::select(-gene_id, -gene_type, -gene_status, -gene_id, -level, -havana_gene) %&gt;%
+    as.data.frame()
+}
+
+# apply function to dlbcl
+hugo_nci_dlbcl &lt;- renamer(dlbcl_nci_total)
+
+# look at the head
+hugo_nci_dlbcl[1:5, 1:5]
+
+# define a function to convert to cpm matrix
+# filter for protein coding genes only
+cpmer &lt;- function(df){
+  df_mat &lt;- df[-1] %&gt;% as.matrix()
+  rownames(df_mat) &lt;- df %&gt;% pull(gene_name)
+  # average expression for repeated gene names
+  # convert to CPM
+  df_mat %&gt;%
+    avereps() %&gt;%
+    cpm()
+}
+
+# apply function to list
+cpm_nci_dlbcl &lt;- cpmer(hugo_nci_dlbcl)
+
+cpm_nci_dlbcl[1:5, 1:5]
+
+# TMM normalization
+norm_factors &lt;- calcNormFactors(cpm_nci_dlbcl, method = &quot;TMM&quot;)
+summary(norm_factors)
+
+# convert expression matrix to dataframe
+cpm_nci_dlbcl_df &lt;- as.data.frame(cpm_nci_dlbcl)
+
+# apply factor to each column
+total_cpm_norm_nci &lt;- map2_dfc(cpm_nci_dlbcl_df, norm_factors, `*`)
+total_cpm_norm_nci &lt;- as.data.frame(cpm_nci_dlbcl_df)
+total_cpm_norm_nci[1:5, 1:5]
+str(total_cpm_norm_nci)
+nci_dlbcl_mixture &lt;- total_cpm_norm_nci %&gt;%
+  rownames_to_column(var = &quot;GeneSymbol&quot;) %&gt;%
+  as_tibble() %&gt;%
+  print()
+
+write_delim(nci_dlbcl_mixture, 
+            &quot;output/nci_dlbcl_mixture.tsv&quot;,
+            delim = &quot;\t&quot;,
+            col_names = TRUE)</code></pre>
+<p>Duke mixture file prepared in dukedata.Rmd</p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
