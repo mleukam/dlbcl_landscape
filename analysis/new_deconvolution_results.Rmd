@@ -1,0 +1,1088 @@
+---
+title: "new_deconvolution_results"
+author: "mleukam"
+date: "2020-02-23"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Setup
+
+Clear workspace
+```{r}
+rm(list = ls())
+```
+
+Prevent knitting from executing chunks
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+Load packages
+```{r}
+# plotting
+library(ggsci)
+library(ggpubr)
+library(viridis)
+library(ComplexHeatmap)
+library(circlize)
+library(scales)
+library(ggConvexHull)
+
+# correlation
+library(corrplot)
+source("http://www.sthda.com/upload/rquery_cormat.r")
+
+# clustering
+library(FactoMineR)
+library(factoextra)
+library(cluster)
+
+# survival analysis
+library(survival)
+library(survminer)
+
+# utility
+library(rlang)
+library(broom)
+library(Biobase)
+library(stats)
+
+# base tidyverse
+library(tidyverse)
+```
+
+
+## Read in data
+
+```{r}
+nci_decon <- read_csv("data/cibersort/NCI/abs_cell_number_estimate_022320/CIBERSORTx_Job2_Results.csv")
+
+duke_decon <- read_csv("data/cibersort/Duke/abs_cell_number_estimate_022320/CIBERSORTx_Job3_Results.csv")
+
+combined_decon <- nci_decon %>%
+  bind_rows(duke_decon) %>%
+  print()
+```
+
+
+## Boxplots by GSVA cluster
+
+Read in cluster assignment and combine
+```{r}
+gsva4_es <- readRDS("output/combined_es_gsva4_4cluster.rds")
+
+gsva_clust_assgn <- pData(gsva4_es) %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  dplyr::select(sample_id, clust) %>%
+  as_tibble() %>%
+  print()
+
+decon_res <- combined_decon %>%
+  rename(sample_id = Mixture) %>%
+  left_join(gsva_clust_assgn) %>%
+  dplyr::select(sample_id, clust, everything()) %>%
+  print()
+
+cd8_plot <- ggplot(decon_res, 
+                   aes(x = clust, y = cd8_eff, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("CD8 Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("CD8")
+cd8_plot
+
+th1_plot <- ggplot(decon_res, 
+                   aes(x = clust, y = th1_rest, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Th1 Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Th1")
+th1_plot
+
+th2_plot <- ggplot(decon_res, 
+                   aes(x = clust, y = th2_rest, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Th2 Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Th2")
+th2_plot
+
+mac_1_plot <- ggplot(decon_res, 
+                   aes(x = clust, y = mac_1, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+      scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Macrophage Type 1 Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Macrophage Type 1")
+mac_1_plot
+
+mac_2_plot <- ggplot(decon_res, 
+                   aes(x = clust, y = mac_2, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+      scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Macrophage Type 2 Deconvolution Score") +
+   stat_compare_means() +
+    ggtitle("Macrophage Type 2")
+mac_2_plot
+
+mac_3_plot <- ggplot(decon_res, 
+                   aes(x = clust, y = mac_3, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+    scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Macrophage Type 3 Deconvolution Score") +
+   stat_compare_means() +
+    ggtitle("Macrophage Type 3")
+mac_3_plot
+
+mac_4_plot <- ggplot(decon_res, 
+                   aes(x = clust, y = mac_4, fill = clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+  scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Macrophage Type 4 Deconvolution Score") +
+   stat_compare_means() +
+    ggtitle("Macrophage Type 4")
+mac_4_plot
+
+mac_5_plot <- ggplot(decon_res, 
+                   aes(x = clust, y = mac_5, fill = clust)) +
+  geom_boxplot() +
+  theme_classic2() + 
+  scale_fill_d3(name = "Cluster", labels = c("Cold", "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Macrophage Type 5 Deconvolution Score") +
+   stat_compare_means() +
+    ggtitle("Macrophage Type 5")
+mac_5_plot
+
+mac_6_plot <- ggplot(decon_res, 
+                   aes(x = clust, y = mac_6, fill = clust)) +
+  geom_boxplot() +
+  theme_classic2() + 
+  scale_fill_d3(name = "Cluster", labels = c("Cold", "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Macrophage Type 6 Deconvolution Score") +
+   stat_compare_means() +
+    ggtitle("Macrophage Type 6")
+mac_6_plot
+```
+
+
+## Survival analysis
+
+Read in clinical data
+```{r}
+nci_pheno_data <- read_csv("output/nci_extended_pheno_data.csv") %>% print()
+
+nci_surv_frame <- nci_pheno_data %>%
+  dplyr::select(sample_id,
+                os_status = `Status at Follow_up_ 0 Alive_ 1 Dead`,
+                os_years = `Follow_up Time _yrs`,
+                pfs_status = `Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1 Progression`,
+                pfs_years = `Progression_Free Survival _PFS_ Time _yrs`) %>%
+  print()
+
+nci_extremes <- nci_decon %>%
+  mutate(cd8_groups = ntile(cd8_eff, 5)) %>%
+  mutate(th1_groups = ntile(th1_rest, 5)) %>%
+  mutate(th2_groups = ntile(th2_rest, 5)) %>%
+  mutate(treg_groups = ntile(treg, 5)) %>%
+  mutate(nk_groups = ntile(nk_rest, 5)) %>%
+  mutate(mac1_groups = ntile(mac_1, 5)) %>%
+  mutate(mac2_groups = ntile(mac_2, 5)) %>%
+  mutate(mac3_groups = ntile(mac_3, 5)) %>%
+  mutate(mac4_groups = ntile(mac_4, 5)) %>%
+  mutate(mac5_groups = ntile(mac_5, 5)) %>%
+  mutate(mac6_groups = ntile(mac_6, 5)) %>%
+  mutate(mac7_groups = ntile(mac_7, 5)) %>%
+  dplyr::select(sample_id = Mixture, cd8_groups, th1_groups, th2_groups, treg_groups, nk_groups, mac1_groups, mac2_groups, mac3_groups, mac4_groups, mac5_groups, mac6_groups, mac7_groups) %>%
+  print()
+
+nci_surv_frame_groups <- nci_surv_frame %>%
+  left_join(nci_extremes) %>%
+  print()
+
+nci_cd8_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(cd8_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, cd8_groups, os_years, os_status, pfs_years, pfs_status) %>%
+  print()
+nci_cd8_os_object <- Surv(time = nci_cd8_extremes$os_years,
+                   event = nci_cd8_extremes$os_status)
+fit_cd8 <- survfit(nci_cd8_os_object ~ cd8_groups,
+                   data = nci_cd8_extremes)
+ggsurvplot(fit_cd8, data = nci_cd8_extremes, pval = TRUE)
+
+nci_th1_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(th1_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, th1_groups, os_years, os_status, pfs_years, pfs_status) %>%
+  print()
+nci_th1_os_object <- Surv(time = nci_th1_extremes$os_years,
+                   event = nci_th1_extremes$os_status)
+fit_th1 <- survfit(nci_th1_os_object ~ th1_groups,
+                   data = nci_th1_extremes)
+ggsurvplot(fit_th1, data = nci_th1_extremes, pval = TRUE)
+
+nci_th2_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(th2_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, th2_groups, os_years, os_status, pfs_years, pfs_status) %>%
+  print()
+nci_th2_os_object <- Surv(time = nci_th2_extremes$os_years,
+                   event = nci_th2_extremes$os_status)
+fit_th2 <- survfit(nci_th2_os_object ~ th2_groups,
+                   data = nci_th2_extremes)
+ggsurvplot(fit_th2, data = nci_th2_extremes, pval = TRUE)
+
+nci_treg_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(treg_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, treg_groups, os_years, os_status, pfs_years, pfs_status) %>%
+  print()
+nci_treg_os_object <- Surv(time = nci_treg_extremes$os_years,
+                   event = nci_treg_extremes$os_status)
+fit_treg <- survfit(nci_treg_os_object ~ treg_groups,
+                   data = nci_treg_extremes)
+ggsurvplot(fit_treg, data = nci_treg_extremes, pval = TRUE)
+
+nci_mac1_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(mac1_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, mac1_groups, os_years, os_status, pfs_years, pfs_status) %>%
+  print()
+nci_mac1_os_object <- Surv(time = nci_mac1_extremes$os_years,
+                   event = nci_mac1_extremes$os_status)
+fit_mac1 <- survfit(nci_mac1_os_object ~ mac1_groups,
+                   data = nci_mac1_extremes)
+ggsurvplot(fit_mac1, data = nci_mac1_extremes, pval = TRUE)
+
+nci_mac2_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(mac2_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, mac2_groups, os_years, os_status, pfs_years, pfs_status) %>%
+  print()
+nci_mac2_os_object <- Surv(time = nci_mac2_extremes$os_years,
+                   event = nci_mac2_extremes$os_status)
+fit_mac2 <- survfit(nci_mac2_os_object ~ mac2_groups,
+                   data = nci_mac2_extremes)
+ggsurvplot(fit_mac2, data = nci_mac2_extremes, pval = TRUE)
+
+nci_mac3_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(mac3_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, mac3_groups, os_years, os_status, pfs_years, pfs_status) %>%
+  print()
+nci_mac3_os_object <- Surv(time = nci_mac3_extremes$os_years,
+                   event = nci_mac3_extremes$os_status)
+fit_mac3 <- survfit(nci_mac3_os_object ~ mac3_groups,
+                   data = nci_mac3_extremes)
+ggsurvplot(fit_mac3, data = nci_mac3_extremes, pval = TRUE)
+
+nci_mac4_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(mac4_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, mac4_groups, os_years, os_status, pfs_years, pfs_status) %>%
+  print()
+nci_mac4_os_object <- Surv(time = nci_mac4_extremes$os_years,
+                   event = nci_mac4_extremes$os_status)
+fit_mac4 <- survfit(nci_mac4_os_object ~ mac4_groups,
+                   data = nci_mac4_extremes)
+ggsurvplot(fit_mac4, data = nci_mac4_extremes, pval = TRUE)
+
+nci_mac5_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(mac5_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, mac5_groups, os_years, os_status, pfs_years, pfs_status) %>%
+  print()
+nci_mac5_os_object <- Surv(time = nci_mac5_extremes$os_years,
+                   event = nci_mac5_extremes$os_status)
+fit_mac5 <- survfit(nci_mac5_os_object ~ mac5_groups,
+                   data = nci_mac5_extremes)
+ggsurvplot(fit_mac5, data = nci_mac5_extremes, pval = TRUE)
+
+nci_mac6_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(mac6_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, mac6_groups, os_years, os_status, pfs_years, pfs_status) %>%
+  print()
+nci_mac6_os_object <- Surv(time = nci_mac6_extremes$os_years,
+                   event = nci_mac6_extremes$os_status)
+fit_mac6 <- survfit(nci_mac6_os_object ~ mac6_groups,
+                   data = nci_mac6_extremes)
+ggsurvplot(fit_mac6, data = nci_mac6_extremes, pval = TRUE)
+
+nci_mac7_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(mac7_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, mac7_groups, os_years, os_status, pfs_years, pfs_status) %>%
+  print()
+nci_mac7_os_object <- Surv(time = nci_mac7_extremes$os_years,
+                   event = nci_mac7_extremes$os_status)
+fit_mac7 <- survfit(nci_mac7_os_object ~ mac7_groups,
+                   data = nci_mac7_extremes)
+ggsurvplot(fit_mac7, data = nci_mac7_extremes, pval = TRUE)
+```
+
+## Mutations
+```{r}
+# rename nci decon columns
+nci_decons <- nci_decon %>% 
+  rename(sample_id = Mixture) %>%
+  print()
+
+# collapse columns to larger groups
+
+
+# get column names
+decon_names <- colnames(nci_decons)[2:27]
+decon_names
+
+# DLBCL mutation data
+muts_dlbcl <- read_delim("data/final_analysis_set.maf", 
+    "\t", escape_double = FALSE, trim_ws = TRUE) %>%
+  dplyr::select(Tumor_Sample_Barcode, everything()) %>%
+  dplyr::select(sample_id = Tumor_Sample_Barcode, 
+                Hugo_Symbol) %>%
+  distinct(sample_id, Hugo_Symbol) %>%
+  dplyr::mutate(n = rep(1, length.out = nrow(.))) %>%
+  spread(key = Hugo_Symbol, value = n, fill = 0) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix()
+muts_dlbcl[1:5, 1:5]
+str(muts_dlbcl)
+
+# keep only those columns with >5% mutations
+muts_5 <- muts_dlbcl[, colSums(muts_dlbcl) > 24]
+str(muts_5)
+# reduces to 96 candidate genes
+
+muts_5_df <- muts_5 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+mut_names <- colnames(muts_5_df)[-1]
+mut_names
+
+# get all permutations of selected mutations and deconvolution
+perms <- expand.grid(mut_names, decon_names) %>%
+  rename(mut_names = Var1, decon_names = Var2) %>%
+  mutate(mut_names = as.character(mut_names)) %>%
+  mutate(decon_names = as.character(decon_names))
+str(perms)
+
+# write function to compare deconvolution scores by mutation
+decon_vs_mut <- function(mut_name, decon_name){
+  mut <- muts_5_df %>%
+    filter(!! rlang::sym(mut_name) == 1) %>%
+    select(sample_id) %>%
+    left_join(nci_decons) %>%
+    pull(!! rlang::sym(decon_name))
+  nonmut <- muts_5_df %>%
+    filter(!! rlang::sym(mut_name) == 0) %>%
+    select(sample_id) %>%
+    left_join(nci_decons) %>%
+    pull(!! rlang::sym(decon_name))
+  tidy(t.test(mut, nonmut)) %>%
+    bind_cols("gene" = mut_name) %>%
+    bind_cols("cell_type" = decon_name) %>%
+    bind_cols("mut_number" = length(mut)) %>%
+    bind_cols("nonmut_number" = length(nonmut)) %>%
+    mutate(mut_rate = length(mut) / (length(mut) + length(nonmut))) %>%
+    mutate(mut_mean = sum(mut, na.rm = TRUE) / length(mut)) %>%
+    mutate(nonmut_mean = sum(nonmut, na.rm = TRUE) / length(nonmut)) %>%
+    mutate(change = (mut_mean - nonmut_mean)) %>%
+    select(gene, cell_type, p.value, change, mut_mean, nonmut_mean, mut_rate, mut_number, nonmut_number, everything())
+}
+
+# test function
+decon_vs_mut("EZH2", "cd8_eff")
+
+mutation_correlations <- map2_dfr(perms$mut_names, 
+                                  perms$decon_names, 
+                                  decon_vs_mut)
+
+mut_decon_corr <- mutation_correlations %>%
+  arrange(p.value) %>%
+  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
+  dplyr::select(gene, cell_type, p.value, p.adj, everything()) %>%
+  print()
+  
+mut_decon_corr %>% 
+  write_csv("output/NCI_mutations_vs_deconvolution.csv")
+```
+
+## Validate results
+```{r}
+
+
+```
+
+
+## Clustering by deconvolution - Abandoned
+
+Roughly following: https://www.nature.com/articles/s41467-018-05570-1#Sec12
+
+Correlation
+```{r}
+nci_score_mat <- nci_decon %>% 
+  dplyr::select(-Mixture, -`P-value`, -Correlation, -RMSE, -`Absolute score (sig.score)`) %>%
+  as.matrix()
+rownames(nci_score_mat) <- nci_results$Mixture
+nci_score_mat[1:5, 1:5]
+dim(nci_score_mat)
+summary(nci_score_mat)
+# estimate correlation with each of the other cell types
+rquery.cormat(nci_score_mat)
+
+cormat <- rquery.cormat(nci_score_mat, graphType = "heatmap")
+cormat
+```
+
+Clustering
+```{r}
+set.seed(818)
+PCA(nci_score_mat, scale.unit = TRUE, ncp = 5, graph = TRUE)
+res.pca <- PCA(nci_score_mat, graph = FALSE)
+eig.val <- get_eigenvalue(res.pca)
+eig.val
+fviz_eig(res.pca, addlabels = TRUE, ylim = c(0, 50))
+fviz_pca_var(res.pca, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07")
+             )
+
+var <- get_pca_var(res.pca)
+var
+
+corrplot(var$cos2, is.corr = FALSE)
+fviz_contrib(res.pca, choice = "var", axes = 1)
+fviz_contrib(res.pca, choice = "var", axes = 2)
+
+fviz_pca_ind(res.pca)
+
+ind.p <- fviz_pca_ind(res.pca, geom = "point")
+ggpubr::ggpar(ind.p,
+              title = "Principal Component Analysis",
+              caption = "Source: factoextra",
+              xlab = "PC1", ylab = "PC2",
+              ggtheme = theme_gray(), palette = "jco"
+              )
+
+# what is the optimal number of clusters?
+fviz_nbclust(nci_score_mat, FUNcluster = cluster::pam, method = "gap_stat") 
+fviz_nbclust(nci_score_mat, FUNcluster = cluster::pam, method = "silhouette") 
+fviz_nbclust(nci_score_mat, FUNcluster = cluster::pam, method = "wss") 
+```
+
+Heatmap
+```{r}
+scale_mat <- nci_score_mat %>% 
+  apply(1, rescale)
+scale_mat[1:5, 1:5]
+f1 = colorRamp2(seq(min(t(scale_mat)), max(t(scale_mat)), length = 3), c("blue", "#EEEEEE", "red"))
+hm <- Heatmap(t(scale_mat),
+              col = f1,
+              show_row_names = FALSE,
+              heatmap_legend_param = list(title = "Relative\nCell\nFraction")
+              )
+hm
+```
+
+Partioning clustering
+http://www.sthda.com/english/wiki/the-ultimate-guide-to-partitioning-clustering
+
+```{r}
+pam.res <- pam(nci_score_mat, 3)
+print(pam.res)
+fviz_cluster(pam.res, 
+             stand = TRUE, 
+             axes = c(1:2), 
+             geom = "point", 
+             show.clust.cent = FALSE) +
+  theme_classic2() +
+  scale_color_d3() +
+  scale_fill_d3()
+fviz_cluster(pam.res, stand = TRUE, axes = c(1,3), geom = "point", show.clust.cent = FALSE)
+pam.res$clustering
+```
+
+Build phenodata and pull in GSVA results
+```{r}
+gs_matrix <- readRDS("output/dlbcl_total_immune_gset_v4_results.rds")
+gs_matrix[, 1:5]
+str(gs_matrix)
+
+combined_es <- readRDS("output/combined_expressionset.rds")
+pheno_data <- pData(combined_es)
+
+nci_pdata <- pData(combined_es) %>%
+  rownames_to_column(var = "sample_id") %>%
+  print()
+cluster_pdata <- pam.res$clustering %>%
+  enframe() %>%
+  dplyr::rename(sample_id = name, pam_clust = value) %>%
+  left_join(nci_pdata, by = "sample_id") %>%
+  print()
+```
+
+Make comparisons between my clusters and ABC/GCB
+```{r}
+table(cluster_pdata$pam_clust, cluster_pdata$abc_gcb_rna)
+table(cluster_pdata$`Genetic Subtype`, cluster_pdata$pam_clust)
+
+cpdata_tbl <- cluster_pdata %>%
+  as_tibble() %>%
+  mutate(pam_clust = as.factor(pam_clust)) %>%
+  dplyr::rename(pfs_status = `Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1 Progression`) %>%
+  dplyr::rename(pfs_years = `Progression_Free Survival _PFS_ Time _yrs`) %>%
+  print()
+
+library(table1)
+table1(~ factor(gender) +
+       age +
+       factor(ipi_initial) +
+       factor(ann_arbor_clinical_stage) +
+       factor(abc_gcb_rna) +
+       factor(pdl1_status) +
+       factor(`Genetic Subtype`) | pam_clust, data = cpdata_tbl)
+
+library(survival)
+library(survminer)
+
+# OS
+# set up survival object
+surv_os <- survfit(Surv(os_years, os_status) ~ pam_clust, data = cpdata_tbl)
+# plot
+plot1 <- ggsurvplot(surv_os, data = as.data.frame(cpdata_tbl), pval = TRUE, palette = "nejm") +
+  ylab("OS probability") +
+  xlab("Time (years)")
+
+plot2 <- ggsurvplot_facet(surv_os, 
+                          data = as.data.frame(cpdata_tbl), 
+                          facet.by = c("abc_gcb_rna"), 
+                          pval = TRUE, 
+                          palette = "nejm") +
+  ylab("OS probability") +
+  xlab("Time (years)")
+plot2
+
+# PFS
+surv_pfs <- survfit(Surv(pfs_years, pfs_status) ~ pam_clust, data = cpdata_tbl)
+ggsurvplot(surv_pfs, data = cpdata_tbl, pval = TRUE, palette = "nejm") +
+  ylab("PFS probability") +
+  xlab("Time (years)")
+
+plot3 <- ggsurvplot_facet(surv_pfs, 
+                          data = as.data.frame(cpdata_tbl), 
+                          facet.by = c("abc_gcb_rna"), 
+                          pval = TRUE, 
+                          palette = "nejm") +
+  ylab("PFS probability") +
+  xlab("Time (years)")
+plot3
+```
+
+Plot scores on cluster map
+```{r}
+tpm_cyt_es <- readRDS("output/tpm_cyt_expressionset.rds")
+tpm_pheno_data <- pData(tpm_cyt_es) %>% 
+  rownames_to_column(var = "sample_id") %>% 
+  as_tibble() %>% 
+  print()
+tpm_matrix <- exprs(tpm_cyt_es)
+
+nci_results_ref <- nci_decon %>% 
+  dplyr::rename(sample_id = Mixture)
+
+pdata <- cluster_pdata %>% 
+  left_join(tpm_pheno_data, by = "sample_id") %>%
+  left_join(nci_results_ref) %>%
+  mutate(pam_clust = as.factor(pam_clust)) %>%
+  print()
+
+
+# CYT score
+fviz_pca_ind(res.pca, 
+             col.ind = log(pdata$CYT),
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "CYT score\n(log scale)") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 3) +
+  labs(title = "CYT score by cluster") +
+  scale_color_viridis()
+
+# CYT score
+fviz_pca_ind(res.pca, 
+             col.ind = log(pdata$CYT),
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "CYT score\n(log scale)") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 3) +
+  labs(title = "CYT score by cluster") +
+  scale_color_viridis()
+
+# CD8 activation
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$mskcc_cd8activation_gs,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "MSKCC CD8 \nactivation score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 3) +
+  labs(title = "MSKCC CD8 activation score by cluster") +
+  scale_color_viridis()
+
+# t cell anergy score
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$mskcc_anergy_gs,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "MSKCC \nanergy score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 3) +
+  labs(title = "MSKCC T cell anergy score by cluster") +
+  scale_color_viridis()
+
+# IFN-gamma activity
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$thor_ifng_score_21050467,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "IFNg score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 3) +
+  labs(title = "IFNg gene set score by cluster") +
+  scale_color_viridis()
+
+# CSF1 response
+thor_csf1_response
+
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$thor_csf1_response,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "CSF1 \nresponse score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 3) +
+  labs(title = "CSF1 response score by cluster") +
+  scale_color_viridis()
+
+# CSF1 response
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$imsig_macrophages_gs,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "Macrophage gene\nset score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 3) +
+  labs(title = "Macrophage gene set score by cluster") +
+  scale_color_viridis()
+
+# CSF1 response
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$imsig_macrophages_gs,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "Macrophage gene\nset score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 3) +
+  labs(title = "Macrophage gene set score by cluster") +
+  scale_color_viridis()
+
+# CSF1 response
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$mskcc_hypoxia_regulated_gs,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "TGFb gene\nset score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 3) +
+  labs(title = "TGFb gene set score by cluster") +
+  scale_color_viridis()
+```
+
+Deconvolution results on cluster map
+```{r}
+fviz_pca_ind(res.pca, 
+             col.ind = pdata$cd8_eff,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "CD8_eff score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(color = pdata$pam_clust,
+                      fill = pdata$pam_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 3) +
+  labs(title = "CD8_eff deconvolution by cluster") +
+  scale_color_viridis()
+```
+
+Boxplots
+```{r}
+pdata_decon <- pdata %>% dplyr::select(1, 2, 273:298) %>%
+  gather(key = cell_type, value = score, -sample_id, -pam_clust) %>%
+  mutate(cell_type = as.factor(cell_type)) %>%
+  print()
+
+pdata_decon_selected <- pdata_decon %>%
+  dplyr::filter(cell_type %in% c("cd8_eff", "cd8_mem", "mac_2", "mac_3", "mac_5", "mac_7", "th1_act", "th1_rest", "th2_act", "th2_rest")) %>%
+  mutate(cell_type = fct_drop(cell_type)) %>%
+  print()
+
+box1 <- ggplot(pdata_decon, aes(x = cell_type, y = score, fill = cell_type)) +
+  geom_boxplot() +
+  facet_grid(facets = "pam_clust") +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 90))
+box1
+
+box2 <- ggplot(pdata_decon_selected, aes(x = cell_type, y = score, fill = cell_type)) +
+  geom_boxplot() +
+  facet_grid(facets = "pam_clust") +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 90))
+box2
+
+pdata_decon_selected %>% dplyr::filter(cell_type == "cd8_eff") %>% ggplot(aes(x = cell_type, y = score, fill = pam_clust)) +
+  geom_boxplot() +
+  facet_wrap(facets = "pam_clust") +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 90))
+
+pdata_decon_selected %>% dplyr::filter(cell_type == "mac_3") %>% ggplot(aes(x = cell_type, y = score, fill = pam_clust)) +
+  geom_boxplot() +
+  facet_wrap(facets = "pam_clust") +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 90))
+
+pdata_decon_selected %>% dplyr::filter(cell_type == "th2_rest") %>% ggplot(aes(x = cell_type, y = score, fill = pam_clust)) +
+  geom_boxplot() +
+  facet_wrap(facets = "pam_clust") +
+  theme_classic2() +
+  theme(axis.text.x = element_text(angle = 90))
+  
+View(pdata_decon_selected %>% group_by(pam_clust, cell_type) %>% summarize(mean = mean(score)))
+```
+
+
+comparing to UCH results
+```{r}
+uchi_results <- read_csv("data/cibersort/UChi/absolute_cell_number_estimate_22320/CIBERSORTx_Job4_Results.csv") 
+
+cell_seg_df <- readRDS("output/uchi_deconvolution_batch_1.rds") %>%
+  separate(sample, into = c("number", "initials", sep = "-")) %>%
+  mutate(sample_id = paste0("JG", number)) %>%
+  dplyr::select(sample_id, everything()) %>%
+  dplyr::select(-number, -initials, -`-`) %>%
+  dplyr::mutate(phenotype = ifelse(phenotype == "CTL_CD8+", "cd8_eff", phenotype)) %>%
+  print()
+
+cell_density <- cell_seg_df %>%
+  dplyr::select(sample_id, phenotype, cell_density_per_mm) %>%
+  print()
+
+uchi_results_df_cd8 <- uchi_results %>%
+  gather(key = phenotype, value = score, -Mixture) %>%
+  dplyr::rename(sample_id = Mixture) %>%
+  left_join(cell_density) %>%
+  dplyr::filter(phenotype == "cd8_eff") %>%
+  drop_na(cell_density_per_mm) %>%
+  print()
+
+ggplot(data = uchi_results_df_cd8, aes(x = score, y = cell_density_per_mm)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  theme_classic2()
+```
+
+Get predicted clusters
+```{r}
+uchi_score_mat <- uchi_results %>% 
+  dplyr::select(-Mixture, -`P-value`, -Correlation, -RMSE, -`Absolute score (sig.score)`) %>%
+  as.matrix()
+rownames(uchi_score_mat) <- uchi_results$Mixture
+uchi_score_mat[1:5, 1:5]
+dim(uchi_score_mat)
+summary(uchi_score_mat)
+
+# object: an object of class PCA
+# newdata: A data frame or a matrix in which to look for variables with which to predict.
+# newdata must contain columns with the same names as the original data.
+# usage: predict(object, newdata, ...)
+set.seed(818)
+pred_uchi <- predict(res.pca, uchi_score_mat)
+
+# extract values for plotting
+uchi_gs_df <- uchi_score_mat %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble()
+uchi_gs_df$pc1 <- pred_uchi$coord[, 1]
+uchi_gs_df$pc2 <- pred_uchi$coord[, 2] 
+
+
+fviz_cluster(pam.res, 
+             stand = TRUE, 
+             axes = c(1:2), 
+             geom = "point", 
+             show.clust.cent = FALSE) +
+  theme_classic2() +
+  scale_color_d3() +
+  scale_fill_d3() +
+  geom_point(data = uchi_gs_df, 
+             aes(x = pc1, y = pc2), 
+             color = "red", 
+             shape = 19, 
+             size = 2.5) + 
+  geom_label(data = uchi_gs_df, aes(x = pc1, y = pc2, label = uchi_gs_df$sample_id))
+```
+
+Mutations
+Read in NCI mutation data
+```{r}
+# read in significance rank list from MutSig2CV
+mutsig_siggenes <- read_delim("data/sig_genes.txt", "\t")
+
+# read in final analysis MAF from MutSig2CV
+final_analysis_set <- read_delim(
+  "data/final_analysis_set.maf", "\t")
+
+# repair nonstandard variant classification
+final_analysis_set$Variant_Classification <- str_replace(final_analysis_set$Variant_Classification, "Start_Codon_Del", "Translation_Start_Site")
+
+final_analysis_set$Variant_Classification <- str_replace(final_analysis_set$Variant_Classification, "Stop_Codon_Ins", "Nonstop_Mutation")
+
+final_analysis_set <- as.data.frame(final_analysis_set)
+
+nci_mut_by_sample <- final_analysis_set %>%
+  dplyr::select(sample_id = Tumor_Sample_Barcode, Hugo_Symbol) %>%
+  mutate(Hugo_Symbol = ifelse(Hugo_Symbol == "MLL2", "KMT2D", Hugo_Symbol)) %>%
+  as_tibble() %>%
+  print()
+  
+# remove duplicate mutations in the same patient and same gene
+unique_mut <- nci_mut_by_sample %>%
+  distinct(sample_id, Hugo_Symbol, .keep_all = TRUE) %>%
+  print()
+
+clust_assgn <- pdata %>% 
+  dplyr::select(sample_id, pam_clust) %>%
+  as_tibble() %>%
+  print()
+
+# get the total n
+clust_assgn %>% distinct(sample_id) %>% nrow()
+
+mut_clust <- unique_mut %>%
+  left_join(clust_assgn) %>%
+  print()
+
+# Get mutation counts per gene for each cluster and combine back to a single table
+
+# get number of cases in the cluster
+mut_clust %>% dplyr::filter(pam_clust == "1") %>% distinct(sample_id) %>% nrow()
+mut_clust %>% dplyr::filter(pam_clust == "2") %>% distinct(sample_id) %>% nrow()
+mut_clust %>% dplyr::filter(pam_clust == "3") %>% distinct(sample_id) %>% nrow()
+
+# get counts by gene for clusters and compare each cluster for significance against pooled counts from each other cluster
+
+# first get mutation counts for each gene per cluster and create column for counts of unmutated genes
+cluster_1 <- mut_clust %>%
+  dplyr::filter(pam_clust == "1") %>%
+  dplyr::select(-pam_clust) %>%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %>%
+  count(Hugo_Symbol) %>%
+  dplyr::rename(c1_mut = n) %>%
+  mutate(c1_nonmut = 279 - c1_mut) %>%
+  print()
+
+cluster_2 <- mut_clust %>%
+  dplyr::filter(pam_clust == "2") %>%
+  dplyr::select(-pam_clust) %>%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %>%
+  count(Hugo_Symbol) %>%
+  dplyr::rename(c2_mut = n) %>%
+  mutate(c2_nonmut = 119 - c2_mut) %>%
+  print() 
+
+cluster_3 <- mut_clust %>%
+  dplyr::filter(pam_clust == "3") %>%
+  dplyr::select(-pam_clust) %>%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %>%
+  count(Hugo_Symbol) %>%
+  dplyr::rename(c3_mut = n) %>%
+  mutate(c3_nonmut = 80 - c3_mut) %>%
+  print() 
+
+mut_counts_by_cluster <- cluster_1 %>%
+  full_join(cluster_2) %>%
+  full_join(cluster_3) %>%
+  replace_na(list(c1_mut = 0, c2_mut = 0, c3_mut = 0)) %>%
+  replace_na(list(c1_nonmut = 0, c2_nonmut = 0, c3_nonmut = 0)) %>%
+  arrange(desc(c3_mut)) %>%
+  print()
+
+mut_counts_matrix <- as.data.frame(mut_counts_by_cluster) %>%
+  column_to_rownames(var = "Hugo_Symbol") %>%
+  as.matrix()
+
+cutoff <- 1189 * 0.05
+
+mut_counts_filtered <- mut_counts_by_cluster %>%
+  mutate(mut_totals = c1_mut + c2_mut + c3_mut) %>%
+  filter(mut_totals > cutoff) %>%
+  print()
+
+clust1_vs_pool <- mut_counts_filtered %>%
+  mutate(pool_mut = c2_mut + c3_mut) %>%
+  mutate(pool_nonmut = c2_nonmut + c3_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c1_mut, c1_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+sig <- clust1_vs_pool %>%
+  nest(-Hugo_Symbol) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  arrange(p.value)
+
+clust_1_summary <- sig %>%
+  left_join(clust1_vs_pool) %>%
+  mutate(p_adj = p.adjust(p.value, method = "BH")) %>%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
+  mutate(c1_rate = c1_mut / (c1_mut + c1_nonmut)) %>%
+  print()
+
+clust1_vs_pool <- mut_counts_filtered %>%
+  mutate(pool_mut = c2_mut + c3_mut) %>%
+  mutate(pool_nonmut = c2_nonmut + c3_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c1_mut, c1_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+sig <- clust1_vs_pool %>%
+  nest(-Hugo_Symbol) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  arrange(p.value)
+
+clust_1_summary <- sig %>%
+  left_join(clust1_vs_pool) %>%
+  mutate(p_adj = p.adjust(p.value, method = "BH")) %>%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
+  mutate(c1_rate = c1_mut / (c1_mut + c1_nonmut)) %>%
+  print()
+```
+
+```{r}
+clust2_vs_pool <- mut_counts_filtered %>%
+  mutate(pool_mut = c1_mut + c3_mut) %>%
+  mutate(pool_nonmut = c1_nonmut + c3_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c2_mut, c2_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+sig <- clust2_vs_pool %>%
+  nest(-Hugo_Symbol) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  arrange(p.value)
+
+clust_2_summary <- sig %>%
+  left_join(clust2_vs_pool) %>%
+  mutate(p_adj = p.adjust(p.value, method = "BH")) %>%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
+  print()
+```
+
+```{r}
+clust3_vs_pool <- mut_counts_filtered %>%
+  mutate(pool_mut = c1_mut + c2_mut) %>%
+  mutate(pool_nonmut = c1_nonmut + c2_nonmut) %>%
+  dplyr::select(Hugo_Symbol, c3_mut, c3_nonmut, pool_mut, pool_nonmut) %>%
+  print()
+
+sig <- clust3_vs_pool %>%
+  nest(-Hugo_Symbol) %>%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %>% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %>%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %>%
+  unnest(stats) %>%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %>%
+  arrange(p.value)
+
+clust_3_summary <- sig %>%
+  left_join(clust3_vs_pool) %>%
+  mutate(p_adj = p.adjust(p.value, method = "BH")) %>%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %>%
+  print()
+```
