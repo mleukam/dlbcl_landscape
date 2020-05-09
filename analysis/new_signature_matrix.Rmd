@@ -1,0 +1,1489 @@
+---
+title: "new_signature_matrix"
+author: "mleukam"
+date: "2020-02-20"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+Deriving a novel signature matrix. 
+
+LM22 - the main micro-array-derived deconvolution signature matrix used in CIBERTSORTx has some issues that render it less usable for DLBCL. 
+
+1) Genes expressed in non-hematopoetic cancers were filtered out, but in our case, the cancer is of hematopoetic origin.
+
+2) B-cells were included in the analysis, which are again the source of the cancer and might be making the result less trustworthy.
+
+3) The macrophage datasets were limited.
+
+The plan will be to aggregate a number of purified/sorted cell types for a micro-array derived signature matrix, to filter out housekeeping genes, and to filter out highly expressed DLBCL genes as well as generally expressed solid tumor genes. 
+
+From CIBERSORTx article: https://www.nature.com/articles/s41587-019-0114-2#Sec9
+
+```
+Briefly, next generation sequencing datasets were downloaded and analyzed using the authors’ normalization settings unless otherwise specified; these consisted of transcripts per million (TPM), reads per kilobase of transcript per million (RPKM) or fragments per kilobase of transcript per million (FPKM) space. For analyses in log2 space, we added 1 to expression values prior to log2 adjustment. Affymetrix microarray datasets were summarized and normalized as described in ‘Gene expression profiling – Microarrays’ (Supplementary Note 1), using the robust multi-array averaging (RMA) method in cases where bulk tissues and ground truth cell subsets were profiled on the same Affymetrix platform, and otherwise using MAS5 normalization.
+```
+
+From: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5998872/
+
+Chen SH, Kuo WY, Su SY, Chung WC, Ho JM, Lu HH, Lin CY. A gene profiling deconvolution approach to estimating immune cell composition from complex tissues. BMC Bioinformatics. 2018 May 8;19(Suppl 4):154. doi: 10.1186/s12859-018-2069-6. PMID: 29745829; PMCID: PMC5998872.
+
+```
+To define a set of feature genes for deconvolution, we first eliminate genes that are unsuitable for building model. Two methods were adopted. We use datasets and enrichment score (ES) described in Benita et al. [13] to define genes that expressed in normal tissues by the criteria of ES>0 in more than 5% of observed tissue types. Besides, genes that expressed in cancer cells are collected from cancer cell line encyclopedia [14] in the criteria of log2 transformed expression level>7. The two lists are used as black lists to remove genes expressed in normal tissues and cancer cells from the candidate list.
+```
+For this project, we will use the list of housekeeping genes from: 
+"Human housekeeping genes revisited" E. Eisenberg and E.Y. Levanon, Trends in Genetics, 29 (2013) as the first filter. List of housekeeping genes downloaded from author's website: https://www.tau.ac.il/~elieis/HKG/
+
+## Set up workspace
+
+Clear workspace prior to analysis and load necessary packages
+```{r}
+rm(list = ls())
+```
+
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r packages, message=FALSE, warning=FALSE}
+# data downloader
+library(GEOquery)
+
+# microarray wrangling
+library(lumi)
+library(lumiHumanIDMapping)
+library(affy)
+library(Biobase)
+
+# database lookup
+library(gprofiler2)
+library(pd.hugene.2.0.st)
+library(lumiHumanAll.db)
+
+# clustering
+library(stats)
+library(dendextend)
+library(gtools)
+
+# plotting
+library(ggsci)
+library(ggpubr)
+library(viridis)
+library(VennDiagram)
+
+# differential gene expression
+library(edgeR)
+library(limma)
+
+# tidyverse base functions
+library(tidyverse)
+```
+
+Load source document - hand assembled in Excel from literature source and database search using GEO web application
+
+```{r}
+masterlist <- read_csv("data/sig_mat_pheno_data.csv") %>%
+  print()
+
+dataset_list <- masterlist %>%
+  pull(dataset) %>%
+  unique() %>%
+  as.list() %>%
+  # last gse is macrophage illumina dataset - will handle separately
+  .[1:9] %>%
+  print()
+```
+
+## Download metadata and expression data
+```{r}
+# function for download
+getter <- function(x){
+  getGEO(x)
+}
+
+# apply to nonmacrophage list
+gse_list <- map(dataset_list, getter)
+
+# load macrophage gse from prior experiments
+gse46903 <- readRDS("~/tcga_macs/data/gse_46903.rds")
+
+# function to get phenodata from gse lists (first element is expression set)
+pdata_puller <- function(x){
+  y <- x[[1]]
+  pData(y) %>%
+    rownames_to_column(var = "sample_id") %>%
+    as_tibble()
+}
+
+# apply to gse list
+pdata_list <- map(gse_list, pdata_puller)
+map(pdata_list, colnames)
+agg_pdata_nomac <- bind_rows(pdata_list)
+
+# get phenodata from the gse lists that have two elements
+second_pass <- list(unlist(gse_list[1]), unlist(gse_list[4]))
+
+pdata_pull2 <- function(x){
+  y <- x[[2]]
+  pData(y) %>%
+    rownames_to_column(var = "sample_id") %>%
+    as_tibble()
+}
+
+second_pass_pdata <- map(second_pass, pdata_pull2)
+
+# add macrophage data
+mac_pdata <- gse46903[[1]] %>%
+  pData() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+agg_pdata <- bind_rows(agg_pdata_nomac, second_pass_pdata, mac_pdata) 
+
+# pull out only selected samples
+selected_cases <- masterlist$sample_id
+selected_pdata <- agg_pdata %>%
+  dplyr::filter(sample_id %in% selected_cases) %>%
+  print()
+
+# are any missing?
+setdiff(masterlist$sample_id, selected_pdata$sample_id)
+# NO
+```
+
+done on cluster due to space on laptop issues
+```{r}
+download_list <- masterlist %>%
+  pull(dataset) %>%
+  unique() %>%
+  as.list() %>%
+  print()
+
+# download raw data
+# getGEOSuppFiles("GSE26347", makeDirectory = TRUE, baseDir = "/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files", fetch_files = TRUE)
+
+# getGEOSuppFiles("GSE43769", makeDirectory = TRUE, baseDir = "/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files", fetch_files = TRUE)
+
+# getGEOSuppFiles("GSE22886", makeDirectory = TRUE, baseDir = "/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files", fetch_files = TRUE)
+
+# getGEOSuppFiles("GSE4527", makeDirectory = TRUE, baseDir = "/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files", fetch_files = TRUE)
+
+# getGEOSuppFiles("GSE11292", makeDirectory = TRUE, baseDir = "/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files", fetch_files = TRUE)
+
+# getGEOSuppFiles("GSE69030", makeDirectory = TRUE, baseDir = "/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files", fetch_files = TRUE)
+
+# getGEOSuppFiles("GSE69030", makeDirectory = TRUE, baseDir = "/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files", fetch_files = TRUE)
+
+# getGEOSuppFiles("GSE66384", makeDirectory = TRUE, baseDir = "/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files", fetch_files = TRUE)
+
+# getGEOSuppFiles("GSE47189", makeDirectory = TRUE, baseDir = "/gpfs/data/kline-lab/dlbcl_sig_matrix_data/CEL_files", fetch_files = TRUE)
+
+# CEL files not available for GSE 3982
+```
+
+## Import CEL files to batch objects
+```{r}
+### GSE26347 ### ------------------------------------------------
+# Affymetrix HG-U133_Plus2 and HG-U133A
+filenames_GSE26347 <- list.files("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347")
+data_GSE26347 <- ReadAffy(filenames_GSE26347) ##read data in working directory
+
+setwd("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/")
+# unpack files
+untar("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/GSE26347_RAW.tar", exdir = "data")
+cels_GSE26347 <- list.files("data/")
+length(cels_GSE26347)
+sapply(paste("data", cels_GSE26347, sep = "/"), gunzip)
+# make filepath vector
+filenames_GSE26347 <- list.files("data/")
+head(filenames_GSE26347)
+filepath_GSE26347 <- paste0("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/data/", filenames_GSE26347)
+# sets 1 and 2 were done on one platform and set 3 on another platform. Will need to import separately
+index_GSE26347_set3 <- grep("_Set3", filepath_GSE26347) %>% print()
+filepath_GSE26347_set3 <- filepath_GSE26347[index_GSE26347_set3] %>% print()
+filepath_GSE26347_set1_2 <- filepath_GSE26347[-index_GSE26347_set3] %>% print()
+# create AffyBatch objects
+data_GSE26347_set1_2 <- ReadAffy(filenames = filepath_GSE26347_set1_2)
+data_GSE26347_set3 <- ReadAffy(filenames = filepath_GSE26347_set3)
+# save AffyBatch objects
+saveRDS(data_GSE26347_set1_2, "/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/affybatch_data_GSE26347_set1_2.rds")
+saveRDS(data_GSE26347_set3, "/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/affybatch_data_GSE26347_set3.rds")
+
+### GSE4527 ### -----------------------------------------------
+## [HG-U133A] Affymetrix Human Genome U133A Array
+setwd("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE4527/")
+# unpack files
+untar("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE4527/GSE4527_RAW.tar", exdir = "data")
+cels_GSE4527 <- list.files("data/")
+length(cels_GSE4527)
+sapply(paste("data", cels_GSE4527, sep = "/"), gunzip)
+# make filepath vector
+# only need GSM101519 and GSM101521 -- avoid the problem of two platforms
+filenames_GSE4527 <- list.files("data/") %>% 
+  .[c(2,4)] %>% print()
+filepath_GSE4527 <- paste0("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE4527/data/", filenames_GSE4527) %>% print()
+# create AffyBatch object
+data_GSE4527 <- ReadAffy(filenames = filepath_GSE4527)
+saveRDS(data_GSE4527, "/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE4527/affybatch_data_GSE4527.rds")
+
+### GSE43769 ### -----------------------------------------------
+## [HG-U133_Plus_2] Affymetrix Human Genome U133 Plus 2.0 Array
+setwd("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE43769/")
+# unpack files
+untar("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE43769/GSE43769_RAW.tar", exdir = "data")
+cels_GSE43769 <- list.files("data/")
+length(cels_GSE43769)
+sapply(paste("data", cels_GSE43769, sep = "/"), gunzip)
+# make filepath vector
+filenames_GSE43769 <- list.files("data/")
+filepath_GSE43769 <- paste0("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE43769/data/", filenames_GSE43769) %>% print()
+# create AffyBatch object
+data_GSE43769 <- ReadAffy(filenames = filepath_GSE43769)
+saveRDS(data_GSE43769, "/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE43769/affybatch_data_GSE43769.rds")
+
+### GSE22886 ### -----------------------------------------------
+## [HG-U133A] Affymetrix Human Genome U133A Array
+setwd("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/")
+# unpack files
+untar("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/GSE22886_RAW.tar", exdir = "data")
+cels_GSE22886 <- list.files("data/")
+length(cels_GSE22886)
+sapply(paste("data", cels_GSE22886, sep = "/"), gunzip)
+# make filepath vector
+filenames_GSE22886 <- list.files("data/") %>% print()
+filepath_GSE22886 <- paste0("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/data/", filenames_GSE22886) %>% print()
+# there is a large number of files in this archive - will subset just for the ones used in the signature matrix
+subset_GSE22886 <- masterlist %>%
+  dplyr::filter(dataset == "GSE22886") %>%
+  pull(sample_id) %>% 
+  paste0(., ".CEL") %>%
+  print()
+filepath_subset_GSE22886 <- paste0("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/data/", subset_GSE22886) %>% print()
+# create AffyBatch object
+data_GSE22886 <- ReadAffy(filenames = filepath_subset_GSE22886)
+saveRDS(data_GSE22886, "/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/affybatch_data_GSE22886.rds")
+
+### GSE11292 ### -----------------------------------------------
+## [HG-U133_Plus_2] Affymetrix Human Genome U133 Plus 2.0 Array
+setwd("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/")
+# unpack files
+untar("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/GSE11292_RAW.tar", exdir = "data")
+cels_GSE11292 <- list.files("data/")
+length(cels_GSE11292)
+sapply(paste("data", cels_GSE11292, sep = "/"), gunzip)
+# make filepath vector
+filenames_GSE11292 <- list.files("data/")
+filepath_GSE11292 <- paste0("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/data/", filenames_GSE11292) %>% print()
+# there is a large number of files in this archive - will subset just for the ones used in the signature matrix
+subset_GSE11292 <- masterlist %>%
+  dplyr::filter(dataset == "GSE11292") %>%
+  pull(sample_id) %>% 
+  paste0(., ".CEL") %>%
+  print()
+filepath_subset_GSE11292 <- paste0("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/data/", subset_GSE11292) %>% print()
+# create AffyBatch object
+data_GSE11292 <- ReadAffy(filenames = filepath_subset_GSE11292)
+saveRDS(data_GSE11292, "/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/affybatch_data_GSE11292.rds")
+
+### GSE106087 ### -----------------------------------------------
+## [PrimeView] Affymetrix Human Gene Expression Array
+setwd("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE106087/")
+# unpack files
+untar("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE106087/GSE106087_RAW.tar", exdir = "data")
+cels_GSE106087 <- list.files("data/")
+length(cels_GSE106087)
+sapply(paste("data", cels_GSE106087, sep = "/"), gunzip)
+# make filepath vector
+filenames_GSE106087 <- list.files("data/")
+filepath_GSE106087 <- paste0("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE106087/data/", filenames_GSE106087) %>% print()
+# create AffyBatch object
+data_GSE106087 <- ReadAffy(filenames = filepath_GSE106087)
+saveRDS(data_GSE106087, "/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE106087/affybatch_data_GSE106087.rds")
+
+### GSE66384 ### -----------------------------------------------
+## [PrimeView] Affymetrix Human Gene Expression Array
+setwd("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE66384/")
+# unpack files
+untar("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE66384/GSE66384_RAW.tar", exdir = "data")
+cels_GSE66384 <- list.files("data/")
+length(cels_GSE66384)
+sapply(paste("data", cels_GSE66384, sep = "/"), gunzip)
+# make filepath vector
+filenames_GSE66384 <- list.files("data/")
+filepath_GSE66384 <- paste0("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE66384/data/", filenames_GSE66384) %>% print()
+# create AffyBatch object
+data_GSE66384 <- ReadAffy(filenames = filepath_GSE66384)
+saveRDS(data_GSE66384, "/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE66384/affybatch_data_GSE66384.rds")
+
+### GSE69030 ### -----------------------------------------------
+## [HuGene-2_0-st] Affymetrix Human Gene 2.0 ST Array [transcript (gene) version]
+## Requires oligo package to import
+## Not compatible with Affy
+library(oligo)
+setwd("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE69030/")
+# unpack files
+untar("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE69030/GSE69030_RAW.tar", exdir = "data")
+cels_GSE69030 <- list.files("data/")
+length(cels_GSE69030)
+sapply(paste("data", cels_GSE69030, sep = "/"), gunzip)
+# make filepath vector
+file_index_GSE69030 <- list.files("data/") %>% grep(".CEL", .) %>% print()
+filenames_GSE69030 <- list.files("data/") %>% .[file_index_GSE69030] %>% print()
+filepath_GSE69030 <- paste0("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE69030/data/", filenames_GSE69030) %>% print()
+# import with oligo
+data_GSE69030 <- read.celfiles(filepath_GSE69030)
+saveRDS(data_GSE69030, "/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE69030/affybatch_data_GSE69030.rds")
+```
+
+
+Normalization and background correction
+Subset cases
+Summarize at gene level
+```{r}
+# read in Affy batch
+data_GSE26347_set1_2 <- readRDS("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/affybatch_data_GSE26347_set1_2.rds")
+# convert to expression table with RMA background correction
+expr_GSE26347_set1_2 <- affy::rma(data_GSE26347_set1_2) %>% 
+  exprs() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_name") %>%
+  as_tibble() %>%
+  separate(sample_name, into = c("sample_id", NA)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix() %>%
+  t()
+expr_GSE26347_set1_2[1:5, 1:5]
+# subset cases
+subset_cases_26347 <- masterlist %>%
+  dplyr::filter(dataset == "GSE26347") %>%
+  dplyr::filter(platform_code == "GPL570") %>%
+  pull(sample_id) %>%
+  print()
+selected_GSE26347_set1_2 <- expr_GSE26347_set1_2[, subset_cases_26347]
+dim(selected_GSE26347_set1_2)
+
+# read in Affy batch
+data_GSE26347_set3 <- readRDS("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE26347/affybatch_data_GSE26347_set3.rds")
+# convert to expression table with RMA background correction
+expr_GSE26347_set3 <- affy::rma(data_GSE26347_set3) %>% 
+  exprs() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_name") %>%
+  as_tibble() %>%
+  separate(sample_name, into = c("sample_id", NA)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix() %>%
+  t()
+expr_GSE26347_set3[1:5, 1:5]
+# subset cases
+subset_cases_26347 <- masterlist %>%
+  dplyr::filter(dataset == "GSE26347") %>%
+  dplyr::filter(platform_code == "GPL3921") %>%
+  pull(sample_id) %>%
+  print()
+selected_GSE26347_set3 <- expr_GSE26347_set3[, subset_cases_26347]
+dim(selected_GSE26347_set3)
+
+# read in Affy batch
+data_GSE4527 <- readRDS("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE4527/affybatch_data_GSE4527.rds")
+# convert to expression table with RMA background correction
+expr_GSE4527 <- affy::rma(data_GSE4527) %>% 
+  exprs() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_name") %>%
+  as_tibble() %>%
+  separate(sample_name, into = c("sample_id", NA)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix() %>%
+  t()
+expr_GSE4527[1:5, ]
+# subset cases
+subset_cases_GSE4527 <- masterlist %>%
+  dplyr::filter(dataset == "GSE4527") %>%
+  pull(sample_id) %>%
+  print()
+selected_GSE4527 <- expr_GSE4527[, subset_cases_GSE4527]
+dim(selected_GSE4527)
+
+# read in Affy batch
+data_GSE43769 <- readRDS("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE43769/affybatch_data_GSE43769.rds")
+# convert to expression table with RMA background correction
+expr_GSE43769 <- affy::rma(data_GSE43769) %>% 
+  exprs() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_name") %>%
+  as_tibble() %>%
+  separate(sample_name, into = c("sample_id", NA)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix() %>%
+  t()
+expr_GSE43769[1:5, ]
+# subset cases
+subset_cases_GSE43769 <- masterlist %>%
+  dplyr::filter(dataset == "GSE43769") %>%
+  pull(sample_id) %>%
+  print()
+selected_GSE43769 <- expr_GSE43769[, subset_cases_GSE43769]
+dim(selected_GSE43769)
+
+# this was read in with oligo, not affy package
+data_GSE69030 <- readRDS("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE69030/affybatch_data_GSE69030.rds")
+# convert to expression table with RMA background correction
+expr_GSE69030 <- oligo::rma(data_GSE69030) %>% 
+  exprs() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_name") %>%
+  as_tibble() %>%
+  separate(sample_name, into = c("sample_id", NA)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix() %>%
+  t()
+expr_GSE69030[1:5, ]
+# subset cases
+subset_cases_GSE69030 <- masterlist %>%
+  dplyr::filter(dataset == "GSE69030") %>%
+  pull(sample_id) %>%
+  print()
+selected_GSE69030 <- expr_GSE69030[, subset_cases_GSE69030]
+dim(selected_GSE69030)
+
+# read in Affy batch
+data_GSE66384 <- readRDS("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE66384/affybatch_data_GSE66384.rds")
+# convert to expression table with RMA background correction
+expr_GSE66384 <- affy::rma(data_GSE66384) %>% 
+  exprs() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_name") %>%
+  as_tibble() %>%
+  separate(sample_name, into = c("sample_id", NA)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix() %>%
+  t()
+expr_GSE66384[1:5, ]
+# subset cases
+subset_cases_GSE66384 <- masterlist %>%
+  dplyr::filter(dataset == "GSE66384") %>%
+  pull(sample_id) %>%
+  print()
+selected_GSE66384 <- expr_GSE66384[, subset_cases_GSE66384]
+dim(selected_GSE66384)
+
+# read in Affy batch
+data_GSE106087 <- readRDS("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE106087/affybatch_data_GSE106087.rds")
+# convert to expression table with RMA background correction
+expr_GSE106087 <- affy::rma(data_GSE106087) %>% 
+  exprs() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_name") %>%
+  as_tibble() %>%
+  separate(sample_name, into = c("sample_id", NA)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix() %>%
+  t()
+expr_GSE106087[1:5, ]
+# subset cases
+subset_cases_GSE106087 <- masterlist %>%
+  dplyr::filter(dataset == "GSE106087") %>%
+  pull(sample_id) %>%
+  print()
+selected_GSE106087 <- expr_GSE106087[, subset_cases_GSE106087]
+dim(selected_GSE106087)
+
+# read in Affy batch
+data_GSE11292 <- readRDS("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE11292/affybatch_data_GSE11292.rds")
+# convert to expression table with RMA background correction
+expr_GSE11292 <- affy::rma(data_GSE11292) %>% 
+  exprs() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_name") %>%
+  as_tibble() %>%
+  separate(sample_name, into = c("sample_id", NA)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix() %>%
+  t()
+expr_GSE11292[1:5, ]
+# subset cases
+subset_cases_GSE11292 <- masterlist %>%
+  dplyr::filter(dataset == "GSE11292") %>%
+  pull(sample_id) %>%
+  print()
+selected_GSE11292 <- expr_GSE11292[, subset_cases_GSE11292]
+dim(selected_GSE11292)
+
+# read in Affy batch
+data_GSE22886 <- readRDS("/Volumes/kline-lab/dlbcl_sig_matrix_data/CEL_files/GSE22886/affybatch_data_GSE22886.rds")
+# convert to expression table with RMA background correction
+expr_GSE22886 <- affy::rma(data_GSE22886) %>% 
+  exprs() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_name") %>%
+  as_tibble() %>%
+  separate(sample_name, into = c("sample_id", NA)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix() %>%
+  t()
+expr_GSE22886[1:5, ]
+# subset cases
+subset_cases_GSE22886 <- masterlist %>%
+  dplyr::filter(dataset == "GSE22886") %>%
+  pull(sample_id) %>%
+  print()
+selected_GSE22886 <- expr_GSE22886[, subset_cases_GSE22886]
+dim(selected_GSE22886)
+```
+
+Load expression matrices for those already imported or lacking CEL files
+```{r}
+### GSE3982 ### ----------------------------------------------------
+expr_GSE3982 <- gse_list[[6]] %>% 
+  .[[1]] %>% 
+  exprs()
+expr_GSE3982[1:5, 1:5]
+# subset cases
+subset_cases_3982 <- masterlist %>%
+  dplyr::filter(dataset == "GSE3982") %>%
+  pull(sample_id) %>%
+  print()
+selected_GSE3982 <- expr_GSE3982[, subset_cases_3982] %>%
+  log2()
+dim(selected_GSE3982)
+selected_GSE3982[1:5, 1:5] 
+
+### GSE47189 ### ------------------------------------------------------
+# macrophage gene sets with illumina bead chips downloaded as raw (non-normalized) counts
+expr_GSE47189 <- readRDS("~/tcga_macs/output/expression_set.rds") %>%
+  exprs()
+expr_GSE47189[1:5, 1:5]
+# need to change column names to GEO sample_ids
+pdata_lookup <- pData(readRDS("~/tcga_macs/output/expression_set.rds")) %>%
+  as_tibble() %>%
+  dplyr::select(geo_id, raw_id) %>%
+  print()
+# subset cases
+expr_geo_GSE47189 <- t(expr_GSE47189) %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "raw_id") %>%
+  as_tibble() %>%
+  left_join(pdata_lookup) %>%
+  dplyr::select(geo_id, everything()) %>%
+  dplyr::select(-raw_id) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "geo_id") %>%
+  as.matrix() %>%
+  t()
+expr_geo_GSE47189[1:5, 1:5]
+
+subset_cases_47189 <- masterlist %>%
+  dplyr::filter(dataset == "GSE47189") %>%
+  pull(sample_id) %>%
+  print()
+selected_GSE47189 <- expr_geo_GSE47189[, subset_cases_47189]
+dim(selected_GSE47189)
+```
+
+Convert probes to ensembl gene IDs
+```{r}
+raw_probe_expr_list <- list("GSE26347_12" = selected_GSE26347_set1_2, 
+                            "GSE26347_3" = selected_GSE26347_set3,
+                            "GSE4527" = selected_GSE4527,
+                            "GSE43769" = selected_GSE43769,
+                            "GSE22886" = selected_GSE22886,
+                            "GSE11292" = selected_GSE11292,
+                            "GSE106087" = selected_GSE106087,
+                            "GSE66384" = selected_GSE66384,
+                            "GSE3982" = selected_GSE3982)
+                            
+
+# define function for g:convert
+converter <- function(expr_mat){
+  ensg_lookup <- gconvert(query = rownames(expr_mat), 
+           organism = "hsapiens",
+           target = "HGNC", 
+           mthreshold = 1,
+           numeric_ns = "AFFY_HUEX_1_0_ST_V2",
+           filter_na = TRUE) %>%
+    dplyr::select(input, target)
+  expr_df <- expr_mat %>%
+    as.data.frame() %>%
+    rownames_to_column(var = "input") %>%
+    as_tibble() %>%
+    left_join(ensg_lookup) %>%
+    dplyr::select(-input) %>%
+    dplyr::select(ensembl_gene_id = target, everything()) %>%
+    dplyr::filter(!is.na(ensembl_gene_id)) %>%
+    as.data.frame()
+  expr_mat_ensembl <- expr_df[-1] %>%
+    as.matrix
+  rownames(expr_mat_ensembl) <- expr_df[,1]
+  collapsed_expr <- avereps(expr_mat_ensembl)
+  collapsed_expr
+}
+
+# apply function to expression sets with probe names
+ensg_expr_list <- map(raw_probe_expr_list, converter)
+
+# convert to dataframes
+ensg_expr_df_list <- map(ensg_expr_list, function(x){
+  x %>%
+    as.data.frame() %>%
+    rownames_to_column(var = "gene_id") %>%
+    as_tibble()
+})
+# join as single dataframe
+# just missing GSE47189 and GSE69030
+ensg_expr_subtotal <- ensg_expr_df_list %>% 
+  reduce(left_join, by = "gene_id")
+
+# convert lumi probe IDs to gene names
+# use R object in lumiHumanAll.db
+lumi_lookup <- as.list(lumiHumanAllALIAS2PROBE) %>%
+  enframe() %>%
+  dplyr::rename(gene_name = name, probe_id = value) %>%
+  unnest(probe_id) %>%
+  print()
+
+# convert to gene id, drop all unmapped probes
+ensg_expr_GSE47189_df <- selected_GSE47189 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "probe_id") %>%
+  as_tibble() %>%
+  left_join(lumi_lookup) %>%
+  dplyr::select(probe_id, gene_name, everything()) %>%
+  drop_na(gene_name) %>%
+  dplyr::select(-probe_id)
+ensg_mat_GSE47189 <- ensg_expr_GSE47189_df[-1] %>% 
+  as.matrix()
+rownames(ensg_mat_GSE47189) <- ensg_expr_GSE47189_df$gene_name
+# collapse multiple mapped probes by averaging
+ensg_expr_GSE47189 <- avereps(ensg_mat_GSE47189)
+ensg_expr_GSE47189[1:5, 1:5]
+dim(ensg_expr_GSE47189)
+# prepare for left join with main expression matrix
+ensg_GSE47189 <- ensg_expr_GSE47189 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  print()
+
+# read in annotation file for HuGene-2_0-st-v1 Transcript Cluster Annotations, CSV, Release 36 from affymetrix website: http://www.affymetrix.com/support/technical/byproduct.affx?product=hugene-1_0-st-v1
+
+HuGene_2_0_st_v1_na36_hg19_transcript <- read_csv("/Volumes/kline-lab/dlbcl_sig_matrix_data/HuGene-2_0-st-v1.na36.hg19.transcript.csv", 
+                                                 skip = 23) 
+
+lookup_hugene_2 <- HuGene_2_0_st_v1_na36_hg19_transcript %>%
+  select(transcript_cluster_id, probeset_id, gene_assignment) %>%
+  separate(gene_assignment, into = c("refseq_id", "hugo_name", "long_name"), sep = "//") %>%
+  mutate(hugo_name = str_trim(hugo_name, side = "both")) %>%
+  mutate(refseq_id = str_trim(refseq_id, side = "both")) %>%
+  mutate(long_name = str_trim(long_name, side = "both")) %>%
+  print()
+
+lookup_hugene_2_hgnc <- lookup_hugene_2 %>%
+  dplyr::select(probeset_id, hugo_name) %>%
+  mutate(probeset_id = as.character(probeset_id)) %>%
+  print()
+
+GSE69030_esbl_df <- selected_GSE69030 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "probeset_id") %>%
+  as_tibble() %>%
+  left_join(lookup_hugene_2_hgnc) %>%
+  dplyr::select(probeset_id, hugo_name, everything()) %>%
+  drop_na(hugo_name) %>%
+  dplyr::select(-probeset_id) %>%
+  print()
+
+ensg_mat_GSE69030 <- GSE69030_esbl_df[-1] %>% 
+  as.matrix()
+rownames(ensg_mat_GSE69030) <- GSE69030_esbl_df$hugo_name
+# collapse multiple mapped probes by averaging
+ensg_expr_GSE69030 <- avereps(ensg_mat_GSE69030)
+ensg_expr_GSE69030[1:5, 1:5]
+dim(ensg_expr_GSE69030)
+# prepare for left join with main expression matrix
+ensg_GSE69030 <- ensg_expr_GSE69030 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  print()
+  
+# Combine all expression matrices into a single matrix
+ensg_expr_total <- ensg_expr_subtotal %>% 
+  left_join(ensg_GSE47189) %>%
+  left_join(ensg_GSE69030) %>%
+  drop_na(gene_id) %>%
+  print()
+
+ensg_mat <- ensg_expr_total[-1] %>% 
+  as.matrix()
+rownames(ensg_mat) <- ensg_expr_total$gene_id
+# collapse multiple mapped probes by averaging
+ensg_mat_total <- avereps(ensg_mat)
+ensg_mat_total[1:5, 1:5]
+dim(ensg_mat_total)
+
+saveRDS(ensg_mat_total, "output/combined_expr_matrix_for_signature_unprocessed.rmd")
+```
+
+Prepare pheno data
+```{r}
+pheno <- colnames(ensg_mat_total) %>%
+  enframe() %>%
+  dplyr::select(sample_id = value) %>%
+  left_join(masterlist) %>%
+  left_join(selected_pdata) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id")
+pheno[1:5, 1:5]
+saveRDS(pheno, "output/phenodata_for_signature_matrix.rmd")
+
+identical(colnames(ensg_mat_total), rownames(pheno))
+
+metadata <- data.frame(colnames(pheno))
+rownames(metadata) <- colnames(pheno)
+metadata
+
+phenoData <- new("AnnotatedDataFrame",
+                 data = pheno, 
+                 varMetadata = metadata)
+
+
+annotation <- "CEL files downloaded where available for each dataset and background corrected following annotation in phenodata (RMA for Affymetrix and RSN for Illumina chips). GSE3982 had no available CEL files and was downloaded as MAS5 normalized data which was then log2 transformed to match RMA. Individual samples chosen as representative populations and assigned to groups by hand after literature review. Summarized at gene level with HGNC gene names. Probes that did not map to a gene name were dropped and duplicate gene names averaged. Combined into single expression matrix in log2 space."
+
+experimentData <- new("MIAME",
+                      name = "Mike Leukam", 
+                      lab = "Justin Kline Lab",
+                      contact = "mleukam@medicine.bsd.uchicago.edu",
+                      title = "Construction of DLBCL-specific signature matrix",
+                      abstract = "pending",
+                      url = "www.medicine.uchicago.edu",
+                      other = list(notes = "aggregated from prior experiments"))
+```
+
+Make expression set
+```{r}
+preprocessed_sig_matrix_es <- ExpressionSet(
+  assayData = ensg_mat_total,
+  phenoData = phenoData,
+  experimentData = experimentData,
+  annotation = annotation)
+preprocessed_sig_matrix_es
+
+saveRDS(preprocessed_sig_matrix_es, "preprocessed_data_for_signature_matrix_es.rds")
+```
+
+## Blacklist
+
+From: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5998872/
+
+Chen SH, Kuo WY, Su SY, Chung WC, Ho JM, Lu HH, Lin CY. A gene profiling deconvolution approach to estimating immune cell composition from complex tissues. BMC Bioinformatics. 2018 May 8;19(Suppl 4):154. doi: 10.1186/s12859-018-2069-6. PMID: 29745829; PMCID: PMC5998872.
+
+```
+To define a set of feature genes for deconvolution, we first eliminate genes that are unsuitable for building model. Two methods were adopted. We use datasets and enrichment score (ES) described in Benita et al. [13] to define genes that expressed in normal tissues by the criteria of ES>0 in more than 5% of observed tissue types. Besides, genes that expressed in cancer cells are collected from cancer cell line encyclopedia [14] in the criteria of log2 transformed expression level>7. The two lists are used as black lists to remove genes expressed in normal tissues and cancer cells from the candidate list.
+```
+For this project, we will use the list of housekeeping genes from: 
+"Human housekeeping genes revisited" E. Eisenberg and E.Y. Levanon, Trends in Genetics, 29 (2013) as the first filter. List of housekeeping genes downloaded from author's website: https://www.tau.ac.il/~elieis/HKG/
+
+```{r}
+hk_genes <- read_delim("~/tcga_macs/data/HK_genes.tsv", 
+                       delim = "\t", 
+                       col_names = c("hgnc_name", "refseq_name"), 
+                       trim_ws = TRUE)
+hk_genes
+
+blacklist_hk_genes <- hk_genes %>%
+  pull(hgnc_name)
+head(blacklist_hk_genes)
+length(blacklist_hk_genes)
+```
+
+Broad Cancer Cell Line Encyclopedia (CCLE) RNAseq gene expression data for 1019 cell lines (raw read counts) downloaded from website: www.broadinstitute.org/ccle. Version last updated: Jan 2, 2019
+File moved to data folder
+
+For this project, only genes highly expressed in DLBCL will be included in the blacklist
+```{r}
+# read in as matrix
+ccle <- CePa::read.gct("~/tcga_macs/data/CCLE_RNAseq_genes_counts_20180929.gct")
+dim(ccle)
+
+# read in annotation file
+ccle_annotation <- read_delim("data/CCLE_sample_info_file_2012-10-18.txt", 
+    "\t", escape_double = FALSE, trim_ws = TRUE) %>%
+  dplyr::select(ccle_name = `CCLE name`, site = `Site Primary`, histology = Histology, hist_subtype = `Hist Subtype1`) %>%
+  print()
+
+# select DLBCL cell lines
+ccle_dlbcl_lines <- ccle_annotation %>%
+  dplyr::filter(grepl("lymphoma", hist_subtype)) %>%
+  dplyr::filter(grepl("diffuse_large_B_cell", hist_subtype)) %>%
+  pull(ccle_name) %>%
+  print()
+
+# filter for dlbcl cell lines
+ccle_dlbcl <- ccle %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  dplyr::select(one_of(ccle_dlbcl_lines), gene_id) %>%
+  column_to_rownames(var = "gene_id") %>%
+  as.matrix()
+
+ccle_dlbcl[1:5, 1:5]
+str(ccle_dlbcl)
+
+# log transform
+log2_ccle <- log2(ccle_dlbcl)
+
+# read in gene_id to gene_name conversion table
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo") %>%
+  separate(gene_id, into = c("gene_id", "version"), sep = "\\.") %>%
+  dplyr::select(gene_id, gene_name) %>%
+  print()
+
+# get average gene expression across all cancer cell lines
+ccle_log_means <- rowMeans(log2_ccle, na.rm = FALSE, dims = 1)
+hist(ccle_log_means)
+cancer_genes_high <- ccle_log_means[ccle_log_means > 12]
+length(cancer_genes_high)
+hist(cancer_genes_high)
+head(cancer_genes_high)
+blacklist_dlbcl_genes <- names(cancer_genes_high) %>% 
+  enframe() %>%
+  dplyr::select(gene_id = value) %>%
+  separate(gene_id, into = c("gene_id", "version"), sep = "\\.", remove = TRUE) %>%
+  left_join(gencode_gtf) %>%
+  dplyr::filter(!is.na(gene_name)) %>%
+  pull(gene_name)
+head(blacklist_dlbcl_genes)
+length(blacklist_dlbcl_genes)
+```
+
+Make combined blacklist
+```{r}
+blacklist <- unique(c(blacklist_dlbcl_genes, blacklist_hk_genes))
+length(blacklist)
+head(blacklist)
+```
+
+## Cluster
+```
+Data from the 22 cell types (the signature set, 113 arrays) are quantile normalized before detecting differentially expressed genes. In order to prevent the datasets containing bias experiment result, clustering on gene profiling is applied. The clustering method is complete linkage and in the Euclidean distance. The inconsistency of gene profiling clusters and cell type labels is further analyzed for an advanced outlier judgment. 
+```
+
+```{r filter}
+# expression set created above
+# contains background-corrected data
+# also contains metadata from GEO and cell type assignment
+# expression in terms of hugo gene names
+es_preprocessed <- readRDS("preprocessed_data_for_signature_matrix_es.rds")
+
+# retreive preprocessed expression data
+expr_preprocessed <- exprs(es_preprocessed)
+summary(as.factor(expr_preprocessed < 0))
+summary(expr_preprocessed)
+summary(as.factor(is.na(expr_preprocessed)))
+# negative numbers can be introduced by RMA normalization if probe intensity is lower than the background probes - this will be addressed with an offset
+# NAs are probably introduced by different gene coverage of the various different probesets and should be removed
+expr_pre <- expr_preprocessed %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  drop_na() %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_id") %>%
+  as.matrix()
+summary(as.factor(expr_pre < 0))
+summary(expr_pre)
+summary(as.factor(is.na(expr_pre)))
+expr_pre[expr_pre < 0] <- 0.01
+expr_pre[expr_pre == 0] <- 0.01
+summary(as.factor(expr_pre < 0))
+summary(expr_pre)
+summary(as.factor(is.na(expr_pre)))
+range(expr_pre)
+
+# quantile normalize using limma function
+expr_norm <- limma::normalizeBetweenArrays(expr_pre, 
+                                           method = "quantile")
+
+summary(as.factor(expr_norm < 0))
+summary(as.factor(is.na(expr_norm)))
+range(expr_norm)
+
+## Clustering gene expression to examine phenotype labels
+set.seed(818)
+
+# select 1000 highest probes with highest variation
+# input is normalized expression matrix with zero expression genes removed
+myvars <- apply(expr_norm, 1, var, na.rm = TRUE) 
+myvars <- sort(myvars, decreasing = TRUE) 
+myvars <- myvars[1:1000] 
+expr_onek <- expr_norm[names(myvars), ] 
+dim(expr_onek) 
+
+cell_type <- as.numeric(as.factor(pData(es_preprocessed)$abreviated_name))
+```
+
+```{r}
+# heirarchical cluster
+dend <- t(expr_onek) %>% 
+  scale() %>% 
+  dist() %>% 
+  hclust(method = "ward.D2") %>% 
+  as.dendrogram() %>%
+  color_branches(clusters = cell_type) %>%
+  set("labels", pData(es_preprocessed)$abreviated_name)
+plot(dend)
+
+ggd1 <- as.ggdend(dend)
+ggplot(ggd1)
+
+dend2 <- t(expr_onek) %>% 
+  scale() %>% 
+  dist() %>% 
+  hclust(method = "ward.D2") %>% 
+  as.dendrogram() %>%
+  color_branches(clusters = cell_type) %>%
+  set("labels", rownames(pData(es_preprocessed)))
+plot(dend2)
+
+ggd2 <- as.ggdend(dend2)
+ggplot(ggd2)
+
+# suggested pdf size 36"w x 30"h
+```
+
+```{r}
+# subset the data to remove the CD8 naive group (cannot be separated from CD8 T-effector cells) and the out-of-place T-regs enveloped by neutrophils
+# done by hand in excel spreadsheet for masterlist
+# so now it shows up at the start of the notebook... time travel
+pheno_data_subset <- masterlist %>%
+  dplyr::filter(!is.na(cell_type)) %>%
+  print()
+
+keep_cases <- pheno_data_subset %>%
+  pull(sample_id)
+dim(expr_norm)
+expr_norm_subset <- expr_norm[, keep_cases]
+dim(expr_norm_subset)
+```
+
+Now will remove blacklist genes
+```
+To define a set of feature genes for deconvolution, we first eliminate genes that are unsuitable for building model. Two methods were adopted.
+```
+
+```{r}
+dim(pheno_data_subset)
+
+expr_norm_subset_filtered_df <- expr_norm_subset %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_name") %>%
+  as_tibble() %>%
+  dplyr::filter(!gene_name %in% blacklist) %>%
+  print()
+expr_norm_subset_filtered <- expr_norm_subset_filtered_df[-1] %>%
+  as.matrix()
+rownames(expr_norm_subset_filtered) <- expr_norm_subset_filtered_df$gene_name
+
+expr_norm_subset_filtered[1:5, 1:5]
+dim(expr_norm_subset_filtered)
+```
+
+Filter genes by protein expression
+```{r}
+# tidy data
+edata_tbl <- expr_norm_subset_filtered %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_name") %>%
+  as_tibble() %>%
+  gather(key = "sample_id", value = "intensity", -gene_name) %>%
+  group_by(sample_id)
+
+# find "valley" in density plot for low value filtering
+dplot <- ggplot(edata_tbl, aes(intensity, color = sample_id)) +
+  geom_density() + 
+  theme(legend.position = "none") +
+  geom_vline(xintercept = 4)
+dplot
+
+# remove any probes without at least expression value 4 in at least 3 samples (smallest group)
+dataMatrix <- as.data.frame(expr_norm_subset_filtered)
+mat_stats <- data.frame(total = apply(dataMatrix, 1, function(x) sum(
+      x > 4, na.rm = TRUE)))
+keep = which(mat_stats$total >= 3) 
+
+dim(dataMatrix)
+selDataMatrix = dataMatrix[keep,] %>% as.matrix()
+dim(selDataMatrix)
+
+# gather list of selected probes
+geneList <- rownames(selDataMatrix)
+
+# get phenodata for groups
+dim(pheno_data_subset)
+```
+
+
+## Differential gene expression
+
+From:
+Chen SH, Kuo WY, Su SY, Chung WC, Ho JM, Lu HH, Lin CY. A gene profiling deconvolution approach to estimating immune cell composition from complex tissues. BMC Bioinformatics. 2018 May 8;19(Suppl 4):154. doi: 10.1186/s12859-018-2069-6. PMID: 29745829; PMCID: PMC5998872.
+
+```
+To select genes that can be the representative features of a cell type, we run the statistical analysis between each two immune cell type pairs. Firstly, the differentially expressed genes (DEGs) are detected using two-sided unequal variance T-test with a significant criterion in q-value <0.3. Secondly, we sort the DEGs of each comparing pair by the absolute value of log fold change of gene expression level in descending order. Third, a top G (G=5 to 100) ranked DEGs are selected from each pair to build a union set of a signature gene list (top G signature gene list) and to derive top G signature matrix, the expression profiles for each top G signature gene list. Condition number [15] which is associated with the linear equation is introduced to define the choice of G and calculated with “kappa” function in R.
+```
+
+Development of LM22 from CIBERSORT paper:
+
+Newman AM, Liu CL, Green MR, Gentles AJ, Feng W, Xu Y, Hoang CD, Diehn M, Alizadeh AA. Robust enumeration of cell subsets from tissue expression profiles. Nat Methods. 2015 May;12(5):453-7. doi: 10.1038/nmeth.3337. Epub 2015 Mar 30. PMID: 25822800; PMCID: PMC4739640.
+```
+We obtained GEP data from the public domain for 22 leukocyte subsets profiled on the HGU133A platform (Supplementary Table 1). Probesets were preprocessed as described above. Significantly differentially expressed genes between each population and all other populations were identified using a two-sided unequal variance t-test. Genes with a q-value < 0.3 (false discovery rate29) were considered significant.
+
+For each leukocyte subset, significant genes were ordered by decreasing fold change compared to other cell subsets, and the top G marker genes from each cell subset were combined into a signature matrix BG. We iterated G from 50 to 200 across all subsets, and retained the signature matrix with the lowest condition number (condition number = 11.4; G = 102; n = 547 distinct genes; Supplementary Table 1).
+
+To prevent genes expressed on non-hematopoietic cell types from confounding deconvolution results, we also used two gene filtration strategies. First, we identified genes with enriched expression in non-hematopoietic cells or tissues using the Gene Enrichment Profiler, an online compendium of diverse cells and tissues profiled on HGU133A (http://xavierlab2.mgh.harvard.edu/EnrichmentProfiler/)30. Gene Enrichment Profiler calculates an enrichment score (ES) for a given gene in a given cell or tissue type based on the sum of linear model coefficients from all pairwise comparisons of that gene with other samples. For each gene and cell or tissue type with ES > 0, we determined the fraction of non-hematopoietic cell or tissue samples in the Gene Enrichment Profiler database, and excluded genes from the signature matrix with a non-hematopoietic fraction >0.05. As a second filtration step, we omitted all genes from further analysis with a mean log2 expression level ≥7 in all non-hematopoietic cancer cell lines profiled in the Cancer Cell Line Encyclopedia (CCLE) (pre-normalized gene expression data were extracted from CCLE_Expression_Entrez_2012-09-29.txt, downloaded from the Broad Institute). We termed the final signature matrix ‘LM22’.
+```
+
+Summary of plan:
+
+*Step 1:* Get DEGs of each cluster compaired pairwise to others using limma. Select only those genes with adj.P.Val > 0.3 for each comparison.
+*Step 1b:* Apply blacklist and remove housekeeping and cancer genes from list
+
+*Step 2:* Sort each comparison's ttable by logFC in descending order
+
+*Step 3:*. For each G value from 25-200, make an vector of the top G genes from each comparison. Filter the expression matrix for only those genes and create a list of 95 expression matrices (one for each value of G). Calculate the condition number for each expression matrix using the `kappa` function and choose the one with the lowest condition number. This will be the signature gene list.
+*Step 3b:* Create the signature gene matrix by averaging columns by each cluster and filtering rows by the signature gene list.
+
+#### Step 1 and 2
+
+```{r}
+# set up design matrix
+rnames <- rownames(pheno_data_subset)
+groups <- as.factor(pheno_data_subset$cell_type)
+batch <- as.factor(pheno_data_subset$platform_code)
+design <- model.matrix(~0 + groups)
+colnames(design) <- gsub("groups", "", colnames(design))
+rownames(design) <- rnames
+head(design)
+
+# make contrasts
+unique_groups <- as.character(unique(groups))
+unique_groups
+
+# get permutations
+conts <- as.data.frame(permutations(n = length(unique_groups), r = 2, v = unique_groups)) %>%
+  mutate(cont = paste0(V1, "-", V2)) %>%
+  pull(cont)
+conts
+  
+# define contrasts
+contr.matrix <- makeContrasts(contrasts = conts, levels = design)
+contr.matrix[1:5, 1:5]
+dim(contr.matrix)
+
+# fit linear models
+fit <- lmFit(selDataMatrix, design)
+fit2 <- contrasts.fit(fit, contr.matrix)
+fit2 <- eBayes(fit2)
+
+# make a list from to length of conts
+numlist <- as.list(seq(1, length(conts)))
+
+# define a function to get toptables and combine in a list
+toptabler <- function(numlist, fit){
+  topTable(fit2, coef = numlist, 
+           adjust.method = "BH",
+           sort.by = "none",
+           number = Inf)
+}
+
+# iterate function over number list
+ttables <- map(numlist, toptabler)
+head(ttables[[1]])
+
+# define a funtion to get selected columns from toptables
+maketables <- function(ttable_list){
+  ttable_list %>%
+    rownames_to_column(var = "gene_name") %>%
+    dplyr::select(gene_name, logFC, adj.P.Val) %>%
+    as_tibble() %>%
+    # select only those with adj.P.Val < 0.3
+    dplyr::filter(adj.P.Val < 0.3) %>%
+    # filter against the blacklist
+    dplyr::filter(!gene_name %in% blacklist) %>%
+    # sort by logFC
+    arrange(desc(logFC)) %>%
+    # remove any unnamed genes
+    dplyr::filter(!is.na(gene_name)) %>%
+    # remove duplicates
+    distinct(gene_name, .keep_all = TRUE)
+}
+
+# apply function to list of toptables
+tables <- map(ttables, maketables)
+tables[[1]]
+names(tables) <- conts
+head(tables)
+# convert to nested dataframe
+table_df <- enframe(tables)
+table_df
+```
+
+#### Step 3
+
+```{r}
+# use for loop to slice dataframe column 195 times from 5:200
+for (g in 5:200) {
+  new_col_name <- paste0("gvalue_", g)
+  table_df <- table_df %>%
+    mutate(!!sym(new_col_name) := map(value, 
+                                      function(x){dplyr::slice(x, 1:{g})}))
+}
+
+# get just the g columns and get the gene names
+# convert to list
+g_genes <- table_df %>%
+  dplyr::select(starts_with("gvalue_")) %>%
+  mutate_all(~map(., function(x){dplyr::select(x, gene_name)})) %>%
+  mutate_all(~map(., unlist)) %>%
+  map(., unlist) 
+str(g_genes)
+
+# get unique values only
+g_genes_union <- map(g_genes, unique)
+str(g_genes_union)
+```
+
+#### Step 3b
+
+Format expression matrix
+```{r}
+# average expression by cell type
+cell_type_lookup <- pheno_data_subset[, c("sample_id", "cell_type")]
+
+exp_tbl <- selDataMatrix %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  left_join(cell_type_lookup) %>%
+  dplyr::select(cell_type, everything(), -sample_id) %>%
+  print()
+
+cluster_matrix <- exp_tbl[-1] %>% as.matrix()
+cluster_matrix[1:5, 1:5]
+rownames(cluster_matrix) <- pull(exp_tbl, cell_type)
+cluster_matrix[1:5, 1:5]
+
+# collapse rownames by averaging expression for shared cluster assignment
+cluster_matrix <- avereps(cluster_matrix) %>% t()
+cluster_matrix[1:5, 1:5]
+dim(cluster_matrix)
+
+# convert to df for downstream analysis
+cluster_exp_df <- cluster_matrix %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_name") %>%
+  as_tibble() %>%
+  print()
+```
+
+Calculate the condition number for each expression matrix and create the signature matrix
+```{r}
+# create a list of expression matrices and filter by union genes
+exp_subsetter <- function(gene_vect){
+  cluster_exp_df %>%
+    dplyr::filter(gene_name %in% gene_vect) %>%
+    as.data.frame() %>%
+    column_to_rownames(var = "gene_name") %>%
+    as.matrix()
+}
+
+g_expr_mat_list <- map(g_genes_union, exp_subsetter)
+map(g_expr_mat_list, dim)
+str(g_expr_mat_list)
+
+condition_numbers <- map_dbl(g_expr_mat_list, kappa) %>% 
+  enframe() %>%
+  mutate(gval = gsub("gvalue_", "", name)) %>%
+  mutate(gval = as.numeric(gval)) %>%
+  print()
+
+ggplot(data = condition_numbers, aes(x = gval, y = value)) +
+  geom_point() +
+  geom_line() +
+  ylab("Condition Number") +
+  xlab("G-value")
+
+condition_numbers %>% arrange(value) %>% print()
+# condition number for gvalue 22 is a significant local minimum and will be chosen 
+
+sig_matrix <- g_expr_mat_list[["gvalue_22"]]
+
+# get descriptive statistics
+# G = 22
+dim(sig_matrix)
+# 964 genes
+kappa(sig_matrix)
+```
+
+#### Compare signature matrix to established gene sets
+
+Read in LM22 from: https://cibersortx.stanford.edu/download.php
+
+```{r}
+lm22 <- read_delim("~/tcga_macs/data/LM22.txt", "\t", 
+    escape_double = FALSE, trim_ws = TRUE)
+
+lm22_genes <- pull(lm22, `Gene symbol`)
+dlbcl_sig_matrix_genes <- rownames(sig_matrix)
+
+venn.diagram(x = list(lm22_genes, dlbcl_sig_matrix_genes),
+             category.names = c("LM22 Signature Genes" , 
+                                "DLBCL Custom \nSignature Genes"),
+             filename = "output/venn.png",
+             output = TRUE ,
+             imagetype = "png",
+             height = 600, 
+          width = 600, 
+          resolution = 300,
+          compression = "lzw",
+          lwd = 1.5,
+          col = c("red", "blue"),
+          fill = c(alpha("red", 0.3), alpha("blue", 0.3)),
+          cex = 1.1,
+          fontfamily = "sans",
+          cat.cex = 0.5,
+          cat.default.pos = "outer",
+          cat.pos = c(-5, 5),
+          cat.dist = c(0.055, 0.09),
+          cat.fontfamily = "sans",
+          cat.col = c("red", "blue"))
+
+```
+
+#### Format signature matrix for CIBERTSORTx
+
+```
+Reference sample file format:
+Tab-delimited tabular input format (.txt) with no double quotations and no missing entries. 
+
+Gene symbols in column 1; Reference cell phenotype labels in row 1.
+
+Cells with the same phenotype should have the same phenotypic label.
+
+Remove any non-assigned cells before uploading the file to CIBERSORTx.
+
+CIBERSORTx will automatically normalize the input data such that the sum of all normalized reads are the same for each transcriptome. If a gene length-normalized expression matrix is provided (e.g., RPKM), then the signature matrix will be in TPM (transcripts per million). If a count matrix is provided, the signature matrix will be in CPM (counts per million). Regardless of the input, the signature matrix and mixture files should be represented in the same normalization space.
+
+Data should be in non-log space. Note: if maximum expression value is <50; CIBERSORTx will assume that data are in log space, and will anti-log all expression values by 2x.
+```
+
+```{r}
+# needs to be in linear, not log format
+# log2 values were generated from import from raw lumi data, along with RSN normalization
+# will anti-log the data to return to linear space
+# expression matrix filtered for protein expression above:
+expr_norm_subset[1:5, 1:5]
+linear_exp <- 2^(expr_norm_subset)
+linear_exp[1:5, 1:5]
+
+cell_type_lookup <- pheno_data_subset[, c("sample_id", "cell_type")]
+
+linear_exp_tbl <- linear_exp %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  left_join(cell_type_lookup) %>%
+  dplyr::select(cell_type, everything(), -sample_id) %>%
+  print()
+
+lin_cluster_matrix <- linear_exp_tbl[-1] %>% as.matrix()
+rownames(lin_cluster_matrix) <- pull(linear_exp_tbl, cell_type)
+lin_cluster_matrix[1:5, 1:5]
+# normalize matrix by cpm
+lin_cluster_cpm <- cpm(t(lin_cluster_matrix))
+lin_cluster_cpm[1:5, 1:5]
+# collapse rownames by averaging expression for shared cluster assignment
+lin_cluster_ave <- avereps(t(lin_cluster_cpm))
+lin_cluster_ave[1:5, 1:5]
+dim(lin_cluster_ave)
+lin_cluster_rot <- t(lin_cluster_ave)
+lin_cluster_rot[1:5, 1:5]
+dim(lin_cluster_rot)
+# filter for signature genes
+lin_cluster_df <- lin_cluster_rot %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "GeneSymbol") %>%
+  as_tibble() %>%
+  dplyr::filter(GeneSymbol %in% dlbcl_sig_matrix_genes) %>%
+  print()
+
+# read out for use in CIBERSORTx
+lin_cluster_df %>% write_tsv("output/dlbcl_final_signature_matrix.tsv")
+```
+
+
+## Create Reference File
+```
+The reference sample file is an input file required for custom signature genes file generation by CIBERSORT and consists of a table of the gene expression profiles of reference sample cell populations that will be compared to each other as defined in the phenotype classes file to generate the custom signature genes file.
+
+Reference file formatting requirements. Improperly formatted files may cause CIBERSORTx to fail to run.
+
+Tab-delimited tabular input format (.txt) with no double quotations and no missing entries.
+Gene symbols in column 1; Reference cell population labels in row 1. Replicate populations can have the same label.
+It is highly recommended that replicate population columns be placed adjacent to each other, as this will make it easier for you to create your phenotype classes file.
+Gene symbols should be of the same type as those used in the Mixture file. For example, if HUGO symbols were used in the Mixture file, HUGO symbols should also be used for the reference sample file. Non-HUGO symbols can be used so long as they are used in both the Mixture and reference sample files.
+We strongly recommend 50% or greater overlap in genes between the mixture and signature genes files. If the overlap is less than 50%, this may affect performance and accuracy.
+Data should be in non-log space. Note: if maximum expression value is <50; CIBERSORTx will assume that data are in log space, and will anti-log all expression values by 2x.
+
+```
+
+```{r}
+# needs to be in linear, not log format
+# log2 values were generated from import from raw lumi data, along with RSN normalization
+# will anti-log the data to return to linear space
+# expression matrix filtered for protein expression above:
+expr_norm_subset[1:5, 1:5]
+linear_exp <- 2^(expr_norm_subset)
+linear_exp[1:5, 1:5]
+
+cell_type_lookup <- pheno_data_subset[, c("sample_id", "cell_type")]
+
+linear_exp_tbl <- linear_exp %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  left_join(cell_type_lookup) %>%
+  dplyr::select(cell_type, everything(), -sample_id) %>%
+  print()
+
+lin_cluster_matrix <- linear_exp_tbl[-1] %>% as.matrix()
+rownames(lin_cluster_matrix) <- pull(linear_exp_tbl, cell_type)
+lin_cluster_matrix[1:5, 1:5]
+# normalize matrix by cpm
+lin_cluster_cpm <- cpm(t(lin_cluster_matrix))
+lin_cluster_cpm[1:5, 1:5]
+# collapse rownames by averaging expression for shared cluster assignment
+lin_cluster_ave <- avereps(t(lin_cluster_cpm))
+lin_cluster_ave[1:5, 1:5]
+dim(lin_cluster_ave)
+lin_cluster_rot <- t(lin_cluster_ave)
+lin_cluster_rot[1:5, 1:5]
+dim(lin_cluster_rot)
+line_cluster_df <- lin_cluster_rot %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "GeneSymbol") %>%
+  as_tibble() %>%
+  print()
+
+write_delim(line_cluster_df, "output/reference_matrix_file.tsv", delim = "\t")
+```
+
+## Prepare mixtures
+
+```
+Mixture file formatting requirements. Improperly formatted files may cause CIBERSORTx to fail to run.
+Gene symbols in column 1; Mixture labels in row 1
+Given the significant difference between counts (e.g., CPM) and gene length-normalized expression data (e.g., TPM) we recommend that the signature matrix and mixture files be represented in the same normalization space whenever possible.
+Data should be in non-log space. Note: if maximum expression value is less than 50; CIBERSORTx will assume that data are in log space, and will anti-log all expression values by 2x.
+CIBERSORTx will add an unique identifier to each redundant gene symbol, however we recommend that users remove redundancy prior to file upload.
+CIBERSORTx performs a feature selection and therefore typically does not use all genes in the signature matrix. It is generally ok if some genes are missing from the user’s mixture file. If less than 50% of signature matrix genes overlap, CIBERSORTx will issue a warning.
+```
+
+```{r}
+# read in dlbcl data
+dlbcl_nci_total <- read_csv("output/nci_dlbcl_unprocessed_counts.csv", trim_ws = TRUE)
+
+# read in conversion table for gene IDs
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
+
+
+# and change to hugo gene names
+renamer <- function(dataframe) {
+  df1 <- dataframe %>%
+    dplyr::rename(gene_id = gene) %>%
+    left_join(gencode_gtf) %>%
+    dplyr::filter(gene_type == "protein_coding") %>%
+    dplyr::select(gene_name, everything()) %>%
+    dplyr::select(-gene_id, -gene_type, -gene_status, -gene_id, -level, -havana_gene) %>%
+    as.data.frame()
+}
+
+# apply function to dlbcl
+hugo_nci_dlbcl <- renamer(dlbcl_nci_total)
+
+# look at the head
+hugo_nci_dlbcl[1:5, 1:5]
+
+# define a function to convert to cpm matrix
+# filter for protein coding genes only
+cpmer <- function(df){
+  df_mat <- df[-1] %>% as.matrix()
+  rownames(df_mat) <- df %>% pull(gene_name)
+  # average expression for repeated gene names
+  # convert to CPM
+  df_mat %>%
+    avereps() %>%
+    cpm()
+}
+
+# apply function to list
+cpm_nci_dlbcl <- cpmer(hugo_nci_dlbcl)
+
+cpm_nci_dlbcl[1:5, 1:5]
+
+# TMM normalization
+norm_factors <- calcNormFactors(cpm_nci_dlbcl, method = "TMM")
+summary(norm_factors)
+
+# convert expression matrix to dataframe
+cpm_nci_dlbcl_df <- as.data.frame(cpm_nci_dlbcl)
+
+# apply factor to each column
+total_cpm_norm_nci <- map2_dfc(cpm_nci_dlbcl_df, norm_factors, `*`)
+total_cpm_norm_nci <- as.data.frame(cpm_nci_dlbcl_df)
+total_cpm_norm_nci[1:5, 1:5]
+str(total_cpm_norm_nci)
+nci_dlbcl_mixture <- total_cpm_norm_nci %>%
+  rownames_to_column(var = "GeneSymbol") %>%
+  as_tibble() %>%
+  print()
+
+write_delim(nci_dlbcl_mixture, 
+            "output/nci_dlbcl_mixture.tsv",
+            delim = "\t",
+            col_names = TRUE)
+```
+
+Duke mixture file prepared in dukedata.Rmd
+```{r}
+
+
+
+
+```
+
+

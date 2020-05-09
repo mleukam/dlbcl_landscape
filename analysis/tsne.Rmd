@@ -8,6 +8,13 @@ editor_options:
 ---
 
 ## Setup
+```{r}
+rm(list = ls())
+```
+
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
 
 ```{r}
 library(caret)  

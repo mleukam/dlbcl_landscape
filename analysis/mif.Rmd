@@ -1,0 +1,441 @@
+---
+title: "mif"
+author: "mleukam"
+date: "2019-10-14"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+# First pass / trial
+JG31 (inflamed) vs JG33 (cold)
+
+## Setup
+
+Clear the workspace
+```{r}
+rm(list = ls())
+```
+
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+Load packages
+```{r}
+library(tidyverse)
+
+library(phenoptr)
+
+# plotting
+library(ggpubr)
+library(ggsci)
+library(gridExtra)
+```
+
+## Initial pass 
+
+Read in data
+```{r}
+# get lists of filenames for each sample
+# import summary datafiles for each sample
+# 10 MSI fields from each tumor
+
+file_text <- list.files(path = "data/DLBCL_histo/JG33_vs_JG31_first_pass_test/")
+
+file_list <- list(JK31_1 = file_text[1],
+                  JK31_2 = file_text[2],
+                  JK31_3 = file_text[3],
+                  JK31_4 = file_text[4],
+                  JK31_5 = file_text[5],
+                  JK31_6 = file_text[6],
+                  JK31_7 = file_text[7],
+                  JK31_8 = file_text[8],
+                  JK31_9 = file_text[9],
+                  JK31_10 = file_text[10],
+                  JK33_1 = file_text[11],
+                  JK33_2 = file_text[12],
+                  JK33_3 = file_text[13], 
+                  JK33_4 = file_text[14],
+                  JK33_5 = file_text[15],
+                  JK33_6 = file_text[16],
+                  JK33_7 = file_text[17],
+                  JK33_8 = file_text[18],
+                  JK33_9 = file_text[19],
+                  JK33_10 = file_text[20])
+
+# define function to read to a dataframe
+readin <- function(fname){
+  df <- read_tsv(paste0("data/DLBCL_histo/JG33_vs_JG31_first_pass_test/", fname))
+  df
+}
+
+# test function
+print(readin(file_text[1]))
+
+# read in files, clean up sample names
+df_source <- map(file_list, readin) %>%
+  tibble() %>%
+  unnest(cols = c(.)) %>%
+  dplyr::rename(sample_name = `Sample Name`) %>%
+  tidyr::separate(sample_name, into = c("date", "sample_id", "site"), sep = "_") %>%
+  tidyr::separate(site, into = c("site", NA), sep = "\\.") %>%
+  mutate(sample_id = as.factor(sample_id)) %>%
+  mutate(cluster = fct_recode(sample_id,
+                              "Cold" = "33-JK",
+                              "Inflamed" = "31-JK")) %>%
+  print()
+
+```
+
+Summarize results and plot
+```{r}
+df_mean <- df_source %>%
+  group_by(sample_id, Phenotype) %>%
+  summarize(ave_dens = mean(`Cell Density (per megapixel)`)) %>%
+  print()
+
+df_sum <- df_source %>%
+  group_by(Phenotype) %>%
+  summarize(tots = sum(`Total Cells`)) %>%
+  dplyr::filter(Phenotype %in% c("CD4", "CD8", "CD68", "PAX5")) %>%
+  summarize(tots_filt = sum(tots)) %>%
+  print()
+
+plot_data <- df_source %>%
+  dplyr::rename("density" = `Cell Density (per megapixel)`) %>%
+  dplyr::filter(Phenotype %in% c("CD4", "CD8", "CD68")) %>%
+  dplyr::select(sample_id, density, Phenotype, cluster) %>%
+  print()
+
+boxp <- ggplot(data = plot_data, aes(x = cluster, 
+                                     y = density,
+                                     fill = cluster)) +
+  geom_boxplot() +
+  stat_compare_means(aes(label = paste0("p = ", ..p.format..)), label.y = 1500) +
+  facet_wrap("Phenotype") +
+  theme_classic2() +
+  scale_fill_nejm() +
+  ylab("Cell Density (per megapixel)") +
+  xlab("") +
+  theme(legend.position = "none") + 
+  theme(axis.text = element_text(size = 14)) +
+  theme(strip.text.x = element_text(size = 14, 
+                                    color = "black", 
+                                    face = "bold.italic")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+boxp
+
+ggsave("output/ASH_ORAL_figures/mif.png", boxp, width = 3.8, height = 4, units = "in")
+```
+
+## 110119 Batch
+```{bash}
+# on cluster
+find /gpfs/data/kline-lab/DLBCL_mif_archive -type f -name "*.txt" | xargs cp -t /gpfs/data/kline-lab/DLBCL_mif_archive/110119_data/
+
+find /gpfs/data/kline-lab/DLBCL_mif_archive/110119_data/ -type f -name "*_summary.txt" | xargs mv -t /gpfs/data/kline-lab/DLBCL_mif_archive/110119_data/summary
+```
+
+```{r}
+# connect to network drive first
+file_text <- list.files(path = "/Volumes/kline-lab/DLBCL_mif_archive/110119_data/summary")
+
+metadata <- file_text %>%
+  enframe() %>%
+  dplyr::select(filename = value) %>%
+  separate(filename, into = c(NA, "sample", "position"), sep = "_", remove = FALSE) %>%
+  print()
+
+file_list <- metadata %>% 
+  mutate(filepath = paste0("/Volumes/kline-lab/DLBCL_mif_archive/110119_data/summary/",
+                           filename)) %>%
+  pull(filepath) %>% 
+  as.list() %>%
+  print()
+
+# function using phenoptr to read data file
+csd <- function(path){
+  read_cell_seg_data(path)
+}
+
+# read in as a list
+cell_seg_110119 <- map(file_list, csd) 
+
+# convert to dataframe
+cell_seg_df <- cell_seg_110119 %>%
+  enframe() %>%
+  mutate(name = metadata$filename) %>%
+  separate(name, into = c(NA, "sample", "position"), sep = "_") %>%
+  unnest(value) %>%
+  dplyr::select(sample, 
+                position, 
+                phenotype = Phenotype, 
+                total_cells = `Total Cells`, 
+                cell_density_per_mm = `Cell Density (per square mm)`, 
+                everything()) %>%
+  print()
+
+saveRDS(cell_seg_df, "output/uchi_deconvolution_batch_1.rds")
+
+# get cluster assignments
+uchi_pheno_clust <- readRDS("output/uchi_pheno_clust")
+pheno_clust <- uchi_pheno_clust %>%
+  separate(sample_id, into = c("initials", "number"), sep = 2) %>% 
+  mutate(sample = paste0(number, "-JK")) %>%
+  dplyr::select(sample, everything()) %>%
+  dplyr::select(-initials, -number) %>%
+  print()
+
+# merge in uchicago pheno data
+cell_seg <- cell_seg_df %>%
+  left_join(pheno_clust, by = "sample") %>%
+  dplyr::select(sample, position, phenotype, cluster, treatment_status, wes_available, tcr_seq_available, everything()) %>%
+  mutate(cluster = as.factor(cluster)) %>%
+  print()
+
+# which clusters are represented in the samples?
+cell_seg %>% dplyr::select(sample, cluster) %>% distinct(sample, cluster)
+```
+
+#### Plotting
+```{r}
+# boxplots
+# CTL
+cell_seg_ctl <- cell_seg %>%
+  dplyr::filter(phenotype %in% c("CTL_CD8+"))
+box_ctl <- ggplot(data = cell_seg_ctl,
+                    aes(y = cell_density_per_mm, x = cluster, group = cluster, fill = cluster)) +
+  geom_boxplot()
+box_ctl
+
+# M1
+cell_seg_m1 <- cell_seg %>%
+  dplyr::filter(phenotype %in% c("M1_CD68+/CD11c+"))
+box_m1 <- ggplot(data = cell_seg_m1,
+                    aes(y = cell_density_per_mm, x = cluster, group = cluster, fill = cluster)) +
+  geom_boxplot()
+box_m1
+
+# T helper cells
+cell_seg_tch <- cell_seg %>%
+  dplyr::filter(phenotype %in% c("Tch_CD4+/FoxP3-"))
+box_tch <- ggplot(data = cell_seg_tch,
+                    aes(y = cell_density_per_mm, x = cluster, group = cluster, fill = cluster)) +
+  geom_boxplot()
+box_tch
+
+# Treg_CD4+/FoxP3+ 
+cell_seg_treg <- cell_seg %>%
+  dplyr::filter(phenotype %in% c("Treg_CD4+/FoxP3+"))
+box_treg <- ggplot(data = cell_seg_treg,
+                    aes(y = cell_density_per_mm, x = cluster, group = cluster, fill = cluster)) +
+  geom_boxplot()
+box_treg
+```
+
+# Batch 1
+
+```{r}
+# must connect to shared lab drive first
+# get filenames and format
+files_batch1 <- list.files(path = "/Volumes/kline-lab/DLBCL_mif_archive/110119_data/") %>% 
+  enframe() %>%
+  dplyr::select(filename = value) %>%
+  dplyr::filter(grepl("90319_", filename)) %>%
+  separate(filename, into = c(NA, "sample_id", "field", NA, NA, NA), sep = "_", remove = FALSE) %>%
+  separate(sample_id, into = c("number", "initials")) %>%
+  mutate(sample_id = paste0(initials, number)) %>%
+  separate(field, into = c("xcoord", "ycoord"), sep = ",", remove = FALSE) %>%
+  mutate(xcoord = sub("\\[", "", xcoord)) %>%
+  mutate(ycoord = sub("\\]", "", ycoord)) %>%
+  mutate(field_id = paste0(sample_id, "_", xcoord, "_", ycoord)) %>%
+  mutate(filepath = paste0("/Volumes/kline-lab/DLBCL_mif_archive/110119_data/", filename)) %>%
+  dplyr::select(field_id, sample_id, xcoord, ycoord, field, filepath, filename) %>%
+  print()
+
+file_list_batch1 <- as.list(files_batch1$filepath)
+names(file_list_batch1) <- files_batch1$field_id
+head(file_list_batch1)
+str(file_list_batch1[["JK14_10075_38688"]])
+# now I have a named list of character vectors, each of which is a filename
+
+# test phenoptr cell seg data reading function
+read_cell_seg_data(file_list_batch1[[1]])
+
+# read in all files to a list of dataframes
+batch1_cell_seg_data <- map(file_list_batch1, read_cell_seg_data)
+batch1_cell_seg_data[[1]]
+# collapse to a single dataframe
+batch1_cell_seg_df <- bind_rows(batch1_cell_seg_data, .id = "column_label")
+# save for later use
+saveRDS(batch1_cell_seg_df, "output/batch1_cell_seg_df.rds")
+```
+
+Done on the cluster
+```{bash eval=FALSE, include=FALSE}
+ssh mleukam@gardner.cri.uchicago.edu
+cd /gpfs/data/kline-lab/DLBCL_mif_archive/
+find /gpfs/data/kline-lab/DLBCL_mif_archive/ -type f -iname "*.cell_seg_data_summary.txt" -exec cp -t /gpfs/data/kline-lab/DLBCL_mif_archive/110119_data/summary/ {} +
+```
+
+```{r}
+files_summary_batch1 <- list.files(path = "/Volumes/kline-lab/DLBCL_mif_archive/110119_data/summary/") %>% 
+  enframe() %>%
+  dplyr::select(filename = value) %>%
+  dplyr::filter(grepl("90319_", filename)) %>%
+  separate(filename, into = c(NA, "sample_id", "field", NA, NA, NA), sep = "_", remove = FALSE) %>%
+  separate(sample_id, into = c("number", "initials")) %>%
+  mutate(sample_id = paste0(initials, number)) %>%
+  separate(field, into = c("xcoord", "ycoord"), sep = ",", remove = FALSE) %>%
+  mutate(xcoord = sub("\\[", "", xcoord)) %>%
+  mutate(ycoord = sub("\\]", "", ycoord)) %>%
+  mutate(field_id = paste0(sample_id, "_", xcoord, "_", ycoord)) %>%
+  mutate(filepath = paste0("/Volumes/kline-lab/DLBCL_mif_archive/110119_data/summary/", filename)) %>%
+  dplyr::select(field_id, sample_id, xcoord, ycoord, field, filepath, filename) %>%
+  print()
+
+file_list_summary_batch1 <- as.list(files_summary_batch1$filepath)
+names(file_list_summary_batch1) <- files_summary_batch1$field_id
+head(file_list_summary_batch1)
+str(file_list_summary_batch1[["JK14_10075_38688"]])
+
+# test phenoptr cell seg data reading function
+read_cell_seg_data(file_list_summary_batch1[[1]])
+
+batch1_summary_seg_data <- map(file_list_summary_batch1, read_cell_seg_data)
+batch1_summary_seg_df <- bind_rows(batch1_cell_seg_data, .id = "column_label")
+
+saveRDS(batch1_summary_seg_df, "output/batch1_summary_cell_seg_df.rds")
+```   
+
+Assign mIF cases to clusters
+```{r}
+# read in mIF data
+# by field
+batch1_cell_seg_df <- readRDS("output/batch1_cell_seg_df.rds")
+
+# summarized by case
+batch1_summary_seg_df <- readRDS("output/batch1_summary_cell_seg_df.rds")
+
+# from notebook: visualizing_gsva_scores_5.Rmd
+batch1_cell_seg_df <- readRDS("output/batch1_cell_seg_df.rds")
+# read in computational cluster data
+dlbcl_hcpc <- readRDS("output/dlbcl_gsva5_4cluster_hcpc.rds")
+
+# from notebook: predictor.Rmd
+# read in cluster labels
+uchi_clust_assign <- read_csv("output/uchi_cluster_assignments.csv") %>%
+  mutate(sample_id = sub("JG", "JK", sample_id)) %>%
+  print(n = nrow(.))
+
+# add sample names to mIF data and group by sample id
+batch1_summary_df <- batch1_summary_seg_df %>%
+  separate(column_label, c("sample_id", NA, NA), sep = "_", remove = FALSE) %>%
+  left_join(uchi_clust_assign, by = "sample_id") %>%
+  dplyr::select(sample_id, cluster, everything()) %>%
+  print()
+
+batch1_cell_df <- batch1_cell_seg_df %>%
+  separate(column_label, c("sample_id", NA, NA), sep = "_", remove = FALSE) %>%
+  left_join(uchi_clust_assign, by = "sample_id") %>%
+  dplyr::select(sample_id, cluster, everything()) %>%
+  print()
+
+field_count_df <- batch1_cell_df %>% 
+  count(sample_id, column_label) %>%
+  group_by(sample_id) %>%
+  count() %>%
+  dplyr::rename(field_count = n) %>%
+  print()
+
+# add sample names to individual field mIF data
+batch1_field_df <- batch1_cell_seg_df %>%
+  separate(column_label, c("sample_id", NA, NA), sep = "_", remove = FALSE) %>%
+  left_join(uchi_clust_assign, by = "sample_id") %>%
+  left_join(field_count_df, by = "sample_id") %>%
+  dplyr::select(sample_id, cluster, field_count, everything()) %>%
+  print()
+
+field_number_df <- batch1_field_df %>% 
+  group_by(sample_id, column_label, Phenotype) %>%
+  summarize(cell_count = n()) %>%
+  left_join(uchi_clust_assign, by = "sample_id") %>%
+  print()
+
+# get a sense of the total
+density_df %>%
+  dplyr::filter(cluster %in% c("1", "2", "3", "4")) %>%
+  dplyr::filter(Phenotype != "Other") %>%
+  dplyr::filter(Phenotype != "All") %>%
+  ggplot(aes(x = as.factor(cluster), y = mean_density, fill = cluster)) +
+  geom_boxplot() +
+  facet_wrap(facets = "Phenotype")
+
+# separate boxplots
+density_df %>%
+  dplyr::filter(cluster %in% c("1", "2", "3", "4")) %>%
+  dplyr::filter(Phenotype == "CTL_CD8+") %>%
+  ggplot(aes(x = as.factor(cluster), y = mean_density, fill = cluster)) +
+  geom_boxplot()
+
+# compare to non-summarized data for each HPF
+summary(as.factor(field_number_df$Phenotype))
+
+# define a function for individual boxplots
+boxplotter <- function(phenotype){
+  myplot <- field_number_df %>% 
+    ungroup() %>%
+    dplyr::mutate(cluster = as.factor(cluster)) %>%
+    dplyr::filter(cluster %in% c("1", "2", "3", "4")) %>%
+    mutate(cluster = fct_drop(cluster)) %>%
+    dplyr::filter(Phenotype == phenotype) %>%
+    dplyr::mutate(cluster = fct_recode(cluster,
+                                     "Cold" = "1",
+                                     "Intermediate-T" = "2",
+                                     "Intermediate-M" = "3",
+                                     "Inflamed" = "4")) %>%
+    ggplot(aes(x = cluster, y = cell_count, fill = cluster)) +
+    geom_boxplot() +
+    scale_fill_d3() +
+    theme_classic2() +
+    ylab("Cells per HPF") +
+    xlab("") +
+    theme(axis.text.x = element_text(angle = 50, 
+                                     hjust = 1, 
+                                     size = 12)) +
+    ggtitle(phenotype) +
+    theme(title = element_text(size = 9, face = "bold"))
+  myplot
+  
+}
+
+# create a list of phenotypes
+ptype <- names(summary(as.factor(field_number_df$Phenotype)))[-1] %>%
+  as.list()
+names(ptype) <- names(summary(as.factor(field_number_df$Phenotype)))[-1]
+ptype
+
+# apply plotting function to phenotype list
+plotlist <- map(ptype, boxplotter)
+
+plotlist[[1]]
+
+# define function to get legend and save it
+get_legend <- function(myggplot){
+  tmp <- ggplot_gtable(ggplot_build(myggplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
+
+legend <- get_legend(plotlist[[1]])
+
+# remove legends from plotlist
+plot_noleg <- map(plotlist, function(plot){plot + theme(legend.position = "none")})
+
+# combined into a single plot
+grid.arrange(plot_noleg[[1]], plot_noleg[[2]], plot_noleg[[3]], plot_noleg[[4]], plot_noleg[[5]], plot_noleg[[6]], plot_noleg[[7]], legend, ncol = 4, nrow = 2)
+
+```

@@ -1,0 +1,112 @@
+---
+title: "table1"
+author: "mleukam"
+date: "2019-12-04"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+This is a workbook to analyze the clinical data for each immune cluster
+
+## Setup
+```{r}
+# clear workspace
+rm(list = ls())
+```
+
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+Load packages
+```{r}
+library(tidyverse)
+```
+
+Load data
+```{r}
+# read in cluster assignments from visualizing_gsva_scores_4.Rmd
+clust_assign <- readRDS("output/gsva_v4_4clust_assign.rds")
+
+# read in expression set
+combined_es <- readRDS("output/combined_es_gsva4_4cluster.rds")
+
+# get phenotype data
+pheno_data <- pData(combined_es) %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+# combine tables
+pheno_clust_data <- clust_assign %>%
+  left_join(pheno_data, by = "sample_id") %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  dplyr::select(-gsva2_clust)
+pheno_clust_data
+
+# confirm last column of gene set expression matrix
+pheno_clust_data[1:5,125:128]
+ncol(pheno_clust_data)
+# columns 1-125 are gene set expression matrix, columns 126-197 are phenotype data
+
+# select relevant pheno_data
+select_pheno <- pheno_clust_data %>%
+  dplyr::select(clust, source, age, gender, ipi_initial, ps_2plus, ann_arbor_stage_3plus, ipi_high) 
+# IPI
+IPI <- select_pheno %>%
+  mutate(ipi_initial = as.numeric(ipi_initial), 
+         ipi_hi = ifelse(ipi_initial > 3, "high", "not_high")) %>%
+  drop_na(ipi_hi) %>%
+  group_by(clust, ipi_hi) %>%
+  summarize(n = n()) %>%
+  spread(key = ipi_hi, value = n) %>%
+  ungroup() %>%
+  dplyr::select(-clust) %>%
+  as.matrix() %>%
+  fisher.test(simulate.p.value = TRUE) %>%
+  print()
+
+# age
+age <- select_pheno %>%
+  mutate(age = as.numeric(age), 
+         age_hi = ifelse(age > 65, "elderly", "not_elderly")) %>%
+  drop_na(age_hi) %>%
+  group_by(clust, age_hi) %>%
+  summarize(n = n()) %>%
+  spread(key = age_hi, value = n) %>%
+  ungroup() %>%
+  dplyr::select(-clust) %>%
+  as.matrix() %>%
+  fisher.test(simulate.p.value = TRUE) %>%
+  print()
+
+# sex
+sex <- select_pheno %>%
+  mutate(male = ifelse(gender == "M", "male", "female")) %>%
+  drop_na(male) %>%
+  group_by(clust, male) %>%
+  summarize(n = n()) %>%
+  spread(key = male, value = n) %>%
+  ungroup() %>%
+  dplyr::select(-clust) %>%
+  as.matrix() %>%
+  fisher.test(simulate.p.value = TRUE) %>%
+  print()
+
+# stage
+stage <- select_pheno %>%
+  mutate(ann_arbor_stage_3plus = as.numeric(ann_arbor_stage_3plus), 
+         stage_hi = ifelse(ann_arbor_stage_3plus == "1", "high",
+                           ifelse(ann_arbor_stage_3plus == "0", "not_high", NA))) %>%
+  drop_na(stage_hi) %>%
+  group_by(clust, stage_hi) %>%
+  summarize(n = n()) %>%
+  spread(key = stage_hi, value = n) %>%
+  ungroup() %>%
+  dplyr::select(-clust) %>%
+  as.matrix() %>%
+  fisher.test(simulate.p.value = TRUE) %>%
+  print()
+```

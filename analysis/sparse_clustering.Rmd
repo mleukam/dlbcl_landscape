@@ -9,11 +9,19 @@ editor_options:
 
 ## Setup
 
-Clear the workspace
 ```{r}
+# Clear the workspace
 rm(list = ls())
+```
 
-# store plotting parameters at startup for later reset
+
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+
+```{r}
+# store base R plotting parameters at startup for later reset
 .pardefault <- par(no.readonly = T)
 
 # set seed
@@ -33,10 +41,10 @@ library("jcolors")
 library("M3C")
 library("caTools")
 library("ggConvexHull")
-library(ggsci)
-library(ggpubr)
-library(viridis)
-library(Rtsne)
+library("ggsci")
+library("ggpubr")
+library("viridis")
+library("Rtsne")
 ```
 
 note: after using ggdark, need to restore defaults of fill/color with: 
@@ -114,6 +122,14 @@ print(names.lessoverlap)
 length(names.lessoverlap)
 # n = 121
 
+filt_gs <- enframe(gset_ids_complete_4) %>%
+  dplyr::rename(gs_name = name, genes = value) %>%
+  dplyr::filter(gs_name %in% names.lessoverlap) %>%
+  print()
+filt_gs_list <- as.list(filt_gs$genes)
+names(filt_gs_list) <- as.character(filt_gs$gs_name)
+head(filt_gs_list)
+  
 raw_score_matrix <- readRDS("output/dlbcl_total_immune_gset_v4_results.rds") %>%
   as.data.frame() %>%
   rownames_to_column(var = "gs_names")
@@ -131,8 +147,50 @@ dim(score_matrix)
   
 ```
 
+Get total number of genes
+```{r}
+# get a table of final genes in each gene set by filtered gene set name
+filt_genes <- enframe(gset_ids_complete_4) %>%
+  dplyr::rename(gs_name = name, genes = value) %>%
+  dplyr::filter(gs_name %in% names.handfiltered) %>%
+  dplyr::filter(!gs_name %in% gs_cut) %>%
+  print()
 
-Hierarchical sparse clustering: https://rdrr.io/cran/sparcl/man/HierarchicalSparseCluster.html
+# vector of all genes
+genes <- filt_genes %>%
+  pull(genes) %>%
+  as_vector()
+
+# get number of unique genes
+genes %>%
+  unique() %>%
+  length()
+
+# frequency table
+freq_tab <- filt_genes %>%
+  unnest() %>%
+  group_by(genes) %>%
+  count(genes) %>%
+  arrange(desc(n)) %>%
+  mutate(prop = n / 121) %>%
+  print()
+
+# mean frequency
+freq_tab %>% pull(n) %>% as.numeric() %>% mean()
+
+# get hugo symbols for genes
+# read in conversion table for gene IDs
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo") %>%
+  print()
+freq_tab_hugo <- freq_tab %>%
+  dplyr::rename(gene_id = genes) %>%
+  left_join(gencode_gtf) %>%
+  dplyr::select(gene_name, n, prop, gene_id) %>%
+  print()
+```
+
+
+# Hierarchical sparse clustering: https://rdrr.io/cran/sparcl/man/HierarchicalSparseCluster.html
 
 Manipulating an hclust object
 https://stat.ethz.ch/R-manual/R-patched/library/stats/html/hclust.html
@@ -201,8 +259,6 @@ fviz_dend(sparsehc$hc,
           rect_fill = FALSE,
           lower_rect = -0.0001)
 ```
-
-PCA using only the retained gene sets from sparse HC
 
 ```{r}
 # filter gene sets

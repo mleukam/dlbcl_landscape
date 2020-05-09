@@ -14,9 +14,12 @@ Clear the workspace
 rm(list = ls())
 ```
 
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 Load packages
 ```{r}
-library("tidyverse")
 library("factoextra")
 library("FactoMineR")
 library("cluster")
@@ -30,6 +33,7 @@ library("jcolors")
 library("ggdark")
 library("viridis")
 library("ggConvexHull")
+library("tidyverse")
 library("broom")
 ```
 
@@ -285,6 +289,7 @@ cortables <- rquery.cormat(t(gs_matrix), graphType = "heatmap")
 # reformat gene set correlation table and view
 corflat <- rquery.cormat(t(gs_matrix), type = "flatten", graph = FALSE)
 corflat_tbl <- corflat$r %>% as_tibble() %>% arrange(desc(cor)) %>% print(n = 30)
+
 # 22 gene sets 0.96 correlation and above. 
 removesets <- c("thor_module11_prolif_score", 
                 "thor_ifn_21978456",
@@ -429,6 +434,21 @@ fviz_cluster(dlbcl_hcpc,
   theme(legend.position = "none")
 
 #500 x 700
+
+# ASH ORAL plot
+clust_pca <- fviz_cluster(dlbcl_hcpc, 
+             geom = "point",
+             show.clust.cent = FALSE,  
+             main = "Immune Response Clusters",
+             pointshape = 19
+             ) + 
+  theme_classic2() +
+  xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  scale_fill_d3() +
+  scale_color_d3()
+
+ggsave("output/ASH_ORAL_figures/clust_pca.png", plot = clust_pca, height = 4, width = 6, units = "in")
 ```
 
 Compare cluster assignments at the individual level.
@@ -583,6 +603,8 @@ pdl1_pca1 <- fviz_pca_ind(dlbcl_pca,
                   aes(fill = pheno_clust_data$clust),
                   show.legend = FALSE,
                   color = "#76767666") +
+  xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
   ggtitle(mytitle)
 pdl1_pca1
 
@@ -611,6 +633,8 @@ pdl1_pca
 ## plot for abstract
 invert_geom_defaults()
 
+mytitle <- expression(paste(italic("PD-L1"), " amplified cases by cluster"))
+
 pdl1_pca2 <- fviz_pca_ind(dlbcl_pca,
              label = "none",
              habillage = pheno_clust_data$amp_or_not,
@@ -625,8 +649,12 @@ pdl1_pca2 <- fviz_pca_ind(dlbcl_pca,
                   aes(fill = pheno_clust_data$clust),
                   show.legend = FALSE,
                   color = "black") +
-  ggtitle("Gene set PCA: PDL1 high amp by cluster")
+  xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  ggtitle(mytitle)
 pdl1_pca2
+
+ggsave("output/ASH_ORAL_figures/pdl1.png", plot = pdl1_pca2, width = 6, height = 4, units = "in")
 
 # get counts by cluster
 table(pheno_clust_data$amp_or_not, pheno_clust_data$clust)
@@ -842,34 +870,30 @@ clust4_prop <- clust4 %>%
   mutate(clust = rep("4", nrow(.))) %>%
   print()
 
-coo_sum_prop <- coo_sum %>%
-  dplyr::rename(coo = abc_gcb_rna) %>%
-  left_join(clust1_prop, by = c("coo", "clust")) %>%
-  dplyr::select(-cold, -not_cold) %>%
-  left_join(clust2_prop, by = c("coo", "clust")) %>%
-  dplyr::select(-intermediate_t, -not_intermediate_t) %>%
-  left_join(clust3_prop, by = c("coo", "clust")) %>%
-  dplyr::select(-intermediate_m, -not_intermediate_m) %>%
-  left_join(clust4_prop, by = c("coo", "clust")) %>%
-  dplyr::select(-inflamed, -not_inflamed) %>%
-  mutate(proportion = coalesce(proportion.x, 
-                               proportion.y, 
-                               proportion.x.x, 
-                               proportion.y.y)) %>%
-  dplyr::select(-proportion.x, 
-                -proportion.y, 
-                -proportion.x.x, 
-                -proportion.y.y) %>%
-  mutate(percent = round((proportion * 100), 1)) %>%
+coo_totals <- coo_data %>%
+  dplyr::group_by(clust, abc_gcb_rna) %>%
+  summarize(n = n()) %>%
+  summarize(sum = sum(n)) %>%
+  print()
+
+coo_sum_prop <- coo_data %>%
+  dplyr::group_by(clust, abc_gcb_rna) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  left_join(coo_totals) %>%
+  mutate(proportion = n / sum) %>%
+  mutate(percent = round((proportion * 100), 0)) %>%
   mutate(percent = paste0(percent, "%")) %>%
   mutate(clust = as.factor(clust)) %>%
   mutate(clust = fct_recode(clust, "Cold" = "1",
                             "Intermediate-T" = "2",
                             "Intermediate-M" = "3",
                             "Inflamed" = "4")) %>%
+  mutate(percent_n = paste0("n = ", n, "\n", "(", percent, ")")) %>%
+  dplyr::rename(coo = abc_gcb_rna) %>%
   print()
 
-# make data frae containing all p-values
+# make data frame containing all p-values
 pvals <- bind_rows(clust1_p, clust2_p, clust3_p, clust4_p) %>%
   bind_cols(clust = c("Cold", "Intermediate-T", "Intermediate-M", "Inflamed")) %>%
   mutate(p.value = round(p.value, 3)) %>%
@@ -889,7 +913,10 @@ coo_bar <- ggplot(coo_sum_prop,
        fill = "Cell of Origin",
        x = "",
        y = "Number of cases") +
-  geom_text(aes(label = percent), vjust = 2, color = "white") +
+  geom_text(aes(label = percent_n), 
+            vjust = 1.2, 
+            color = "white", 
+            size = 3.3) +
   geom_text(data = pvals, 
             aes(y = 185, 
                 x = 1, 
@@ -916,6 +943,32 @@ coo_bar <- ggplot(coo_sum,
   
 coo_bar
 
+invert_geom_defaults()
+
+# manual color assignment
+mypal = pal_d3(alpha = 1)(4)
+names(mypal) <- c("Cold", "Intermediate-T", "Intermediate-M", "Inflamed")
+
+# facet by cell of origin
+coo_bar2 <- ggplot(coo_sum_prop, 
+                  aes(x = clust,
+                      y = proportion,
+                      fill = clust)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ coo) +
+  theme_classic2() +
+  scale_color_manual(values = mypal) +
+  scale_fill_manual(values = mypal) +
+  labs(title = "Cell of origin subtypes are evenly distributed in all immune clusters",
+       fill = "Cluster",
+       x = "",
+       y = "Proportion of each cluster") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 14)) +
+  theme(strip.text.x = element_text(size = 14, color = "black", face = "bold.italic"
+        )) +
+  theme(legend.position = "none")
+  
+ggsave("output/ASH_ORAL_figures/coo.png", coo_bar2, height = 4.5, width = 7, units = "in")
 ```
 
 ## Survival analysis per cluster assignment
@@ -949,11 +1002,12 @@ plot1 <- ggsurvplot(fit1,
                     palette = "d3",
                     tables.height = 0.3,
                     ggtheme = theme_classic2(),
-                    title = "Overall survival by immune response cluster",
+                    title = "Overall survival with R-CHOP by immune response cluster",
                     legend.title = "Cluster", 
-                    legend = "right",
+                    legend = "none",
                     tables.y.text = FALSE,
-                    ylab = "Time in years")
+                    ylab = "Proportion alive",
+                    xlab = "Time in years")
 plot1
 
 fit2 <- survfit(surv_clust ~ clust + abc_gcb_rna, 
