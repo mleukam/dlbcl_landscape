@@ -11,9 +11,9 @@
 
 <meta name="author" content="mleukam" />
 
-<meta name="date" content="2019-06-14" />
+<meta name="date" content="2019-07-30" />
 
-<title>enrichment</title>
+<title>Figure for ASH Abstract</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -377,9 +377,9 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">enrichment</h1>
+<h1 class="title toc-ignore">Figure for ASH Abstract</h1>
 <h4 class="author">mleukam</h4>
-<h4 class="date">2019-06-14</h4>
+<h4 class="date">2019-07-30</h4>
 
 </div>
 
@@ -701,7 +701,7 @@ Message
 Rmd
 </td>
 <td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/e2b04164414d529fe354c85445de58e0329486c7/analysis/enrichment.Rmd" target="_blank">e2b0416</a>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/e2b04164414d529fe354c85445de58e0329486c7/analysis/abstract_figure.Rmd" target="_blank">e2b0416</a>
 </td>
 <td>
 mleukam
@@ -718,7 +718,7 @@ wflow_publish(c(“analysis/about.Rmd”, “analysis/abstract_figure.Rmd”,
 Rmd
 </td>
 <td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/a78a45cffe9d483012683d912ca3ab8f19d2000b/analysis/enrichment.Rmd" target="_blank">a78a45c</a>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/a78a45cffe9d483012683d912ca3ab8f19d2000b/analysis/abstract_figure.Rmd" target="_blank">a78a45c</a>
 </td>
 <td>
 mleukam
@@ -730,40 +730,6 @@ mleukam
 archives dump from local machine - near final gsva v4 cluster model
 </td>
 </tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/c7b68abef1c3acf9ef195c0584331d9253686ec7/docs/enrichment.html" target="_blank">c7b68ab</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-30
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/f77ef41f45889002d270f64d1e8be78d909db7b8/analysis/enrichment.Rmd" target="_blank">f77ef41</a>
-</td>
-<td>
-mleukam
-</td>
-<td>
-2019-06-30
-</td>
-<td>
-minor updates, getting ready for second attempt at GSVA
-</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -771,227 +737,326 @@ minor updates, getting ready for second attempt at GSVA
 </div>
 </div>
 </div>
+<p>Design of figure for ASH abstract</p>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
-<p>Clear workspace</p>
+<p>Clear the workspace</p>
 <pre class="r"><code>rm(list = ls())</code></pre>
 <pre class="r"><code>knitr::opts_chunk$set(eval = FALSE)</code></pre>
 <p>Load packages</p>
-<pre class="r"><code>library(&quot;tidyverse&quot;)
-library(&quot;GSVA&quot;)
-library(&quot;msigdbr&quot;)
-library(&quot;GSA&quot;)
-library(&quot;limma&quot;)
-library(&quot;EnhancedVolcano&quot;)</code></pre>
-<p>Read in data</p>
-<pre class="r"><code># expression matrix from preprocessing_count_data.Rmd
-total_counts &lt;- read_csv(&quot;output/dlbcl_expr_matrix.csv&quot;)
+<pre class="r"><code># core packages
+library(&quot;tidyverse&quot;)
 
-rownames &lt;- total_counts %&gt;% pull(gene)
-expr_matrix &lt;- total_counts %&gt;%
-  dplyr::select(-gene) %&gt;%
-  as.matrix()
-rownames(expr_matrix) &lt;- rownames
+# analysis
+library(FactoMineR)
 
-expr_matrix[1:5, 1:5]
-dim(expr_matrix)
+# core imaging packages
+library(&quot;ggsci&quot;)
+library(&quot;ggpubr&quot;)
+library(&quot;viridis&quot;)
+library(&quot;RColorBrewer&quot;)
+# library(&quot;ggdark&quot;)
 
-# gene sets from TCGA macrophage experiment
-gset &lt;- readRDS(&quot;data/gset_ids_complete.rds&quot;)
-str(gset)
+# specific imaging packages
+library(&quot;ggConvexHull&quot;)
+library(&quot;factoextra&quot;)</code></pre>
+</div>
+<div id="gene-expression-scores-on-cluster-map" class="section level2">
+<h2>Gene expression scores on cluster map</h2>
+<p>Load data</p>
+<pre class="r"><code>tpm_cyt_es &lt;- readRDS(&quot;output/tpm_cyt_expressionset.rds&quot;)
+pheno_data &lt;- pData(tpm_cyt_es)
+tpm_matrix &lt;- exprs(tpm_cyt_es)</code></pre>
+<pre class="r"><code># plot cytotoxic score on combined GSVA PCA plot
+dlbcl_pca &lt;- PCA(pheno_data[, 2:126], graph = FALSE)
 
-# clean up structure and names
-# drop downregulated genes for now
-upreg &lt;- gset[1:7]
-downreg &lt;- gset[8:14]
-t &lt;- gset[15]
-mac_and_t_gset &lt;- c(upreg, t)
-str(mac_and_t_gset)
-names(mac_and_t_gset) &lt;- (c(&quot;uchi_macrophage_cluster_1&quot;, &quot;uchi_macrophage_cluster_2&quot;, &quot;uchi_macrophage_cluster_3&quot;, &quot;uchi_macrophage_cluster_4&quot;, &quot;uchi_macrophage_cluster_5&quot;, &quot;uchi_macrophage_cluster_6&quot;, &quot;uchi_macrophage_cluster_7&quot;, &quot;uchi_t_cell_inflammation&quot;))
-str(mac_and_t_gset)
+# variables in each direction
+fviz_pca_var(dlbcl_pca)
+fviz_contrib(dlbcl_pca, choice = &quot;var&quot;, axes = 1)
+fviz_contrib(dlbcl_pca, choice = &quot;var&quot;, axes = 2)
+ggsave(&quot;output/var_contribution_axis2.pdf&quot;, plot = last_plot(), width = 22, height = 7, units = &quot;in&quot;)
 
-# Read in lookup table for features, gencode v22 (used by GDC to label features)
-gencode_gtf &lt;- read_tsv(&quot;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&quot;)</code></pre>
-<p>Download additional gene sets <a href="https://cran.r-project.org/web/packages/msigdbr/vignettes/msigdbr-intro.html" class="uri">https://cran.r-project.org/web/packages/msigdbr/vignettes/msigdbr-intro.html</a></p>
-<pre class="r"><code># use msigdbr to retreive human gene sets from MSigDB
-m_df = msigdbr(species = &quot;Homo sapiens&quot;)
+# CYT score
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = log(pheno_data$CYT),
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;CYT score\n(log scale)&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 1) +
+  labs(title = &quot;CYT score by cluster&quot;, subtitle = &quot;Gene set expression PCA&quot;) +
+  scale_color_viridis()
 
-# review subcategories
-summary(as.factor(m_df$gs_subcat))</code></pre>
-<div id="msigdb-gene-sets" class="section level4">
-<h4>MSigDB Gene Sets</h4>
-<p>Searched MSigDB website for C2 curated human gene sets unambiguously assocaited with immune function</p>
-<p><a href="http://software.broadinstitute.org/gsea/msigdb/search.jsp" class="uri">http://software.broadinstitute.org/gsea/msigdb/search.jsp</a></p>
-<pre class="r"><code># read in GMT file as a set of lists
-c2_immune_gsets &lt;- GSA.read.gmt(&quot;data/c2_human_immune_genesets.gmt&quot;)
+# Plot for ASH presentation, no cluster lines
+cyt_pca &lt;- fviz_pca_ind(dlbcl_pca, 
+             col.ind = log(pheno_data$CYT),
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;CYT score\n(log scale)&quot;) +
+  labs(title = &quot;Cytolytic activity score&quot;) +
+  xlab(&quot;PC1 (44.1% of variance)&quot;) +
+  ylab(&quot;PC2 (8.8% of variance)&quot;) +
+  scale_color_viridis()
 
-# get names of gene sets
-gsetnames &lt;- c2_immune_gsets$geneset.names
+ggsave(&quot;output/ASH_ORAL_figures/cyt_pca.png&quot;, plot = cyt_pca, height = 4, width = 6, units = &quot;in&quot;)
 
-# select gene sets from msigdbr-retreived gene list with vector of gene set names
-my_gsets &lt;- m_df %&gt;%
-  dplyr::filter(gs_name %in% gsetnames)
-summary(as.factor(my_gsets$gs_name))
-
-# convert gene symbols to gencode v22 names
-gencode_table &lt;- gencode_gtf %&gt;%
-  dplyr::select(gene_id, gene_name) %&gt;%
-  dplyr::rename(human_gene_symbol = gene_name)
-my_gsets_w_id &lt;- my_gsets %&gt;%
-  left_join(gencode_table)
-
-# how many failed to map?
-x &lt;- my_gsets_w_id$gene_id
-x[is.na(x)]
-length(x[!is.na(x)]) / nrow(my_gsets_w_id)
-# just over 96% success rate - acceptable 
-# which gene sets have the most missing genes?
-missing_genes &lt;- my_gsets_w_id %&gt;% group_by(gs_name) %&gt;% summarise(na_count = sum(is.na(gene_id))) %&gt;% arrange(desc(na_count))
-# which gene sets have the highest percentage of missing genes?
-totals &lt;- my_gsets_w_id %&gt;% group_by(gs_name) %&gt;% tally() %&gt;% rename(total = n)
-gs_table &lt;- totals %&gt;% 
-  left_join(missing_genes) %&gt;% 
-  mutate(percentage = na_count / total) %&gt;%
-  arrange(desc(percentage)) %&gt;%
+##
+mean_table &lt;- pheno_data %&gt;%
+  dplyr::select(CYT, clust) %&gt;%
+  group_by(clust) %&gt;%
+  summarize(mean = mean(CYT)) %&gt;% 
   print()
-# based on these findings, I won&#39;t remove any gene sets from further consideration
-my_gsets_cleaned &lt;- my_gsets_w_id %&gt;%
-  drop_na(gene_id)
 
-# make a list of gene id vectors for each gene set
-gsets_msig &lt;- my_gsets_cleaned %&gt;%
-  dplyr::select(gs_name, gene_id) %&gt;%
-  nest(key = &quot;gene_id&quot;) %&gt;%
-  print()
-gsets_msig_list &lt;- map(gsets_msig, as.list)
-gsets_vectors &lt;- gsets_msig_list$data %&gt;%
-  map(pull)
-names(gsets_vectors) &lt;- gsets_msig %&gt;% pull(gs_name)
-gsets_vectors
-str(gsets_vectors)</code></pre>
-</div>
-<div id="combine-gene-sets-save-for-outside-use" class="section level4">
-<h4>Combine Gene Sets, save for outside use</h4>
-<pre class="r"><code>total_immune_gset_v1 &lt;- c(mac_and_t_gset, gsets_vectors)
-str(total_immune_gset_v1)
-saveRDS(total_immune_gset_v1, &quot;output/total_immune_gset_v1.rds&quot;)</code></pre>
-</div>
-</div>
-<div id="gsva-scores-for-macrophage-and-t-cell-inflamed-gene-sets" class="section level2">
-<h2>GSVA scores for macrophage and T-cell inflamed gene sets</h2>
-<p>Run on cluster using scripts:</p>
-<ul>
-<li>run_gsva1.pbs</li>
-<li>gsva1.sh</li>
-<li>gsva1.r</li>
-</ul>
-<p>See code folder in GitHub repository for source code for scripts.</p>
-</div>
-<div id="limma-for-gene-set-enrichment" class="section level2">
-<h2>Limma for Gene Set Enrichment</h2>
-<pre class="r"><code># read in data from cluster
-nci_dlbcl_es &lt;- readRDS(&quot;data/dlbcl_total_immune_gset_v1_results.rds&quot;)
-
-# read in pheno_data from previous notebook
-pheno_data &lt;- read_csv(&quot;output/nci_dlbcl_annotation.csv&quot;)</code></pre>
-<pre class="r"><code>nci_dlbcl_tbl &lt;- nci_dlbcl_es %&gt;%
-  as.data.frame() %&gt;%
-  rownames_to_column(var = &quot;gene_set&quot;) %&gt;%
+sig &lt;- pheno_data %&gt;%
+  dplyr::select(CYT, clust) %&gt;%
   as_tibble() %&gt;%
-  print()</code></pre>
-<p>Set up groups for contrast matrix</p>
-<pre class="r"><code># Need design matrix that specifies groups
-samples &lt;- colnames(nci_dlbcl_tbl)
+  compare_means(CYT ~ clust, ., ) %&gt;%
+  print()
 
-# remove &quot;gene_set&quot; from vector
-samples &lt;- samples[-c(1)]
-sample_tibble &lt;- enframe(samples) %&gt;%
-  dplyr::select(samples = value)
+# plot CD4 naive score on combined GSVA PCA plot
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data$beijing_cd4_c1_ccr7_gs,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;CD4/C1/CCR7\nGSVA score&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 1) +
+  labs(title = &quot;CD4+ T-cell score&quot;, 
+       subtitle = &quot;Gene set expression PCA&quot;) +
+  scale_color_viridis()
 
-# pull out sample names from pheno_data
-highamp_samp &lt;- pheno_data %&gt;%
-  dplyr::filter(pdl1_status == &quot;high_amplified&quot;) %&gt;%
-  pull(case_submitter_id)
+# Plot for ASH presentation, no cluster lines
+cd4_pca &lt;- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data$beijing_cd4_c1_ccr7_gs,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;GSVA\nscore&quot;) +
+  labs(title = &quot;CD4+ T-cell single cell gene set expression&quot;) +
+  xlab(&quot;PC1 (44.1% of variance)&quot;) +
+  ylab(&quot;PC2 (8.8% of variance)&quot;) +
+  scale_color_viridis()
 
-nonamp_samp &lt;- pheno_data %&gt;%
-  filter(pdl1_status == &quot;non-amplified&quot;) %&gt;%
-  pull(case_submitter_id)
+ggsave(&quot;output/ASH_ORAL_figures/cd4_pca.png&quot;, plot = cd4_pca, height = 4, width = 6, units = &quot;in&quot;)
 
-pdl1_table &lt;- pheno_data %&gt;% 
-  dplyr::select(case_submitter_id, pdl1_status) %&gt;%
-  mutate(pdl1_status = ifelse(pdl1_status == &quot;non-amplified&quot;, 
-                              &quot;non_amplified&quot;, 
-                              pdl1_status)) %&gt;%
-  mutate(pdl1_status = replace_na(pdl1_status, &quot;not_assesed&quot;)) %&gt;%
-  dplyr::rename(samples = case_submitter_id)
-summary(as.factor(pdl1_table$pdl1_status))</code></pre>
-<p>The order of samples for the design matrix and the fpkm matrix have to be identical</p>
-<pre class="r"><code># pull column names in order and join group assignment by sample name
-sampleorder &lt;- colnames(nci_dlbcl_es) %&gt;% 
-  enframe() %&gt;% 
-  dplyr::rename(samples = value)
-pdl1_groups_sorted &lt;- left_join(sampleorder, pdl1_table)
-pdl1_groups_sorted$pdl1_status &lt;- replace_na(pdl1_groups_sorted$pdl1_status, 
-                                             &quot;not_assessed&quot;)
+# plot macrophage score on combined GSVA PCA plot
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data$thor_tgfb_score_21050467,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;TGFbeta-related\nGSVA score&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 1) +
+  labs(title = &quot;TGFbeta-related gene set expression&quot;, 
+       subtitle = &quot;Gene set expression PCA&quot;) +
+  scale_color_viridis()
 
-print(all.equal(colnames(nci_dlbcl_es), pdl1_groups_sorted$samples))
+# Plot for ASH presentation, no cluster lines
+tgfb_pca &lt;- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data$thor_tgfb_score_21050467,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;GSVA\nscore&quot;) +
+  labs(title = &quot;TGFbeta co-expression module gene set expression&quot;) +
+  xlab(&quot;PC1 (44.1% of variance)&quot;) +
+  ylab(&quot;PC2 (8.8% of variance)&quot;) +
+  scale_color_viridis()
 
-# set up design matrix
-rnames &lt;- pdl1_groups_sorted$samples
-groups &lt;- as.factor(pdl1_groups_sorted$pdl1_status)
-design &lt;- model.matrix(~ 0 + groups)
-colnames(design) &lt;- gsub(&quot;groups&quot;, &quot;&quot;, colnames(design))
-rownames(design) &lt;- rnames
-head(design)
+ggsave(&quot;output/ASH_ORAL_figures/tgfb_pca.png&quot;, plot = tgfb_pca, height = 4, width = 6, units = &quot;in&quot;)</code></pre>
+</div>
+<div id="deconvolution-scores-on-cluster-map" class="section level2">
+<h2>Deconvolution scores on cluster map</h2>
+<pre class="r"><code># read in Xcell results
+xc_results &lt;- read_delim(&quot;output/xCell_combined_tpm_matrix_xCell_2225072019.txt&quot;, 
+                         &quot;\t&quot;, 
+                         escape_double = FALSE, 
+                         trim_ws = TRUE) %&gt;%
+  dplyr::rename(cell_type = X1) %&gt;% 
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;cell_type&quot;) %&gt;%
+  as.matrix %&gt;%
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  print()
 
-contr.matrix &lt;- makeContrasts(high_amplified - non_amplified, levels = colnames(design))
-contr.matrix</code></pre>
-<div id="tests-of-functional-enrichment" class="section level4">
-<h4>Tests of functional enrichment</h4>
-<pre class="r"><code>adjPvalueCutoff &lt;- 0.05
-logFCcutoff &lt;- log2(2)
-fit &lt;- lmFit(nci_dlbcl_es, design)
-fit2 &lt;- contrasts.fit(fit, contr.matrix)
-fit2 &lt;- eBayes(fit2)
-allGeneSets &lt;- topTable(fit2, 
-                        coef = &quot;high_amplified - non_amplified&quot;, 
-                        number = Inf)
-DEgeneSets &lt;- topTable(fit2, coef = &quot;high_amplified - non_amplified&quot;,
-                       number = Inf,
-                       p.value = adjPvalueCutoff, 
-                       adjust.method = &quot;BH&quot;)
-DEgeneSets
-res &lt;- decideTests(fit2, p.value = adjPvalueCutoff)
-summary(res)</code></pre>
-<pre class="r"><code>DE_geneset_df &lt;- as.data.frame(DEgeneSets)
+# merge xcell results with pca results
+pheno_data_xc &lt;- pheno_data %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(xc_results) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;)
 
-GS_volcano &lt;- EnhancedVolcano(DE_geneset_df, 
-                lab = rownames(DE_geneset_df),
-                x = &quot;logFC&quot;, 
-                xlab = bquote(~ Log[2]~ &quot;FC&quot;),
-                xlim = c(-0.5, 0.5),
-                y = &quot;P.Value&quot;, 
-                ylab = bquote(~ -Log[10] ~ italic(P)),
-                ylim = c(0, 7),
-                FCcutoff = 0.15,
-                pCutoff = 0.001,
-                col = c(&#39;grey&#39;, &#39;grey&#39;, &#39;grey&#39;, &#39;red&#39;),
-                colAlpha = 1,
-                title = &quot;&quot;,
-                titleLabSize = 18,
-                transcriptPointSize = 2,
-                transcriptLabSize = 2.0,
-                DrawConnectors = FALSE,
-                widthConnectors = 0.2,
-                colConnectors = &quot;grey30&quot;,
-                axisLabSize = 20,
-                legend = c(&quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;), legendLabSize = -1, legendIconSize = -1,
-                border = &quot;full&quot;,
-                borderWidth = 1.5,
-                borderColour = &quot;black&quot;,
-                gridlines.major = FALSE,
-                gridlines.minor = FALSE)
-GS_volcano</code></pre>
+dim(pheno_data_xc)
+colnames(pheno_data_xc)
+pheno_data_xc[1:5, 1:5]
+
+#---------------------------------------------
+
+# plot macrophage score on combined GSVA PCA plot
+decon_th1 &lt;- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$`Th1 cells`,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;Xcell\nscore&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 1) +
+  labs(title = &quot;Deconvolution score for Th1 cells&quot;, 
+       subtitle = &quot;Gene set expression PCA&quot;) +
+  xlab(&quot;PC1 (44.1% of variance)&quot;) +
+  ylab(&quot;PC2 (8.8% of variance)&quot;) +
+  scale_color_viridis()
+
+decon_th1
+
+ggsave(&quot;output/ASH_ORAL_figures/decon_th1.png&quot;, decon_th1, height = 4.2, width = 6, units = &quot;in&quot;)
+
+#---------------------------------------------
+decon_th2 &lt;- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$`Th2 cells`,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;Xcell\nscore&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 1) +
+  labs(title = &quot;Deconvolution score for Th2 cells&quot;, 
+       subtitle = &quot;Gene set expression PCA&quot;) +
+      xlab(&quot;PC1 (44.1% of variance)&quot;) +
+  ylab(&quot;PC2 (8.8% of variance)&quot;) +
+  scale_color_viridis()
+
+decon_th2
+
+ggsave(&quot;output/ASH_ORAL_figures/decon_th2.png&quot;, decon_th2, height = 4.2, width = 6, units = &quot;in&quot;)
+
+#---------------------------------------------
+decon_aDC &lt;- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$aDC,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;Xcell\nscore&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 1) +
+  labs(title = &quot;Deconvolution score for activated dendritic cells&quot;, 
+       subtitle = &quot;Gene set expression PCA&quot;) +
+    xlab(&quot;PC1 (44.1% of variance)&quot;) +
+  ylab(&quot;PC2 (8.8% of variance)&quot;) +
+  scale_color_viridis()
+
+decon_aDC
+
+ggsave(&quot;output/ASH_ORAL_figures/decon_dc.png&quot;, decon_aDC, height = 4.2, width = 6, units = &quot;in&quot;)
+
+#--------------------------------------
+
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$Tregs,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;Xcell\nscore&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 1) +
+  labs(title = &quot;Deconvolution score for Tregs&quot;, 
+       subtitle = &quot;Gene set expression PCA&quot;) +
+    xlab(&quot;PC1 (44.1% of variance)&quot;) +
+  ylab(&quot;PC2 (8.8% of variance)&quot;) +
+  scale_color_viridis()
+
+#--------------------------------------
+decon_m1 &lt;- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$`Macrophages M1`,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;Xcell\nscore&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 1) +
+  labs(title = &quot;Deconvolution score for M1 Macrophages&quot;, 
+       subtitle = &quot;Gene set expression PCA&quot;) +
+    xlab(&quot;PC1 (44.1% of variance)&quot;) +
+  ylab(&quot;PC2 (8.8% of variance)&quot;) +
+  scale_color_viridis()
+
+decon_m1
+
+ggsave(&quot;output/ASH_ORAL_figures/decon_m1.png&quot;, decon_m1, height = 4.2, width = 6, units = &quot;in&quot;)
+#--------------------------------------
+
+fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$`Macrophages M2`,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;Xcell\nscore&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 1) +
+  labs(title = &quot;Deconvolution score for M2 Macrophages&quot;, 
+       subtitle = &quot;Gene set expression PCA&quot;) +
+    xlab(&quot;PC1 (44.1% of variance)&quot;) +
+  ylab(&quot;PC2 (8.8% of variance)&quot;) +
+  scale_color_viridis()
+
+#--------------------------------------------
+
+decon_cd8 &lt;- fviz_pca_ind(dlbcl_pca, 
+             col.ind = pheno_data_xc$`CD8+ T-cells`,
+             label = &quot;none&quot;,
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = &quot;Xcell\nscore&quot;) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_data$clust),
+                  show.legend = FALSE,
+                  color = &quot;black&quot;,
+                  linetype = 1) +
+  labs(title = &quot;Deconvolution score for CD8+ T-cells&quot;, 
+       subtitle = &quot;Gene set expression PCA&quot;) +
+    xlab(&quot;PC1 (44.1% of variance)&quot;) +
+  ylab(&quot;PC2 (8.8% of variance)&quot;) +
+  scale_color_viridis()
+
+decon_cd8
+
+ggsave(&quot;output/ASH_ORAL_figures/decon_cd8.png&quot;, decon_cd8, height = 4.2, width = 6, units = &quot;in&quot;)</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1000,7 +1065,6 @@ GS_volcano</code></pre>
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
 <pre class="r"><code>sessionInfo()</code></pre>
-</div>
 </div>
 </div>
 

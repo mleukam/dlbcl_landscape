@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 <meta name="author" content="mleukam" />
@@ -88,7 +88,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -237,6 +236,7 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -249,48 +249,9 @@ $(document).ready(function () {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -304,6 +265,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -419,7 +386,7 @@ div.section {
 
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
-<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 </button>
 </p>
 <div id="workflowr-report" class="collapse">
@@ -428,7 +395,7 @@ div.section {
 <a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -437,22 +404,22 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-07-15
+<strong>Last updated:</strong> 2020-05-09
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
 </p>
 <p>
 This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
-  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.4.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
 </p>
 <hr>
 </div>
 <div id="checks" class="tab-pane fade">
-<div class="panel-group" id="workflowr-checks">
+<div id="workflowr-checks" class="panel-group">
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
@@ -468,57 +435,12 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongobjectspresent"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>Environment:</strong> objects present </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
 </p>
 </div>
-<div id="strongEnvironmentstrongobjectspresent" class="panel-collapse collapse">
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
 <div class="panel-body">
-
-<p>
-The global environment had objects present when the code in the R Markdown file was run. These objects can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment. Use <code>wflow_publish</code> or <code>wflow_build</code> to ensure that the code is always run in an empty environment.
-</p>
-<p>
-The following objects were defined in the global environment when these results were created:
-</p>
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th style="text-align:left;">
-Name
-</th>
-<th style="text-align:left;">
-Class
-</th>
-<th style="text-align:left;">
-Size
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-data
-</td>
-<td style="text-align:left;">
-environment
-</td>
-<td style="text-align:left;">
-56 bytes
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-env
-</td>
-<td style="text-align:left;">
-environment
-</td>
-<td style="text-align:left;">
-56 bytes
-</td>
-</tr>
-</tbody>
-</table>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
 </div>
 </div>
 </div>
@@ -573,10 +495,10 @@ environment
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreed372d0ac0400710cfcfe3f4ee00a2f7709c7d07dtargetblankd372d0aa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/d372d0ac0400710cfcfe3f4ee00a2f7709c7d07d" target="_blank">d372d0a</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreee2b04164414d529fe354c85445de58e0329486c7targetblanke2b0416a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/e2b04164414d529fe354c85445de58e0329486c7" target="_blank">e2b0416</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreed372d0ac0400710cfcfe3f4ee00a2f7709c7d07dtargetblankd372d0aa" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreee2b04164414d529fe354c85445de58e0329486c7targetblanke2b0416a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -586,85 +508,156 @@ Ignored files:
     Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    NCI_mutations_vs_deconvolution.csv
+    Ignored:    data/.DS_Store
     Ignored:    data/1-s2.0-S1074761316304320-mmc2.xlsx
+    Ignored:    data/12864_2005_498_MOESM2_ESM.xls
     Ignored:    data/41591_2018_45_MOESM5_ESM.xlsx
+    Ignored:    data/CCLE_sample_info_file_2012-10-18.txt
     Ignored:    data/NIH_PDL1_amp_cases.csv
     Ignored:    data/NIH_PDL1_nonamp_cases.csv
+    Ignored:    data/PDL1dlbcl.rnaseq.kallisto.raw.txi.coding.cpm1.TMM.logCPM.sm24.csv
+    Ignored:    data/PanImmune_GeneSet_Definitions.xlsx
     Ignored:    data/aliquot.tsv
     Ignored:    data/azizi_curated.xlsx
     Ignored:    data/c2_human_immune_genesets.gmt
     Ignored:    data/dlbcl_total_immune_gset_v1_results.rds
     Ignored:    data/ds_JCO.18.01583-2.xlsx
+    Ignored:    data/duke_study_driver_mutations_top150_maf.csv
+    Ignored:    data/final_analysis_set.maf
     Ignored:    data/gdc_clinical_data.json
     Ignored:    data/gdc_files_and_case_ids.json
+    Ignored:    data/gencode.v22.annotation.gtf
     Ignored:    data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Ignored:    data/genesets/
     Ignored:    data/gset_ids_complete.rds
-    Ignored:    data/htseq_counts/
+    Ignored:    data/histo_metadata_dlbcl_landscape.csv
     Ignored:    data/journal.pone.0088309.s001.XLS
     Ignored:    data/mmc1.xlsx
     Ignored:    data/nejmoa1801445_appendix_2.xlsx
+    Ignored:    data/reactome_imm_signaling.tsv
     Ignored:    data/sample.tsv
     Ignored:    data/sig.rda
+    Ignored:    data/sig_genes.txt
+    Ignored:    data/temp.dgelist_edger.rds
     Ignored:    data/temp.dgelist_limma.rds
-    Ignored:    docs/.DS_Store
+    Ignored:    data/uchi_metadata.csv
+    Ignored:    logs/
+    Ignored:    output/.DS_Store
+    Ignored:    output/NCI_mutations_vs_deconvolution.csv
+    Ignored:    output/clust1_vs_others.txt
+    Ignored:    output/clust1_vs_others_dge.rnk
+    Ignored:    output/clust2_vs_others_dge.rnk
+    Ignored:    output/clust3_vs_others_dge.rnk
+    Ignored:    output/clust4_vs_others_dge.rnk
+    Ignored:    output/cluster1_dge.rds
+    Ignored:    output/cluster2_dge.rds
+    Ignored:    output/cluster3_dge.rds
+    Ignored:    output/cluster4_dge.rds
     Ignored:    output/combined_clin_data.xlsx
     Ignored:    output/combined_dlbcl_expr_matrix.csv
+    Ignored:    output/combined_es_gsva2_4cluster.rds
+    Ignored:    output/combined_es_gsva4_4cluster.rds
+    Ignored:    output/combined_expressionset.rds
+    Ignored:    output/combined_tpm_matrix.csv
+    Ignored:    output/counts_expressionset_for_limma.rds
     Ignored:    output/dlbcl_expr_matrix.csv
     Ignored:    output/dlbcl_total_immune_gset_v2_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v3_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v4_results.rds
     Ignored:    output/duke_expression_set_cleaned_log.rds
     Ignored:    output/duke_expressionset.rds
     Ignored:    output/duke_expressionset_pext.rds
     Ignored:    output/duke_extended_pheno_data.csv
     Ignored:    output/expr_matrix.csv
+    Ignored:    output/gsea_res_cluster1.csv
     Ignored:    output/gset_ids_complete_2.rds
+    Ignored:    output/gset_ids_complete_3.rds
+    Ignored:    output/gset_ids_complete_4.rds
+    Ignored:    output/gsva_v2_4clust_assign.rds
+    Ignored:    output/gsva_v3_4clust_assign.rds
+    Ignored:    output/gsva_v4_4clust_assign.rds
+    Ignored:    output/limma_voom_elist_1.rds
+    Ignored:    output/merged_raw_counts.csv
     Ignored:    output/nci_dlbcl_annotation.csv
     Ignored:    output/nci_dlbcl_unprocessed_counts.csv
     Ignored:    output/nci_expressionset.rds
     Ignored:    output/nci_expressionset_pext.rds
     Ignored:    output/nci_extended_pheno_data.csv
+    Ignored:    output/networkanal3_clust1.txt
+    Ignored:    output/networkanal3_clust2.txt
+    Ignored:    output/networkanal3_clust3.txt
+    Ignored:    output/networkanal3_clust4.txt
     Ignored:    output/total_immune_gset_v1.rds
+    Ignored:    output/tpm_cyt_expressionset.rds
+    Ignored:    output/tpm_expressionset.rds
+    Ignored:    output/uchi_cluster_assignments.csv
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019.pvals.txt
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019.txt
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019_RAW.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.pvals.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819_RAW.txt
+    Ignored:    output/xcell_input_matrix.csv
 
 Untracked files:
-    Untracked:  analysis/visualizing_gsva_scores_3.Rmd
-    Untracked:  analysis/visualizing_gsva_scores_4.Rmd
-    Untracked:  data/12864_2005_498_MOESM2_ESM.xls
-    Untracked:  data/PanImmune_GeneSet_Definitions.xlsx
-    Untracked:  data/final_analysis_set.maf
-    Untracked:  data/genesets/
-    Untracked:  data/reactome_imm_signaling.tsv
-    Untracked:  data/sig_genes.txt
-    Untracked:  data/temp.dgelist_edger.rds
-    Untracked:  docs/assets/Rplot01.pdf
-    Untracked:  docs/assets/Rplot02.pdf
-    Untracked:  docs/assets/Rplot03.pdf
-    Untracked:  docs/assets/gsva4_heatmap_rawscores.pdf
-    Untracked:  output/combined_es_gsva2_4cluster.rds
-    Untracked:  output/combined_expressionset.rds
-    Untracked:  output/dlbcl_total_immune_gset_v3_results.rds
-    Untracked:  output/dlbcl_total_immune_gset_v4_results.rds
-    Untracked:  output/gset_ids_complete_3.rds
-    Untracked:  output/gset_ids_complete_4.rds
-    Untracked:  output/gsva_v2_4clust_assign.rds
-    Untracked:  output/gsva_v3_4clust_assign.rds
-    Untracked:  output/gsva_v4_4clust_assign.rds
-    Untracked:  output/mc1_score_matrix.csv
-    Untracked:  output/mc2_score_matrix.csv
-    Untracked:  output/mc3_score_matrix.csv
-    Untracked:  output/mc4_score_matrix.csv
-    Untracked:  output/mc5_score_matrix.csv
-    Untracked:  output/mc6_score_matrix.csv
-    Untracked:  output/mc7_score_matrix.csv
-    Untracked:  output/merged_raw_counts.csv
-    Untracked:  output/merged_raw_counts_1.csv
-    Untracked:  output/merged_raw_counts_2.csv
-    Untracked:  output/merged_raw_counts_3.csv
-    Untracked:  output/merged_raw_counts_4.csv
-    Untracked:  output/merged_raw_counts_5.csv
-    Untracked:  output/merged_raw_counts_6.csv
-    Untracked:  output/merged_raw_counts_7.csv
+    Untracked:  NCI_mutations_vs_deconvolution.xls
+    Untracked:  analysis/correlation_clusters.Rmd
+    Untracked:  analysis/mif.Rmd
+    Untracked:  analysis/new_signature_matrix.Rmd
+    Untracked:  analysis/table1.Rmd
+    Untracked:  analysis/visualizing_gsva_scores_5.Rmd
+    Untracked:  batch1_cell_counts.pdf
+    Untracked:  data/cibersort/
+    Untracked:  data/gistic_results_nci/
+    Untracked:  es_10k_hgnc/
+    Untracked:  output/ASH_ORAL_figures.png
+    Untracked:  output/ASH_ORAL_figures/
+    Untracked:  output/Rplot.pdf
+    Untracked:  output/Rplot01.pdf
+    Untracked:  output/batch1_cell_seg_df.rds
+    Untracked:  output/batch1_summary_cell_seg_df.rds
+    Untracked:  output/colored_hclust_plot_by_group.pdf
+    Untracked:  output/colored_hclust_plot_by_samples.pdf
+    Untracked:  output/combined_counts_dge.rds
+    Untracked:  output/combined_expr_matrix_for_signature_unprocessed.rmd
+    Untracked:  output/dgelist_pheno_data.rds
+    Untracked:  output/dlbcl_final_signature_matrix.tsv
+    Untracked:  output/dlbcl_gsva5_4cluster_hcpc.rds
+    Untracked:  output/dlbcl_gsva5_4cluster_pca.rds
+    Untracked:  output/dlbcl_uchi_batch1_mixture.tsv
+    Untracked:  output/duke_dlbcl_mixture.tsv
+    Untracked:  output/gse_69030_probes.tsv
+    Untracked:  output/hclust_labeled_by_cell_type.pdf
+    Untracked:  output/mif_pilot_data_plot.pdf
+    Untracked:  output/nci_dlbcl_mixture.tsv
+    Untracked:  output/phenodata_for_signature_matrix.rmd
+    Untracked:  output/reference_matrix_file.tsv
+    Untracked:  output/table1.html
+    Untracked:  output/uchi_deconvolution_batch_1.rds
+    Untracked:  output/uchi_pheno_clust
+    Untracked:  output/var_contribution_axis2.pdf
+    Untracked:  output/venn.png
+    Untracked:  output/venn.png.2020-02-23_11-17-47.log
+    Untracked:  output/venn.png.2020-02-23_11-17-56.log
+    Untracked:  output/venn.png.2020-02-23_11-20-44.log
+    Untracked:  preprocessed_data_for_signature_matrix_es.rds
 
 Unstaged changes:
-    Modified:   analysis/visualizing_gsva_scores_2.Rmd
+    Modified:   .gitignore
+    Deleted:    Rplot.pdf
+    Deleted:    Rplot001.png
+    Deleted:    Rplot002.png
+    Deleted:    Rplot01.pdf
+    Modified:   analysis/cyt.Rmd
+    Modified:   analysis/deconvolution.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/predictor.Rmd
+    Modified:   analysis/sparse_clustering.Rmd
+    Modified:   analysis/visualizing_gsva_scores_4.Rmd
+    Deleted:    data/DLBCL_histo/JG55/HE/14-1464/14-1464_Scan1_annotations.xml.lock
+    Modified:   output/design_for_limma.rds
+    Modified:   output/dgelist_for_limma.rds
 
 </code></pre>
 <p>
@@ -708,6 +701,91 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/e2b04164414d529fe354c85445de58e0329486c7/analysis/cluster_dge.Rmd" target="_blank">e2b0416</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2020-05-09
+</td>
+<td>
+wflow_publish(c(“analysis/about.Rmd”, “analysis/abstract_figure.Rmd”,
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/a78a45cffe9d483012683d912ca3ab8f19d2000b/analysis/cluster_dge.Rmd" target="_blank">a78a45c</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-10-12
+</td>
+<td>
+archives dump from local machine - near final gsva v4 cluster model
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/2960d8b54653f6823b6df05cc0a3cc6f023486cd/analysis/cluster_dge.Rmd" target="_blank">2960d8b</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-18
+</td>
+<td>
+record keeping updates - did not yet build the pages for these notebooks
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/01fb3c107e629cfc19b059394907946e892ab03a/analysis/cluster_dge.Rmd" target="_blank">01fb3c1</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-16
+</td>
+<td>
+updates of analysis pages without building html pages - for record keeping and safekeeping
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/6eb3aa2331bda38f2c5361c0d7105cc737d189fd/docs/cluster_dge.html" target="_blank">6eb3aa2</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/mleukam/dlbcl_landscape/blob/d372d0ac0400710cfcfe3f4ee00a2f7709c7d07d/analysis/cluster_dge.Rmd" target="_blank">d372d0a</a>
 </td>
 <td>
@@ -727,8 +805,596 @@ new notebooks, first commit
 </div>
 </div>
 </div>
-<div id="introduction" class="section level2">
-<h2>Introduction</h2>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>Clear the workspace</p>
+<pre class="r"><code>rm(list = ls())</code></pre>
+<pre class="r"><code>knitr::opts_chunk$set(eval = FALSE)</code></pre>
+<p>Load packages</p>
+<pre class="r"><code>library(&quot;tidyverse&quot;)
+library(&quot;Biobase&quot;)
+library(&quot;limma&quot;)
+library(&quot;edgeR&quot;)
+library(&quot;ggdark&quot;)
+library(&quot;ggsci&quot;)
+library(&quot;viridis&quot;)
+library(&quot;sva&quot;)
+library(ggpubr)</code></pre>
+<p>Read in data</p>
+<pre class="r"><code># Combined duke+nci es with gsva4, 4-cluster model phenodata and log-transformed, normalized read counts
+combined_es &lt;- readRDS(&quot;output/combined_es_gsva4_4cluster.rds&quot;)</code></pre>
+<p>Setup for limma voom linear modeling following limma user’s manual <a href="https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf" class="uri">https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf</a></p>
+<p>Chapter 15 RNAseq Data</p>
+<p>Recommended steps:</p>
+<ol style="list-style-type: decimal">
+<li>Start with raw counts (HTSeq or Kallisto for example)</li>
+<li>Filter for expression</li>
+<li>TMM normalize</li>
+<li>Do not log transform</li>
+<li>Pass batches (sequencing center) to limma voom with precision weights for batch effect modeling</li>
+</ol>
+</div>
+<div id="nci" class="section level2">
+<h2>NCI</h2>
+<p>Read in raw counts</p>
+<pre class="r"><code>total_counts &lt;- read_csv(&quot;output/nci_dlbcl_unprocessed_counts.csv&quot;)
+
+# read in conversion table for gene IDs
+gencode_gtf &lt;- read_tsv(&quot;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&quot;)</code></pre>
+<div id="filter-for-protein-coding-genes" class="section level4">
+<h4>Filter for protein coding genes</h4>
+<pre class="r"><code># filter for protein coding genes
+total_counts_prcode &lt;- total_counts %&gt;%
+  dplyr::rename(gene_id = gene) %&gt;%
+  left_join(gencode_gtf, by = &quot;gene_id&quot;) %&gt;%
+  dplyr::filter(gene_type == &quot;protein_coding&quot;) %&gt;%
+  dplyr::select(-gene_name, -gene_type, -gene_status, -level, -havana_gene) %&gt;%
+  dplyr::select(gene_id, everything())
+total_counts_prcode[1:5, 1:5]
+
+nrow(total_counts)
+nrow(total_counts_prcode)</code></pre>
+</div>
+<div id="density-plots-before-expression-filtering" class="section level4">
+<h4>Density plots before expression filtering</h4>
+<pre class="r"><code>tidy_counts &lt;- total_counts_prcode %&gt;% 
+  gather(key = &quot;sampleID&quot;, value = &quot;intensity&quot;, -gene_id) 
+
+dplot1 &lt;- ggplot(tidy_counts, aes(intensity)) +
+  geom_density() + 
+  theme(legend.position = &quot;none&quot;) +
+  xlim(-5, 100) +
+  ggtitle(&quot;Density plot of counts for NCI DLBCL&quot;) +
+  theme_classic2()
+dplot1
+
+dplot2 &lt;- ggplot(tidy_counts, aes(log(intensity))) +
+  geom_density() +
+  theme(legend.position = &quot;none&quot;) +
+  xlim(-20, 20) +
+  ggtitle(&quot;Density plot of log(counts) for NCI DLBCL&quot;) +
+  theme_classic2()
+dplot2</code></pre>
+</div>
+<div id="filter-by-expression-levels" class="section level4">
+<h4>Filter by expression levels</h4>
+<p>Will use CPM for filtering</p>
+<pre class="r"><code># move gene names to rownames
+totcounts_prcode_matrix &lt;- total_counts_prcode %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;gene_id&quot;)
+totcounts_prcode_matrix[1:5, 1:5]
+dim(totcounts_prcode_matrix)
+
+cpm_prcode_matrix &lt;- cpm(totcounts_prcode_matrix, log = FALSE)
+
+# apply hard cutoffs 
+# filter out genes that have counts &lt;= 10 in at least half of cases
+# count expression cutoff: 10
+cutoff &lt;- 1
+# set filter fraction
+min_sm_frac = 0.5
+filter_frac = min_sm_frac * ncol(cpm_prcode_matrix)
+filter_frac
+total_stats &lt;- data.frame(
+  total = apply(cpm_prcode_matrix, 
+                1, 
+               function(x) {sum(x &gt; cutoff, na.rm = TRUE) } ))
+# get indices that meet criteria
+keep &lt;- which(total_stats$total &gt;= filter_frac)
+
+# use indices to filter COUNTS MATRIX (not cpm) and check results
+dim(totcounts_prcode_matrix)
+total_nci_filtered = totcounts_prcode_matrix[keep,]
+dim(total_nci_filtered)
+total_nci_filtered[1:5, 1:5]</code></pre>
+</div>
+<div id="density-plots-after-expression-filtering" class="section level4">
+<h4>Density plots after expression filtering</h4>
+<pre class="r"><code>tidy_counts &lt;- total_nci_filtered %&gt;% 
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  gather(key = &quot;sampleID&quot;, value = &quot;counts&quot;, -gene_id) 
+
+dplot1 &lt;- ggplot(tidy_counts, aes(counts)) +
+  geom_density() + 
+  theme(legend.position = &quot;none&quot;) +
+  xlim(-5, 100) +
+  ggtitle(&quot;Density plot of filtered counts for NCI DLBCL&quot;) +
+  theme_classic2()
+dplot1
+
+dplot2 &lt;- ggplot(tidy_counts, aes(log(counts))) +
+  geom_density() +
+  theme(legend.position = &quot;none&quot;) +
+  xlim(-20, 20) +
+  ggtitle(&quot;Density plot of filtered log(counts) for NCI DLBCL&quot;) +
+  dark_theme_gray()
+dplot2</code></pre>
+</div>
+</div>
+<div id="duke" class="section level2">
+<h2>Duke</h2>
+<p>Read in raw counts for Duke samples as dgelist</p>
+<pre class="r"><code>dgelist &lt;- readRDS(&quot;data/temp.dgelist_edger.rds&quot;)
+str(dgelist)</code></pre>
+<p>Convert GENCODE v29 to v22 gene ids to match GDC standard</p>
+<pre class="r"><code># get expression matrix
+expr_duke &lt;- dgelist[[1]]
+expr_duke[1:5, 1:5]
+col__names &lt;- colnames(expr_duke)
+col_names_rep &lt;- str_split(col__names, pattern = &quot;\\.&quot;, simplify = TRUE) %&gt;% 
+  as_tibble() %&gt;%
+  pull(V1) %&gt;%
+  paste0(&quot;duke_&quot;, .) %&gt;%
+  print()
+colnames(expr_duke) &lt;- col_names_rep
+expr_duke[1:5, 1:5]
+
+# gencode v29 was used to generate rownames of expr_duke matrix
+# GDC standard is gencode v22, which is source of NCI data
+# will convert to gencode v22 to match rows of NCI data
+geneID_split &lt;- str_split(gencode_gtf$gene_id, pattern = &quot;\\.&quot;, simplify = TRUE) %&gt;% 
+  as_tibble() %&gt;%
+  dplyr::select(geneID_split = V1)
+
+gencode_gtf_split &lt;- gencode_gtf %&gt;% 
+  bind_cols(geneID_split) %&gt;%
+  dplyr::select(gene_id_v22 = gene_id, geneID_split, everything()) %&gt;%
+  print()
+
+row__names &lt;- rownames(expr_duke) %&gt;%
+  enframe() %&gt;%
+  dplyr::select(geneID_split = value) %&gt;%
+  print()
+
+# check how many gene ids are missing in v22 that are named in v29
+setdiff(row__names$geneID_split, gencode_gtf_split$geneID_split)
+# approx 1900 (previous checks show none after filtering for protein coding genes)
+
+# merge gene name data with expression matrix
+expr_duke_df &lt;- expr_duke %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id_v29&quot;) %&gt;%
+  as_tibble() %&gt;%
+  mutate(geneID_split = str_replace(gene_id_v29, pattern = &quot;\\.*&quot;, &quot;&quot;)) %&gt;%
+  dplyr::select(gene_id_v29, geneID_split, everything()) %&gt;%
+  left_join(gencode_gtf_split) %&gt;%
+  dplyr::select(gene_id_v29, gene_id_v22, geneID_split, gene_type, everything()) %&gt;%
+  dplyr::select(-gene_status, -gene_name, -level, -havana_gene) %&gt;%
+  print()
+
+# check how many gene ids are missing from version 22  
+summary(is.na(expr_duke_df$gene_id_v22))
+
+# check the gene types in the expression matrix
+summary(as.factor(expr_duke_df$gene_type))</code></pre>
+<div id="filter-for-protein-coding" class="section level4">
+<h4>Filter for protein coding</h4>
+<pre class="r"><code># filter for protein coding genes only
+expr_duke_filtered &lt;- expr_duke_df %&gt;% 
+  dplyr::filter(gene_type == &quot;protein_coding&quot;)
+  
+# any missing gene ids also protein coding genes?
+summary(is.na(expr_duke_filtered$gene_id_v22))
+# NO
+
+expr_duke_protcoding &lt;- expr_duke_filtered %&gt;%
+  dplyr::select(-gene_id_v29, -geneID_split, -gene_type) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;gene_id_v22&quot;) %&gt;%
+  as.matrix()
+
+str(expr_duke_protcoding)
+expr_duke_protcoding[1:5, 1:5]</code></pre>
+</div>
+<div id="subset-cases-based-on-protein-coding-library-coverage" class="section level4">
+<h4>Subset cases based on protein coding library coverage</h4>
+<p>Following recommendation in methods section of Reddy et al Cell 2017 (original data source). They reported including only those libraries containing at least 12,000 protein coding genes.</p>
+<pre class="r"><code>expr_duke_protcoding[1:5, 1:5]
+
+gene_coverage_threshold &lt;- 12000
+
+ncol(expr_duke_protcoding)
+expr_duke_subset &lt;- expr_duke_protcoding[, colSums(expr_duke_protcoding != 0) &gt; gene_coverage_threshold]
+
+expr_duke_subset[1:5, 1:5]
+ncol(expr_duke_subset)</code></pre>
+</div>
+<div id="initial-density-plots" class="section level4">
+<h4>Initial density plots</h4>
+<pre class="r"><code># Density plots
+# tidy data
+tidy_counts &lt;- t(expr_duke_subset) %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  gather(key = &quot;gene_id&quot;, value = &quot;counts&quot;, -sample_id) %&gt;%
+  print()
+
+# plots
+dplot_duke &lt;- ggplot(tidy_counts, aes(counts)) +
+  geom_density() + 
+  theme(legend.position = &quot;none&quot;) +
+  dark_theme_gray()
+dplot_duke +
+  xlim(-5, 100)
+
+# plot with log and small offset
+dplot_duke_log &lt;- ggplot(tidy_counts, aes(log(counts + 0.5))) +
+  geom_density() + 
+  theme(legend.position = &quot;none&quot;) +
+  dark_theme_gray()
+dplot_duke_log +
+  xlim(-10, 10)</code></pre>
+</div>
+<div id="filtering-by-expression" class="section level4">
+<h4>Filtering by expression</h4>
+<p>Will use CPM for filtering</p>
+<pre class="r"><code>cpm_duke_subset &lt;- cpm(expr_duke_subset, log = FALSE)
+
+# apply hard cutoffs 
+# filter out genes that have counts &lt;= 10 in at least half of cases
+# count expression cutoff: 10
+cutoff &lt;- 1
+# set filter fraction
+min_sm_frac = 0.5
+filter_frac = min_sm_frac * ncol(cpm_duke_subset)
+filter_frac
+total_stats &lt;- data.frame(
+  total = apply(cpm_duke_subset, 
+                1, 
+               function(x) {sum(x &gt; cutoff, na.rm = TRUE) } ))
+# get indices that meet criteria
+keep &lt;- which(total_stats$total &gt;= filter_frac)
+
+# use indices to filter COUNTS MATRIX (not cpm) and check results
+dim(expr_duke_subset)
+total_duke_filtered &lt;- expr_duke_subset[keep,]
+dim(total_duke_filtered)
+total_duke_filtered[1:5, 1:5]</code></pre>
+</div>
+<div id="post-filtering-density-plots" class="section level4">
+<h4>Post-filtering density plots</h4>
+<pre class="r"><code># Density plots
+# tidy data
+tidy_filtered &lt;- t(total_duke_filtered) %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  gather(key = &quot;gene_id&quot;, value = &quot;counts&quot;, -sample_id) %&gt;%
+  print()
+
+# plots
+dplot_duke_2 &lt;- ggplot(tidy_filtered, aes(counts)) +
+  geom_density() + 
+  theme(legend.position = &quot;none&quot;) +
+  dark_theme_gray() +
+  ggtitle(&quot;Density plot of Duke raw counts after expression filtering&quot;)
+dplot_duke_2 +
+  xlim(-5, 100)
+
+# plot with log and small offset
+dplot_duke_log_2 &lt;- ggplot(tidy_filtered, aes(log(counts + 0.5))) +
+  geom_density() + 
+  theme(legend.position = &quot;none&quot;) +
+  dark_theme_gray() +
+  ggtitle(&quot;Density plot of Duke log(counts) after expression filtering&quot;)
+dplot_duke_log_2 +
+  xlim(-10, 10)</code></pre>
+</div>
+</div>
+<div id="merge" class="section level2">
+<h2>Merge</h2>
+<div id="combine-expression-data" class="section level4">
+<h4>Combine expression data</h4>
+<pre class="r"><code>duke_exprs &lt;- total_duke_filtered %&gt;% 
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(gene_id, everything()) %&gt;%
+  print()
+
+nci_exprs &lt;- total_nci_filtered %&gt;% 
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(gene_id, everything()) %&gt;%
+  print()
+
+# filter rownames to only keep intersecting rows
+duke_genes &lt;- duke_exprs %&gt;% pull(gene_id)
+length(duke_genes)
+nci_genes &lt;- nci_exprs %&gt;% pull(gene_id)
+length(nci_genes)
+
+combined_genes &lt;- intersect(duke_genes, nci_genes)
+length(combined_genes)
+head(combined_genes)
+
+duke_exprs_filt &lt;- duke_exprs %&gt;%
+  dplyr::filter(gene_id %in% combined_genes)
+nrow(duke_exprs_filt)
+
+nci_exprs_filt &lt;- nci_exprs %&gt;%
+  dplyr::filter(gene_id %in% combined_genes)
+nrow(nci_exprs_filt)
+
+combined_exprs_df &lt;- nci_exprs_filt %&gt;%
+  left_join(duke_exprs_filt, by = &quot;gene_id&quot;) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;gene_id&quot;)
+combined_exprs_df[1:5, 1:5]</code></pre>
+</div>
+<div id="normalize-gene-expression-distributions" class="section level4">
+<h4>Normalize gene expression distributions</h4>
+<p>Normalisation by the method of trimmed mean of M-values is performed using the calcNormFactors function in edgeR. The normalisation factors calculated here are used as a scaling factor for the library sizes.</p>
+<pre class="r"><code># will do below on the dge
+# get normalization factors
+# norm_factors &lt;- calcNormFactors(combined_exprs_df, method = &quot;TMM&quot;)
+
+# apply factor to each column - not necessary for limma
+# norm_exprs &lt;- map2_dfc(combined_exprs_df, norm_factors, `*`)
+# norm_exprs &lt;- as.data.frame(norm_exprs)
+# rownames(norm_exprs) &lt;- rownames(combined_exprs)
+
+combined_exprs &lt;- combined_exprs_df %&gt;% as.matrix()
+combined_exprs[1:5, 1:5]</code></pre>
+</div>
+<div id="reformat-pheno-data-to-match" class="section level4">
+<h4>Reformat pheno data to match</h4>
+<pre class="r"><code>pheno_data_tbl &lt;- pData(combined_es) %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  dplyr::select(sample_id, 127:198) %&gt;%
+  dplyr::select(-alpha_var) %&gt;%
+  as_tibble() %&gt;%
+  print()
+
+samplenames &lt;- pheno_data_tbl %&gt;% pull(sample_id)
+length(samplenames)
+columnnames &lt;- colnames(combined_exprs)
+length(columnnames)
+identical(samplenames, columnnames)
+
+pheno_data &lt;- pheno_data_tbl %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;sample_id&quot;)</code></pre>
+</div>
+</div>
+<div id="dge-by-cluster" class="section level2">
+<h2>DGE by cluster</h2>
+<p>The contrast matrix for the differential gene expression will be to compare each cluster to all other clusters)</p>
+<p>Contrast matrix bioC forum question: <a href="https://support.bioconductor.org/p/26251/" class="uri">https://support.bioconductor.org/p/26251/</a></p>
+<p>General contrast coding: <a href="https://stats.idre.ucla.edu/r/library/r-library-contrast-coding-systems-for-categorical-variables/#DEVIATION" class="uri">https://stats.idre.ucla.edu/r/library/r-library-contrast-coding-systems-for-categorical-variables/#DEVIATION</a></p>
+<p>Contrast coding for linear models in R (detailed instructions on custom matrix): <a href="https://stats.stackexchange.com/questions/52252/how-to-specify-a-contrast-matrix-in-r-for-the-difference-between-one-level-and" class="uri">https://stats.stackexchange.com/questions/52252/how-to-specify-a-contrast-matrix-in-r-for-the-difference-between-one-level-and</a></p>
+<div id="limma" class="section level4">
+<h4>Limma</h4>
+<pre class="r"><code># create DGEList
+dge &lt;- DGEList(counts = combined_exprs)
+
+# apply TMM normalization to DGE
+dge &lt;- calcNormFactors(dge)
+
+# set up design matrix
+# include sequencing center as a batch variable to the model
+rnames &lt;- colnames(combined_es)
+groups &lt;- pData(combined_es) %&gt;% 
+  pull(clust) %&gt;%
+  paste0(&quot;cluster_&quot;, .) %&gt;%
+  as.factor()
+batch &lt;- pData(combined_es) %&gt;%
+  pull(source) %&gt;%
+  as.factor
+design &lt;- model.matrix(~ 0 + groups + batch)
+rownames(design) &lt;- rnames
+head(design)
+
+# write out DGElist and design
+saveRDS(dge, &quot;output/dgelist_for_limma.rds&quot;)
+saveRDS(pheno_data, &quot;output/dgelist_pheno_data.rds&quot;)
+saveRDS(design, &quot;output/design_for_limma.rds&quot;)</code></pre>
+<p>Limma voom with quality weights - run on a cluster</p>
+<pre class="r"><code>## See code folder in github repo for full script
+# read in data
+dge &lt;- readRDS(&quot;/gpfs/data/kline-lab/inputs/dgelist_for_limma.rds&quot;)
+design &lt;- readRDS(&quot;/gpfs/data/kline-lab/inputs/design_for_limma.rds&quot;)
+
+# voom transformation is applied to the normalized and filtered DGEList object
+v &lt;- voomWithQualityWeights(dge, 
+                            design, 
+                            plot = TRUE, 
+                            normalize = &quot;quantile&quot;)
+
+# fit linear model and estimate DGE
+fit &lt;- lmFit(v, design)
+
+# write out results
+saveRDS &lt;- saveRDS(v, &quot;/gpfs/data/kline-lab/tcga_macs/output/limma_voom_elist_1.rds&quot;)
+
+saveRDS &lt;- saveRDS(fit, &quot;/gpfs/data/kline-lab/tcga_macs/output/limma_voom_marraylmfit.rds&quot;)</code></pre>
+<p>Read in results</p>
+<pre class="r"><code>v &lt;- readRDS(&quot;output/limma_voom_elist_1.rds&quot;)
+fit &lt;- readRDS(&quot;output/limma_voom_marraylmfit.rds&quot;)</code></pre>
+<p>DGE Cluster 1</p>
+<pre class="r"><code># set up contrast matrix
+contr_matrix_c1 &lt;- makeContrasts(&quot;clust_1_vs_others&quot; = groupscluster_1 - (groupscluster_2 + groupscluster_3 + groupscluster_4) / 3, 
+  levels = colnames(design))
+contr_matrix_c1
+
+# use contrast matrix and eBayes to estimate SEM and pvalues
+fit_c1 &lt;- contrasts.fit(fit, contr_matrix_c1)
+fit_c1 &lt;- eBayes(fit_c1)
+
+cluster1_dge &lt;- topTable(fit_c1, 
+                         adjust.method = &quot;BH&quot;, 
+                         sort.by = &quot;none&quot;, 
+                         number = Inf)
+
+top50_cluster1_dge_up &lt;- cluster1_dge %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  left_join(gencode_gtf) %&gt;%
+  arrange(desc(logFC)) %&gt;%
+  dplyr::slice(1:50) %&gt;%
+  dplyr::select(gene_name, logFC, adj.P.Val) %&gt;%
+  print()
+
+top50_cluster1_dge_down &lt;- cluster1_dge %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  left_join(gencode_gtf) %&gt;%
+  arrange(logFC) %&gt;%
+  dplyr::slice(1:50) %&gt;%
+  dplyr::select(gene_name, logFC, adj.P.Val) %&gt;%
+  print()</code></pre>
+<p>DGE Cluster 2</p>
+<pre class="r"><code># set up contrast matrix
+contr_matrix_c2 &lt;- makeContrasts(&quot;clust_1_vs_others&quot; = groupscluster_2 - (groupscluster_1 + groupscluster_3 + groupscluster_4) / 3, 
+  levels = colnames(design))
+contr_matrix_c2
+
+# use contrast matrix and eBayes to estimate SEM and pvalues
+fit_c2 &lt;- contrasts.fit(fit, contr_matrix_c2)
+fit_c2 &lt;- eBayes(fit_c2)
+
+cluster2_dge &lt;- topTable(fit_c2, 
+                         adjust.method = &quot;BH&quot;, 
+                         sort.by = &quot;none&quot;, 
+                         number = Inf)
+
+top50_cluster2_dge_up &lt;- cluster2_dge %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  left_join(gencode_gtf) %&gt;%
+  arrange(desc(logFC)) %&gt;%
+  dplyr::slice(1:50) %&gt;%
+  dplyr::select(gene_name, logFC, adj.P.Val) %&gt;%
+  print()
+
+top50_cluster2_dge_down &lt;- cluster2_dge %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  left_join(gencode_gtf) %&gt;%
+  arrange(logFC) %&gt;%
+  dplyr::slice(1:50) %&gt;%
+  dplyr::select(gene_name, logFC, adj.P.Val) %&gt;%
+  print()</code></pre>
+<p>DGE Cluster 3</p>
+<pre class="r"><code># set up contrast matrix
+contr_matrix_c3 &lt;- makeContrasts(&quot;clust_1_vs_others&quot; = groupscluster_3 - (groupscluster_1 + groupscluster_2 + groupscluster_4) / 3, 
+  levels = colnames(design))
+contr_matrix_c3
+
+# use contrast matrix and eBayes to estimate SEM and pvalues
+fit_c3 &lt;- contrasts.fit(fit, contr_matrix_c3)
+fit_c3 &lt;- eBayes(fit_c3)
+
+cluster3_dge &lt;- topTable(fit_c3, 
+                         adjust.method = &quot;BH&quot;, 
+                         sort.by = &quot;none&quot;, 
+                         number = Inf)
+
+top50_cluster3_dge_up &lt;- cluster3_dge %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  left_join(gencode_gtf) %&gt;%
+  arrange(desc(logFC)) %&gt;%
+  dplyr::slice(1:50) %&gt;%
+  dplyr::select(gene_name, logFC, adj.P.Val) %&gt;%
+  print()
+
+top50_cluster3_dge_down &lt;- cluster3_dge %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  left_join(gencode_gtf) %&gt;%
+  arrange(logFC) %&gt;%
+  dplyr::slice(1:50) %&gt;%
+  dplyr::select(gene_name, logFC, adj.P.Val) %&gt;%
+  print()</code></pre>
+<p>DGE Cluster 4</p>
+<pre class="r"><code># set up contrast matrix
+contr_matrix_c4 &lt;- makeContrasts(&quot;clust_1_vs_others&quot; = groupscluster_4 - (groupscluster_1 + groupscluster_2 + groupscluster_3) / 3, 
+  levels = colnames(design))
+contr_matrix_c4
+
+# use contrast matrix and eBayes to estimate SEM and pvalues
+fit_c4 &lt;- contrasts.fit(fit, contr_matrix_c4)
+fit_c4 &lt;- eBayes(fit_c4)
+
+cluster4_dge &lt;- topTable(fit_c4, 
+                         adjust.method = &quot;BH&quot;, 
+                         sort.by = &quot;none&quot;, 
+                         number = Inf)
+
+top50_cluster4_dge_up &lt;- cluster4_dge %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  left_join(gencode_gtf) %&gt;%
+  arrange(desc(logFC)) %&gt;%
+  dplyr::slice(1:50) %&gt;%
+  dplyr::select(gene_name, logFC, adj.P.Val) %&gt;%
+  print()
+
+top50_cluster4_dge_down &lt;- cluster4_dge %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  left_join(gencode_gtf) %&gt;%
+  arrange(logFC) %&gt;%
+  dplyr::slice(1:50) %&gt;%
+  dplyr::select(gene_name, logFC, adj.P.Val) %&gt;%
+  print()</code></pre>
+</div>
+</div>
+<div id="visualizations" class="section level2">
+<h2>Visualizations</h2>
+<pre class="r"><code>library(EnhancedVolcano)
+## Change to gene names
+cluster4_dge_names &lt;- cluster4_dge %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(gencode_gtf, by = &quot;gene_id&quot;) %&gt;%
+  dplyr::distinct(gene_name, .keep_all = TRUE) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(var = &quot;gene_name&quot;) %&gt;%
+  dplyr::select(-gene_id, -gene_type, -gene_status, -level, -havana_gene) 
+
+head(cluster4_dge_names)
+
+## Plot
+EnhancedVolcano(
+  toptable = cluster4_dge_names,
+  lab = rownames(cluster4_dge_names),
+  x = &quot;logFC&quot;,
+  y = &quot;P.Value&quot;,
+  pCutoff = 0.05,
+  FCcutoff = 1.5, 
+  legendPosition = &quot;none&quot;,
+  title = &quot;DGE: Inflamed cluster vs all others&quot;,
+  transcriptPointSize = 1.5
+  
+)</code></pre>
+</div>
+<div id="write-out-data" class="section level2">
+<h2>Write out data</h2>
+<pre class="r"><code>saveRDS(counts_es, &quot;output/counts_expressionset_for_limma.rds&quot;)</code></pre>
+<pre class="r"><code>saveRDS(cluster1_dge, &quot;output/cluster1_dge.rds&quot;)
+saveRDS(cluster2_dge, &quot;output/cluster2_dge.rds&quot;)
+saveRDS(cluster3_dge, &quot;output/cluster3_dge.rds&quot;)
+saveRDS(cluster4_dge, &quot;output/cluster4_dge.rds&quot;)</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -737,27 +1403,6 @@ new notebooks, first commit
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.5.3 (2019-03-11)
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
-Running under: macOS Mojave 10.14.4
-
-Matrix products: default
-BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
-
-locale:
-[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-
-attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
-
-loaded via a namespace (and not attached):
- [1] workflowr_1.4.0 Rcpp_1.0.1      digest_0.6.20   rprojroot_1.3-2
- [5] backports_1.1.4 git2r_0.26.1    magrittr_1.5    evaluate_0.14  
- [9] highr_0.8       stringi_1.4.3   fs_1.3.1        whisker_0.3-2  
-[13] rmarkdown_1.13  tools_3.5.3     stringr_1.4.0   glue_1.3.1     
-[17] xfun_0.8        yaml_2.2.0      compiler_3.5.3  htmltools_0.3.6
-[21] knitr_1.23     </code></pre>
 </div>
 </div>
 
@@ -791,6 +1436,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

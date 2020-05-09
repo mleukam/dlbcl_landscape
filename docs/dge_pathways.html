@@ -11,9 +11,9 @@
 
 <meta name="author" content="mleukam" />
 
-<meta name="date" content="2019-06-14" />
+<meta name="date" content="2019-07-16" />
 
-<title>enrichment</title>
+<title>Pathway analysis of differentially expressed genes by cluster</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -377,9 +377,9 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">enrichment</h1>
+<h1 class="title toc-ignore">Pathway analysis of differentially expressed genes by cluster</h1>
 <h4 class="author">mleukam</h4>
-<h4 class="date">2019-06-14</h4>
+<h4 class="date">2019-07-16</h4>
 
 </div>
 
@@ -701,7 +701,7 @@ Message
 Rmd
 </td>
 <td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/e2b04164414d529fe354c85445de58e0329486c7/analysis/enrichment.Rmd" target="_blank">e2b0416</a>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/e2b04164414d529fe354c85445de58e0329486c7/analysis/dge_pathways.Rmd" target="_blank">e2b0416</a>
 </td>
 <td>
 mleukam
@@ -718,7 +718,7 @@ wflow_publish(c(“analysis/about.Rmd”, “analysis/abstract_figure.Rmd”,
 Rmd
 </td>
 <td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/a78a45cffe9d483012683d912ca3ab8f19d2000b/analysis/enrichment.Rmd" target="_blank">a78a45c</a>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/a78a45cffe9d483012683d912ca3ab8f19d2000b/analysis/dge_pathways.Rmd" target="_blank">a78a45c</a>
 </td>
 <td>
 mleukam
@@ -732,19 +732,19 @@ archives dump from local machine - near final gsva v4 cluster model
 </tr>
 <tr>
 <td>
-html
+Rmd
 </td>
 <td>
-<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/c7b68abef1c3acf9ef195c0584331d9253686ec7/docs/enrichment.html" target="_blank">c7b68ab</a>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/2960d8b54653f6823b6df05cc0a3cc6f023486cd/analysis/dge_pathways.Rmd" target="_blank">2960d8b</a>
 </td>
 <td>
 mleukam
 </td>
 <td>
-2019-06-30
+2019-07-18
 </td>
 <td>
-Build site.
+record keeping updates - did not yet build the pages for these notebooks
 </td>
 </tr>
 <tr>
@@ -752,16 +752,16 @@ Build site.
 Rmd
 </td>
 <td>
-<a href="https://github.com/mleukam/dlbcl_landscape/blob/f77ef41f45889002d270f64d1e8be78d909db7b8/analysis/enrichment.Rmd" target="_blank">f77ef41</a>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/01fb3c107e629cfc19b059394907946e892ab03a/analysis/dge_pathways.Rmd" target="_blank">01fb3c1</a>
 </td>
 <td>
 mleukam
 </td>
 <td>
-2019-06-30
+2019-07-16
 </td>
 <td>
-minor updates, getting ready for second attempt at GSVA
+updates of analysis pages without building html pages - for record keeping and safekeeping
 </td>
 </tr>
 </tbody>
@@ -771,227 +771,518 @@ minor updates, getting ready for second attempt at GSVA
 </div>
 </div>
 </div>
-<div id="setup" class="section level2">
-<h2>Setup</h2>
-<p>Clear workspace</p>
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<p>Clear the workspace</p>
 <pre class="r"><code>rm(list = ls())</code></pre>
 <pre class="r"><code>knitr::opts_chunk$set(eval = FALSE)</code></pre>
-<p>Load packages</p>
+<p>Load basic packages</p>
 <pre class="r"><code>library(&quot;tidyverse&quot;)
-library(&quot;GSVA&quot;)
-library(&quot;msigdbr&quot;)
-library(&quot;GSA&quot;)
-library(&quot;limma&quot;)
-library(&quot;EnhancedVolcano&quot;)</code></pre>
+library(&quot;fgsea&quot;)
+library(&quot;org.Hs.eg.db&quot;)
+library(&quot;msigdbr&quot;)</code></pre>
 <p>Read in data</p>
-<pre class="r"><code># expression matrix from preprocessing_count_data.Rmd
-total_counts &lt;- read_csv(&quot;output/dlbcl_expr_matrix.csv&quot;)
+<pre class="r"><code># toptables
+cluster1_dge &lt;- readRDS(&quot;output/cluster1_dge.rds&quot;)
+cluster2_dge &lt;- readRDS(&quot;output/cluster2_dge.rds&quot;)
+cluster3_dge &lt;- readRDS(&quot;output/cluster3_dge.rds&quot;)
+cluster4_dge &lt;- readRDS(&quot;output/cluster4_dge.rds&quot;)
 
-rownames &lt;- total_counts %&gt;% pull(gene)
-expr_matrix &lt;- total_counts %&gt;%
-  dplyr::select(-gene) %&gt;%
-  as.matrix()
-rownames(expr_matrix) &lt;- rownames
+ttable_list &lt;- list(cluster1_dge, cluster2_dge, cluster3_dge, cluster4_dge)
+names(ttable_list) &lt;- c(&quot;cluster1_dge&quot;, &quot;cluster2_dge&quot;, &quot;cluster3_dge&quot;, &quot;cluster4_dge&quot;)
 
-expr_matrix[1:5, 1:5]
-dim(expr_matrix)
-
-# gene sets from TCGA macrophage experiment
-gset &lt;- readRDS(&quot;data/gset_ids_complete.rds&quot;)
-str(gset)
-
-# clean up structure and names
-# drop downregulated genes for now
-upreg &lt;- gset[1:7]
-downreg &lt;- gset[8:14]
-t &lt;- gset[15]
-mac_and_t_gset &lt;- c(upreg, t)
-str(mac_and_t_gset)
-names(mac_and_t_gset) &lt;- (c(&quot;uchi_macrophage_cluster_1&quot;, &quot;uchi_macrophage_cluster_2&quot;, &quot;uchi_macrophage_cluster_3&quot;, &quot;uchi_macrophage_cluster_4&quot;, &quot;uchi_macrophage_cluster_5&quot;, &quot;uchi_macrophage_cluster_6&quot;, &quot;uchi_macrophage_cluster_7&quot;, &quot;uchi_t_cell_inflammation&quot;))
-str(mac_and_t_gset)
-
-# Read in lookup table for features, gencode v22 (used by GDC to label features)
+# lookup table for gene names
+# read in conversion table for gene IDs
 gencode_gtf &lt;- read_tsv(&quot;data/gencode.v22.primary_assembly.annotation.gtf.geneinfo&quot;)</code></pre>
-<p>Download additional gene sets <a href="https://cran.r-project.org/web/packages/msigdbr/vignettes/msigdbr-intro.html" class="uri">https://cran.r-project.org/web/packages/msigdbr/vignettes/msigdbr-intro.html</a></p>
-<pre class="r"><code># use msigdbr to retreive human gene sets from MSigDB
+</div>
+<div id="go-enrichment" class="section level1">
+<h1>GO Enrichment</h1>
+<div id="go-with-topgo" class="section level4">
+<h4>GO with TopGO</h4>
+<p><a href="https://bioconductor.org/packages/release/bioc/vignettes/topGO/inst/doc/topGO.pdf" class="uri">https://bioconductor.org/packages/release/bioc/vignettes/topGO/inst/doc/topGO.pdf</a></p>
+</div>
+<div id="go-with-clusterprofiler" class="section level4">
+<h4>GO with clusterProfiler</h4>
+<p>Vignettes and tutorials from the author used to generate this analysis: <a href="https://guangchuangyu.github.io/2016/01/go-analysis-using-clusterprofiler/" class="uri">https://guangchuangyu.github.io/2016/01/go-analysis-using-clusterprofiler/</a> <a href="https://yulab-smu.github.io/clusterProfiler-book/chapter5.html" class="uri">https://yulab-smu.github.io/clusterProfiler-book/chapter5.html</a></p>
+<p>Load packages</p>
+<pre class="r"><code>library(&quot;clusterProfiler&quot;)</code></pre>
+<p>Prepare data - input for enrichGO test is simple vector of gene names Will pass gene names that meet cutoff criteria for adj.p.val and logFC from DGE experiment.</p>
+<p>Add Entrez identifiers to gencode lookup table</p>
+<pre class="r"><code>gencode_symbols &lt;- gencode_gtf %&gt;%
+  pull(gene_name)
+  
+entrez &lt;- mapIds(org.Hs.eg.db, gencode_symbols, &#39;ENTREZID&#39;, &#39;SYMBOL&#39;) %&gt;%
+  enframe() %&gt;%
+  dplyr::rename(gene_name = name, entrez_id = value) %&gt;%
+  print()
+
+gencode_ent &lt;- gencode_gtf %&gt;%
+  left_join(entrez) %&gt;%
+  print()</code></pre>
+<p>Decide which genes to use for enrichment</p>
+<pre class="r"><code># set adjusted pval cutoff
+p_cut &lt;- 0.001
+
+# see range of fold-changes
+summary(ttable_list[[1]]$logFC)
+summary(ttable_list[[2]]$logFC)
+summary(ttable_list[[3]]$logFC)
+summary(ttable_list[[4]]$logFC)
+
+# set logFC cutoff at average of 3rd quartile fold-change (upregulated genes only)
+l_cut &lt;- (0.23247 + 0.178593 + 0.1258525 + 0.126851) / 4
+
+# get gene list of entrez IDs that pass cutoff for each cluster from DGE
+go_gene_list &lt;- ttable_list %&gt;%
+  map(function(df){rownames_to_column(df, var = &quot;gene_id&quot;)}) %&gt;%
+  map(as_tibble) %&gt;%
+  map(function(df){df %&gt;% 
+      dplyr::filter(adj.P.Val &lt; p_cut) %&gt;%
+      dplyr::filter(logFC &gt; l_cut)}) %&gt;%
+  map(function(df){left_join(df, gencode_ent)}) %&gt;%
+  map(function(df){pull(df, entrez_id)})
+
+str(go_gene_list)
+
+# get gene universe list (same for all clusters)
+go_gene_universe &lt;- ttable_list[[1]] %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(gencode_ent) %&gt;%
+  pull(entrez_id)
+str(go_gene_universe)</code></pre>
+<pre class="r"><code># get enriched/overrepresented GO lists for cluster 1 DGE
+ego1 &lt;- enrichGO(gene = go_gene_list[[1]],
+                 OrgDb = org.Hs.eg.db,
+                 ont = &quot;BP&quot;,
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = &quot;BH&quot;,
+                 universe = go_gene_universe,
+                 qvalueCutoff = 0.1)
+# http://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/
+
+# convert to gene names
+ego1 &lt;- setReadable(ego1, OrgDb = org.Hs.eg.db)
+
+# plot
+dotplot(ego1, showCategory = 30)
+
+ego1_simp &lt;- clusterProfiler::simplify(ego1, 
+                      cutoff = 0.7,
+                      by = &quot;p.adjust&quot;,
+                      select_fun = min)</code></pre>
+<pre class="r"><code># get enriched/overrepresented GO lists for cluster 2 DGE
+ego2 &lt;- enrichGO(gene = go_gene_list[[2]],
+                 OrgDb = org.Hs.eg.db,
+                 ont = &quot;BP&quot;,
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = &quot;BH&quot;,
+                 universe = go_gene_universe,
+                 qvalueCutoff = 0.1)
+# http://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/
+
+# convert to gene names
+ego2 &lt;- setReadable(ego2, OrgDb = org.Hs.eg.db)
+
+# plot
+dotplot(ego2, showCategory = 30)
+
+ego2_simp &lt;- clusterProfiler::simplify(ego2, 
+                      cutoff = 0.7,
+                      by = &quot;p.adjust&quot;,
+                      select_fun = min)</code></pre>
+<pre class="r"><code># get enriched/overrepresented GO lists for cluster 3 DGE
+ego2 &lt;- enrichGO(gene = go_gene_list[[3]],
+                 OrgDb = org.Hs.eg.db,
+                 ont = &quot;BP&quot;,
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = &quot;BH&quot;,
+                 universe = go_gene_universe,
+                 qvalueCutoff = 0.1)
+# http://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/
+
+# convert to gene names
+ego2 &lt;- setReadable(ego1, OrgDb = org.Hs.eg.db)
+
+# plot
+dotplot(ego2, showCategory = 30)
+
+ego2_simp &lt;- clusterProfiler::simplify(ego2, 
+                      cutoff = 0.7,
+                      by = &quot;p.adjust&quot;,
+                      select_fun = min)</code></pre>
+</div>
+</div>
+<div id="fgsea" class="section level1">
+<h1>FGSEA</h1>
+<div id="rank-lists" class="section level4">
+<h4>Rank lists</h4>
+<p>Filtering by FC and adjusted P-value</p>
+<pre class="r"><code># Adjusted p-value cutoff
+p_cut &lt;- 0.01
+
+# filter for p value
+nrow(ttable_list[[1]])
+ttable_df_list &lt;- ttable_list %&gt;%
+  map(function(df){rownames_to_column(df, var = &quot;gene_id&quot;)}) %&gt;%
+  map(as_tibble) %&gt;%
+  map(function(df){df %&gt;% 
+      dplyr::filter(adj.P.Val &lt; p_cut)})
+
+# how many significantly different genes left?
+nrow(ttable_df_list[[1]])
+nrow(ttable_df_list[[2]])
+nrow(ttable_df_list[[3]])
+nrow(ttable_df_list[[4]])</code></pre>
+<p><a href="http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html" class="uri">http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html</a></p>
+<p>Create ranked lists following this tutorial: <a href="https://bioinformatics-core-shared-training.github.io/cruk-summer-school-2018/RNASeq2018/html/06_Gene_set_testing.nb.html" class="uri">https://bioinformatics-core-shared-training.github.io/cruk-summer-school-2018/RNASeq2018/html/06_Gene_set_testing.nb.html</a></p>
+<p>Downloading gene sets from MSigDB: <a href="https://cran.r-project.org/web/packages/msigdbr/vignettes/msigdbr-intro.html" class="uri">https://cran.r-project.org/web/packages/msigdbr/vignettes/msigdbr-intro.html</a></p>
+<pre class="r"><code># define function for creating ranked lists
+ranklist &lt;- function(df){
+  ranks &lt;- df %&gt;%
+    rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+    left_join(gencode_ent) %&gt;%
+    dplyr::select(entrez_id, logFC) %&gt;%
+    mutate(logFC = as.double(logFC)) %&gt;%
+    drop_na(entrez_id)
+  rank_vector &lt;- ranks %&gt;% pull(logFC)
+  names(rank_vector) &lt;- ranks %&gt;% pull(entrez_id)
+  rank_vector
+}
+
+# apply to list of top tables
+rtable_list &lt;- map(ttable_list, ranklist)
+rtable_list[[1]]
+str(rtable_list)</code></pre>
+<pre class="r"><code># get gene sets from MSigDB
 m_df = msigdbr(species = &quot;Homo sapiens&quot;)
 
-# review subcategories
-summary(as.factor(m_df$gs_subcat))</code></pre>
-<div id="msigdb-gene-sets" class="section level4">
-<h4>MSigDB Gene Sets</h4>
-<p>Searched MSigDB website for C2 curated human gene sets unambiguously assocaited with immune function</p>
-<p><a href="http://software.broadinstitute.org/gsea/msigdb/search.jsp" class="uri">http://software.broadinstitute.org/gsea/msigdb/search.jsp</a></p>
-<pre class="r"><code># read in GMT file as a set of lists
-c2_immune_gsets &lt;- GSA.read.gmt(&quot;data/c2_human_immune_genesets.gmt&quot;)
+# format  gene sets as a list of character vectors of entrez gene names
+gs_df &lt;- m_df %&gt;%
+  mutate(gs_idname = paste0(gs_cat, &quot;.&quot;, gs_id, &quot;.&quot;, gs_name)) %&gt;%
+  dplyr::select(gs_idname, entrez_gene) %&gt;%
+  nest(data = entrez_gene) %&gt;%
+  arrange(desc(gs_idname))
 
-# get names of gene sets
-gsetnames &lt;- c2_immune_gsets$geneset.names
+gs_list &lt;- map(gs_df$data, pull) %&gt;%
+  map(as.character)
+names(gs_list) &lt;- gs_df$gs_idname
+str(gs_list)
 
-# select gene sets from msigdbr-retreived gene list with vector of gene set names
-my_gsets &lt;- m_df %&gt;%
-  dplyr::filter(gs_name %in% gsetnames)
-summary(as.factor(my_gsets$gs_name))
+# start with just the hallmark gene sets for testing
+hall_gs_subset &lt;- gs_df %&gt;%
+  dplyr::filter(grepl(&quot;^H&quot;, gs_idname))
 
-# convert gene symbols to gencode v22 names
-gencode_table &lt;- gencode_gtf %&gt;%
-  dplyr::select(gene_id, gene_name) %&gt;%
-  dplyr::rename(human_gene_symbol = gene_name)
-my_gsets_w_id &lt;- my_gsets %&gt;%
-  left_join(gencode_table)
-
-# how many failed to map?
-x &lt;- my_gsets_w_id$gene_id
-x[is.na(x)]
-length(x[!is.na(x)]) / nrow(my_gsets_w_id)
-# just over 96% success rate - acceptable 
-# which gene sets have the most missing genes?
-missing_genes &lt;- my_gsets_w_id %&gt;% group_by(gs_name) %&gt;% summarise(na_count = sum(is.na(gene_id))) %&gt;% arrange(desc(na_count))
-# which gene sets have the highest percentage of missing genes?
-totals &lt;- my_gsets_w_id %&gt;% group_by(gs_name) %&gt;% tally() %&gt;% rename(total = n)
-gs_table &lt;- totals %&gt;% 
-  left_join(missing_genes) %&gt;% 
-  mutate(percentage = na_count / total) %&gt;%
-  arrange(desc(percentage)) %&gt;%
-  print()
-# based on these findings, I won&#39;t remove any gene sets from further consideration
-my_gsets_cleaned &lt;- my_gsets_w_id %&gt;%
-  drop_na(gene_id)
-
-# make a list of gene id vectors for each gene set
-gsets_msig &lt;- my_gsets_cleaned %&gt;%
-  dplyr::select(gs_name, gene_id) %&gt;%
-  nest(key = &quot;gene_id&quot;) %&gt;%
-  print()
-gsets_msig_list &lt;- map(gsets_msig, as.list)
-gsets_vectors &lt;- gsets_msig_list$data %&gt;%
-  map(pull)
-names(gsets_vectors) &lt;- gsets_msig %&gt;% pull(gs_name)
-gsets_vectors
-str(gsets_vectors)</code></pre>
+hall_gs_list &lt;- map(hall_gs_subset$data, pull) %&gt;%
+  map(as.character)
+names(hall_gs_list) &lt;- hall_gs_subset$gs_idname
+str(hall_gs_list)</code></pre>
 </div>
-<div id="combine-gene-sets-save-for-outside-use" class="section level4">
-<h4>Combine Gene Sets, save for outside use</h4>
-<pre class="r"><code>total_immune_gset_v1 &lt;- c(mac_and_t_gset, gsets_vectors)
-str(total_immune_gset_v1)
-saveRDS(total_immune_gset_v1, &quot;output/total_immune_gset_v1.rds&quot;)</code></pre>
-</div>
-</div>
-<div id="gsva-scores-for-macrophage-and-t-cell-inflamed-gene-sets" class="section level2">
-<h2>GSVA scores for macrophage and T-cell inflamed gene sets</h2>
-<p>Run on cluster using scripts:</p>
-<ul>
-<li>run_gsva1.pbs</li>
-<li>gsva1.sh</li>
-<li>gsva1.r</li>
-</ul>
-<p>See code folder in GitHub repository for source code for scripts.</p>
-</div>
-<div id="limma-for-gene-set-enrichment" class="section level2">
-<h2>Limma for Gene Set Enrichment</h2>
-<pre class="r"><code># read in data from cluster
-nci_dlbcl_es &lt;- readRDS(&quot;data/dlbcl_total_immune_gset_v1_results.rds&quot;)
+<div id="gsea" class="section level4">
+<h4>GSEA</h4>
+<pre class="r"><code># define function to run hallmark gsea on each toptable
+library(BiocParallel)
 
-# read in pheno_data from previous notebook
-pheno_data &lt;- read_csv(&quot;output/nci_dlbcl_annotation.csv&quot;)</code></pre>
-<pre class="r"><code>nci_dlbcl_tbl &lt;- nci_dlbcl_es %&gt;%
+fgsea_hallmark &lt;- function(ranklist){
+  temp &lt;- fgsea(pathways = hall_gs_list, 
+                                  stats = ranklist,
+                                  minSize = 15, 
+                                  maxSize = 500,
+                                  nperm = 10000)
+  
+  collapsedPathways &lt;- collapsePathways(temp[order(pval)][padj &lt; 0.01],
+                                        hall_gs_list, 
+                                        ranklist)
+  mainPathways &lt;- temp[pathway %in% collapsedPathways$mainPathways][
+                         order(-NES)]
+  mainPathways
+}
+
+# apply function to list of cluster toptables
+hallmark_gsea_results &lt;- map(rtable_list, fgsea_hallmark)
+
+# review results
+# review results
+map(hallmark_gsea_results, function(df){as_tibble(df) %&gt;% 
+    dplyr::filter(padj &lt; 0.01) %&gt;% 
+    dplyr::select(&quot;pathway&quot;, &quot;ES&quot;, &quot;padj&quot;) %&gt;% 
+    arrange(desc(ES))})</code></pre>
+<pre class="r"><code># define function to run gsea on each toptable
+fgsea_batch &lt;- function(ranklist){
+  temp &lt;- fgsea(pathways = gs_list, 
+                                  stats = ranklist,
+                                  minSize = 15, 
+                                  maxSize = 500,
+                                  nperm = 10000)
+  
+  collapsedPathways &lt;- collapsePathways(temp[order(pval)][padj &lt; 0.01],
+                                        gs_list, 
+                                        ranklist)
+  mainPathways &lt;- temp[pathway %in% collapsedPathways$mainPathways][
+                         order(-NES)]
+  mainPathways
+}
+
+# apply function to list of cluster toptables
+gsea_results &lt;- map(rtable_list, fgsea_batch)
+
+# review results
+map(gsea_results, function(df){as_tibble(df) %&gt;% 
+    dplyr::select(&quot;pathway&quot;, &quot;ES&quot;, &quot;padj&quot;) %&gt;% 
+    arrange(desc(ES))})</code></pre>
+<p>Write out results for use in Cytoscape</p>
+<pre class="r"><code>gsea_cluster1 &lt;- gsea_results[[1]] %&gt;% as_tibble() 
+lead &lt;- map_chr(gsea_cluster1$leadingEdge, function(list){
+  paste(list, collapse = &quot;,&quot;)
+  })
+gsea_cluster1$leadingEdge &lt;- lead
+gsea_cluster1
+
+write_csv(gsea_cluster1, &quot;output/gsea_res_cluster1.csv&quot;)</code></pre>
+<p>Example code for collapsing pathways: <a href="http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html" class="uri">http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html</a></p>
+<p>Will instead handle the analysis and visualization of results with the EnrichmentMap App in Cytoscape 3.7.</p>
+<p><a href="https://enrichmentmap.readthedocs.io/en/latest/" class="uri">https://enrichmentmap.readthedocs.io/en/latest/</a></p>
+<p>Another option for functional annotation: <a href="http://genescf.kandurilab.org/documentation.php" class="uri">http://genescf.kandurilab.org/documentation.php</a> <a href="http://genescf.kandurilab.org/ftp/GeneSCF-Documentation_v1.1.pdf" class="uri">http://genescf.kandurilab.org/ftp/GeneSCF-Documentation_v1.1.pdf</a></p>
+<p>A third option for network analysis: <a href="https://www.networkanalyst.ca/NetworkAnalyst/resources/tutorials/t2a_single_list.pdf" class="uri">https://www.networkanalyst.ca/NetworkAnalyst/resources/tutorials/t2a_single_list.pdf</a></p>
+<p>Prepare data for GSEA desktop app</p>
+<p>RNK file format: <a href="https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats" class="uri">https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats</a></p>
+<pre class="r"><code># Column names need to start with `#` or just don&#39;t have any
+# Recommend Hugo Gene symbdols
+enframe(rtable_list[[1]]) %&gt;% 
+  dplyr::rename(entrez_id = name) %&gt;%
+  left_join(gencode_ent) %&gt;%
+  drop_na(gene_name) %&gt;%
+  dplyr::select(`#HGNC_symbol` = gene_name, logFC = value) %&gt;%
+  write_delim(&quot;output/clust1_vs_others_dge.rnk&quot;, delim = &quot;\t&quot;, col_names = FALSE)
+
+enframe(rtable_list[[2]]) %&gt;% 
+  dplyr::rename(entrez_id = name) %&gt;%
+  left_join(gencode_ent) %&gt;%
+  drop_na(gene_name) %&gt;%
+  dplyr::select(`#HGNC_symbol` = gene_name, logFC = value) %&gt;%
+  write_delim(&quot;output/clust2_vs_others_dge.rnk&quot;, delim = &quot;\t&quot;, col_names = FALSE)
+
+enframe(rtable_list[[3]]) %&gt;% 
+  dplyr::rename(entrez_id = name) %&gt;%
+  left_join(gencode_ent) %&gt;%
+  drop_na(gene_name) %&gt;%
+  dplyr::select(`#HGNC_symbol` = gene_name, logFC = value) %&gt;%
+  write_delim(&quot;output/clust3_vs_others_dge.rnk&quot;, delim = &quot;\t&quot;, col_names = FALSE)
+
+enframe(rtable_list[[4]]) %&gt;% 
+  dplyr::rename(entrez_id = name) %&gt;%
+  left_join(gencode_ent) %&gt;%
+  drop_na(gene_name) %&gt;%
+  dplyr::select(`#HGNC_symbol` = gene_name, logFC = value) %&gt;%
+  write_delim(&quot;output/clust4_vs_others_dge.rnk&quot;, delim = &quot;\t&quot;, col_names = FALSE)</code></pre>
+</div>
+<div id="hallmark-gene-sets" class="section level4">
+<h4>Hallmark gene sets</h4>
+<pre class="r"><code># Get hallmark gene sets from MSigDb (human)
+msigdbr_show_species()
+m_df = msigdbr(species = &quot;Homo sapiens&quot;, category = &quot;H&quot;)
+m_df
+
+# format for fgsea
+gs_list_hallmark = m_df %&gt;% 
+  split(x = .$gene_symbol, f = .$gs_name)
+str(gs_list_hallmark)
+
+# Get all human gene sets for relevant biological processes
+# Include Hallmark and curated C2 biological process sets
+# Exclude chromosome position gene sets
+# Exclude miRNA / regulatory motif gene sets
+# Include GO terms (C5)
+# Include computational gene sets from cancer microarray data (C4)
+# Include microarray &#39;oncogenic&#39; signatures
+# Include immunologic signatures, manual curation from human and mouse studies (C7)
+m_df_total = msigdbr(species = &quot;Homo sapiens&quot;) %&gt;%
+  dplyr::filter(gs_cat %in% c(&quot;H&quot;, &quot;C2&quot;, &quot;C4&quot;, &quot;C5&quot;, &quot;C7&quot;))
+m_df_total
+
+# get number of gene sets in each category
+summary(as.factor(m_df_total$gs_cat))
+
+# format for fgsea
+gs_list_total = m_df_total %&gt;% 
+  split(x = .$gene_symbol, f = .$gs_name)
+str(gs_list_total)</code></pre>
+<pre class="r"><code># read in toptables
+cluster1_dge &lt;- readRDS(&quot;output/cluster1_dge.rds&quot;)
+cluster2_dge &lt;- readRDS(&quot;output/cluster2_dge.rds&quot;)
+cluster3_dge &lt;- readRDS(&quot;output/cluster3_dge.rds&quot;)
+cluster4_dge &lt;- readRDS(&quot;output/cluster4_dge.rds&quot;)</code></pre>
+<p>Source for GSEA file prep (supplemental method 1): <a href="https://www.nature.com/articles/s41596-018-0103-9" class="uri">https://www.nature.com/articles/s41596-018-0103-9</a> Reimand et al “Pathway enrichment analysis and visualization of omics data using g:Profiler, GSEA, Cytoscape and EnrichmentMap” Nature Methods Jan 2019</p>
+<p>Create a two-column rank (.RNK) file of all gene IDs and corresponding scores to for GSEA pre-ranked analysis. To run GSEA in pre-ranked mode, you need a two column RNK file with gene/protein/probe name (column 1) and the associated score (column 2). The first column should contain the same type of gene IDs used in the pathway gene-set (GMT) file. GSEA will look for enrichment in the set of most differentially expressed genes at the top of the list as well as those at the bottom of the list. Genes at the top of the list are more highly expressed in class A of samples while genes at the bottom are highly expressed in class B. A score can be computed by multiplying direction (sign) of fold change and logarithm of p-value for each gene.</p>
+<pre class="r"><code># change gene ids to gene symbol
+cluster1_dge_names &lt;- cluster1_dge %&gt;%
   as.data.frame() %&gt;%
-  rownames_to_column(var = &quot;gene_set&quot;) %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
   as_tibble() %&gt;%
-  print()</code></pre>
-<p>Set up groups for contrast matrix</p>
-<pre class="r"><code># Need design matrix that specifies groups
-samples &lt;- colnames(nci_dlbcl_tbl)
+  left_join(gencode_gtf, by = &quot;gene_id&quot;) %&gt;%
+  dplyr::distinct(gene_name, .keep_all = TRUE) %&gt;%
+  dplyr::select(gene_name, everything()) %&gt;%
+  dplyr::select(-gene_id, -gene_type, -gene_status, -level, -havana_gene) 
+cluster1_dge_names
 
-# remove &quot;gene_set&quot; from vector
-samples &lt;- samples[-c(1)]
-sample_tibble &lt;- enframe(samples) %&gt;%
-  dplyr::select(samples = value)
+cluster2_dge_names &lt;- cluster2_dge %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(gencode_gtf, by = &quot;gene_id&quot;) %&gt;%
+  dplyr::distinct(gene_name, .keep_all = TRUE) %&gt;%
+  dplyr::select(gene_name, everything()) %&gt;%
+  dplyr::select(-gene_id, -gene_type, -gene_status, -level, -havana_gene) 
+cluster2_dge_names
 
-# pull out sample names from pheno_data
-highamp_samp &lt;- pheno_data %&gt;%
-  dplyr::filter(pdl1_status == &quot;high_amplified&quot;) %&gt;%
-  pull(case_submitter_id)
+cluster3_dge_names &lt;- cluster3_dge %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(gencode_gtf, by = &quot;gene_id&quot;) %&gt;%
+  dplyr::distinct(gene_name, .keep_all = TRUE) %&gt;%
+  dplyr::select(gene_name, everything()) %&gt;%
+  dplyr::select(-gene_id, -gene_type, -gene_status, -level, -havana_gene) 
+cluster3_dge_names
 
-nonamp_samp &lt;- pheno_data %&gt;%
-  filter(pdl1_status == &quot;non-amplified&quot;) %&gt;%
-  pull(case_submitter_id)
+cluster4_dge_names &lt;- cluster4_dge %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;gene_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(gencode_gtf, by = &quot;gene_id&quot;) %&gt;%
+  dplyr::distinct(gene_name, .keep_all = TRUE) %&gt;%
+  dplyr::select(gene_name, everything()) %&gt;%
+  dplyr::select(-gene_id, -gene_type, -gene_status, -level, -havana_gene) 
+cluster4_dge_names
 
-pdl1_table &lt;- pheno_data %&gt;% 
-  dplyr::select(case_submitter_id, pdl1_status) %&gt;%
-  mutate(pdl1_status = ifelse(pdl1_status == &quot;non-amplified&quot;, 
-                              &quot;non_amplified&quot;, 
-                              pdl1_status)) %&gt;%
-  mutate(pdl1_status = replace_na(pdl1_status, &quot;not_assesed&quot;)) %&gt;%
-  dplyr::rename(samples = case_submitter_id)
-summary(as.factor(pdl1_table$pdl1_status))</code></pre>
-<p>The order of samples for the design matrix and the fpkm matrix have to be identical</p>
-<pre class="r"><code># pull column names in order and join group assignment by sample name
-sampleorder &lt;- colnames(nci_dlbcl_es) %&gt;% 
-  enframe() %&gt;% 
-  dplyr::rename(samples = value)
-pdl1_groups_sorted &lt;- left_join(sampleorder, pdl1_table)
-pdl1_groups_sorted$pdl1_status &lt;- replace_na(pdl1_groups_sorted$pdl1_status, 
-                                             &quot;not_assessed&quot;)
+# calculate ranks
+ranks_clust1 &lt;- sign(cluster1_dge_names$logFC) * -log10(cluster1_dge_names$P.Value)
+names(ranks_clust1) &lt;- cluster1_dge_names$gene_name
+ranks_clust1 &lt;- sort(ranks_clust1, decreasing = TRUE)
+head(ranks_clust1)
+tail(ranks_clust1)
+summary(duplicated(names(ranks_clust1)))
 
-print(all.equal(colnames(nci_dlbcl_es), pdl1_groups_sorted$samples))
+ranks_clust2 &lt;- sign(cluster2_dge_names$logFC) * -log10(cluster2_dge_names$P.Value)
+names(ranks_clust2) &lt;- cluster2_dge_names$gene_name
+ranks_clust2 &lt;- sort(ranks_clust2, decreasing = TRUE)
+head(ranks_clust2)
+tail(ranks_clust2)
+summary(duplicated(names(ranks_clust2)))
 
-# set up design matrix
-rnames &lt;- pdl1_groups_sorted$samples
-groups &lt;- as.factor(pdl1_groups_sorted$pdl1_status)
-design &lt;- model.matrix(~ 0 + groups)
-colnames(design) &lt;- gsub(&quot;groups&quot;, &quot;&quot;, colnames(design))
-rownames(design) &lt;- rnames
-head(design)
+ranks_clust3 &lt;- sign(cluster3_dge_names$logFC) * -log10(cluster3_dge_names$P.Value)
+names(ranks_clust3) &lt;- cluster3_dge_names$gene_name
+ranks_clust3 &lt;- sort(ranks_clust3, decreasing = TRUE)
+head(ranks_clust3)
+tail(ranks_clust3)
+summary(duplicated(names(ranks_clust3)))
 
-contr.matrix &lt;- makeContrasts(high_amplified - non_amplified, levels = colnames(design))
-contr.matrix</code></pre>
-<div id="tests-of-functional-enrichment" class="section level4">
-<h4>Tests of functional enrichment</h4>
-<pre class="r"><code>adjPvalueCutoff &lt;- 0.05
-logFCcutoff &lt;- log2(2)
-fit &lt;- lmFit(nci_dlbcl_es, design)
-fit2 &lt;- contrasts.fit(fit, contr.matrix)
-fit2 &lt;- eBayes(fit2)
-allGeneSets &lt;- topTable(fit2, 
-                        coef = &quot;high_amplified - non_amplified&quot;, 
-                        number = Inf)
-DEgeneSets &lt;- topTable(fit2, coef = &quot;high_amplified - non_amplified&quot;,
-                       number = Inf,
-                       p.value = adjPvalueCutoff, 
-                       adjust.method = &quot;BH&quot;)
-DEgeneSets
-res &lt;- decideTests(fit2, p.value = adjPvalueCutoff)
-summary(res)</code></pre>
-<pre class="r"><code>DE_geneset_df &lt;- as.data.frame(DEgeneSets)
+ranks_clust4 &lt;- sign(cluster4_dge_names$logFC) * -log10(cluster3_dge_names$P.Value)
+names(ranks_clust4) &lt;- cluster4_dge_names$gene_name
+ranks_clust4 &lt;- sort(ranks_clust4, decreasing = TRUE)
+head(ranks_clust4)
+tail(ranks_clust4)
+summary(duplicated(names(ranks_clust4)))</code></pre>
+</div>
+<div id="hallmark-gsea" class="section level4">
+<h4>Hallmark GSEA</h4>
+<p>Source: <a href="http://bioconductor.org/packages/devel/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html" class="uri">http://bioconductor.org/packages/devel/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html</a></p>
+<p>Purrr functions</p>
+<pre class="r"><code>library(BiocParallel)
 
-GS_volcano &lt;- EnhancedVolcano(DE_geneset_df, 
-                lab = rownames(DE_geneset_df),
-                x = &quot;logFC&quot;, 
-                xlab = bquote(~ Log[2]~ &quot;FC&quot;),
-                xlim = c(-0.5, 0.5),
-                y = &quot;P.Value&quot;, 
-                ylab = bquote(~ -Log[10] ~ italic(P)),
-                ylim = c(0, 7),
-                FCcutoff = 0.15,
-                pCutoff = 0.001,
-                col = c(&#39;grey&#39;, &#39;grey&#39;, &#39;grey&#39;, &#39;red&#39;),
-                colAlpha = 1,
-                title = &quot;&quot;,
-                titleLabSize = 18,
-                transcriptPointSize = 2,
-                transcriptLabSize = 2.0,
-                DrawConnectors = FALSE,
-                widthConnectors = 0.2,
-                colConnectors = &quot;grey30&quot;,
-                axisLabSize = 20,
-                legend = c(&quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;), legendLabSize = -1, legendIconSize = -1,
-                border = &quot;full&quot;,
-                borderWidth = 1.5,
-                borderColour = &quot;black&quot;,
-                gridlines.major = FALSE,
-                gridlines.minor = FALSE)
-GS_volcano</code></pre>
+fgsea_hallmark &lt;- function(ranks){
+  temp &lt;- fgsea(pathways = gs_list_hallmark, 
+                                  stats = ranks,
+                                  minSize = 15, 
+                                  maxSize = 500,
+                                  nperm = 10000)
+  
+  collapsedPathways &lt;- collapsePathways(temp[order(pval)][padj &lt; 0.01],
+                                        gs_list_hallmark, 
+                                        ranks)
+  mainPathways &lt;- temp[pathway %in% collapsedPathways$mainPathways][
+                         order(-NES)]
+  mainPathways
+}
+
+# test function
+ranks &lt;- ranks_clust1
+fgsea_hallmark(ranks)[1:5, 1:5]
+
+# make list of rank stat vectors
+ranklist &lt;- list(ranks_clust1,
+                 ranks_clust2,
+                 ranks_clust3, 
+                 ranks_clust4)
+                 
+
+# apply function to list
+hallmark_results &lt;- map(ranklist, fgsea_hallmark)
+
+# display function
+mainpaths &lt;- function(df){
+  pathways &lt;- df %&gt;% pull(pathway)
+  pathways
+}
+
+# apply display function to results
+map(hallmark_results, mainpaths)
+
+# plots
+pathways1 &lt;- hallmark_results[[1]] %&gt;% arrange(desc(abs(NES))) %&gt;% pull(pathway)
+ranks = ranklist[[1]]
+plot1 &lt;- plotGseaTable(gs_list_hallmark[pathways1], 
+                       ranks, 
+                       hallmark_results[[1]])</code></pre>
+</div>
+<div id="larger-collection-of-gene-sets" class="section level4">
+<h4>Larger collection of gene sets</h4>
+<pre class="r"><code>fgsea_total &lt;- function(ranks){
+  temp &lt;- fgsea(pathways = gs_list_total, 
+                                  stats = ranks,
+                                  minSize = 15, 
+                                  maxSize = 500,
+                                  nperm = 10000)
+  
+  collapsedPathways &lt;- collapsePathways(temp[order(pval)][padj &lt; 0.01],
+                                        gs_list_total, 
+                                        ranks)
+  mainPathways &lt;- temp[pathway %in% collapsedPathways$mainPathways][
+                         order(abs(NES))]
+  mainPathways
+}
+
+# test function
+ranks &lt;- ranks_clust1
+fgsea_total(ranks)[1:5, 1:5]
+
+# make list of rank stat vectors
+ranklist &lt;- list(ranks_clust1,
+                 ranks_clust2,
+                 ranks_clust3, 
+                 ranks_clust4)
+
+# apply function to list
+total_results &lt;- map(ranklist, fgsea_total)
+
+# display function
+mainpaths &lt;- function(df){
+  pathways &lt;- df %&gt;% pull(pathway)
+  pathways
+}
+
+# apply display function to results
+map(total_results, mainpaths)
+
+# plots
+pathways1 &lt;- total_results[[1]] %&gt;% 
+  arrange(abs(NES)) %&gt;% 
+  dplyr::slice(1:20) %&gt;% 
+  pull(pathway)
+ranks &lt;- ranklist[[1]]
+plot1 &lt;- plotGseaTable(gs_list_total[pathways1], 
+                       ranks, 
+                       total_results[[1]])</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

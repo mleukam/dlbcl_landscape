@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 <meta name="author" content="mleukam" />
@@ -88,7 +88,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -237,6 +236,7 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -249,48 +249,9 @@ $(document).ready(function () {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -304,6 +265,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -419,7 +386,7 @@ div.section {
 
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
-<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 </button>
 </p>
 <div id="workflowr-report" class="collapse">
@@ -428,7 +395,7 @@ div.section {
 <a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -437,22 +404,22 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2019-07-15
+<strong>Last updated:</strong> 2020-05-09
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong> <code>dlbcl_landscape/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
 </p>
 <p>
 This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
-  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.4.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
 </p>
 <hr>
 </div>
 <div id="checks" class="tab-pane fade">
-<div class="panel-group" id="workflowr-checks">
+<div id="workflowr-checks" class="panel-group">
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
@@ -468,57 +435,12 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongobjectspresent"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>Environment:</strong> objects present </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
 </p>
 </div>
-<div id="strongEnvironmentstrongobjectspresent" class="panel-collapse collapse">
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
 <div class="panel-body">
-
-<p>
-The global environment had objects present when the code in the R Markdown file was run. These objects can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment. Use <code>wflow_publish</code> or <code>wflow_build</code> to ensure that the code is always run in an empty environment.
-</p>
-<p>
-The following objects were defined in the global environment when these results were created:
-</p>
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th style="text-align:left;">
-Name
-</th>
-<th style="text-align:left;">
-Class
-</th>
-<th style="text-align:left;">
-Size
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-data
-</td>
-<td style="text-align:left;">
-environment
-</td>
-<td style="text-align:left;">
-56 bytes
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-env
-</td>
-<td style="text-align:left;">
-environment
-</td>
-<td style="text-align:left;">
-56 bytes
-</td>
-</tr>
-</tbody>
-</table>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
 </div>
 </div>
 </div>
@@ -573,10 +495,10 @@ environment
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreed372d0ac0400710cfcfe3f4ee00a2f7709c7d07dtargetblankd372d0aa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/d372d0ac0400710cfcfe3f4ee00a2f7709c7d07d" target="_blank">d372d0a</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreee2b04164414d529fe354c85445de58e0329486c7targetblanke2b0416a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/mleukam/dlbcl_landscape/tree/e2b04164414d529fe354c85445de58e0329486c7" target="_blank">e2b0416</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreed372d0ac0400710cfcfe3f4ee00a2f7709c7d07dtargetblankd372d0aa" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcommleukamdlbcllandscapetreee2b04164414d529fe354c85445de58e0329486c7targetblanke2b0416a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -586,85 +508,156 @@ Ignored files:
     Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    NCI_mutations_vs_deconvolution.csv
+    Ignored:    data/.DS_Store
     Ignored:    data/1-s2.0-S1074761316304320-mmc2.xlsx
+    Ignored:    data/12864_2005_498_MOESM2_ESM.xls
     Ignored:    data/41591_2018_45_MOESM5_ESM.xlsx
+    Ignored:    data/CCLE_sample_info_file_2012-10-18.txt
     Ignored:    data/NIH_PDL1_amp_cases.csv
     Ignored:    data/NIH_PDL1_nonamp_cases.csv
+    Ignored:    data/PDL1dlbcl.rnaseq.kallisto.raw.txi.coding.cpm1.TMM.logCPM.sm24.csv
+    Ignored:    data/PanImmune_GeneSet_Definitions.xlsx
     Ignored:    data/aliquot.tsv
     Ignored:    data/azizi_curated.xlsx
     Ignored:    data/c2_human_immune_genesets.gmt
     Ignored:    data/dlbcl_total_immune_gset_v1_results.rds
     Ignored:    data/ds_JCO.18.01583-2.xlsx
+    Ignored:    data/duke_study_driver_mutations_top150_maf.csv
+    Ignored:    data/final_analysis_set.maf
     Ignored:    data/gdc_clinical_data.json
     Ignored:    data/gdc_files_and_case_ids.json
+    Ignored:    data/gencode.v22.annotation.gtf
     Ignored:    data/gencode.v22.primary_assembly.annotation.gtf.geneinfo
+    Ignored:    data/genesets/
     Ignored:    data/gset_ids_complete.rds
-    Ignored:    data/htseq_counts/
+    Ignored:    data/histo_metadata_dlbcl_landscape.csv
     Ignored:    data/journal.pone.0088309.s001.XLS
     Ignored:    data/mmc1.xlsx
     Ignored:    data/nejmoa1801445_appendix_2.xlsx
+    Ignored:    data/reactome_imm_signaling.tsv
     Ignored:    data/sample.tsv
     Ignored:    data/sig.rda
+    Ignored:    data/sig_genes.txt
+    Ignored:    data/temp.dgelist_edger.rds
     Ignored:    data/temp.dgelist_limma.rds
-    Ignored:    docs/.DS_Store
+    Ignored:    data/uchi_metadata.csv
+    Ignored:    logs/
+    Ignored:    output/.DS_Store
+    Ignored:    output/NCI_mutations_vs_deconvolution.csv
+    Ignored:    output/clust1_vs_others.txt
+    Ignored:    output/clust1_vs_others_dge.rnk
+    Ignored:    output/clust2_vs_others_dge.rnk
+    Ignored:    output/clust3_vs_others_dge.rnk
+    Ignored:    output/clust4_vs_others_dge.rnk
+    Ignored:    output/cluster1_dge.rds
+    Ignored:    output/cluster2_dge.rds
+    Ignored:    output/cluster3_dge.rds
+    Ignored:    output/cluster4_dge.rds
     Ignored:    output/combined_clin_data.xlsx
     Ignored:    output/combined_dlbcl_expr_matrix.csv
+    Ignored:    output/combined_es_gsva2_4cluster.rds
+    Ignored:    output/combined_es_gsva4_4cluster.rds
+    Ignored:    output/combined_expressionset.rds
+    Ignored:    output/combined_tpm_matrix.csv
+    Ignored:    output/counts_expressionset_for_limma.rds
     Ignored:    output/dlbcl_expr_matrix.csv
     Ignored:    output/dlbcl_total_immune_gset_v2_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v3_results.rds
+    Ignored:    output/dlbcl_total_immune_gset_v4_results.rds
     Ignored:    output/duke_expression_set_cleaned_log.rds
     Ignored:    output/duke_expressionset.rds
     Ignored:    output/duke_expressionset_pext.rds
     Ignored:    output/duke_extended_pheno_data.csv
     Ignored:    output/expr_matrix.csv
+    Ignored:    output/gsea_res_cluster1.csv
     Ignored:    output/gset_ids_complete_2.rds
+    Ignored:    output/gset_ids_complete_3.rds
+    Ignored:    output/gset_ids_complete_4.rds
+    Ignored:    output/gsva_v2_4clust_assign.rds
+    Ignored:    output/gsva_v3_4clust_assign.rds
+    Ignored:    output/gsva_v4_4clust_assign.rds
+    Ignored:    output/limma_voom_elist_1.rds
+    Ignored:    output/merged_raw_counts.csv
     Ignored:    output/nci_dlbcl_annotation.csv
     Ignored:    output/nci_dlbcl_unprocessed_counts.csv
     Ignored:    output/nci_expressionset.rds
     Ignored:    output/nci_expressionset_pext.rds
     Ignored:    output/nci_extended_pheno_data.csv
+    Ignored:    output/networkanal3_clust1.txt
+    Ignored:    output/networkanal3_clust2.txt
+    Ignored:    output/networkanal3_clust3.txt
+    Ignored:    output/networkanal3_clust4.txt
     Ignored:    output/total_immune_gset_v1.rds
+    Ignored:    output/tpm_cyt_expressionset.rds
+    Ignored:    output/tpm_expressionset.rds
+    Ignored:    output/uchi_cluster_assignments.csv
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019.pvals.txt
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019.txt
+    Ignored:    output/xCell_combined_tpm_matrix_xCell_2225072019_RAW.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.pvals.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819.txt
+    Ignored:    output/xCell_xcell_input_matrix_xCell_1039071819_RAW.txt
+    Ignored:    output/xcell_input_matrix.csv
 
 Untracked files:
-    Untracked:  analysis/visualizing_gsva_scores_3.Rmd
-    Untracked:  analysis/visualizing_gsva_scores_4.Rmd
-    Untracked:  data/12864_2005_498_MOESM2_ESM.xls
-    Untracked:  data/PanImmune_GeneSet_Definitions.xlsx
-    Untracked:  data/final_analysis_set.maf
-    Untracked:  data/genesets/
-    Untracked:  data/reactome_imm_signaling.tsv
-    Untracked:  data/sig_genes.txt
-    Untracked:  data/temp.dgelist_edger.rds
-    Untracked:  docs/assets/Rplot01.pdf
-    Untracked:  docs/assets/Rplot02.pdf
-    Untracked:  docs/assets/Rplot03.pdf
-    Untracked:  docs/assets/gsva4_heatmap_rawscores.pdf
-    Untracked:  output/combined_es_gsva2_4cluster.rds
-    Untracked:  output/combined_expressionset.rds
-    Untracked:  output/dlbcl_total_immune_gset_v3_results.rds
-    Untracked:  output/dlbcl_total_immune_gset_v4_results.rds
-    Untracked:  output/gset_ids_complete_3.rds
-    Untracked:  output/gset_ids_complete_4.rds
-    Untracked:  output/gsva_v2_4clust_assign.rds
-    Untracked:  output/gsva_v3_4clust_assign.rds
-    Untracked:  output/gsva_v4_4clust_assign.rds
-    Untracked:  output/mc1_score_matrix.csv
-    Untracked:  output/mc2_score_matrix.csv
-    Untracked:  output/mc3_score_matrix.csv
-    Untracked:  output/mc4_score_matrix.csv
-    Untracked:  output/mc5_score_matrix.csv
-    Untracked:  output/mc6_score_matrix.csv
-    Untracked:  output/mc7_score_matrix.csv
-    Untracked:  output/merged_raw_counts.csv
-    Untracked:  output/merged_raw_counts_1.csv
-    Untracked:  output/merged_raw_counts_2.csv
-    Untracked:  output/merged_raw_counts_3.csv
-    Untracked:  output/merged_raw_counts_4.csv
-    Untracked:  output/merged_raw_counts_5.csv
-    Untracked:  output/merged_raw_counts_6.csv
-    Untracked:  output/merged_raw_counts_7.csv
+    Untracked:  NCI_mutations_vs_deconvolution.xls
+    Untracked:  analysis/correlation_clusters.Rmd
+    Untracked:  analysis/mif.Rmd
+    Untracked:  analysis/new_signature_matrix.Rmd
+    Untracked:  analysis/table1.Rmd
+    Untracked:  analysis/visualizing_gsva_scores_5.Rmd
+    Untracked:  batch1_cell_counts.pdf
+    Untracked:  data/cibersort/
+    Untracked:  data/gistic_results_nci/
+    Untracked:  es_10k_hgnc/
+    Untracked:  output/ASH_ORAL_figures.png
+    Untracked:  output/ASH_ORAL_figures/
+    Untracked:  output/Rplot.pdf
+    Untracked:  output/Rplot01.pdf
+    Untracked:  output/batch1_cell_seg_df.rds
+    Untracked:  output/batch1_summary_cell_seg_df.rds
+    Untracked:  output/colored_hclust_plot_by_group.pdf
+    Untracked:  output/colored_hclust_plot_by_samples.pdf
+    Untracked:  output/combined_counts_dge.rds
+    Untracked:  output/combined_expr_matrix_for_signature_unprocessed.rmd
+    Untracked:  output/dgelist_pheno_data.rds
+    Untracked:  output/dlbcl_final_signature_matrix.tsv
+    Untracked:  output/dlbcl_gsva5_4cluster_hcpc.rds
+    Untracked:  output/dlbcl_gsva5_4cluster_pca.rds
+    Untracked:  output/dlbcl_uchi_batch1_mixture.tsv
+    Untracked:  output/duke_dlbcl_mixture.tsv
+    Untracked:  output/gse_69030_probes.tsv
+    Untracked:  output/hclust_labeled_by_cell_type.pdf
+    Untracked:  output/mif_pilot_data_plot.pdf
+    Untracked:  output/nci_dlbcl_mixture.tsv
+    Untracked:  output/phenodata_for_signature_matrix.rmd
+    Untracked:  output/reference_matrix_file.tsv
+    Untracked:  output/table1.html
+    Untracked:  output/uchi_deconvolution_batch_1.rds
+    Untracked:  output/uchi_pheno_clust
+    Untracked:  output/var_contribution_axis2.pdf
+    Untracked:  output/venn.png
+    Untracked:  output/venn.png.2020-02-23_11-17-47.log
+    Untracked:  output/venn.png.2020-02-23_11-17-56.log
+    Untracked:  output/venn.png.2020-02-23_11-20-44.log
+    Untracked:  preprocessed_data_for_signature_matrix_es.rds
 
 Unstaged changes:
-    Modified:   analysis/visualizing_gsva_scores_2.Rmd
+    Modified:   .gitignore
+    Deleted:    Rplot.pdf
+    Deleted:    Rplot001.png
+    Deleted:    Rplot002.png
+    Deleted:    Rplot01.pdf
+    Modified:   analysis/cyt.Rmd
+    Modified:   analysis/deconvolution.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/predictor.Rmd
+    Modified:   analysis/sparse_clustering.Rmd
+    Modified:   analysis/visualizing_gsva_scores_4.Rmd
+    Deleted:    data/DLBCL_histo/JG55/HE/14-1464/14-1464_Scan1_annotations.xml.lock
+    Modified:   output/design_for_limma.rds
+    Modified:   output/dgelist_for_limma.rds
 
 </code></pre>
 <p>
@@ -677,9 +670,120 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with <code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/e2b04164414d529fe354c85445de58e0329486c7/analysis/assign_mutations.Rmd" target="_blank">e2b0416</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2020-05-09
+</td>
+<td>
+wflow_publish(c(“analysis/about.Rmd”, “analysis/abstract_figure.Rmd”,
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/a78a45cffe9d483012683d912ca3ab8f19d2000b/analysis/assign_mutations.Rmd" target="_blank">a78a45c</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-10-12
+</td>
+<td>
+archives dump from local machine - near final gsva v4 cluster model
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/ea9871093a36139d500684b2618f89164552dc76/analysis/assign_mutations.Rmd" target="_blank">ea98710</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-19
+</td>
+<td>
+record keeping push - no html made yet
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/mleukam/dlbcl_landscape/6eb3aa2331bda38f2c5361c0d7105cc737d189fd/docs/assign_mutations.html" target="_blank">6eb3aa2</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/mleukam/dlbcl_landscape/blob/d372d0ac0400710cfcfe3f4ee00a2f7709c7d07d/analysis/assign_mutations.Rmd" target="_blank">d372d0a</a>
+</td>
+<td>
+mleukam
+</td>
+<td>
+2019-07-15
+</td>
+<td>
+new notebooks, first commit
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -688,102 +792,797 @@ There are no past versions. Publish this analysis with <code>wflow_publish()</co
 <h2>Setup</h2>
 <p>Clear the workspace</p>
 <pre class="r"><code>rm(list = ls())</code></pre>
+<pre class="r"><code>knitr::opts_chunk$set(eval = FALSE)</code></pre>
 <p>Load packages</p>
 <pre class="r"><code>library(maftools)
-library(tidyverse)</code></pre>
-<pre><code>── Attaching packages ────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
-<pre><code>✔ ggplot2 3.2.0     ✔ purrr   0.3.2
-✔ tibble  2.1.3     ✔ dplyr   0.8.3
-✔ tidyr   0.8.3     ✔ stringr 1.4.0
-✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
-<pre><code>── Conflicts ───────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::combine()    masks Biobase::combine(), BiocGenerics::combine()
-✖ dplyr::filter()     masks stats::filter()
-✖ dplyr::lag()        masks stats::lag()
-✖ ggplot2::Position() masks BiocGenerics::Position(), base::Position()</code></pre>
-<pre class="r"><code>library(RColorBrewer)
+library(tidyverse)
+library(RColorBrewer)
 library(knitr)
-library(ggpubr)</code></pre>
-<pre><code>Loading required package: magrittr</code></pre>
-<pre><code>
-Attaching package: &#39;magrittr&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:purrr&#39;:
-
-    set_names</code></pre>
-<pre><code>The following object is masked from &#39;package:tidyr&#39;:
-
-    extract</code></pre>
-<pre class="r"><code>library(ggsci)</code></pre>
+library(ggpubr)
+library(ggsci)
+library(Biobase)
+library(BiocGenerics)
+library(parallel)</code></pre>
+</div>
+<div id="read-in-and-clean-data" class="section level2">
+<h2>Read in and clean data</h2>
 <p>Read in NCI mutation data</p>
 <pre class="r"><code># read in significance rank list from MutSig2CV
-mutsig_siggenes &lt;- read_delim(&quot;data/sig_genes.txt&quot;, &quot;\t&quot;)</code></pre>
-<pre><code>Parsed with column specification:
-cols(
-  rank = col_double(),
-  gene = col_character(),
-  longname = col_character(),
-  codelen = col_double(),
-  nnei = col_double(),
-  nncd = col_double(),
-  nsil = col_double(),
-  nmis = col_double(),
-  nstp = col_double(),
-  nspl = col_double(),
-  nind = col_double(),
-  nnon = col_double(),
-  npat = col_double(),
-  nsite = col_double(),
-  pCV = col_double(),
-  pCL = col_double(),
-  pFN = col_double(),
-  p = col_double(),
-  q = col_double()
-)</code></pre>
-<pre class="r"><code># read in final analysis MAF from MutSig2CV
+mutsig_siggenes &lt;- read_delim(&quot;data/sig_genes.txt&quot;, &quot;\t&quot;)
+
+# read in final analysis MAF from MutSig2CV
 final_analysis_set &lt;- read_delim(
-  &quot;data/final_analysis_set.maf&quot;, &quot;\t&quot;)</code></pre>
-<pre><code>Parsed with column specification:
-cols(
-  .default = col_character(),
-  Entrez_Gene_Id = col_double(),
-  Center = col_logical(),
-  Chromosome = col_double(),
-  Start_Position = col_double(),
-  End_Position = col_double(),
-  x1000Genome_AC = col_double(),
-  x1000Genome_AF = col_double(),
-  x1000Genome_AFR_AF = col_double(),
-  x1000Genome_AMR_AF = col_double(),
-  x1000Genome_AN = col_double(),
-  x1000Genome_CS = col_logical(),
-  x1000Genome_DP = col_double(),
-  x1000Genome_EAS_AF = col_double(),
-  x1000Genome_END = col_logical(),
-  x1000Genome_EUR_AF = col_double(),
-  x1000Genome_IMPRECISE = col_logical(),
-  x1000Genome_MC = col_logical(),
-  x1000Genome_MEND = col_logical(),
-  x1000Genome_MLEN = col_logical(),
-  x1000Genome_MSTART = col_logical()
-  # ... with 67 more columns
-)</code></pre>
-<pre><code>See spec(...) for full column specifications.</code></pre>
-<pre><code>Warning: 3402 parsing failures.
- row                              col           expected                                       actual                          file
-1374 ESP_CA                           1/0/T/F/TRUE/FALSE http://www.ncbi.nlm.nih.gov/sites/varvu?gene &#39;data/final_analysis_set.maf&#39;
-1469 CGC_CancerGermlineMut            1/0/T/F/TRUE/FALSE yes                                          &#39;data/final_analysis_set.maf&#39;
-1469 CGC_CancerSyndrome               1/0/T/F/TRUE/FALSE Familial neuroblastoma                       &#39;data/final_analysis_set.maf&#39;
-1469 CGC_TumourTypesGermlineMutations 1/0/T/F/TRUE/FALSE neuroblastoma                                &#39;data/final_analysis_set.maf&#39;
-1470 CGC_CancerGermlineMut            1/0/T/F/TRUE/FALSE yes                                          &#39;data/final_analysis_set.maf&#39;
-.... ................................ .................. ............................................ .............................
-See problems(...) for more details.</code></pre>
-<pre class="r"><code># repair nonstandard variant classification
+  &quot;data/final_analysis_set.maf&quot;, &quot;\t&quot;)
+
+# repair nonstandard variant classification
 final_analysis_set$Variant_Classification &lt;- str_replace(final_analysis_set$Variant_Classification, &quot;Start_Codon_Del&quot;, &quot;Translation_Start_Site&quot;)
 
 final_analysis_set$Variant_Classification &lt;- str_replace(final_analysis_set$Variant_Classification, &quot;Stop_Codon_Ins&quot;, &quot;Nonstop_Mutation&quot;)
 
-final_analysis_set &lt;- as.data.frame(final_analysis_set)</code></pre>
+final_analysis_set &lt;- as.data.frame(final_analysis_set)
+
+nci_mut_by_sample &lt;- final_analysis_set %&gt;%
+  dplyr::select(sample_id = Tumor_Sample_Barcode, Hugo_Symbol) %&gt;%
+  mutate(Hugo_Symbol = ifelse(Hugo_Symbol == &quot;MLL2&quot;, &quot;KMT2D&quot;, Hugo_Symbol)) %&gt;%
+  as_tibble() %&gt;%
+  print()</code></pre>
 <p>Read in Duke mutation data</p>
+<pre class="r"><code>duke_mut_raw &lt;- read_csv(&quot;data/duke_study_driver_mutations_top150_maf.csv&quot;)
+
+duke_mut_by_sample &lt;- duke_mut_raw %&gt;%
+  dplyr::select(Tumor_Sample_Barcode, Hugo_Symbol) %&gt;%
+  tidyr::separate(Tumor_Sample_Barcode, 
+                  into = c(NA, NA, &quot;sample_id&quot;), 
+                  sep = &quot;_&quot;)  %&gt;%
+  mutate(sample_id = paste0(&quot;duke_&quot;, sample_id)) %&gt;%
+  arrange(sample_id) %&gt;%
+  as_tibble() %&gt;%
+  mutate(Hugo_Symbol = ifelse(Hugo_Symbol == &quot;MLL2&quot;, &quot;KMT2D&quot;, Hugo_Symbol)) %&gt;%
+  print()</code></pre>
+<div id="combine-mutation-data" class="section level4">
+<h4>Combine mutation data</h4>
+<pre class="r"><code>combined_mut &lt;- nci_mut_by_sample %&gt;%
+  bind_rows(duke_mut_by_sample) %&gt;%
+  print()
+
+# remove duplicate mutations in the same patient and same gene
+unique_mut &lt;- combined_mut %&gt;%
+  distinct(sample_id, Hugo_Symbol, .keep_all = TRUE) %&gt;%
+  print()
+
+nrow(combined_mut)
+nrow(unique_mut)</code></pre>
+</div>
+<div id="read-in-deconvolution-data" class="section level4">
+<h4>Read in deconvolution data</h4>
+<pre class="r"><code>nci_decon &lt;- read_csv(&quot;data/cibersort/NCI/abs_cell_number_estimate_022320/CIBERSORTx_Job2_Results.csv&quot;)
+
+duke_decon &lt;- read_csv(&quot;data/cibersort/Duke/abs_cell_number_estimate_022320/CIBERSORTx_Job3_Results.csv&quot;)
+
+combined_decon &lt;- nci_decon %&gt;%
+  bind_rows(duke_decon) %&gt;%
+  print()</code></pre>
+<p>Read in cluster assignment and combine</p>
+<pre class="r"><code>gsva4_es &lt;- readRDS(&quot;output/combined_es_gsva4_4cluster.rds&quot;)
+
+clust_assgn &lt;- pData(gsva4_es) %&gt;% 
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  dplyr::select(sample_id, clust) %&gt;%
+  as_tibble() %&gt;%
+  print()
+
+# get the total n
+clust_assgn %&gt;% distinct(sample_id) %&gt;% nrow()
+
+mut_clust &lt;- unique_mut %&gt;%
+  left_join(clust_assgn) %&gt;%
+  print()</code></pre>
+</div>
+<div id="mutation-counts-by-cluster" class="section level4">
+<h4>Mutation counts by cluster</h4>
+<p>Get mutation counts per gene for each cluster and combine back to a single table</p>
+<pre class="r"><code># get number of cases in the cluster
+mut_clust %&gt;% dplyr::filter(clust == &quot;1&quot;) %&gt;% distinct(sample_id) %&gt;% nrow()
+mut_clust %&gt;% dplyr::filter(clust == &quot;2&quot;) %&gt;% distinct(sample_id) %&gt;% nrow()
+mut_clust %&gt;% dplyr::filter(clust == &quot;3&quot;) %&gt;% distinct(sample_id) %&gt;% nrow()
+mut_clust %&gt;% dplyr::filter(clust == &quot;4&quot;) %&gt;% distinct(sample_id) %&gt;% nrow()
+
+# get counts by gene for clusters and compare each cluster for significance against pooled counts from each other cluster
+
+# first get mutation counts for each gene per cluster and create column for counts of unmutated genes
+cluster_1 &lt;- mut_clust %&gt;%
+  dplyr::filter(clust == &quot;1&quot;) %&gt;%
+  dplyr::select(-clust) %&gt;%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %&gt;%
+  count(Hugo_Symbol) %&gt;%
+  dplyr::rename(c1_mut = n) %&gt;%
+  mutate(c1_nonmut = 352 - c1_mut) %&gt;%
+  print()
+
+cluster_2 &lt;- mut_clust %&gt;%
+  dplyr::filter(clust == &quot;2&quot;) %&gt;%
+  dplyr::select(-clust) %&gt;%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %&gt;%
+  count(Hugo_Symbol) %&gt;%
+  dplyr::rename(c2_mut = n) %&gt;%
+  mutate(c2_nonmut = 277 - c2_mut) %&gt;%
+  print() 
+
+cluster_3 &lt;- mut_clust %&gt;%
+  dplyr::filter(clust == &quot;3&quot;) %&gt;%
+  dplyr::select(-clust) %&gt;%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %&gt;%
+  count(Hugo_Symbol) %&gt;%
+  dplyr::rename(c3_mut = n) %&gt;%
+  mutate(c3_nonmut = 222 - c3_mut) %&gt;%
+  print() 
+
+cluster_4 &lt;- mut_clust %&gt;%
+  dplyr::filter(clust == &quot;4&quot;) %&gt;%
+  dplyr::select(-clust) %&gt;%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %&gt;%
+  count(Hugo_Symbol) %&gt;%
+  dplyr::rename(c4_mut = n) %&gt;%
+  mutate(c4_nonmut = 317 - c4_mut) %&gt;%
+  print() 
+
+mut_counts_by_cluster &lt;- cluster_1 %&gt;%
+  full_join(cluster_2) %&gt;%
+  full_join(cluster_3) %&gt;%
+  full_join(cluster_4) %&gt;%
+  replace_na(list(c1_mut = 0, c2_mut = 0, c3_mut = 0, c4_mut = 0)) %&gt;%
+  replace_na(list(c1_nonmut = 0, c2_nonmut = 0, c3_nonmut = 0, c4_nonmut = 0)) %&gt;%
+  arrange(desc(c4_mut)) %&gt;%
+  print()
+
+mut_counts_matrix &lt;- as.data.frame(mut_counts_by_cluster) %&gt;%
+  column_to_rownames(var = &quot;Hugo_Symbol&quot;) %&gt;%
+  as.matrix()
+
+mut_counts_matrix[1:5, ]
+mut_counts &lt;- mut_counts_matrix[, c(1,3,5,7)]
+  
+# filter for genes without any meaningful number of total mutations
+# filter out genes that have a mutant allele fraction &lt; 0.05
+cutoff &lt;- 1189 * 0.05
+
+mut_counts_filtered &lt;- mut_counts_by_cluster %&gt;%
+  mutate(mut_totals = c1_mut + c2_mut + c3_mut + c4_mut) %&gt;%
+  filter(mut_totals &gt; cutoff) %&gt;%
+  print()</code></pre>
+</div>
+</div>
+<div id="test-pairwise-significance" class="section level2">
+<h2>Test pairwise significance</h2>
+<p>Significance testing per for each cluster vs pool of other clusters</p>
+<p><a href="https://stackoverflow.com/questions/41507230/fisher-test-on-multiple-data-entries-and-extract-results-in-separate-table/41512086#41512086?newreg=fbae75b1bdbc4796b925c53ca1e2f132" class="uri">https://stackoverflow.com/questions/41507230/fisher-test-on-multiple-data-entries-and-extract-results-in-separate-table/41512086#41512086?newreg=fbae75b1bdbc4796b925c53ca1e2f132</a></p>
+<p><a href="https://blog.rstudio.com/2016/02/02/tidyr-0-4-0/" class="uri">https://blog.rstudio.com/2016/02/02/tidyr-0-4-0/</a></p>
+<p><a href="https://jennybc.github.io/purrr-tutorial/index.html" class="uri">https://jennybc.github.io/purrr-tutorial/index.html</a></p>
+<pre class="r"><code>clust1_vs_pool &lt;- mut_counts_filtered %&gt;%
+  mutate(pool_mut = c2_mut + c3_mut + c4_mut) %&gt;%
+  mutate(pool_nonmut = c2_nonmut + c3_nonmut + c4_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c1_mut, c1_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+sig &lt;- clust1_vs_pool %&gt;%
+  nest(-Hugo_Symbol) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  arrange(p.value)
+
+clust_1_summary &lt;- sig %&gt;%
+  left_join(clust1_vs_pool) %&gt;%
+  mutate(p_adj = p.adjust(p.value, method = &quot;BH&quot;)) %&gt;%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %&gt;%
+  mutate(c1_rate = c1_mut / (c1_mut + c1_nonmut)) %&gt;%
+  print()
+
+clust_1_plotdata &lt;- clust_1_summary %&gt;%
+  mutate(pool_rate = pool_mut / pool_nonmut) %&gt;%
+  select(Hugo_Symbol, c1_rate, pool_rate, p_adj) %&gt;%
+  pivot_longer(cols = c(c1_rate, pool_rate),
+               names_to = &quot;c1_vs_pool&quot;, 
+               values_to = &quot;mut_rate&quot;) %&gt;%
+  dplyr::filter(p_adj &lt; 0.26)
+clust_1_plotdata
+
+clust_1_plot &lt;- ggplot(data = clust_1_plotdata,
+                       aes(x = Hugo_Symbol, y = mut_rate, group = c1_vs_pool, fill = c1_vs_pool)) +
+  geom_col(position = &quot;dodge&quot;)
+clust_1_plot</code></pre>
+<pre class="r"><code>clust2_vs_pool &lt;- mut_counts_filtered %&gt;%
+  mutate(pool_mut = c1_mut + c3_mut + c4_mut) %&gt;%
+  mutate(pool_nonmut = c1_nonmut + c3_nonmut + c4_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c2_mut, c2_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+sig &lt;- clust2_vs_pool %&gt;%
+  nest(-Hugo_Symbol) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  arrange(p.value)
+
+clust_2_summary &lt;- sig %&gt;%
+  left_join(clust2_vs_pool) %&gt;%
+  mutate(p_adj = p.adjust(p.value, method = &quot;BH&quot;)) %&gt;%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %&gt;%
+  print()</code></pre>
+<pre class="r"><code>clust3_vs_pool &lt;- mut_counts_filtered %&gt;%
+  mutate(pool_mut = c1_mut + c2_mut + c4_mut) %&gt;%
+  mutate(pool_nonmut = c1_nonmut + c2_nonmut + c4_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c3_mut, c3_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+sig &lt;- clust3_vs_pool %&gt;%
+  nest(-Hugo_Symbol) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  arrange(p.value)
+
+clust_3_summary &lt;- sig %&gt;%
+  left_join(clust3_vs_pool) %&gt;%
+  mutate(p_adj = p.adjust(p.value, method = &quot;BH&quot;)) %&gt;%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %&gt;%
+  print()</code></pre>
+<pre class="r"><code>clust4_vs_pool &lt;- mut_counts_filtered %&gt;%
+  mutate(pool_mut = c1_mut + c2_mut + c3_mut) %&gt;%
+  mutate(pool_nonmut = c1_nonmut + c2_nonmut + c3_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c4_mut, c4_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+sig &lt;- clust4_vs_pool %&gt;%
+  nest(-Hugo_Symbol) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  arrange(p.value)
+
+clust_4_summary &lt;- sig %&gt;%
+  left_join(clust4_vs_pool) %&gt;%
+  mutate(p_adj = p.adjust(p.value, method = &quot;BH&quot;)) %&gt;%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %&gt;%
+  print()</code></pre>
+</div>
+<div id="test-pairwise-mutations-of-pre-selected-genes" class="section level2">
+<h2>Test pairwise mutations of pre-selected genes</h2>
+<pre class="r"><code># EZH2 across all clusters
+
+# get column of mutants by cluster
+ezh2_mut &lt;- mut_counts_by_cluster %&gt;% 
+  dplyr::filter(Hugo_Symbol %in% c(&quot;EZH2&quot;)) %&gt;%
+  dplyr::select(c1 = c1_mut, c2 = c2_mut, c3 = c3_mut, c4 = c4_mut, -Hugo_Symbol) %&gt;%
+  as.matrix() %&gt;%
+  t() %&gt;%
+  print()
+
+colnames(ezh2_mut) &lt;- &quot;ezh2_mut&quot;
+ezh2_mut
+
+# get column of non-mutants by cluster
+ezh2_nonmut &lt;- mut_counts_by_cluster %&gt;% 
+  dplyr::filter(Hugo_Symbol %in% c(&quot;EZH2&quot;)) %&gt;%
+  dplyr::select(c1 = c1_nonmut, c2 = c2_nonmut, c3 = c3_nonmut, c4 = c4_nonmut, -Hugo_Symbol) %&gt;%
+  as.matrix() %&gt;%
+  t() %&gt;%
+  print()
+
+colnames(ezh2_nonmut) &lt;- &quot;ezh2_nonmut&quot;
+ezh2_nonmut
+
+# combine
+ezh2 &lt;- cbind(ezh2_mut, ezh2_nonmut)
+ezh2
+
+# test significance
+fisher.test(ezh2, simulate.p.value = TRUE)
+
+# TNFAIP3 across all clusters
+
+# get column of mutants by cluster
+tnfaip3_mut &lt;- mut_counts_by_cluster %&gt;% 
+  dplyr::filter(Hugo_Symbol %in% c(&quot;TNFAIP3&quot;)) %&gt;%
+  dplyr::select(c1 = c1_mut, c2 = c2_mut, c3 = c3_mut, c4 = c4_mut, -Hugo_Symbol) %&gt;%
+  as.matrix() %&gt;%
+  t() %&gt;%
+  print()
+
+colnames(tnfaip3_mut) &lt;- &quot;tnfaip3_mut&quot;
+tnfaip3_mut
+
+# get column of non-mutants by cluster
+tnfaip3_nonmut &lt;- mut_counts_by_cluster %&gt;% 
+  dplyr::filter(Hugo_Symbol %in% c(&quot;TNFAIP3&quot;)) %&gt;%
+  dplyr::select(c1 = c1_nonmut, c2 = c2_nonmut, c3 = c3_nonmut, c4 = c4_nonmut, -Hugo_Symbol) %&gt;%
+  as.matrix() %&gt;%
+  t() %&gt;%
+  print()
+
+colnames(tnfaip3_nonmut) &lt;- &quot;tnfaip3_nonmut&quot;
+tnfaip3_nonmut
+
+# combine
+tnfaip3 &lt;- cbind(tnfaip3_mut, tnfaip3_nonmut)
+tnfaip3
+
+# test significance
+fisher.test(tnfaip3, simulate.p.value = TRUE)
+
+# get column of mutants by cluster
+ezh2_mut &lt;- mut_counts_by_cluster %&gt;% 
+  dplyr::filter(Hugo_Symbol %in% c(&quot;EZH2&quot;)) %&gt;%
+  dplyr::select(c1 = c1_mut, c2 = c2_mut, c3 = c3_mut, c4 = c4_mut, -Hugo_Symbol) %&gt;%
+  as.matrix() %&gt;%
+  t() %&gt;%
+  print()
+
+colnames(ezh2_mut) &lt;- &quot;ezh2_mut&quot;
+ezh2_mut
+
+# get column of non-mutants by cluster
+ezh2_nonmut &lt;- mut_counts_by_cluster %&gt;% 
+  dplyr::filter(Hugo_Symbol %in% c(&quot;EZH2&quot;)) %&gt;%
+  dplyr::select(c1 = c1_nonmut, c2 = c2_nonmut, c3 = c3_nonmut, c4 = c4_nonmut, -Hugo_Symbol) %&gt;%
+  as.matrix() %&gt;%
+  t() %&gt;%
+  print()
+
+colnames(ezh2_nonmut) &lt;- &quot;ezh2_nonmut&quot;
+ezh2_nonmut
+
+# combine
+ezh2 &lt;- cbind(ezh2_mut, ezh2_nonmut)
+ezh2
+
+# test significance
+fisher.test(ezh2, simulate.p.value = TRUE)</code></pre>
+<pre class="r"><code># Test significance in hottest and coldest clusters compared to each other
+clust4_vs_clust1 &lt;- mut_counts_filtered %&gt;%
+  dplyr::select(Hugo_Symbol, c4_mut, c4_nonmut, c1_mut, c1_nonmut) %&gt;%
+  print()
+
+sig &lt;- clust4_vs_clust1 %&gt;%
+  nest(-Hugo_Symbol) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  arrange(p.value)
+
+clust4_clust1_summary &lt;- sig %&gt;%
+  left_join(clust4_vs_clust1) %&gt;%
+  mutate(p_adj = p.adjust(p.value, method = &quot;BH&quot;)) %&gt;%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %&gt;%
+  arrange(p_adj) %&gt;%
+  print()
+
+clust_14_plotdata &lt;- clust4_clust1_summary %&gt;%
+  mutate(c4_rate = c4_mut / (c4_nonmut + c4_mut)) %&gt;%
+  mutate(c1_rate = c1_mut / (c1_nonmut + c1_mut) ) %&gt;%
+  mutate(difference = (c4_rate - c1_rate)^2) %&gt;%
+  arrange(desc(difference)) %&gt;%
+  slice(1:10) %&gt;%
+  select(Hugo_Symbol, c1_rate, c4_rate, difference) %&gt;%
+  mutate(Hugo_Symbol = as_factor(Hugo_Symbol)) %&gt;%
+  mutate(Hugo_Symbol = fct_reorder(Hugo_Symbol, difference, .desc = TRUE)) %&gt;%
+  pivot_longer(cols = c(c1_rate, c4_rate),
+               names_to = &quot;c1_vs_c4&quot;, 
+               values_to = &quot;mut_rate&quot;) %&gt;%
+  mutate(c1_vs_c4 = as.factor(c1_vs_c4)) %&gt;%
+  mutate(c1_vs_c4 = fct_recode(c1_vs_c4, &quot;Inflamed&quot; = &quot;c4_rate&quot;,
+                               &quot;Cold&quot; = &quot;c1_rate&quot;)) %&gt;%
+  mutate(c1_vs_c4 = fct_relevel(c1_vs_c4, &quot;Cold&quot;, &quot;Inflamed&quot;)) %&gt;%
+  print()
+
+clust_14_plot &lt;- ggplot(data = clust_14_plotdata,
+                       aes(x = Hugo_Symbol, 
+                           y = mut_rate, 
+                           group = c1_vs_c4, 
+                           fill = c1_vs_c4)) +
+  geom_col(position = &quot;dodge&quot;) +
+  theme_classic2() +
+  scale_fill_d3(name = &quot;Cluster&quot;) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Mutation Rate&quot;)
+clust_14_plot
+
+# Test significance in intermedite clusters compared to each other
+clust2_vs_clust3 &lt;- mut_counts_filtered %&gt;%
+  dplyr::select(Hugo_Symbol, c2_mut, c2_nonmut, c3_mut, c3_nonmut) %&gt;%
+  print()
+
+sig &lt;- clust2_vs_clust3 %&gt;%
+  nest(-Hugo_Symbol) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  arrange(p.value)
+
+clust2_clust3_summary &lt;- sig %&gt;%
+  left_join(clust2_vs_clust3) %&gt;%
+  mutate(p_adj = p.adjust(p.value, method = &quot;BH&quot;)) %&gt;%
+  dplyr::select(Hugo_Symbol, p_adj, p = p.value, everything()) %&gt;%
+  print()
+
+clust_23_plotdata &lt;- clust2_clust3_summary %&gt;%
+  mutate(c2_rate = c2_mut / (c2_nonmut + c2_mut) ) %&gt;%
+  mutate(c3_rate = c3_mut / (c3_nonmut + c3_mut) ) %&gt;%
+  mutate(difference = (c3_rate - c2_rate)^2) %&gt;%
+  arrange(desc(difference)) %&gt;%
+  slice(1:10) %&gt;%
+  select(Hugo_Symbol, c2_rate, c3_rate, difference) %&gt;%
+  mutate(Hugo_Symbol = as_factor(Hugo_Symbol)) %&gt;%
+  mutate(Hugo_Symbol = fct_reorder(Hugo_Symbol, difference, .desc = TRUE)) %&gt;%
+  pivot_longer(cols = c(c2_rate, c3_rate),
+               names_to = &quot;c2_vs_c3&quot;, 
+               values_to = &quot;mut_rate&quot;) %&gt;%
+  mutate(c2_vs_c3 = as.factor(c2_vs_c3)) %&gt;%
+  mutate(c2_vs_c3 = fct_recode(c2_vs_c3, &quot;Intermediate-T&quot; = &quot;c2_rate&quot;,
+                               &quot;Intermediate-M&quot; = &quot;c3_rate&quot;)) %&gt;%
+  mutate(c2_vs_c3 = fct_relevel(c2_vs_c3, &quot;Intermediate-T&quot;, &quot;Intermediate-M&quot;)) %&gt;%
+  print()
+
+clust_23_plot &lt;- ggplot(data = clust_23_plotdata,
+                       aes(x = Hugo_Symbol, 
+                           y = mut_rate, 
+                           group = c2_vs_c3, 
+                           fill = c2_vs_c3)) +
+  geom_col(position = &quot;dodge&quot;) +
+  theme_classic2() +
+  scale_fill_d3(name = &quot;Cluster&quot;) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Mutation Rate&quot;)
+clust_23_plot</code></pre>
+</div>
+<div id="gprofiler-input" class="section level2">
+<h2>g:Profiler input</h2>
+<p>Get list of genes mutated over allele fraction of 0.05 for each individual cluster for input into g:profiler ordered enrichment test</p>
+<p>Rank by pairwise p-value and select only those significant at p &lt; 0.05 in univariate analysis for further investigation. Rank by mutant allele frequency to use with g:Profiler “ordered query”</p>
+<pre class="r"><code>cluster_1_maf &lt;- mut_clust %&gt;%
+  dplyr::filter(clust == &quot;1&quot;) %&gt;%
+  dplyr::select(-clust) %&gt;%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %&gt;%
+  count(Hugo_Symbol) %&gt;%
+  dplyr::rename(c1_mut = n) %&gt;%
+  mutate(MAF = c1_mut/352) %&gt;%
+  arrange(desc(MAF)) %&gt;%
+  left_join(mut_counts_by_cluster) %&gt;%
+  # filter out MAF with at least 1% MAF
+  dplyr::filter(MAF &gt; 0.01) %&gt;%
+  print()
+  
+clust1_vs_pool &lt;- cluster_1_maf %&gt;%
+  mutate(pool_mut = c2_mut + c3_mut + c4_mut) %&gt;%
+  mutate(pool_nonmut = c2_nonmut + c3_nonmut + c4_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c1_mut, c1_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+clust_1_ranked &lt;- clust1_vs_pool %&gt;%
+  nest(data = c(c1_mut, c1_nonmut, pool_mut, pool_nonmut)) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  # dplyr::filter(p.value &lt; 0.05) %&gt;%
+  left_join(cluster_1_maf) %&gt;%
+  arrange(desc(MAF)) %&gt;%
+  dplyr::select(Hugo_Symbol) %&gt;%
+  print()
+
+#-----------------------------------
+cluster_2_maf &lt;- mut_clust %&gt;%
+  dplyr::filter(clust == &quot;2&quot;) %&gt;%
+  dplyr::select(-clust) %&gt;%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %&gt;%
+  count(Hugo_Symbol) %&gt;%
+  dplyr::rename(c2_mut = n) %&gt;%
+  mutate(MAF = c2_mut/277) %&gt;%
+  arrange(desc(MAF)) %&gt;%
+  left_join(mut_counts_by_cluster) %&gt;%
+  # filter out MAF with at least 1% MAF
+  dplyr::filter(MAF &gt; 0.01) %&gt;%
+  print()
+  
+clust2_vs_pool &lt;- cluster_2_maf %&gt;%
+  mutate(pool_mut = c1_mut + c3_mut + c4_mut) %&gt;%
+  mutate(pool_nonmut = c1_nonmut + c3_nonmut + c4_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c2_mut, c2_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+clust_2_ranked &lt;- clust2_vs_pool %&gt;%
+  nest(data = c(c2_mut, c2_nonmut, pool_mut, pool_nonmut)) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  # dplyr::filter(p.value &lt; 0.05) %&gt;%
+  left_join(cluster_2_maf) %&gt;%
+  arrange(desc(MAF)) %&gt;%
+  dplyr::select(Hugo_Symbol) %&gt;%
+  print()
+
+#-----------------------------------
+cluster_3_maf &lt;- mut_clust %&gt;%
+  dplyr::filter(clust == &quot;3&quot;) %&gt;%
+  dplyr::select(-clust) %&gt;%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %&gt;%
+  count(Hugo_Symbol) %&gt;%
+  dplyr::rename(c3_mut = n) %&gt;%
+  mutate(MAF = c3_mut/222) %&gt;%
+  arrange(desc(MAF)) %&gt;%
+  left_join(mut_counts_by_cluster) %&gt;%
+  # filter out MAF with at least 1% MAF
+  dplyr::filter(MAF &gt; 0.01) %&gt;%
+  print()
+  
+clust3_vs_pool &lt;- cluster_3_maf %&gt;%
+  mutate(pool_mut = c2_mut + c1_mut + c4_mut) %&gt;%
+  mutate(pool_nonmut = c2_nonmut + c1_nonmut + c4_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c3_mut, c3_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+clust_3_ranked &lt;- clust3_vs_pool %&gt;%
+  nest(data = c(c3_mut, c3_nonmut, pool_mut, pool_nonmut)) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  # dplyr::filter(p.value &lt; 0.05) %&gt;%
+  left_join(cluster_3_maf) %&gt;%
+  arrange(desc(MAF)) %&gt;%
+  dplyr::select(Hugo_Symbol) %&gt;%
+  print()
+
+#-----------------------------------
+cluster_4_maf &lt;- mut_clust %&gt;%
+  dplyr::filter(clust == &quot;4&quot;) %&gt;%
+  dplyr::select(-clust) %&gt;%
+  mutate(sample_id = as.factor(sample_id),
+         Hugo_Symbol = as.factor(Hugo_Symbol)) %&gt;%
+  count(Hugo_Symbol) %&gt;%
+  dplyr::rename(c4_mut = n) %&gt;%
+  mutate(MAF = c4_mut/317) %&gt;%
+  arrange(desc(MAF)) %&gt;%
+  left_join(mut_counts_by_cluster) %&gt;%
+  # filter out MAF with at least 1% MAF
+  dplyr::filter(MAF &gt; 0.01) %&gt;%
+  print()
+  
+clust4_vs_pool &lt;- cluster_4_maf %&gt;%
+  mutate(pool_mut = c2_mut + c1_mut + c3_mut) %&gt;%
+  mutate(pool_nonmut = c2_nonmut + c1_nonmut + c3_nonmut) %&gt;%
+  dplyr::select(Hugo_Symbol, c4_mut, c4_nonmut, pool_mut, pool_nonmut) %&gt;%
+  print()
+
+clust_4_ranked &lt;- clust4_vs_pool %&gt;%
+  nest(data = c(c4_mut, c4_nonmut, pool_mut, pool_nonmut)) %&gt;%
+  mutate(matrix = map(data, ~matrix(unlist(.x), nrow = 2))) %&gt;% 
+  mutate(fisher = map(matrix, ~fisher.test(.x))) %&gt;%
+  mutate(stats = map(fisher, ~broom::glance(.x))) %&gt;%
+  unnest(stats) %&gt;%
+  dplyr::select(Hugo_Symbol, p.value, odds = estimate) %&gt;%
+  # dplyr::filter(p.value &lt; 0.05) %&gt;%
+  left_join(cluster_4_maf) %&gt;%
+  arrange(desc(MAF)) %&gt;%
+  dplyr::select(Hugo_Symbol) %&gt;%
+  print()
+
+#-----------------------------------
+
+mutations &lt;- list(c1 = pull(clust_1_ranked, Hugo_Symbol), c2 = pull(clust_2_ranked, Hugo_Symbol), c3 = pull(clust_3_ranked, Hugo_Symbol), c4 = pull(clust_4_ranked, Hugo_Symbol))
+
+library(gprofiler2)
+gostres &lt;- gost(query = mutations,
+                organism = &quot;hsapiens&quot;, 
+                ordered_query = TRUE, 
+                multi_query = TRUE, 
+                significant = TRUE, 
+                exclude_iea = FALSE, 
+                measure_underrepresentation = FALSE, 
+                evcodes = FALSE, 
+                user_threshold = 0.05, 
+                correction_method = &quot;g_SCS&quot;, 
+                domain_scope = &quot;annotated&quot;, 
+                custom_bg = NULL, 
+                numeric_ns = &quot;&quot;, 
+                sources = NULL, 
+                as_short_link = TRUE)
+gostres</code></pre>
+</div>
+<div id="display-mutation-density-versus-pca-from-gsva-v4v5" class="section level2">
+<h2>Display mutation density versus PCA from GSVA v4/v5</h2>
+<pre class="r"><code>dlbcl_pca &lt;- readRDS(&quot;output/dlbcl_gsva5_4cluster_pca.rds&quot;)
+dlbcl_hcpc &lt;- readRDS(&quot;output/dlbcl_gsva5_4cluster_hcpc.rds&quot;)
+
+hcpc_clust &lt;- dlbcl_hcpc$data.clust %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample_id, clust)
+
+# get coordinates for each sample and merge with total mutation data
+# merge with cluster assignment
+pca_ind_coord &lt;- dlbcl_pca$ind$coord %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(var = &quot;sample_id&quot;) %&gt;%
+  as_tibble() %&gt;%
+  left_join(unique_mut) %&gt;%
+  left_join(hcpc_clust) %&gt;%
+  print()
+
+pca_ind_coord %&gt;%
+  group_by(Hugo_Symbol) %&gt;%
+  summarize(mean_dim1 = mean(Dim.1), n = n()) %&gt;%
+  dplyr::filter(n &gt; 25) %&gt;%
+  arrange(desc(mean_dim1))
+
+pca_ind_coord %&gt;%
+  group_by(Hugo_Symbol) %&gt;%
+  summarize(mean_dim2 = mean(Dim.2), n = n()) %&gt;%
+  dplyr::filter(n &gt; 25) %&gt;%
+  arrange(desc(mean_dim2))</code></pre>
+<p>MYD88</p>
+<pre class="r"><code>pca_ind_coord %&gt;%
+  dplyr::filter(Hugo_Symbol == &quot;MYD88&quot;) %&gt;%
+  ggplot(aes(x = Dim.1, y = Dim.2)) + 
+    geom_bin2d(bins = 8) +
+    scale_fill_continuous(type = &quot;viridis&quot;) +
+    theme_classic2()
+
+pca_ind_coord %&gt;%
+  dplyr::filter(Hugo_Symbol == &quot;MYD88&quot;) %&gt;%
+  ggplot(aes(x = Dim.1)) +
+  geom_density() +
+  geom_vline(xintercept = 0) +
+  geom_vline(aes(xintercept = mean(Dim.1)), 
+             color = &quot;blue&quot;, 
+             linetype = &quot;dashed&quot;, 
+             size = 1)</code></pre>
+<p>MYC</p>
+<pre class="r"><code>pca_ind_coord %&gt;%
+  dplyr::filter(Hugo_Symbol == &quot;MYC&quot;) %&gt;%
+  ggplot(aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 12) +
+    scale_fill_continuous(type = &quot;viridis&quot;) +
+    theme_classic2()
+
+pca_ind_coord %&gt;%
+  dplyr::filter(Hugo_Symbol == &quot;EZH2&quot;) %&gt;%
+  ggplot(aes(x = Dim.1)) +
+  geom_density() +
+  geom_vline(xintercept = 0) +
+  geom_vline(aes(xintercept = mean(Dim.1)), 
+             color = &quot;blue&quot;, 
+             linetype = &quot;dashed&quot;, 
+             size = 1) +
+  theme_classic2() +
+  ylab(&quot;Mutation frequency&quot;)</code></pre>
+<p>TP53</p>
+<pre class="r"><code>tp53_ind_coord &lt;- pca_ind_coord %&gt;%
+  dplyr::filter(Hugo_Symbol == &quot;TP53&quot;)
+
+ggplot(data = tp53_ind_coord,
+       aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 12) +
+    scale_fill_continuous(type = &quot;viridis&quot;) +
+    theme_classic2()
+
+ggplot(data = tp53_ind_coord,
+       aes(x = Dim.1)) +
+  geom_density() +
+  geom_vline(xintercept = 0) +
+  geom_vline(data = tp53_ind_coord,
+             aes(xintercept = mean(Dim.1)), 
+             color = &quot;blue&quot;, 
+             linetype = &quot;dashed&quot;, 
+             size = 1) +
+  theme_classic2() +
+  ylab(&quot;Mutation frequency&quot;) +
+  geom_density(data = tp53_ind_coord, aes(x = Dim.2)) +
+  geom_vline(data = tp53_ind_coord,
+             aes(xintercept = mean(Dim.1)), 
+             color = &quot;red&quot;, 
+             linetype = &quot;dashed&quot;, 
+             size = 1)</code></pre>
+<p>SOCS1</p>
+<pre class="r"><code>socs1_ind_coord &lt;- pca_ind_coord %&gt;%
+  dplyr::filter(Hugo_Symbol == &quot;SOCS1&quot;)
+
+foxo1_ind_coord &lt;- pca_ind_coord %&gt;%
+  dplyr::filter(Hugo_Symbol == &quot;FOXO1&quot;)
+
+ggplot(data = socs1_ind_coord,
+       aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 12) +
+    scale_fill_continuous(type = &quot;viridis&quot;) +
+    theme_classic2()
+
+ggplot(data = foxo1_ind_coord,
+       aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 10) +
+    scale_fill_continuous(type = &quot;viridis&quot;) +
+    theme_classic2()
+
+ggplot(data = socs1_ind_coord,
+       aes(x = Dim.1)) +
+  geom_density(color = &quot;blue&quot;) +
+  geom_vline(xintercept = 0) +
+  geom_vline(data = socs1_ind_coord,
+             aes(xintercept = mean(Dim.1)), 
+             color = &quot;blue&quot;, 
+             linetype = &quot;dashed&quot;, 
+             size = 1) +
+  theme_classic2() +
+  ylab(&quot;Mutation frequency&quot;) +
+  geom_density(data = foxo1_ind_coord, aes(x = Dim.1), color = &quot;red&quot;) +
+  geom_vline(data = foxo1_ind_coord,
+             aes(xintercept = mean(Dim.1)), 
+             color = &quot;red&quot;, 
+             linetype = &quot;dashed&quot;, 
+             size = 1)
+
+jak1_ind_coord &lt;- pca_ind_coord %&gt;%
+  dplyr::filter(Hugo_Symbol == &quot;JAK1&quot;)
+
+s1pr2_ind_coord &lt;- pca_ind_coord %&gt;%
+  dplyr::filter(Hugo_Symbol == &quot;S1PR2&quot;)
+
+ggplot(data = jak1_ind_coord,
+       aes(x = Dim.2)) +
+  geom_density(color = &quot;red&quot;) +
+  geom_vline(xintercept = 0) +
+  geom_vline(data = jak1_ind_coord,
+             aes(xintercept = mean(Dim.2)), 
+             color = &quot;red&quot;, 
+             linetype = &quot;dashed&quot;, 
+             size = 1) +
+  theme_classic2() +
+  ylab(&quot;Mutation frequency&quot;) +
+  geom_density(data = s1pr2_ind_coord, aes(x = Dim.2), color = &quot;blue&quot;) +
+  geom_vline(data = s1pr2_ind_coord,
+             aes(xintercept = mean(Dim.2)), 
+             color = &quot;blue&quot;, 
+             linetype = &quot;dashed&quot;, 
+             size = 1)
+
+ggplot(data = s1pr2_ind_coord,
+       aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 5) +
+    scale_fill_continuous(type = &quot;viridis&quot;) +
+    theme_classic2() +
+    geom_hline(yintercept = 0, linetype = &quot;dashed&quot;, color = &quot;grey&quot;, size = 1)
+
+ggplot(data = jak1_ind_coord,
+       aes(x = Dim.1, y = Dim.2)) + 
+    geom_hex(bins = 5) +
+    scale_fill_continuous(type = &quot;viridis&quot;) +
+    theme_classic2() +
+  geom_hline(yintercept = 0, linetype = &quot;dashed&quot;, color = &quot;grey&quot;, size = 1)</code></pre>
+<p>SOCS1, oncogene or tumor suppressor: <a href="https://www.sciencedirect.com/science/article/abs/pii/S1043466616300059" class="uri">https://www.sciencedirect.com/science/article/abs/pii/S1043466616300059</a></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -792,79 +1591,6 @@ final_analysis_set &lt;- as.data.frame(final_analysis_set)</code></pre>
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.5.3 (2019-03-11)
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
-Running under: macOS Mojave 10.14.4
-
-Matrix products: default
-BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
-
-locale:
-[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-
-attached base packages:
-[1] parallel  stats     graphics  grDevices utils     datasets  methods  
-[8] base     
-
-other attached packages:
- [1] ggsci_2.9           ggpubr_0.2.1        magrittr_1.5       
- [4] knitr_1.23          RColorBrewer_1.1-2  forcats_0.4.0      
- [7] stringr_1.4.0       dplyr_0.8.3         purrr_0.3.2        
-[10] readr_1.3.1         tidyr_0.8.3         tibble_2.1.3       
-[13] ggplot2_3.2.0       tidyverse_1.2.1     maftools_1.8.10    
-[16] Biobase_2.42.0      BiocGenerics_0.28.0
-
-loaded via a namespace (and not attached):
- [1] nlme_3.1-140                bitops_1.0-6               
- [3] matrixStats_0.54.0          fs_1.3.1                   
- [5] lubridate_1.7.4             httr_1.4.0                 
- [7] doParallel_1.0.14           rprojroot_1.3-2            
- [9] GenomeInfoDb_1.18.2         tools_3.5.3                
-[11] backports_1.1.4             R6_2.4.0                   
-[13] lazyeval_0.2.2              colorspace_1.4-1           
-[15] GetoptLong_0.1.7            withr_2.1.2                
-[17] tidyselect_0.2.5            gridExtra_2.3              
-[19] compiler_3.5.3              git2r_0.26.1               
-[21] cli_1.1.0                   rvest_0.3.4                
-[23] xml2_1.2.0                  DelayedArray_0.8.0         
-[25] pkgmaker_0.28               rtracklayer_1.42.2         
-[27] scales_1.0.0                NMF_0.21.0                 
-[29] digest_0.6.20               Rsamtools_1.34.1           
-[31] rmarkdown_1.13              XVector_0.22.0             
-[33] pkgconfig_2.0.2             htmltools_0.3.6            
-[35] bibtex_0.4.2                BSgenome_1.50.0            
-[37] highr_0.8                   readxl_1.3.1               
-[39] rlang_0.4.0                 GlobalOptions_0.1.0        
-[41] rstudioapi_0.10             shape_1.4.4                
-[43] generics_0.0.2              jsonlite_1.6               
-[45] mclust_5.4.4                BiocParallel_1.16.6        
-[47] RCurl_1.95-4.12             GenomeInfoDbData_1.2.0     
-[49] wordcloud_2.6               Matrix_1.2-17              
-[51] Rcpp_1.0.1                  munsell_0.5.0              
-[53] S4Vectors_0.20.1            stringi_1.4.3              
-[55] yaml_2.2.0                  SummarizedExperiment_1.12.0
-[57] zlibbioc_1.28.0             plyr_1.8.4                 
-[59] grid_3.5.3                  ggrepel_0.8.1              
-[61] crayon_1.3.4                lattice_0.20-38            
-[63] haven_2.1.1                 Biostrings_2.50.2          
-[65] cowplot_0.9.4               splines_3.5.3              
-[67] hms_0.4.2                   circlize_0.4.6             
-[69] ComplexHeatmap_1.20.0       pillar_1.4.2               
-[71] GenomicRanges_1.34.0        rjson_0.2.20               
-[73] ggsignif_0.5.0              rngtools_1.4               
-[75] reshape2_1.4.3              codetools_0.2-16           
-[77] stats4_3.5.3                XML_3.98-1.20              
-[79] glue_1.3.1                  evaluate_0.14              
-[81] modelr_0.1.4                data.table_1.12.2          
-[83] foreach_1.4.4               cellranger_1.1.0           
-[85] gtable_0.3.0                assertthat_0.2.1           
-[87] xfun_0.8                    gridBase_0.4-7             
-[89] xtable_1.8-4                broom_0.5.2                
-[91] survival_2.44-1.1           iterators_1.0.10           
-[93] GenomicAlignments_1.18.1    registry_0.5-1             
-[95] IRanges_2.16.0              workflowr_1.4.0            
-[97] cluster_2.1.0              </code></pre>
 </div>
 </div>
 
@@ -898,6 +1624,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
