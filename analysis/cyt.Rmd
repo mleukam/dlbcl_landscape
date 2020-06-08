@@ -15,6 +15,10 @@ rm(list = ls())
 ```
 
 ```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r}
 # load packages
 library(tidyverse)
 library(Biobase)

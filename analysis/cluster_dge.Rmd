@@ -20,22 +20,23 @@ knitr::opts_chunk$set(eval = FALSE)
 
 Load packages
 ```{r}
-library("tidyverse")
-library("Biobase")
-library("limma")
-library("edgeR")
-library("ggdark")
-library("ggsci")
-library("viridis")
-library("sva")
+
+library(Biobase)
+library(limma)
+library(edgeR)
+library(ggdark)
+library(ggsci)
+library(viridis)
+library(sva)
 library(ggpubr)
+library(tidyverse)
 
 ```
 
-Read in data
+## GSVA model version 5 - NCI only
+
 ```{r}
-# Combined duke+nci es with gsva4, 4-cluster model phenodata and log-transformed, normalized read counts
-combined_es <- readRDS("output/combined_es_gsva4_4cluster.rds")
+nci_clust_data <- readRDS("output/nci_pheno_gsva_clust_v5.rds")
 ```
 
 Setup for limma voom linear modeling following limma user's manual https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf
@@ -49,6 +50,351 @@ Recommended steps:
 3. TMM normalize
 4. Do not log transform
 5. Pass batches (sequencing center) to limma voom with precision weights for batch effect modeling
+
+Read in raw counts
+```{r}
+total_counts <- read_csv("output/nci_dlbcl_unprocessed_counts.csv")
+
+# read in conversion table for gene IDs
+gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
+```
+
+#### Filter for protein coding genes
+```{r}
+# filter for protein coding genes
+total_counts_prcode <- total_counts %>%
+  dplyr::rename(gene_id = gene) %>%
+  left_join(gencode_gtf, by = "gene_id") %>%
+  dplyr::filter(gene_type == "protein_coding") %>%
+  dplyr::select(-gene_name, -gene_type, -gene_status, -level, -havana_gene) %>%
+  dplyr::select(gene_id, everything())
+total_counts_prcode[1:5, 1:5]
+
+nrow(total_counts)
+nrow(total_counts_prcode)
+```
+
+#### Density plots before expression filtering
+```{r eval = FALSE}
+tidy_counts <- total_counts_prcode %>% 
+  gather(key = "sampleID", value = "intensity", -gene_id) 
+
+dplot1 <- ggplot(tidy_counts, aes(intensity)) +
+  geom_density() + 
+  theme(legend.position = "none") +
+  xlim(-5, 100) +
+  ggtitle("Density plot of counts for NCI DLBCL") +
+  theme_classic2()
+dplot1
+
+dplot2 <- ggplot(tidy_counts, aes(log(intensity))) +
+  geom_density() +
+  theme(legend.position = "none") +
+  xlim(-20, 20) +
+  ggtitle("Density plot of log(counts) for NCI DLBCL") +
+  theme_classic2()
+dplot2
+```
+
+#### Filter by expression levels
+
+Will use CPM for filtering
+```{r}
+# move gene names to rownames
+totcounts_prcode_matrix <- total_counts_prcode %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_id")
+totcounts_prcode_matrix[1:5, 1:5]
+dim(totcounts_prcode_matrix)
+
+cpm_prcode_matrix <- cpm(totcounts_prcode_matrix, log = FALSE)
+
+# apply hard cutoffs 
+# filter out genes that have counts <= 10 in at least half of cases
+# count expression cutoff: 10
+cutoff <- 1
+# set filter fraction
+min_sm_frac = 0.5
+filter_frac = min_sm_frac * ncol(cpm_prcode_matrix)
+filter_frac
+total_stats <- data.frame(
+  total = apply(cpm_prcode_matrix, 
+                1, 
+               function(x) {sum(x > cutoff, na.rm = TRUE) } ))
+# get indices that meet criteria
+keep <- which(total_stats$total >= filter_frac)
+
+# use indices to filter COUNTS MATRIX (not cpm) and check results
+dim(totcounts_prcode_matrix)
+total_nci_filtered = totcounts_prcode_matrix[keep,]
+dim(total_nci_filtered)
+total_nci_filtered[1:5, 1:5]
+```
+
+#### Density plots after expression filtering
+```{r eval = FALSE}
+tidy_counts <- total_nci_filtered %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  gather(key = "sampleID", value = "counts", -gene_id) 
+
+dplot1 <- ggplot(tidy_counts, aes(counts)) +
+  geom_density() + 
+  theme(legend.position = "none") +
+  xlim(-5, 100) +
+  ggtitle("Density plot of filtered counts for NCI DLBCL") +
+  theme_classic2()
+dplot1
+
+dplot2 <- ggplot(tidy_counts, aes(log(counts))) +
+  geom_density() +
+  theme(legend.position = "none") +
+  xlim(-20, 20) +
+  ggtitle("Density plot of filtered log(counts) for NCI DLBCL") +
+  dark_theme_gray()
+dplot2
+```
+
+## DGE by cluster
+
+The contrast matrix for the differential gene expression will be to compare each cluster to all other clusters)
+
+Contrast matrix bioC forum question: https://support.bioconductor.org/p/26251/
+
+General contrast coding: https://stats.idre.ucla.edu/r/library/r-library-contrast-coding-systems-for-categorical-variables/#DEVIATION
+
+Contrast coding for linear models in R (detailed instructions on custom matrix): https://stats.stackexchange.com/questions/52252/how-to-specify-a-contrast-matrix-in-r-for-the-difference-between-one-level-and
+
+#### Limma
+```{r}
+# create DGEList
+dge <- DGEList(counts = total_nci_filtered)
+
+# apply TMM normalization to DGE
+dge <- calcNormFactors(dge)
+
+# set up design matrix
+# include sequencing center as a batch variable to the model
+identical(colnames(total_nci_filtered), rownames(nci_clust_data))
+rnames <- rownames(nci_clust_data)
+groups <- nci_clust_data %>% 
+  pull(gsva_clust) %>%
+  paste0("cluster_", .) %>%
+  as.factor()
+design <- model.matrix(~ 0 + groups)
+rownames(design) <- rnames
+head(design)
+
+# write out DGElist and design
+saveRDS(dge, "output/v5_nci_dgelist_for_limma.rds")
+saveRDS(design, "output/v5_nci_design_for_limma.rds")
+```
+
+Limma voom with quality weights - run on a cluster
+```{r eval = FALSE}
+## See code folder in github repo for full script
+# read in data
+dge <- readRDS("/gpfs/data/kline-lab/inputs/v5_nci_dgelist_for_limma.rds")
+design <- readRDS("/gpfs/data/kline-lab/inputs/v5_nci_design_for_limma.rds")
+
+# voom transformation is applied to the normalized and filtered DGEList object
+v <- voomWithQualityWeights(dge, 
+                            design, 
+                            plot = TRUE, 
+                            normalize = "quantile")
+
+# fit linear model and estimate DGE
+fit <- lmFit(v, design)
+
+# write out results
+saveRDS <- saveRDS(v, "/gpfs/data/kline-lab/tcga_macs/output/nci_limma_voom_elist_1.rds")
+
+saveRDS <- saveRDS(fit, "/gpfs/data/kline-lab/tcga_macs/output/nci_limma_voom_marraylmfit.rds")
+```
+
+Read in results
+```{r}
+v <- readRDS("output/nci_limma_voom_elist_1.rds")
+fit <- readRDS("output/nci_limma_voom_marraylmfit.rds")
+```
+
+
+DGE Cluster 1
+```{r}
+# set up contrast matrix
+contr_matrix_c1 <- makeContrasts("clust_1_vs_others" = groupscluster_1 - (groupscluster_2 + groupscluster_3 + groupscluster_4) / 3, 
+  levels = colnames(design))
+contr_matrix_c1
+
+# use contrast matrix and eBayes to estimate SEM and pvalues
+fit_c1 <- contrasts.fit(fit, contr_matrix_c1)
+fit_c1 <- eBayes(fit_c1)
+
+cluster1_dge <- topTable(fit_c1, 
+                         adjust.method = "BH", 
+                         sort.by = "none", 
+                         number = Inf)
+
+top50_cluster1_dge_up <- cluster1_dge %>%
+  rownames_to_column(var = "gene_id") %>%
+  left_join(gencode_gtf) %>%
+  arrange(desc(logFC)) %>%
+  dplyr::slice(1:50) %>%
+  dplyr::select(gene_name, logFC, adj.P.Val) %>%
+  print()
+
+top50_cluster1_dge_down <- cluster1_dge %>%
+  rownames_to_column(var = "gene_id") %>%
+  left_join(gencode_gtf) %>%
+  arrange(logFC) %>%
+  dplyr::slice(1:50) %>%
+  dplyr::select(gene_name, logFC, adj.P.Val) %>%
+  print()
+```
+
+DGE Cluster 2
+```{r}
+# set up contrast matrix
+contr_matrix_c2 <- makeContrasts("clust_1_vs_others" = groupscluster_2 - (groupscluster_1 + groupscluster_3 + groupscluster_4) / 3, 
+  levels = colnames(design))
+contr_matrix_c2
+
+# use contrast matrix and eBayes to estimate SEM and pvalues
+fit_c2 <- contrasts.fit(fit, contr_matrix_c2)
+fit_c2 <- eBayes(fit_c2)
+
+cluster2_dge <- topTable(fit_c2, 
+                         adjust.method = "BH", 
+                         sort.by = "none", 
+                         number = Inf)
+
+top50_cluster2_dge_up <- cluster2_dge %>%
+  rownames_to_column(var = "gene_id") %>%
+  left_join(gencode_gtf) %>%
+  arrange(desc(logFC)) %>%
+  dplyr::slice(1:50) %>%
+  dplyr::select(gene_name, logFC, adj.P.Val) %>%
+  print()
+
+top50_cluster2_dge_down <- cluster2_dge %>%
+  rownames_to_column(var = "gene_id") %>%
+  left_join(gencode_gtf) %>%
+  arrange(logFC) %>%
+  dplyr::slice(1:50) %>%
+  dplyr::select(gene_name, logFC, adj.P.Val) %>%
+  print()
+```
+
+DGE Cluster 3
+```{r}
+# set up contrast matrix
+contr_matrix_c3 <- makeContrasts("clust_1_vs_others" = groupscluster_3 - (groupscluster_1 + groupscluster_2 + groupscluster_4) / 3, 
+  levels = colnames(design))
+contr_matrix_c3
+
+# use contrast matrix and eBayes to estimate SEM and pvalues
+fit_c3 <- contrasts.fit(fit, contr_matrix_c3)
+fit_c3 <- eBayes(fit_c3)
+
+cluster3_dge <- topTable(fit_c3, 
+                         adjust.method = "BH", 
+                         sort.by = "none", 
+                         number = Inf)
+
+top50_cluster3_dge_up <- cluster3_dge %>%
+  rownames_to_column(var = "gene_id") %>%
+  left_join(gencode_gtf) %>%
+  arrange(desc(logFC)) %>%
+  dplyr::slice(1:50) %>%
+  dplyr::select(gene_name, logFC, adj.P.Val) %>%
+  print()
+
+top50_cluster3_dge_down <- cluster3_dge %>%
+  rownames_to_column(var = "gene_id") %>%
+  left_join(gencode_gtf) %>%
+  arrange(logFC) %>%
+  dplyr::slice(1:50) %>%
+  dplyr::select(gene_name, logFC, adj.P.Val) %>%
+  print()
+```
+
+DGE Cluster 4
+```{r}
+# set up contrast matrix
+contr_matrix_c4 <- makeContrasts("clust_1_vs_others" = groupscluster_4 - (groupscluster_1 + groupscluster_2 + groupscluster_3) / 3, 
+  levels = colnames(design))
+contr_matrix_c4
+
+# use contrast matrix and eBayes to estimate SEM and pvalues
+fit_c4 <- contrasts.fit(fit, contr_matrix_c4)
+fit_c4 <- eBayes(fit_c4)
+
+cluster4_dge <- topTable(fit_c4, 
+                         adjust.method = "BH", 
+                         sort.by = "none", 
+                         number = Inf)
+
+top50_cluster4_dge_up <- cluster4_dge %>%
+  rownames_to_column(var = "gene_id") %>%
+  left_join(gencode_gtf) %>%
+  arrange(desc(logFC)) %>%
+  dplyr::slice(1:50) %>%
+  dplyr::select(gene_name, logFC, adj.P.Val) %>%
+  print()
+
+top50_cluster4_dge_down <- cluster4_dge %>%
+  rownames_to_column(var = "gene_id") %>%
+  left_join(gencode_gtf) %>%
+  arrange(logFC) %>%
+  dplyr::slice(1:50) %>%
+  dplyr::select(gene_name, logFC, adj.P.Val) %>%
+  print()
+```
+
+## Visualizations
+```{r}
+library(EnhancedVolcano)
+## Change to gene names
+cluster4_dge_names <- cluster4_dge %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id") %>%
+  as_tibble() %>%
+  left_join(gencode_gtf, by = "gene_id") %>%
+  dplyr::distinct(gene_name, .keep_all = TRUE) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_name") %>%
+  dplyr::select(-gene_id, -gene_type, -gene_status, -level, -havana_gene) 
+
+head(cluster4_dge_names)
+
+## Plot
+EnhancedVolcano(
+  toptable = cluster4_dge_names,
+  lab = rownames(cluster4_dge_names),
+  x = "logFC",
+  y = "P.Value",
+  pCutoff = 0.05,
+  FCcutoff = 1.5, 
+  legendPosition = "none",
+  title = "DGE: Inflamed cluster vs all others",
+  transcriptPointSize = 1.5
+  
+)
+
+```
+
+## Write out data
+
+```{r}
+saveRDS(counts_es, "output/counts_expressionset_for_limma.rds")
+```
+
+```{r}
+saveRDS(cluster1_dge, "output/cluster1_dge.rds")
+saveRDS(cluster2_dge, "output/cluster2_dge.rds")
+saveRDS(cluster3_dge, "output/cluster3_dge.rds")
+saveRDS(cluster4_dge, "output/cluster4_dge.rds")
+```
 
 ## NCI 
 

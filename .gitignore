@@ -599,3 +599,9 @@ data/gencode.v22.annotation.gtf
 output/limma_voom_elist_1.rds
 output/tpm_expressionset.rds
 output/tpm_cyt_expressionset.rds
+packrat/lib*/
+output/batch1_summary_cell_seg_df.rds
+output/duke_dlbcl_mixture.tsv
+output/nci_dlbcl_mixture.tsv
+output/batch1_cell_seg_df.rds
+output/batch1_cell_counts.pdf

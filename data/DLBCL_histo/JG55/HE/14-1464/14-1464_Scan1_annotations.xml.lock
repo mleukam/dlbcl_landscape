@@ -1,8 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root s_v="1" ref="ref0">
- <Writer />
- <WriterCount>0</WriterCount>
- <UpgradeWriterCount>0</UpgradeWriterCount>
- <PendingWriters ref="ref1"></PendingWriters>
- <Readers ref="ref2"></Readers>
-</root>

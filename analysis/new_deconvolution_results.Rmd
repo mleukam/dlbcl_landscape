@@ -67,7 +67,7 @@ combined_decon <- nci_decon %>%
 ```
 
 
-## Boxplots by GSVA cluster
+## Boxplots by GSVA v4 combined clusters
 
 Read in cluster assignment and combine
 ```{r}
@@ -186,35 +186,239 @@ mac_6_plot <- ggplot(decon_res,
 mac_6_plot
 ```
 
+## Boxplots by v5 NCI clusters
+
+```{r}
+nci_decon_clust_data <- readRDS("output/nci_decon_pheno_gsva_clust_v5.rds") %>%
+  mutate(coll_th1_total = th1_act + th1_rest) %>%
+  mutate(coll_th2_total = th2_act + th2_rest) %>%
+  mutate(coll_nk_total = nk_rest + nk_act) %>%
+  mutate(coll_m1 = mac_1) %>%
+  mutate(coll_m2 = mac_2) %>%
+  mutate(coll_mac_other = mac_3 + mac_4 + mac_5 + mac_6 + mac_7) %>%
+  mutate(coll_mac_total = coll_m1 + coll_m2 + coll_mac_other) %>%
+  dplyr::select(sample_id, gsva_clust, nci_genetic_subtype, abc_gcb_rna, cd8_eff, starts_with("coll_"), everything()) %>%
+  print()
+
+nci_cd8_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = gsva_clust, y = cd8_eff, fill = gsva_clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("CD8 Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("CD8")
+nci_cd8_plot
+
+nci_totmac_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = gsva_clust, y = coll_mac_total, fill = gsva_clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Total Macrophage Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Total Macs")
+nci_totmac_plot
+
+nci_m1_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = gsva_clust, y = log(coll_m1), fill = gsva_clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("log M1 Macrophage Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("M1 Macs (log)")
+nci_m1_plot
+
+nci_m2_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = gsva_clust, y = coll_m2, fill = gsva_clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("M2 Macrophage Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("M2 Macs")
+nci_m2_plot
+
+nci_m_other_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = gsva_clust, y = coll_mac_other, fill = gsva_clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Non M1/M2 Macrophage Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Non M1/M2 Macs")
+nci_m_other_plot
+
+nci_th1_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = gsva_clust, y = coll_th1_total, fill = gsva_clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Total Th1 Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Total Th1")
+nci_th1_plot
+
+nci_th2_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = gsva_clust, y = coll_th2_total, fill = gsva_clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Total Th2 Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Total Th2")
+nci_th2_plot
+
+nci_nk_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = gsva_clust, y = coll_nk_total, fill = gsva_clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Total NK Cell Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Total NK")
+nci_nk_plot
+
+nci_tfh_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = gsva_clust, y = tfh, fill = gsva_clust)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "Cluster", labels = c("Cold",   "Intermediate-T", "Intermediate-M", "Inflamed")) +
+  xlab("") +
+  ylab("Tfh Cell Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Tfh")
+nci_tfh_plot
+```
+
+## Boxplots by NCI genetic subgroups
+```{r}
+nci_subtype_cd8_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = nci_genetic_subtype, y = cd8_eff, fill = nci_genetic_subtype)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "NCI Subtype") +
+  xlab("") +
+  ylab("Total CD8 Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Total CD8 by NCI subtype")
+nci_subtype_cd8_plot
+
+nci_subtype_th1_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = nci_genetic_subtype, y = coll_th1_total, fill = nci_genetic_subtype)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "NCI Subtype") +
+  xlab("") +
+  ylab("Total Th1 Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Total Th1 by NCI subtype")
+nci_subtype_th1_plot
+
+nci_subtype_th2_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = nci_genetic_subtype, y = coll_th2_total, fill = nci_genetic_subtype)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "NCI Subtype") +
+  xlab("") +
+  ylab("Total Th2 Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Total Th2 by NCI subtype")
+nci_subtype_th2_plot
+
+nci_subtype_tfh_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = nci_genetic_subtype, y = tfh, fill = nci_genetic_subtype)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "NCI Subtype") +
+  xlab("") +
+  ylab("Tfh Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Tfh by NCI subtype")
+nci_subtype_tfh_plot
+
+nci_subtype_m1_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = nci_genetic_subtype, y = log(coll_m1), fill = nci_genetic_subtype)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "NCI Subtype") +
+  xlab("") +
+  ylab("M1 Deconvolution Score (log)") +
+  stat_compare_means() +
+  ggtitle("M1 by NCI subtype (log)")
+nci_subtype_m1_plot
+
+nci_subtype_m2_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = nci_genetic_subtype, y = coll_m2, fill = nci_genetic_subtype)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "NCI Subtype") +
+  xlab("") +
+  ylab("M2 Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("M2 by NCI subtype")
+nci_subtype_m2_plot
+
+nci_subtype_m_oth_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = nci_genetic_subtype, y = coll_mac_other, fill = nci_genetic_subtype)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "NCI Subtype") +
+  xlab("") +
+  ylab("Non M1/M2 Macs Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Non M2/M2 Macs by NCI subtype")
+nci_subtype_m_oth_plot
+
+nci_subtype_m_total_plot <- ggplot(nci_decon_clust_data, 
+                   aes(x = nci_genetic_subtype, y = coll_mac_total, fill = nci_genetic_subtype)) +
+  geom_boxplot() +
+    theme_classic2() + 
+        scale_fill_d3(name = "NCI Subtype") +
+  xlab("") +
+  ylab("Total Macs Deconvolution Score") +
+  stat_compare_means() +
+  ggtitle("Total Macs by NCI subtype")
+nci_subtype_m_total_plot
+```
 
 ## Survival analysis
 
-Read in clinical data
-```{r}
-nci_pheno_data <- read_csv("output/nci_extended_pheno_data.csv") %>% print()
 
-nci_surv_frame <- nci_pheno_data %>%
-  dplyr::select(sample_id,
-                os_status = `Status at Follow_up_ 0 Alive_ 1 Dead`,
-                os_years = `Follow_up Time _yrs`,
+```{r}
+nci_surv_frame_groups <- nci_decon_clust_data %>%
+  mutate(cd8_groups = ntile(cd8_eff, 5)) %>%
+  mutate(th1_groups = ntile(coll_th1_total, 5)) %>%
+  mutate(th2_groups = ntile(coll_th2_total, 5)) %>%
+  mutate(tfh_groups = ntile(tfh, 5)) %>%
+  mutate(nk_groups = ntile(coll_nk_total, 5)) %>%
+  mutate(m1_groups = ntile(coll_m1, 5)) %>%
+  mutate(m2_groups = ntile(coll_m2, 5)) %>%
+  mutate(m_other_groups = ntile(coll_mac_other, 5)) %>%
+  mutate(m_tot_groups = ntile(coll_mac_total, 5)) %>%
+  dplyr::select(sample_id, 
+                cd8_groups, 
+                th1_groups, 
+                th2_groups, 
+                tfh_groups, 
+                nk_groups, 
+                m1_groups, 
+                m2_groups, 
+                m_other_groups, 
+                m_tot_groups, 
+                os_status, 
+                os_years, 
                 pfs_status = `Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1 Progression`,
                 pfs_years = `Progression_Free Survival _PFS_ Time _yrs`) %>%
-  print()
-
-nci_extremes <- nci_decon %>%
-  mutate(cd8_groups = ntile(cd8_eff, 5)) %>%
-  mutate(th1_groups = ntile(th1_rest, 5)) %>%
-  mutate(th2_groups = ntile(th2_rest, 5)) %>%
-  mutate(treg_groups = ntile(treg, 5)) %>%
-  mutate(nk_groups = ntile(nk_rest, 5)) %>%
-  mutate(mac1_groups = ntile(mac_1, 5)) %>%
-  mutate(mac2_groups = ntile(mac_2, 5)) %>%
-  mutate(mac3_groups = ntile(mac_3, 5)) %>%
-  mutate(mac4_groups = ntile(mac_4, 5)) %>%
-  mutate(mac5_groups = ntile(mac_5, 5)) %>%
-  mutate(mac6_groups = ntile(mac_6, 5)) %>%
-  mutate(mac7_groups = ntile(mac_7, 5)) %>%
-  dplyr::select(sample_id = Mixture, cd8_groups, th1_groups, th2_groups, treg_groups, nk_groups, mac1_groups, mac2_groups, mac3_groups, mac4_groups, mac5_groups, mac6_groups, mac7_groups) %>%
   print()
 
 nci_surv_frame_groups <- nci_surv_frame %>%
@@ -229,7 +433,8 @@ nci_cd8_os_object <- Surv(time = nci_cd8_extremes$os_years,
                    event = nci_cd8_extremes$os_status)
 fit_cd8 <- survfit(nci_cd8_os_object ~ cd8_groups,
                    data = nci_cd8_extremes)
-ggsurvplot(fit_cd8, data = nci_cd8_extremes, pval = TRUE)
+ggsurvplot(fit_cd8, data = nci_cd8_extremes, pval = TRUE) +
+  ggtitle("NCI dataset: OS stratified by CD8 deconvolution")
 
 nci_th1_extremes <- nci_surv_frame_groups %>%
   dplyr::filter(th1_groups %in% c("1", "5")) %>%
@@ -239,7 +444,8 @@ nci_th1_os_object <- Surv(time = nci_th1_extremes$os_years,
                    event = nci_th1_extremes$os_status)
 fit_th1 <- survfit(nci_th1_os_object ~ th1_groups,
                    data = nci_th1_extremes)
-ggsurvplot(fit_th1, data = nci_th1_extremes, pval = TRUE)
+ggsurvplot(fit_th1, data = nci_th1_extremes, pval = TRUE) +
+  ggtitle("NCI dataset: OS stratified by Th1 deconvolution")
 
 nci_th2_extremes <- nci_surv_frame_groups %>%
   dplyr::filter(th2_groups %in% c("1", "5")) %>%
@@ -249,101 +455,83 @@ nci_th2_os_object <- Surv(time = nci_th2_extremes$os_years,
                    event = nci_th2_extremes$os_status)
 fit_th2 <- survfit(nci_th2_os_object ~ th2_groups,
                    data = nci_th2_extremes)
-ggsurvplot(fit_th2, data = nci_th2_extremes, pval = TRUE)
+ggsurvplot(fit_th2, data = nci_th2_extremes, pval = TRUE) +
+  ggtitle("NCI dataset: OS stratified by Th2 deconvolution")
 
-nci_treg_extremes <- nci_surv_frame_groups %>%
-  dplyr::filter(treg_groups %in% c("1", "5")) %>%
-  dplyr::select(sample_id, treg_groups, os_years, os_status, pfs_years, pfs_status) %>%
+nci_tfh_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(tfh_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, tfh_groups, os_years, os_status, pfs_years, pfs_status) %>%
   print()
-nci_treg_os_object <- Surv(time = nci_treg_extremes$os_years,
-                   event = nci_treg_extremes$os_status)
-fit_treg <- survfit(nci_treg_os_object ~ treg_groups,
-                   data = nci_treg_extremes)
-ggsurvplot(fit_treg, data = nci_treg_extremes, pval = TRUE)
+nci_tfh_os_object <- Surv(time = nci_tfh_extremes$os_years,
+                   event = nci_tfh_extremes$os_status)
+fit_tfh <- survfit(nci_tfh_os_object ~ tfh_groups,
+                   data = nci_tfh_extremes)
+ggsurvplot(fit_tfh, data = nci_tfh_extremes, pval = TRUE) +
+    ggtitle("NCI dataset: OS stratified by Tfh deconvolution")
 
-nci_mac1_extremes <- nci_surv_frame_groups %>%
-  dplyr::filter(mac1_groups %in% c("1", "5")) %>%
-  dplyr::select(sample_id, mac1_groups, os_years, os_status, pfs_years, pfs_status) %>%
+nci_m1_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(m1_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, m1_groups, os_years, os_status, pfs_years, pfs_status) %>%
   print()
-nci_mac1_os_object <- Surv(time = nci_mac1_extremes$os_years,
-                   event = nci_mac1_extremes$os_status)
-fit_mac1 <- survfit(nci_mac1_os_object ~ mac1_groups,
-                   data = nci_mac1_extremes)
-ggsurvplot(fit_mac1, data = nci_mac1_extremes, pval = TRUE)
+nci_m1_os_object <- Surv(time = nci_m1_extremes$os_years,
+                   event = nci_m1_extremes$os_status)
+fit_m1 <- survfit(nci_m1_os_object ~ m1_groups,
+                   data = nci_m1_extremes)
+ggsurvplot(fit_m1, data = nci_m1_extremes, pval = TRUE) +
+      ggtitle("NCI dataset: OS stratified by M1 deconvolution")
 
-nci_mac2_extremes <- nci_surv_frame_groups %>%
-  dplyr::filter(mac2_groups %in% c("1", "5")) %>%
-  dplyr::select(sample_id, mac2_groups, os_years, os_status, pfs_years, pfs_status) %>%
+nci_m2_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(m2_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, m2_groups, os_years, os_status, pfs_years, pfs_status) %>%
   print()
-nci_mac2_os_object <- Surv(time = nci_mac2_extremes$os_years,
-                   event = nci_mac2_extremes$os_status)
-fit_mac2 <- survfit(nci_mac2_os_object ~ mac2_groups,
-                   data = nci_mac2_extremes)
-ggsurvplot(fit_mac2, data = nci_mac2_extremes, pval = TRUE)
+nci_m2_os_object <- Surv(time = nci_m2_extremes$os_years,
+                   event = nci_m2_extremes$os_status)
+fit_m2 <- survfit(nci_m2_os_object ~ m2_groups,
+                   data = nci_m2_extremes)
+ggsurvplot(fit_m2, data = nci_m2_extremes, pval = TRUE) +
+      ggtitle("NCI dataset: OS stratified by M2 deconvolution")
 
-nci_mac3_extremes <- nci_surv_frame_groups %>%
-  dplyr::filter(mac3_groups %in% c("1", "5")) %>%
-  dplyr::select(sample_id, mac3_groups, os_years, os_status, pfs_years, pfs_status) %>%
+nci_m_other_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(m_other_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, m_other_groups, os_years, os_status, pfs_years, pfs_status) %>%
   print()
-nci_mac3_os_object <- Surv(time = nci_mac3_extremes$os_years,
-                   event = nci_mac3_extremes$os_status)
-fit_mac3 <- survfit(nci_mac3_os_object ~ mac3_groups,
-                   data = nci_mac3_extremes)
-ggsurvplot(fit_mac3, data = nci_mac3_extremes, pval = TRUE)
+nci_m_other_os_object <- Surv(time = nci_m_other_extremes$os_years,
+                   event = nci_m_other_extremes$os_status)
+fit_m_other <- survfit(nci_m_other_os_object ~ m_other_groups,
+                   data = nci_m_other_extremes)
+ggsurvplot(fit_m_other, data = nci_m_other_extremes, pval = TRUE) +
+        ggtitle("NCI dataset: OS stratified by non M1/M1 macs deconvolution")
 
-nci_mac4_extremes <- nci_surv_frame_groups %>%
-  dplyr::filter(mac4_groups %in% c("1", "5")) %>%
-  dplyr::select(sample_id, mac4_groups, os_years, os_status, pfs_years, pfs_status) %>%
+nci_m_tot_extremes <- nci_surv_frame_groups %>%
+  dplyr::filter(m_tot_groups %in% c("1", "5")) %>%
+  dplyr::select(sample_id, m_tot_groups, os_years, os_status, pfs_years, pfs_status) %>%
   print()
-nci_mac4_os_object <- Surv(time = nci_mac4_extremes$os_years,
-                   event = nci_mac4_extremes$os_status)
-fit_mac4 <- survfit(nci_mac4_os_object ~ mac4_groups,
-                   data = nci_mac4_extremes)
-ggsurvplot(fit_mac4, data = nci_mac4_extremes, pval = TRUE)
-
-nci_mac5_extremes <- nci_surv_frame_groups %>%
-  dplyr::filter(mac5_groups %in% c("1", "5")) %>%
-  dplyr::select(sample_id, mac5_groups, os_years, os_status, pfs_years, pfs_status) %>%
-  print()
-nci_mac5_os_object <- Surv(time = nci_mac5_extremes$os_years,
-                   event = nci_mac5_extremes$os_status)
-fit_mac5 <- survfit(nci_mac5_os_object ~ mac5_groups,
-                   data = nci_mac5_extremes)
-ggsurvplot(fit_mac5, data = nci_mac5_extremes, pval = TRUE)
-
-nci_mac6_extremes <- nci_surv_frame_groups %>%
-  dplyr::filter(mac6_groups %in% c("1", "5")) %>%
-  dplyr::select(sample_id, mac6_groups, os_years, os_status, pfs_years, pfs_status) %>%
-  print()
-nci_mac6_os_object <- Surv(time = nci_mac6_extremes$os_years,
-                   event = nci_mac6_extremes$os_status)
-fit_mac6 <- survfit(nci_mac6_os_object ~ mac6_groups,
-                   data = nci_mac6_extremes)
-ggsurvplot(fit_mac6, data = nci_mac6_extremes, pval = TRUE)
-
-nci_mac7_extremes <- nci_surv_frame_groups %>%
-  dplyr::filter(mac7_groups %in% c("1", "5")) %>%
-  dplyr::select(sample_id, mac7_groups, os_years, os_status, pfs_years, pfs_status) %>%
-  print()
-nci_mac7_os_object <- Surv(time = nci_mac7_extremes$os_years,
-                   event = nci_mac7_extremes$os_status)
-fit_mac7 <- survfit(nci_mac7_os_object ~ mac7_groups,
-                   data = nci_mac7_extremes)
-ggsurvplot(fit_mac7, data = nci_mac7_extremes, pval = TRUE)
+nci_m_tot_os_object <- Surv(time = nci_m_tot_extremes$os_years,
+                   event = nci_m_tot_extremes$os_status)
+fit_m_tot <- survfit(nci_m_tot_os_object ~ m_tot_groups,
+                   data = nci_m_tot_extremes)
+ggsurvplot(fit_m_tot, data = nci_m_tot_extremes, pval = TRUE) +
+  ggtitle("NCI dataset: OS stratified by total macs deconvolution")
 ```
 
 ## Mutations
 ```{r}
 # rename nci decon columns
-nci_decons <- nci_decon %>% 
+# collapse cell types to larger groups
+nci_decon_collapsed <- nci_decon %>% 
   rename(sample_id = Mixture) %>%
+  mutate(cd8_eff = cd8_eff + cd8_mem) %>% 
+  mutate(th1_total = th1_act + th1_rest) %>%
+  mutate(th2_total = th2_act + th2_rest) %>%
+  rename(m1 = mac_1) %>%
+  rename(m2 = mac_2) %>%
+  mutate(mac_other = mac_3 + mac_4 + mac_5 + mac_6 + mac_7) %>%
+  mutate(mac_total = m1 + m2 + mac_other) %>%
+  dplyr::select(sample_id, cd8_eff, th1_total, th2_total, tfh, m1, m2, mac_other, mac_total) %>%
   print()
 
-# collapse columns to larger groups
-
-
 # get column names
-decon_names <- colnames(nci_decons)[2:27]
+decon_names <- colnames(nci_decon_collapsed)[2:9]
 decon_names
 
 # DLBCL mutation data
@@ -387,12 +575,12 @@ decon_vs_mut <- function(mut_name, decon_name){
   mut <- muts_5_df %>%
     filter(!! rlang::sym(mut_name) == 1) %>%
     select(sample_id) %>%
-    left_join(nci_decons) %>%
+    left_join(nci_decon_collapsed) %>%
     pull(!! rlang::sym(decon_name))
   nonmut <- muts_5_df %>%
     filter(!! rlang::sym(mut_name) == 0) %>%
     select(sample_id) %>%
-    left_join(nci_decons) %>%
+    left_join(nci_decon_collapsed) %>%
     pull(!! rlang::sym(decon_name))
   tidy(t.test(mut, nonmut)) %>%
     bind_cols("gene" = mut_name) %>%
@@ -402,8 +590,8 @@ decon_vs_mut <- function(mut_name, decon_name){
     mutate(mut_rate = length(mut) / (length(mut) + length(nonmut))) %>%
     mutate(mut_mean = sum(mut, na.rm = TRUE) / length(mut)) %>%
     mutate(nonmut_mean = sum(nonmut, na.rm = TRUE) / length(nonmut)) %>%
-    mutate(change = (mut_mean - nonmut_mean)) %>%
-    select(gene, cell_type, p.value, change, mut_mean, nonmut_mean, mut_rate, mut_number, nonmut_number, everything())
+    mutate(percent_change = (((mut_mean - nonmut_mean) / nonmut_mean))*100) %>%
+    select(gene, cell_type, p.value, percent_change, mut_mean, nonmut_mean, mut_rate, mut_number, nonmut_number, everything())
 }
 
 # test function
@@ -420,7 +608,7 @@ mut_decon_corr <- mutation_correlations %>%
   print()
   
 mut_decon_corr %>% 
-  write_csv("output/NCI_mutations_vs_deconvolution.csv")
+  write_csv("output/NCI_mutations_vs_deconvolution_collapsed.csv")
 ```
 
 ## Validate results
@@ -429,6 +617,203 @@ mut_decon_corr %>%
 
 ```
 
+## Correlations by mutation
+```{r}
+# rename nci decon columns
+# collapse cell types to larger groups
+nci_decon_collapsed <- nci_decon %>% 
+  rename(sample_id = Mixture) %>%
+  mutate(cd8_eff = cd8_eff + cd8_mem) %>% 
+  mutate(th1_total = th1_act + th1_rest) %>%
+  mutate(th2_total = th2_act + th2_rest) %>%
+  rename(m1 = mac_1) %>%
+  rename(m2 = mac_2) %>%
+  mutate(mac_other = mac_3 + mac_4 + mac_5 + mac_6 + mac_7) %>%
+  mutate(mac_total = m1 + m2 + mac_other) %>%
+  dplyr::select(sample_id, cd8_eff, th1_total, th2_total, tfh, m1, m2, mac_other, mac_total) %>%
+  print()
+
+# get column names
+decon_names <- colnames(nci_decon_collapsed)[2:9]
+decon_names
+
+# DLBCL mutation data
+muts_dlbcl <- read_delim("data/final_analysis_set.maf", 
+    "\t", escape_double = FALSE, trim_ws = TRUE) %>%
+  dplyr::select(Tumor_Sample_Barcode, everything()) %>%
+  dplyr::select(sample_id = Tumor_Sample_Barcode, 
+                Hugo_Symbol) %>%
+  distinct(sample_id, Hugo_Symbol) %>%
+  dplyr::mutate(n = rep(1, length.out = nrow(.))) %>%
+  spread(key = Hugo_Symbol, value = n, fill = 0) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix()
+muts_dlbcl[1:5, 1:5]
+str(muts_dlbcl)
+
+# keep only those columns with >5% mutations
+muts_5 <- muts_dlbcl[, colSums(muts_dlbcl) > 24]
+str(muts_5)
+# reduces to 96 candidate genes
+
+muts_5_df <- muts_5 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+mut_names <- colnames(muts_5_df)[-1]
+mut_names
+
+# combined dataframe
+muts_decon <- nci_decon_collapsed %>%
+  left_join(muts_5_df) %>%
+  print()
+
+# test correlation
+tidy(cor.test(muts_decon$cd8_eff, muts_decon$ACTB))
+
+# make named vectors of deconvolution results
+cd8_eff <- muts_decon$cd8_eff
+names(cd8_eff) <- muts_decon$sample_id
+head(cd8_eff)
+
+th1_total <- muts_decon$th1_total
+names(th1_total) <- muts_decon$sample_id
+head(th1_total)
+
+th2_total <- muts_decon$th2_total
+names(th2_total) <- muts_decon$sample_id
+head(th2_total)
+
+tfh_total <- muts_decon$tfh
+names(tfh_total) <- muts_decon$sample_id
+head(tfh_total)
+
+m1 <- muts_decon$m1
+names(m1) <- muts_decon$sample_id
+head(m1)
+
+m2 <- muts_decon$m2
+names(m2) <- muts_decon$sample_id
+head(m2)
+
+mac_other <- muts_decon$mac_other
+names(mac_other) <- muts_decon$sample_id
+head(mac_other)
+
+mac_total <- muts_decon$mac_total
+names(mac_total) <- muts_decon$sample_id
+head(mac_total)
+
+# make dataframe of mutations in same order
+ordered_muts_matrix <- muts_decon[10:105] %>%
+  print()
+
+# get correlation for cd8_eff
+mut_corr_cd8 <- map(ordered_muts_matrix, function(column){
+  cor.test(cd8_eff, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust((p.value))) %>%
+  arrange(p.value) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything())
+mut_corr_cd8
+
+# get correlation for th1
+mut_corr_th1 <- map(ordered_muts_matrix, function(column){
+  cor.test(th1_total, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust((p.value))) %>%
+  arrange(p.value) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything())
+mut_corr_th1
+
+# get correlation for th2
+mut_corr_th2 <- map(ordered_muts_matrix, function(column){
+  cor.test(th2_total, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust((p.value))) %>%
+  arrange(p.value) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything())
+mut_corr_th2
+
+# get correlation for tfh
+mut_corr_tfh <- map(ordered_muts_matrix, function(column){
+  cor.test(tfh_total, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust((p.value))) %>%
+  arrange(p.value) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything())
+mut_corr_tfh
+
+# get correlation for m1
+mut_corr_m1 <- map(ordered_muts_matrix, function(column){
+  cor.test(m1, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust((p.value))) %>%
+  arrange(p.value) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything())
+mut_corr_m1
+
+# get correlation for m2
+mut_corr_m2 <- map(ordered_muts_matrix, function(column){
+  cor.test(m2, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust((p.value))) %>%
+  arrange(p.value) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything())
+mut_corr_m2
+
+# get correlation for m_other
+mut_corr_m_other <- map(ordered_muts_matrix, function(column){
+  cor.test(mac_other, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust((p.value))) %>%
+  arrange(p.value) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything())
+mut_corr_m_other
+
+mut_corr_m_tot <- map(ordered_muts_matrix, function(column){
+  cor.test(mac_total, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust((p.value))) %>%
+  arrange(p.value) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything())
+mut_corr_m_tot
+```
 
 ## Clustering by deconvolution - Abandoned
 

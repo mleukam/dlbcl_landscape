@@ -8,9 +8,14 @@ editor_options:
 ---
 
 ## Setup
+
 Clear the workspace
 ```{r}
 rm(list = ls())
+```
+
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
 ```
 
 Load packages
@@ -27,7 +32,35 @@ library("ggpubr")
 library("GenomicFeatures")
 ```
 
-## Prepare data (TPM)
+## CIBERSORTx
+
+Deriving a novel signature matrix. LM22 - the main micro-array-derived deconvolution signature matrix has some issues that render it less usable for DLBCL. 
+
+1) Genes expressed in non-hematopoetic cancers were filtered out, but in our case, the cancer is of hematopoetic origin.
+
+2) B-cells were included in the analysis, which are again the source of the cancer and might be making the result less trustworthy.
+
+3) The macrophage datasets were limited.
+
+The plan will be to aggregate a number of purified/sorted cell types for a micro-array derived signature matrix, to filter out housekeeping genes, and to filter out highly expressed DLBCL genes as well as generally expressed solid tumor genes. 
+
+#### Background: 
+
+From CIBERSORTx article: https://www.nature.com/articles/s41587-019-0114-2#Sec9
+
+```
+Briefly, next generation sequencing datasets were downloaded and analyzed using the authors’ normalization settings unless otherwise specified; these consisted of transcripts per million (TPM), reads per kilobase of transcript per million (RPKM) or fragments per kilobase of transcript per million (FPKM) space. For analyses in log2 space, we added 1 to expression values prior to log2 adjustment. Affymetrix microarray datasets were summarized and normalized as described in ‘Gene expression profiling – Microarrays’ (Supplementary Note 1), using the robust multi-array averaging (RMA) method in cases where bulk tissues and ground truth cell subsets were profiled on the same Affymetrix platform, and otherwise using MAS5 normalization.
+```
+
+From: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5998872/
+
+Chen SH, Kuo WY, Su SY, Chung WC, Ho JM, Lu HH, Lin CY. A gene profiling deconvolution approach to estimating immune cell composition from complex tissues. BMC Bioinformatics. 2018 May 8;19(Suppl 4):154. doi: 10.1186/s12859-018-2069-6. PMID: 29745829; PMCID: PMC5998872.
+
+```
+To define a set of feature genes for deconvolution, we first eliminate genes that are unsuitable for building model. Two methods were adopted. We use datasets and enrichment score (ES) described in Benita et al. [13] to define genes that expressed in normal tissues by the criteria of ES>0 in more than 5% of observed tissue types. Besides, genes that expressed in cancer cells are collected from cancer cell line encyclopedia [14] in the criteria of log2 transformed expression level>7. The two lists are used as black lists to remove genes expressed in normal tissues and cancer cells from the candidate list.
+```
+
+## xCell data preparation (TPM)
 
 Read in data
 ```{r}
@@ -46,7 +79,7 @@ From xCell:
 
 I will not normalize across lane or source, and TMM normalization will be skipped. I will filter for protein coding genes but not for lowly expressed genes since that may affect the relative ranking.
 
-## NCI 
+NCI 
 
 Read in raw counts
 ```{r}
@@ -56,7 +89,7 @@ total_counts <- read_csv("output/nci_dlbcl_unprocessed_counts.csv")
 gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
 ```
 
-#### Convert to gene name (expected input)
+Convert to gene name (expected input)
 
 From xCell:
 
@@ -76,7 +109,7 @@ nrow(total_counts)
 nrow(total_counts_prcode)
 ```
 
-#### Convert to TPM
+Convert to TPM
 
 Original full GTF file for gencode v22 downloaded from: https://www.gencodegenes.org/human/release_22.html
 
@@ -165,7 +198,7 @@ nci_tpm <- tpm %>%
   print()
 ```
 
-## Duke
+Duke
 
 Read in raw counts for Duke samples as dgelist
 ```{r}
@@ -227,7 +260,7 @@ summary(is.na(expr_duke_df$gene_id_v22))
 summary(as.factor(expr_duke_df$gene_type))
 ```
 
-#### Filter for protein coding
+Filter for protein coding
 ```{r}
 # filter for protein coding genes only
 expr_duke_filtered <- expr_duke_df %>% 
@@ -243,7 +276,7 @@ expr_duke_protcoding <- expr_duke_filtered %>%
   print()
 ```
 
-#### Subset cases based on protein coding library coverage
+Subset cases based on protein coding library coverage
 
 Following recommendation in methods section of Reddy et al Cell 2017 (original data source). They reported including only those libraries containing at least 12,000 protein coding genes.
 
@@ -257,7 +290,8 @@ expr_duke_subset[1:5, 1:5]
 ncol(expr_duke_subset)
 ```
 
-#### Convert to TPM
+Convert to TPM
+
 TPM is very similar to RPKM and FPKM. The only difference is the order of operations. Here’s how you calculate TPM:
 
 1. Divide the read counts by the length of each gene in kilobases. This gives you reads per kilobase (RPK).
@@ -315,7 +349,7 @@ duke_tpm <- tpm %>%
   print()
 ```
 
-## Merge
+Merge
 
 ```{r}
 # messy coding - changed variable names here...
@@ -361,7 +395,7 @@ dim(combined_tpm)
 combined_tpm[1:10, 1:5]
 ```
 
-#### Reformat pheno data to match
+Reformat pheno data to match
 
 ```{r}
 pheno_data_tbl <- pData(combined_es) %>%
@@ -453,7 +487,7 @@ xc_tidy <- xc_results_clust %>%
   print()
 
 # select cell types of interest
-keepers <- c("CD8+ T-cells", "Th1 cells", "Th2 cells", "Tregs", "Macrophages", "Macrophages M1", "Macrophages M2", "DC", "Eosinophils")
+keepers <- c("CD8+ T-cells", "Th1 cells", "Th2 cells", "Tregs", "Macrophages", "Macrophages M1", "Macrophages M2", "DC", "aDC", "Eosinophils")
 
 xc_tidy_filt <- xc_tidy %>%
   dplyr::filter(cell_type %in% keepers) %>%
@@ -467,6 +501,7 @@ xc_tidy_filt <- xc_tidy %>%
                                 "Macrophages M1" = "Macrophages M1", 
                                 "Macrophages M2" = "Macrophages M2", 
                                 "DC" = "DC", 
+                                "aDC" = "aDC",
                                 "Eosinophils" = "Eosinophils")) %>%
   mutate(clust = fct_recode(clust, "Cold  (n = 361)" = "1",
                             "Intermediate-T  (n = 283)" = "2",
@@ -516,9 +551,304 @@ cells_boxplot <- ggplot(xc_tidy_filt2,
 
 cells_boxplot
 # 1100 x 500
+
+keepers3 <- c("CD8+ T-cells", "Th1 cells", "Macrophages")
+
+xc_tidy_filt3 <- xc_tidy_filt %>%
+  dplyr::filter(cell_type %in% keepers3) %>%
+  mutate(cell_type = fct_drop(cell_type)) %>%
+  mutate(clust = fct_recode(clust, "Cold" = "Cold  (n = 361)",
+                            "Intermediate-T" = "Intermediate-T  (n = 283)",
+                            "Intermediate-M" = "Intermediate-M  (n = 225)",
+                            "Inflamed" = "Inflamed  (n = 320)")) %>%
+  mutate(cell_type = fct_recode(cell_type, 
+                                "CD8+ T Cells" = "CD8+ T-cells",
+                                "CD4+ Th1 Cells" = "Th1 cells",
+                                "Macrophages" = "Macrophages"))
+
+# boxplot
+ash_boxplot <- ggplot(xc_tidy_filt3, 
+                        aes(x = clust, y = xc_score)) +
+  geom_boxplot(aes(fill = clust)) +
+  facet_grid(cols = vars(cell_type)) +
+  ylab("xCell scores") +
+  xlab("") +
+  ggtitle("Immune Cell Deconvolution of DLBCL Transcriptomes") +
+  theme_classic2() +
+  scale_fill_d3() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(fill = "Cluster", subtitle = "n = 1189") +
+  stat_compare_means(aes(label = paste0("p = ", ..p.format..)),
+                     method = "anova") +
+  theme(axis.text = element_text(size = 14)) +
+  theme(strip.text.x = element_text(size = 14, 
+                                    color = "black", 
+                                    face = "bold.italic")) +
+  theme(legend.position = "none")
+
+ash_boxplot
+# 5.5 wide x 4.5 tall
+ggsave("output/ASH_ORAL_figures/deconvolution.png", ash_boxplot, height = 4.5, width = 5.5, units = "in")
 ```
 
-#### Additional plots
+Individual plots
+
+```{r}
+cd8_table <- xc_tidy_filt %>%
+  dplyr::filter(cell_type == "CD8+ T-cells") %>%
+  mutate(cell_type = fct_drop(cell_type)) %>%
+  mutate(clust = fct_recode(clust, "Cold" = "Cold  (n = 361)",
+                            "Intermediate-T" = "Intermediate-T  (n = 283)",
+                            "Intermediate-M" = "Intermediate-M  (n = 225)",
+                            "Inflamed" = "Inflamed  (n = 320)")) %>%
+  print()
+
+cd8_plot <- ggplot(cd8_table, 
+                        aes(x = clust, y = xc_score)) +
+  geom_boxplot(aes(fill = clust)) +
+  ylab("xCell scores") +
+  xlab("") +
+  ggtitle("CD8") +
+  theme_classic2() +
+  scale_fill_d3() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  stat_compare_means(aes(label = paste0("p = ", ..p.format..)),
+                     method = "anova",
+                     label.x = 1.5,
+                     label.y = 0.75) +
+  theme(axis.text = element_text(size = 14)) +
+  theme(title = element_text(size = 14, 
+                                    color = "black", 
+                                    face = "bold")) +
+  theme(axis.title.y = element_text(size = 14, face = "plain")) +
+  theme(legend.position = "none")
+
+cd8_plot
+
+th1_table <- xc_tidy_filt %>%
+  dplyr::filter(cell_type == "Th1 cells") %>%
+  mutate(cell_type = fct_drop(cell_type)) %>%
+  mutate(clust = fct_recode(clust, "Cold" = "Cold  (n = 361)",
+                            "Intermediate-T" = "Intermediate-T  (n = 283)",
+                            "Intermediate-M" = "Intermediate-M  (n = 225)",
+                            "Inflamed" = "Inflamed  (n = 320)")) %>%
+  print()
+
+th1_plot <- ggplot(th1_table, 
+                        aes(x = clust, y = xc_score)) +
+  geom_boxplot(aes(fill = clust)) +
+  ylab("xCell scores") +
+  xlab("") +
+  ylab("") +
+  ggtitle("Th1") +
+  theme_classic2() +
+  scale_fill_d3() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  stat_compare_means(aes(label = paste0("p = ", ..p.format..)),
+                     method = "anova",
+                     label.x = 1.5) +
+  theme(axis.text = element_text(size = 14)) +
+  theme(title = element_text(size = 14, 
+                                    color = "black", 
+                                    face = "bold")) +
+  theme(axis.title.y = element_text(size = 14, face = "plain")) +
+  theme(legend.position = "none")
+
+th1_plot
+
+th2_table <- xc_tidy_filt %>%
+  dplyr::filter(cell_type == "Th2 cells") %>%
+  mutate(cell_type = fct_drop(cell_type)) %>%
+  mutate(clust = fct_recode(clust, "Cold" = "Cold  (n = 361)",
+                            "Intermediate-T" = "Intermediate-T  (n = 283)",
+                            "Intermediate-M" = "Intermediate-M  (n = 225)",
+                            "Inflamed" = "Inflamed  (n = 320)")) %>%
+  print()
+
+th2_plot <- ggplot(th2_table, 
+                        aes(x = clust, y = xc_score)) +
+  geom_boxplot(aes(fill = clust)) +
+  ylab("xCell scores") +
+  xlab("") +
+    ylab("") +
+  ggtitle("Th2") +
+  theme_classic2() +
+  scale_fill_d3() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  stat_compare_means(aes(label = paste0("p = ", ..p.format..)),
+                     method = "anova",
+                     label.x = 1.5) +
+  theme(axis.text = element_text(size = 14)) +
+  theme(title = element_text(size = 14, 
+                                    color = "black", 
+                                    face = "bold")) +
+  theme(axis.title.y = element_text(size = 14, face = "plain")) +
+  theme(legend.position = "none")
+
+th2_plot
+
+adc_table <- xc_tidy_filt %>%
+  dplyr::filter(cell_type == "aDC") %>%
+  mutate(cell_type = fct_drop(cell_type)) %>%
+  mutate(clust = fct_recode(clust, "Cold" = "Cold  (n = 361)",
+                            "Intermediate-T" = "Intermediate-T  (n = 283)",
+                            "Intermediate-M" = "Intermediate-M  (n = 225)",
+                            "Inflamed" = "Inflamed  (n = 320)")) %>%
+  print()
+
+adc_plot <- ggplot(adc_table, 
+                        aes(x = clust, y = xc_score)) +
+  geom_boxplot(aes(fill = clust)) +
+    ylab("") +
+  xlab("") +
+  ggtitle("aDC") +
+  theme_classic2() +
+  scale_fill_d3() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  stat_compare_means(aes(label = paste0("p = ", ..p.format..)),
+                     method = "anova",
+                     label.x = 1.5,
+                     label.y = 0.85) +
+  theme(axis.text = element_text(size = 14)) +
+  theme(title = element_text(size = 14, 
+                                    color = "black", 
+                                    face = "bold")) +
+  theme(axis.title.y = element_text(size = 14, face = "plain")) +
+  theme(legend.position = "none")
+
+adc_plot
+
+macrophage_table <- xc_tidy_filt %>%
+  dplyr::filter(cell_type == "Macrophages") %>%
+  mutate(cell_type = fct_drop(cell_type)) %>%
+  mutate(clust = fct_recode(clust, "Cold" = "Cold  (n = 361)",
+                            "Intermediate-T" = "Intermediate-T  (n = 283)",
+                            "Intermediate-M" = "Intermediate-M  (n = 225)",
+                            "Inflamed" = "Inflamed  (n = 320)")) %>%
+  print()
+
+macrophage_plot <- ggplot(macrophage_table, 
+                        aes(x = clust, y = xc_score)) +
+  geom_boxplot(aes(fill = clust)) +
+   ylab("") +
+  xlab("") +
+  ggtitle("Macrophages") +
+  theme_classic2() +
+  scale_fill_d3() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  stat_compare_means(aes(label = paste0("p = ", ..p.format..)),
+                     method = "anova",
+                     label.x = 1.5) +
+  theme(axis.text = element_text(size = 14)) +
+  theme(title = element_text(size = 14, 
+                                    color = "black", 
+                                    face = "bold")) +
+  theme(axis.title.y = element_text(size = 14, face = "plain")) +
+  theme(legend.position = "none")
+
+macrophage_plot
+
+m1_table <- xc_tidy_filt %>%
+  dplyr::filter(cell_type == "Macrophages M1") %>%
+  mutate(cell_type = fct_drop(cell_type)) %>%
+  mutate(clust = fct_recode(clust, "Cold" = "Cold  (n = 361)",
+                            "Intermediate-T" = "Intermediate-T  (n = 283)",
+                            "Intermediate-M" = "Intermediate-M  (n = 225)",
+                            "Inflamed" = "Inflamed  (n = 320)")) %>%
+  print()
+
+m1_plot <- ggplot(m1_table, 
+                        aes(x = clust, y = xc_score)) +
+  geom_boxplot(aes(fill = clust)) +
+   ylab("") +
+  xlab("") +
+  ggtitle("M1") +
+  theme_classic2() +
+  scale_fill_d3() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  stat_compare_means(aes(label = paste0("p = ", ..p.format..)),
+                     method = "anova",
+                     label.x = 1.5,
+                     label.y = 0.35) +
+  theme(axis.text = element_text(size = 14)) +
+  theme(title = element_text(size = 14, 
+                                    color = "black", 
+                                    face = "bold")) +
+  theme(axis.title.y = element_text(size = 14, face = "plain")) +
+  theme(legend.position = "none")
+
+m1_plot
+
+m2_table <- xc_tidy_filt %>%
+  dplyr::filter(cell_type == "Macrophages M2") %>%
+  mutate(cell_type = fct_drop(cell_type)) %>%
+  mutate(clust = fct_recode(clust, "Cold" = "Cold  (n = 361)",
+                            "Intermediate-T" = "Intermediate-T  (n = 283)",
+                            "Intermediate-M" = "Intermediate-M  (n = 225)",
+                            "Inflamed" = "Inflamed  (n = 320)")) %>%
+  print()
+
+m2_plot <- ggplot(m2_table, 
+                        aes(x = clust, y = xc_score)) +
+  geom_boxplot(aes(fill = clust)) +
+    ylab("") +
+  xlab("") +
+  ggtitle("M2") +
+  theme_classic2() +
+  scale_fill_d3() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  stat_compare_means(aes(label = paste0("p = ", ..p.format..)),
+                     method = "anova",
+                     label.x = 1.5,
+                     label.y = 0.22) +
+  theme(axis.text = element_text(size = 14)) +
+  theme(title = element_text(size = 14, 
+                                    color = "black", 
+                                    face = "bold")) +
+  theme(axis.title.y = element_text(size = 14, face = "plain")) +
+  theme(legend.position = "none")
+
+m2_plot
+
+tregs_table <- xc_tidy_filt %>%
+  dplyr::filter(cell_type == "Tregs") %>%
+  mutate(cell_type = fct_drop(cell_type)) %>%
+  mutate(clust = fct_recode(clust, "Cold" = "Cold  (n = 361)",
+                            "Intermediate-T" = "Intermediate-T  (n = 283)",
+                            "Intermediate-M" = "Intermediate-M  (n = 225)",
+                            "Inflamed" = "Inflamed  (n = 320)")) %>%
+  print()
+
+tregs_plot <- ggplot(tregs_table, 
+                        aes(x = clust, y = xc_score)) +
+  geom_boxplot(aes(fill = clust)) +
+    ylab("") +
+  xlab("") +
+  ggtitle("Tregs") +
+  theme_classic2() +
+  scale_fill_d3() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  stat_compare_means(aes(label = paste0("p = ", ..p.format..)),
+                     method = "anova",
+                     label.x = 1.5,
+                     label.y = 0.85) +
+  theme(axis.text = element_text(size = 14)) +
+  theme(title = element_text(size = 14, 
+                                    color = "black", 
+                                    face = "bold")) +
+  theme(axis.title.y = element_text(size = 14, face = "plain")) +
+  theme(legend.position = "none")
+
+tregs_plot
+
+# combined into a single frame
+ggarrange(cd8_plot, th1_plot, m1_plot, m2_plot, adc_plot, nrow = 1)
+
+ggsave("output/ASH_ORAL_figures/decon.combined.png", height = 3.8, width = 8.2, units = "in")
+```
+
+
+Additional plots
 
 Tips on ANOVA: http://www.sthda.com/english/wiki/one-way-anova-test-in-r
 Tips on significance bars: https://www.r-bloggers.com/add-p-values-and-significance-levels-to-ggplots/
@@ -837,7 +1167,8 @@ treg_boxplot_sig <- ggplot(xc_tidy_treg, aes(x = clust, y = xc_score)) +
 treg_boxplot_sig
 ```
 
-#### Comparisons
+Comparisons
+
 ```{r}
 clust_23_means <- xc_tidy %>%
   dplyr::filter(clust %in% c("2", "3")) %>%
@@ -952,15 +1283,15 @@ cell_types <- unique(clust_14$cell_type) %>%
 
 ```
 
-# Abandoned strategies
+## Abandoned strategies
 Investigated TIMER and MuSiC, but decided not to use in the current analysis. Code is preserved for record-keeping.
 
-## Prepare counts for TIMER
+Prepare counts for TIMER
 https://cistrome.shinyapps.io/timer/
 
-### Duke data
+Duke data
 
-#### Read in data
+Read in data
 ```{r eval=FALSE}
 total_counts <- read_csv("output/nci_dlbcl_unprocessed_counts.csv")
 ```
@@ -980,7 +1311,7 @@ read in conversion table for gene IDs
 gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
 ```
 
-#### Data cleaning
+Data cleaning
 
 Convert GENCODE v29 to gene symbols for TIMER
 ```{r eval=FALSE}
@@ -1044,7 +1375,7 @@ str(expr_duke_decon)
 expr_duke_decon[1:5, 1:5]
 ```
 
-### NCI
+NCI
 
 Read in NCI raw counts
 ```{r eval=FALSE}
@@ -1074,7 +1405,7 @@ nrow(expr_nci_nodups)
 expr_nci_nodups[1:5, 1:5]
 ```
 
-### Merge
+Merge
 
 There are more rows in the NCI dataset after removal of duplicates and missing gene symbols. Will keep only those rows present in both datasets to allow for fair comparison. 
 
@@ -1153,7 +1484,7 @@ rownames(combined_score_matrix_norm) <- combined_scores %>% pull(sampleID)
 # reviewed matrix using the View function in R studio - batch effects were persistent. Given the effort necessary to correct this issue, I will try another, newer deconvolution method that can process the whole matrix at once.
 ```
 
-## MuSiC
+MuSiC
 
 https://www-nature-com.proxy.uchicago.edu/articles/nmeth.1830
 Use non-transformed (raw counts) for deconvolution

@@ -47,14 +47,18 @@ final_analysis_set$Variant_Classification <- str_replace(final_analysis_set$Vari
 
 final_analysis_set$Variant_Classification <- str_replace(final_analysis_set$Variant_Classification, "Stop_Codon_Ins", "Nonstop_Mutation")
 
-final_analysis_set <- as.data.frame(final_analysis_set)
+# remove silent mutations
+summary(as.factor(final_analysis_set$is_silent))
+
+final_analysis_set <- as.data.frame(final_analysis_set) %>%
+  dplyr::filter(is_silent == 0) %>%
+  as_tibble() %>%
+  print()
 
 nci_mut_by_sample <- final_analysis_set %>%
   dplyr::select(sample_id = Tumor_Sample_Barcode, Hugo_Symbol) %>%
   mutate(Hugo_Symbol = ifelse(Hugo_Symbol == "MLL2", "KMT2D", Hugo_Symbol)) %>%
-  as_tibble() %>%
   print()
-  
 ```
 
 Read in Duke mutation data

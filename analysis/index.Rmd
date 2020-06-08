@@ -66,10 +66,11 @@ Downloaded and formatted 83 gene sets first published in Thorsson et al. Also fo
 * [Visualizing and clustering GSVA results using recently published gene sets](visualizing_gsva_scores_2.html)
 * [Visualizing and clustering GSVA results using Thorsson et al gene sets](visualizing_gsva_scores_3.html)
 * [Visualizing and clustering GSVA results using a combination of recently published and Thorsson et al gene sets](visualizing_gsva_scores_4.html)
+* [Visualizing and clustering cleaned GSVA results with B-cell and overlapping gene sets removed](visualizing_gsva_scores_5.html)
 
 Both new collections of gene sets perform better than original MSigDB in separating known phenotype PD-L1, and have a broader distribution of vector angles in contributions of each gene set to the principal component axes. A four-cluster model was found to best fit the data in both cases, with 75% identical assignments and 87% Pearson concordance with cluster assignment treated as a numerical value. Several gene sets were removed from Thorsson et al and combined GSVA analyses due to multicollinearity. See [GSVA v3 notebook](visualizing_gsva_scores_3.html) and [GSVA v4 notebook](visualizing_gsva_scores_4.html) for details.
 
-### Clustering
+### GSVA Clustering
 
 4-cluster model assignments made using HCPC on the first 10 principal components of GSVA v4 (combination of Thorsson and new gene set) scores. See [notebook]((visualizing_gsva_scores_4.html)) for details. 
 
@@ -77,7 +78,11 @@ Also tested sparse heirarchical clustering to reduce number of contributing gene
 
 * [Sparse hierarchical clustering](sparse_clustering.html)
 
-### Describe the clusters
+tSNE and other dimensionality-reducing visualization and clustering techniques were compared to the PCA-based method used above, without any significant improvement in interpretibility. These other methods were not pursued; the PCA-based method was carried forward.
+
+* [Visualization and clustering with tSNE](tsne.html)
+
+### Describe the HCPC clusters
 
 #### Differential gene expression
 
@@ -87,8 +92,15 @@ Also tested sparse heirarchical clustering to reduce number of contributing gene
 #### Deconvolution of immune cell types
 
 * [xCell deconvolution](deconvolution.html)
+* [Creation of custom signature matrix](new_signature_matrix.Rmd)
+* [CIBERSORTx deconvolution with custom matrix](new_deconvolution_results.html)
 
-## Aim 2: Link Immune Phenotype Clusters to Oncogenes
+#### Clinical data and phenotype
+
+* [Clinical data](table1.html)
+* [Cytolytic activity score](cyt.html)
+
+## Aim 2: Link Immune Phenotype Clusters to Tumor-Instrinsic Factors
 
 ### Mutation calls
 
@@ -111,8 +123,7 @@ Mutation data collapsed to one mutation per gene per patient for statistical tes
 Derive predictive algorithm using gene expression data for cluster assignment.
 
 * [Prediction algorithm](predictor.html)
-
-#### Multi-Channel IHC 
+* [Multiparameter IHC results](mif.html)
 
 ##### Antibody panel:
 | Marker | Cell type | Company | Product ID |
@@ -125,3 +136,7 @@ Derive predictive algorithm using gene expression data for cluster assignment.
 | PAX5   | B-cell    |         |            |
 | DAPI   | all       |         |            |
 
+## Assorted Figures and Other Notebooks
+
+* [ASH 2019 abstract figures](abstract_figure.html)
+* [Draft of table 1](table1.html)

@@ -41,7 +41,7 @@ Read in data
 # import summary datafiles for each sample
 # 10 MSI fields from each tumor
 
-file_text <- list.files(path = "data/DLBCL_histo/JG33_vs_JG31_first_pass_test/")
+file_text <- list.files(path = "/Volumes/kline-lab/DLBCL_mif_archive/101419_JK31_JK33_exp/")
 
 file_list <- list(JK31_1 = file_text[1],
                   JK31_2 = file_text[2],
@@ -66,7 +66,7 @@ file_list <- list(JK31_1 = file_text[1],
 
 # define function to read to a dataframe
 readin <- function(fname){
-  df <- read_tsv(paste0("data/DLBCL_histo/JG33_vs_JG31_first_pass_test/", fname))
+  df <- read_tsv(paste0("/Volumes/kline-lab/DLBCL_mif_archive/101419_JK31_JK33_exp/", fname))
   df
 }
 

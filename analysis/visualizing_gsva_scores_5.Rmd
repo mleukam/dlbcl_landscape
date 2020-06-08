@@ -40,6 +40,7 @@ library("viridis")
 library("tidyverse")
 library("ComplexHeatmap")
 library("caTools")
+library("broom")
 ```
 
 note: after using ggdark, need to restore defaults of fill/color with: 
@@ -68,7 +69,7 @@ names.initial <- names(gset_ids_complete_4) %>%
 
 # remove B-cell related gene set names and gene sets used for descriptions of clusters only
 # review using View function
-# review unpublished uchi_t_inflamed_gs
+# remove unpublished uchi_t_inflamed_gs
 remove.names <- c("cyt_gs", "dhit_gs", "imsig_bcells_gs", "thor_bcell_mg_igj", "thor_bcell_receptors_score", "thor_b_cell_pca_16704732", "thor_bcell_21978456", 	"thor_gp2_immune_bcell_score", "uchi_t_inflamed_gs")
 
 names.handfiltered <- names.initial %>%
@@ -333,10 +334,10 @@ fviz_contrib(dlbcl_pca, choice = "var", axes = 4, top = 15) +
   theme(axis.text.x = element_text(angle = 80, hjust = 1))
 
 # annotate variables
-CTL_activity
-macrophage_activity
-proliferation
-plasma_cell
+# CTL_activity
+# macrophage_activity
+# proliferation
+# plasma_cell
 ```
 
 #### Heatmap of raw GSVA results
@@ -350,7 +351,8 @@ ht <- Heatmap(score_matrix, name = "GSVA Score",
 ht
 ```
 
-## Clustering
+
+## Clustering - Combined
 
 Determine suitability of data for clustering
 
@@ -383,6 +385,7 @@ library(clustertend)
 dlbcl_tend <- hopkins(score_matrix, n = nrow(score_matrix) - 1, header = FALSE)
 dlbcl_tend
 ```
+
 
 #### Filter out highly correlated gene sets
 ```{r}
@@ -516,4 +519,1729 @@ ggplot(data = var_coord) +
   coord_polar() +
   geom_segment(aes(x = 0, y = 0, xend = Dim.1))
 
+```
+
+## NCI Clustering
+
+NCI only results
+```{r}
+
+nci_score_matrix <- score_matrix %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  dplyr::filter(grepl("DLBCL", sample_id)) %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix()
+
+str(nci_score_matrix)
+```
+
+Determine suitability of data for clustering
+
+First visualize similarity among observations with distance matrix
+```{r}
+# create pearson correlation matrix
+nci_dist <- get_dist(nci_score_matrix, 
+                       stand = TRUE,
+                       method = "pearson")
+
+fviz_dist(nci_dist, show_labels = FALSE) +
+  scale_fill_viridis() +
+  theme(axis.ticks = element_blank(), axis.text = element_blank())
+
+ggsave("docs/assets/fvis_dist_nci.png", 
+       device = png(),
+       width = 6.67, 
+       height = 6.67, 
+       units = "in")
+```
+
+Get Hopkins statistic of clusterability
+```{r}
+# Compute Hopkins statistic 
+# Below 0.5 is considered "clusterable"
+library(clustertend)
+nci_tend <- hopkins(nci_score_matrix, n = nrow(nci_score_matrix) - 1, header = FALSE)
+nci_tend
+```
+
+Filter out highly correlated gene sets
+```{r}
+nci_gs_cor <- cor(nci_score_matrix, method = c("pearson"))
+library(corrplot)
+source("http://www.sthda.com/upload/rquery_cormat.r")
+```
+
+```{r eval=FALSE}
+# view gene set correlation heatmap
+cortables_nci <- rquery.cormat((nci_score_matrix), graphType = "heatmap")
+
+# reformat gene set correlation table and view
+corflat_nci <- rquery.cormat(as.data.frame(nci_score_matrix), type = "flatten", graph = FALSE)
+corflat_tbl_nci <- corflat_nci$r %>% as_tibble() %>% arrange(desc(cor)) %>% print(n = 30)
+
+# 11 gene sets 0.96 correlation and above. 
+removesets <- c("beijing_cd4_c1_ccr7_gs", 
+                "imsig_proliferation_gs",
+                "beijing_cd8_c3_cx3cr1_gs",
+                "imsig_interferon_gs",
+                "imsig_tcells_gs",
+                "imsig_translation_gs",
+                "thor_immune_cell_cluster_21214954",
+                "thor_module5_tcellbcell_score",
+                "thor_interferon_cluster_21214954",
+                "imsig_tcells_gs",
+                "thor_lck_19272155")
+
+ncol(nci_score_matrix)
+nci_gs_matrix_filtered_df <- t(nci_score_matrix) %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_set") %>%
+  dplyr::filter(!gene_set %in% removesets)
+nrow(nci_gs_matrix_filtered_df)
+
+nci_sample_matrix_filtered <- nci_gs_matrix_filtered_df %>%
+  column_to_rownames(var = "gene_set") %>%
+  as.matrix() %>%
+  t()
+nci_sample_matrix_filtered[1:5, 1:5]
+dim(nci_sample_matrix_filtered)
+
+```
+
+Repeat similarity among observations with distance matrix
+```{r}
+# create pearson correlation matrix
+nci_dist2 <- get_dist(nci_sample_matrix_filtered, 
+                       stand = TRUE, 
+                       method = "pearson")
+```
+
+Repeat Hopkins statistic of clusterability
+```{r}
+# Compute Hopkins statistic for iris dataset
+# Below 0.5 is considered "clusterable"
+nci_tend <- hopkins(nci_sample_matrix_filtered,
+                      n = nrow(nci_gs_matrix_filtered_df) - 1, 
+                      header = FALSE)
+nci_tend
+```
+
+Divide into groups with HCPC
+```{r}
+set.seed(818)
+nci_pca <- PCA(nci_sample_matrix_filtered, ncp = 10, graph = FALSE)
+nci_hcpc <- HCPC(nci_pca, nb.clust = 4)
+```
+
+Write out models for later prediction
+```{r}
+saveRDS(nci_pca, "output/nci_gsva5_4cluster_pca.rds")
+saveRDS(nci_hcpc, "output/nci_gsva5_4cluster_hcpc.rds")
+```
+
+Get variable plot
+```{r}
+varplot <- fviz_pca_var(nci_pca, 
+             col.var = "contrib",
+             gradient.cols = "tron", 
+             label = "none",
+             ggtheme = theme_classic2())
+             
+varplot
+
+var_coord <- nci_pca$var$coord %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_set") %>%
+  as_tibble() %>%
+  print()
+
+
+```
+
+
+## START POINT for visualizations NCI exploration and sanity checks
+
+Read in clusters
+```{r}
+nci_pca <- readRDS("output/nci_gsva5_4cluster_pca.rds")
+nci_hcpc <- readRDS("output/nci_gsva5_4cluster_hcpc.rds")
+combined_es <- readRDS("output/combined_expressionset.rds")
+pheno_data <- pData(combined_es)
+```
+
+Data cleaning and formatting
+```{r}
+
+# Get dataframe with gene set score matrix by sample and cluster assignment as the last column
+clust_assign <- nci_hcpc$data.clust %>% 
+  rownames_to_column(var = "sample_id") %>%
+  dplyr::select(sample_id, clust, everything()) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id")
+glimpse(clust_assign)
+clust_assign[1:5, 1:5]
+dim(clust_assign)
+
+# add "gs" to gene set column names for easy selection later
+gs_names <- clust_assign[2:112] %>% 
+  colnames()
+gs_new_names <- paste("gs_", gs_names, sep = "")
+clust_assign_gs_only <- clust_assign[2:112]
+colnames(clust_assign_gs_only) <- gs_new_names
+clust_assign_gs_only <- clust_assign_gs_only %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+clust_assign_named <- clust_assign[1] %>%
+  rownames_to_column(var = "sample_id") %>% 
+  left_join(clust_assign_gs_only) %>%
+  dplyr::select(sample_id, gsva_clust = clust, everything()) %>%
+  as_tibble() %>%
+  print()
+
+# save cluster assignments for comparison in other notebooks
+clust_assign_named %>% saveRDS("output/gsva5nci_4clust_assign.rds")
+
+# get phenotype data
+pheno_data <- pData(combined_es) %>%
+  rownames_to_column(var = "sample_id") %>%
+  dplyr::select(sample_id, nci_genetic_subtype = `Genetic Subtype`, abc_gcb_rna, everything()) %>%
+  as_tibble() %>%
+  print()
+
+# combined tables
+pheno_clust_data <- clust_assign_named %>%
+  left_join(pheno_data, by = "sample_id") %>%
+  dplyr::select(sample_id, gsva_clust, 
+                nci_genetic_subtype, 
+                abc_gcb_rna, 
+                everything()) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id")
+pheno_clust_data[1:10, 1:4]
+str(pheno_clust_data)
+```
+
+Quick look at results
+```{r}
+# variables in each direction
+fviz_pca_var(nci_pca)
+fviz_contrib(nci_pca, choice = "var", axes = 1)
+fviz_contrib(nci_pca, choice = "var", axes = 2)
+ggsave("output/nci_var_contribution_axis2.pdf", plot = last_plot(), width = 22, height = 7, units = "in")
+
+nci_pca$var$contrib %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>% 
+  as_tibble() %>% 
+  arrange(desc(Dim.2)) %>% 
+  dplyr::select(sample_id, Dim.2) %>%
+  print(n = 50)
+
+nci_pca$var$contrib %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>% 
+  as_tibble() %>% 
+  arrange(desc(Dim.1)) %>% 
+  dplyr::select(sample_id, Dim.1)
+```
+
+#### Get PD-L1 for evaluable cases
+```{r}
+pdl1 <- pheno_clust_data %>% 
+  dplyr::select(source, gsva_clust, pdl1_status) %>%
+  dplyr::filter(source == "nci") %>%
+  group_by(gsva_clust, pdl1_status) %>%
+  drop_na(pdl1_status) %>%
+  tally() %>%
+  spread(key = pdl1_status, value = n) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gsva_clust") %>%
+  print()
+
+fisher.test(pdl1, simulate.p.value = TRUE, B = 1e6)
+
+percentages <- pdl1 %>%
+  mutate(high_percent = (high_amplified / (low_amplified + `non-amplified`))*100) %>%
+  print()
+
+c2v3 <- pdl1 %>%
+  dplyr::slice(2:3) %>%
+  print()
+
+fisher.test(c2v3, simulate.p.value = TRUE, B = 1e6)
+
+c1v4 <- pdl1 %>%
+  dplyr::slice(1,4) %>%
+  print()
+
+fisher.test(c1v4, simulate.p.value = TRUE, B = 1e6)
+```
+
+Plots
+Source for overriding shape change with habillage argument: https://github.com/kassambara/factoextra/issues/20
+
+Instructions for convex hull geom: https://github.com/cmartin/ggConvexHull
+
+```{r}
+# convert NAs in pdl1_amp variable
+pheno_clust_data$pdl1_status <- pheno_clust_data$pdl1_status %>%
+  replace_na("not_assessed") %>%
+  str_replace_all("non-amplified", "non_amplified") %>%
+  as.factor()
+summary(pheno_clust_data$pdl1_status)
+
+# make variable for pdl1_amp vs all others
+pheno_clust_data$amp_or_not <- fct_recode(pheno_clust_data$pdl1_status,
+             "PDL1amp" = "high_amplified",
+             "other" = "low_amplified",
+             "other" = "non_amplified",
+             "other" = "not_assessed")
+summary(pheno_clust_data$amp_or_not)
+
+# make factor for alpha
+pheno_clust_data$alpha_var <- fct_recode(pheno_clust_data$amp_or_not,
+             "1" = "PDL1amp",
+             "0.2" = "other") %>%
+  as.character() %>%
+  as.numeric()
+summary(pheno_clust_data$alpha_var)
+
+### LIGHT PLOT
+set.seed(818)
+
+nci_pca <- PCA(pheno_clust_data[4:114], graph = FALSE)
+
+mytitle <- expression(paste(italic("PD-L1"), " amplified cases by cluster"))
+
+pdl1_pca1 <- fviz_pca_ind(nci_pca,
+             label = "none",
+             habillage = pheno_clust_data$amp_or_not,
+             pointshape = 19,
+             alpha.ind = pheno_clust_data$alpha_var,
+             show.legend.text = FALSE,
+             palette = "d3",
+             addEllipses = FALSE,
+             mean.point = FALSE,
+             ggtheme = theme_classic2()
+             ) +
+  geom_convexhull(alpha = 0.3, 
+                  aes(fill = pheno_clust_data$gsva_clust),
+                  show.legend = FALSE,
+                  color = "#76767666") +
+  xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  ggtitle(mytitle)
+pdl1_pca1
+
+mytitle <- expression(paste(italic("PD-L1"), " amplified cases by cluster"))
+
+pdl1_pca2 <- fviz_pca_ind(nci_pca,
+             label = "none",
+             habillage = pheno_clust_data$amp_or_not,
+             pointshape = 19,
+             alpha.ind = pheno_clust_data$alpha_var,
+             show.legend.text = FALSE,
+             palette = "nejm",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()
+             ) +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_clust_data$gsva_clust),
+                  show.legend = FALSE,
+                  color = "black") +
+  xlab("PC1 (44.1% of variance)") +
+  ylab("PC2 (8.8% of variance)") +
+  ggtitle(mytitle)
+pdl1_pca2
+
+# get counts by cluster
+table(pheno_clust_data$amp_or_not, pheno_clust_data$gsva_clust)
+```
+
+
+```{r}
+set.seed(818)
+
+# load CYT score data
+tpm_cyt_es <- readRDS("output/tpm_cyt_expressionset.rds")
+cyt_pheno_data <- pData(tpm_cyt_es) %>% 
+  rownames_to_column(var = "sample_id") %>%
+  dplyr::select(sample_id, CYT)
+
+pheno_clust_data_cyt <- pheno_clust_data %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  left_join(cyt_pheno_data) %>%
+  dplyr::select(sample_id, CYT, gsva_clust, everything()) %>% 
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id")
+glimpse(pheno_clust_data_cyt[1:5])
+
+# save for later use
+saveRDS(pheno_clust_data_cyt, "output/nci_pheno_gsva_clust_v5.rds")
+
+# CYT score
+fviz_pca_ind(nci_pca, 
+             col.ind = log(pheno_clust_data_cyt$CYT),
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "CYT score\n(log scale)") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_clust_data_cyt$gsva_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "CYT score by cluster", subtitle = "Gene set expression PCA") +
+  scale_color_viridis()
+
+cyt_by_cluster <- pheno_clust_data_cyt %>% 
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  dplyr::select(gsva_clust, CYT) %>%
+  group_by(gsva_clust) %>%
+  summarize(mean = mean(CYT)) %>%
+  print()
+
+kruskal.test(CYT ~ gsva_clust, data = pheno_clust_data_cyt)
+
+# plot macrophage score on combined GSVA PCA plot
+fviz_pca_ind(nci_pca, 
+             col.ind = pheno_clust_data$gs_thor_tgfb_score_21050467,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "TGFbeta-related\nGSVA score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_clust_data$gsva_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "TGFbeta-related gene set expression", 
+       subtitle = "Gene set expression PCA") +
+  scale_color_viridis()
+
+# plot CD4 naive score on combined GSVA PCA plot
+fviz_pca_ind(nci_pca, 
+             col.ind = pheno_clust_data$gs_beijing_cd4_c2_anxa1_gs,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "CD4/C2/ANXA1\nGSVA score") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_clust_data$gsva_clust),
+                  show.legend = FALSE,
+                  color = "black",
+                  linetype = 1) +
+  labs(title = "Helper CD4+ T-cell score", 
+       subtitle = "Gene set expression PCA") +
+  scale_color_viridis()
+```
+
+#### ABC vs GCB
+```{r}
+# check categorical variable
+summary(as.factor(pheno_clust_data$abc_gcb_rna))
+
+# plot 
+fviz_pca_ind(nci_pca, 
+             col.ind = pheno_clust_data$abc_gcb_rna,
+             pointshape = 19,
+             label = "none",
+             addEllipses = FALSE,
+             ggtheme = theme_classic2()) +
+  labs(color = "Cell of Origin") +
+  geom_convexhull(alpha = 0.0, 
+                  aes(fill = pheno_clust_data$gsva_clust),
+                  show.legend = FALSE,
+                  color = "black") +
+  ggtitle("Gene set PCA: Cell of origin by cluster") +
+  scale_color_nejm()
+
+
+# variable plot
+fviz_pca_var(nci_pca, col.var = "contrib",
+             gradient.cols = "Blues",
+             label = "none",
+             ggtheme = theme_classic2()) +
+  geom_hline(yintercept = 0, color = "white", alpha = 0.3) +
+  geom_vline(xintercept = 0, color = "white", alpha = 0.3)
+
+# Contributions of variables to PC1
+fviz_contrib(nci_pca, choice = "var", axes = 1, top = 15) + 
+  theme(axis.text.x = element_text(angle = 80, hjust = 1))
+
+# Contributions of variables to PC2
+fviz_contrib(nci_pca, choice = "var", axes = 2, top = 15) +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1))
+
+# Get counts
+coo <- table(pheno_clust_data$abc_gcb_rna, pheno_clust_data$gsva_clust)
+coo
+```
+
+Ratios
+| COO   |  clust 1  |  clust 2  |  clust 3  |  clust 4  |
+|-------|-----------|-----------|-----------|-----------|
+| ABC   |    0.47   |   0.45    |   0.38    |   0.47    |
+|-------|-----------|-----------|-----------|-----------|
+| GCB   |    0.34   |    0.40   |   0.43    |   0.33    |
+|-------|-----------|-----------|-----------|-----------|
+| Unc.  |     0.19  |   0.15    |    0.19   |   0.20    |
+|-------|-----------|-----------|-----------|-----------|
+
+```{r}
+# reformat data for comparisons and plotting
+coo_data <- pheno_clust_data %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  dplyr::select(sample_id, abc_gcb_rna, gsva_clust) %>%
+  mutate(abc_abc_rna = as.factor(abc_gcb_rna),
+         gsva_clust = as.factor(gsva_clust)) %>%
+  as_tibble()
+coo_data
+
+# make table for comparison of proportions
+coo_table <- coo_data %>% 
+  count(gsva_clust, abc_gcb_rna) %>% 
+  tidyr::spread(key = gsva_clust, value = n) %>% 
+  as.data.frame() %>% 
+  column_to_rownames(var = "abc_gcb_rna") %>%
+  as.data.frame() %>% 
+  rownames_to_column(var = "coo") %>% 
+  dplyr::rename(cold = `1`, 
+                intermediate_t = `2`, 
+                intermediate_m = `3`, 
+                inflamed = `4`) %>%
+  mutate(tot = cold + intermediate_t + intermediate_m + inflamed) %>% 
+  mutate(not_cold = tot - cold) %>% 
+  mutate(not_intermediate_t = tot - intermediate_t) %>% 
+  mutate(not_intermediate_m = tot - intermediate_m) %>%
+  mutate(not_inflamed = tot - inflamed) %>%
+  print()
+
+# test for differences in cluster 1 proportions
+clust1 <- coo_table %>%
+  dplyr::select(coo, cold, not_cold) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "coo") %>%
+  as.matrix() %>%
+  print()
+
+clust1_p <- tidy(chisq.test(clust1)) %>%
+  print()
+
+clust1_prop <- clust1 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "coo") %>%
+  as_tibble() %>% 
+  mutate(proportion = cold / (cold + not_cold)) %>%
+  mutate(clust = rep("1", nrow(.))) %>%
+  print()
+
+# test for differences in cluster 2 proportions
+clust2 <- coo_table %>%
+  dplyr::select(coo, intermediate_t, not_intermediate_t) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "coo") %>%
+  as.matrix() %>%
+  print()
+
+clust2_p <- tidy(chisq.test(clust2)) %>%
+  print()
+
+clust2_prop <- clust2 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "coo") %>%
+  as_tibble() %>% 
+  mutate(proportion = intermediate_t / (intermediate_t + not_intermediate_t)) %>%
+  mutate(clust = rep("2", nrow(.))) %>%
+  print()
+
+# test for differences in cluster 3 proportions
+clust3 <- coo_table %>%
+  dplyr::select(coo, intermediate_m, not_intermediate_m) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "coo") %>%
+  as.matrix() %>%
+  print()
+
+clust3_p <- tidy(chisq.test(clust3)) %>%
+  print()
+
+clust3_prop <- clust3 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "coo") %>%
+  as_tibble() %>% 
+  mutate(proportion = intermediate_m / (intermediate_m + not_intermediate_m)) %>%
+  mutate(clust = rep("3", nrow(.))) %>%
+  print()
+
+# test for differences in cluster 4 proportions
+clust4 <- coo_table %>%
+  dplyr::select(coo, inflamed, not_inflamed) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "coo") %>%
+  as.matrix() %>%
+  print()
+
+clust4_p <- tidy(chisq.test(clust4)) %>%
+  print()
+
+clust4_prop <- clust4 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "coo") %>%
+  as_tibble() %>% 
+  mutate(proportion = inflamed / (inflamed + not_inflamed)) %>%
+  mutate(clust = rep("4", nrow(.))) %>%
+  print()
+
+coo_totals <- coo_data %>%
+  dplyr::group_by(gsva_clust, abc_gcb_rna) %>%
+  summarize(n = n()) %>%
+  summarize(sum = sum(n)) %>%
+  print()
+
+coo_sum_prop <- coo_data %>%
+  dplyr::group_by(gsva_clust, abc_gcb_rna) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  left_join(coo_totals) %>%
+  mutate(proportion = n / sum) %>%
+  mutate(percent = round((proportion * 100), 0)) %>%
+  mutate(percent = paste0(percent, "%")) %>%
+  mutate(gsva_clust = as.factor(gsva_clust)) %>%
+  mutate(gsva_clust = fct_recode(gsva_clust, "Cold" = "1",
+                            "Intermediate-T" = "2",
+                            "Intermediate-M" = "3",
+                            "Inflamed" = "4")) %>%
+  mutate(percent_n = paste0("n = ", n, "\n", "(", percent, ")")) %>%
+  dplyr::rename(coo = abc_gcb_rna) %>%
+  print()
+
+# make data frame containing all p-values
+pvals <- bind_rows(clust1_p, clust2_p, clust3_p, clust4_p) %>%
+  bind_cols(gsva_clust = c("Cold", "Intermediate-T", "Intermediate-M", "Inflamed")) %>%
+  mutate(p.value = round(p.value, 3)) %>%
+  print()
+               
+# light plot
+coo_bar <- ggplot(coo_sum_prop, 
+                  aes(x = coo,
+                      y = n,
+                      fill = coo)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ gsva_clust) +
+  theme_classic2() +
+  scale_color_nejm() +
+  scale_fill_nejm() +
+  labs(title = "Cell of origin by cluster",
+       fill = "Cell of Origin",
+       x = "",
+       y = "Number of cases") +
+  geom_text(aes(label = percent_n), 
+            vjust = 1.2, 
+            color = "white", 
+            size = 3.3) +
+  geom_text(data = pvals, 
+            aes(y = 110, 
+                x = 1.5, 
+                label = paste0("p = ", p.value), 
+                group = gsva_clust), 
+                inherit.aes = FALSE)
+  
+coo_bar 
+
+# dark plot
+coo_bar <- ggplot(coo_sum, 
+                  aes(x = abc_gcb_rna,
+                      y = n,
+                      fill = abc_gcb_rna)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ clust) +
+  dark_theme_gray() +
+  scale_color_jcolors(palette = "pal3") +
+  scale_fill_jcolors(palette = "pal3") +
+  labs(title = "Counts of COO Subtype by Cluster",
+       fill = "Cell of Origin",
+       x = "",
+       y = "count (n)")
+  
+coo_bar
+
+invert_geom_defaults()
+
+# manual color assignment
+mypal = pal_d3(alpha = 1)(4)
+names(mypal) <- c("Cold", "Intermediate-T", "Intermediate-M", "Inflamed")
+
+# facet by cell of origin
+coo_bar2 <- ggplot(coo_sum_prop, 
+                  aes(x = gsva_clust,
+                      y = proportion,
+                      fill = gsva_clust)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ coo) +
+  theme_classic2() +
+  scale_color_manual(values = mypal) +
+  scale_fill_manual(values = mypal) +
+  labs(title = "Significant differences in COO in Cold and Intermediate-M clusters",
+       fill = "Cluster",
+       x = "",
+       y = "Proportion of each cluster") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 14)) +
+  theme(strip.text.x = element_text(size = 14, color = "black", face = "bold.italic"
+        )) +
+  theme(legend.position = "none")
+  
+coo_bar2
+ggsave("output/ASH_ORAL_figures/coo.png", coo_bar2, height = 4.5, width = 7, units = "in")
+```
+
+#### NCI genetic subtypes
+```{r}
+# reformat data for comparisons and plotting
+genetic_data <- pheno_clust_data %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  dplyr::select(sample_id, nci_genetic_subtype, gsva_clust) %>%
+  mutate(nci_genetic_subtype = as.factor(nci_genetic_subtype),
+         gsva_clust = as.factor(gsva_clust)) %>%
+  as_tibble()
+genetic_data
+
+# make table for comparison of proportions
+genetic_table <- genetic_data %>% 
+  count(gsva_clust, nci_genetic_subtype) %>% 
+  tidyr::spread(key = gsva_clust, value = n) %>% 
+  as.data.frame() %>% 
+  column_to_rownames(var = "nci_genetic_subtype") %>%
+  as.data.frame() %>% 
+  rownames_to_column(var = "nci_subtype") %>% 
+  dplyr::rename(cold = `1`, 
+                intermediate_t = `2`, 
+                intermediate_m = `3`, 
+                inflamed = `4`) %>%
+  replace_na(list(cold = 0)) %>%
+  mutate(tot = cold + intermediate_t + intermediate_m + inflamed) %>% 
+  mutate(not_cold = tot - cold) %>% 
+  mutate(not_intermediate_t = tot - intermediate_t) %>% 
+  mutate(not_intermediate_m = tot - intermediate_m) %>%
+  mutate(not_inflamed = tot - inflamed) %>%
+  print()
+
+# test for differences in cluster 1 proportions
+clust1 <- genetic_table %>%
+  dplyr::select(nci_subtype, cold, not_cold) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "nci_subtype") %>%
+  as.matrix() %>%
+  print()
+
+clust1_p <- tidy(fisher.test(clust1)) %>%
+  print()
+
+clust1_prop <- clust1 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "coo") %>%
+  as_tibble() %>% 
+  mutate(proportion = cold / (cold + not_cold)) %>%
+  mutate(clust = rep("1", nrow(.))) %>%
+  print()
+
+# test for differences in cluster 2 proportions
+clust2 <- genetic_table %>%
+  dplyr::select(nci_subtype, intermediate_t, not_intermediate_t) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "nci_subtype") %>%
+  as.matrix() %>%
+  print()
+
+clust2_p <- tidy(fisher.test(clust2)) %>%
+  print()
+
+clust2_prop <- clust2 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "nci_subtype") %>%
+  as_tibble() %>% 
+  mutate(proportion = intermediate_t / (intermediate_t + not_intermediate_t)) %>%
+  mutate(clust = rep("2", nrow(.))) %>%
+  print()
+
+# test for differences in cluster 3 proportions
+clust3 <- genetic_table %>%
+  dplyr::select(nci_subtype, intermediate_m, not_intermediate_m) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "nci_subtype") %>%
+  as.matrix() %>%
+  print()
+
+clust3_p <- tidy(fisher.test(clust3)) %>%
+  print()
+
+clust3_prop <- clust3 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "nci_subtype") %>%
+  as_tibble() %>% 
+  mutate(proportion = intermediate_m / (intermediate_m + not_intermediate_m)) %>%
+  mutate(clust = rep("3", nrow(.))) %>%
+  print()
+
+# test for differences in cluster 4 proportions
+clust4 <- genetic_table %>%
+  dplyr::select(nci_subtype, inflamed, not_inflamed) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "nci_subtype") %>%
+  as.matrix() %>%
+  print()
+
+clust4_p <- tidy(fisher.test(clust4)) %>%
+  print()
+
+clust4_prop <- clust4 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "nci_subtype") %>%
+  as_tibble() %>% 
+  mutate(proportion = inflamed / (inflamed + not_inflamed)) %>%
+  mutate(clust = rep("4", nrow(.))) %>%
+  print()
+
+genetic_totals <- genetic_data %>%
+  dplyr::group_by(gsva_clust, nci_genetic_subtype) %>%
+  summarize(n = n()) %>%
+  summarize(sum = sum(n)) %>%
+  print()
+
+genetic_sum_prop <- genetic_data %>%
+  dplyr::group_by(gsva_clust, nci_genetic_subtype) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  left_join(genetic_totals) %>%
+  mutate(proportion = n / sum) %>%
+  mutate(percent = round((proportion * 100), 0)) %>%
+  mutate(percent = paste0(percent, "%")) %>%
+  mutate(gsva_clust = as.factor(gsva_clust)) %>%
+  mutate(gsva_clust = fct_recode(gsva_clust, "Cold" = "1",
+                            "Intermediate-T" = "2",
+                            "Intermediate-M" = "3",
+                            "Inflamed" = "4")) %>%
+  mutate(percent_n = paste0("n = ", n, "\n", "(", percent, ")")) %>%
+  dplyr::rename(nci_subtype = nci_genetic_subtype) %>%
+  print()
+
+# make data frame containing all p-values
+pvals <- bind_rows(clust1_p, clust2_p, clust3_p, clust4_p) %>%
+  bind_cols(gsva_clust = c("Cold", "Intermediate-T", "Intermediate-M", "Inflamed")) %>%
+  mutate(p.value = round(p.value, 3)) %>%
+  print()
+               
+# light plot
+nci_subtype_bar <- ggplot(genetic_sum_prop, 
+                  aes(x = nci_subtype,
+                      y = n,
+                      fill = nci_subtype)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ gsva_clust) +
+  theme_classic2() +
+  scale_color_nejm() +
+  scale_fill_nejm() +
+  labs(title = "NCI subtype by cluster",
+       fill = "NCI subtype",
+       x = "",
+       y = "Number of cases") +
+  geom_text(aes(label = percent_n), 
+            vjust = 1.2, 
+            color = "white", 
+            size = 2) +
+  geom_text(data = pvals, 
+            aes(y = 110, 
+                x = 1.5, 
+                label = paste0("p = ", p.value), 
+                group = gsva_clust), 
+                inherit.aes = FALSE)
+  
+nci_subtype_bar
+
+# manual color assignment
+mypal = pal_d3(alpha = 1)(5)
+names(mypal) <- c("Cold", "Intermediate-T", "Intermediate-M", "Inflamed", "Other")
+```
+
+#### Clusters by NCI group
+```{r}
+# make table for comparison of proportions
+nci_table <- genetic_data %>% 
+  count(gsva_clust, nci_genetic_subtype) %>% 
+  tidyr::spread(key = nci_genetic_subtype, value = n) %>% 
+  replace_na(list(N1 = 0)) %>%
+  mutate(tot = BN2 + EZB + MCD + N1 + Other) %>% 
+  mutate(not_BN2 = tot - BN2) %>% 
+  mutate(not_EZB = tot - EZB) %>% 
+  mutate(not_MCD = tot - MCD) %>%
+  mutate(not_N1 = tot - N1) %>%
+  mutate(not_Other = tot - Other) %>%
+  mutate(gsva_clust = fct_recode(gsva_clust, "cold" = "1",
+                    "intermediate-t" = "2",
+                    "intermediate-m" = "3",
+                    "inflamed" = "4")) %>%
+  print()
+
+# test for differences in BN2 proportions
+bn2 <- nci_table %>%
+  dplyr::select(gsva_clust, BN2, not_BN2) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gsva_clust") %>%
+  as.matrix() %>%
+  print()
+
+bn2_p <- tidy(fisher.test(bn2)) %>%
+  print()
+
+bn2_prop <- bn2 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gsva_clust") %>%
+  as_tibble() %>% 
+  mutate(proportion = BN2 / (BN2 + not_BN2)) %>%
+  mutate(nci_group = rep("BN2", nrow(.))) %>%
+  select(gsva_clust, nci_group, proportion) %>%
+  print()
+
+# test for differences in EZB proportions
+ezb <- nci_table %>%
+  dplyr::select(gsva_clust, EZB, not_EZB) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gsva_clust") %>%
+  as.matrix() %>%
+  print()
+
+ezb_p <- tidy(fisher.test(ezb)) %>%
+  print()
+
+ezb_prop <- ezb %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gsva_clust") %>%
+  as_tibble() %>% 
+  mutate(proportion = EZB / (EZB + not_EZB)) %>%
+  mutate(nci_group = rep("EZB", nrow(.))) %>%
+  select(gsva_clust, nci_group, proportion) %>%
+  print()
+
+# test for differences in N1 proportions
+n1 <- nci_table %>%
+  dplyr::select(gsva_clust, N1, not_N1) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gsva_clust") %>%
+  as.matrix() %>%
+  print()
+
+n1_p <- tidy(fisher.test(n1)) %>%
+  print()
+
+n1_prop <- n1 %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gsva_clust") %>%
+  as_tibble() %>% 
+  mutate(proportion = N1 / (N1 + not_N1)) %>%
+  mutate(nci_group = rep("N1", nrow(.))) %>%
+  select(gsva_clust, nci_group, proportion) %>%
+  print()
+
+# test for differences in MCD proportions
+mcd <- nci_table %>%
+  dplyr::select(gsva_clust, MCD, not_MCD) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gsva_clust") %>%
+  as.matrix() %>%
+  print()
+
+mcd_p <- tidy(fisher.test(mcd)) %>%
+  print()
+
+mcd_prop <- mcd %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gsva_clust") %>%
+  as_tibble() %>% 
+  mutate(proportion = MCD / (MCD + not_MCD)) %>%
+  mutate(nci_group = rep("MCD", nrow(.))) %>%
+  select(gsva_clust, nci_group, proportion) %>%
+  print()
+
+# test for differences in MCD proportions
+other <- nci_table %>%
+  dplyr::select(gsva_clust, Other, not_Other) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gsva_clust") %>%
+  as.matrix() %>%
+  print()
+
+other_p <- tidy(fisher.test(other)) %>%
+  print()
+
+other_prop <- other %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "gsva_clust") %>%
+  as_tibble() %>% 
+  mutate(proportion = Other / (Other + not_Other)) %>%
+  mutate(nci_group = rep("Other", nrow(.))) %>%
+  select(gsva_clust, nci_group, proportion) %>%
+  print()
+
+# collect results
+nci_totals <- genetic_data %>%
+  dplyr::group_by(nci_genetic_subtype, gsva_clust) %>%
+  summarize(n = n()) %>%
+  summarize(sum = sum(n)) %>%
+  print()
+
+nci_sum_prop <- genetic_data %>%
+  dplyr::group_by(nci_genetic_subtype, gsva_clust) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  bind_rows(tibble(nci_genetic_subtype = "N1", gsva_clust = "1", n = 0)) %>%
+  arrange(desc(nci_genetic_subtype)) %>%
+  mutate(nci_genetic_subtype = as.factor(nci_genetic_subtype)) %>%
+  left_join(nci_totals) %>%
+  mutate(proportion = n / sum) %>%
+  mutate(percent = round((proportion * 100), 0)) %>%
+  mutate(percent = paste0(percent, "%")) %>%
+  mutate(gsva_clust = as.factor(gsva_clust)) %>%
+  mutate(gsva_clust = fct_recode(gsva_clust, "Cold" = "1",
+                            "Intermediate-T" = "2",
+                            "Intermediate-M" = "3",
+                            "Inflamed" = "4")) %>%
+  mutate(percent_n = paste0("n = ", n, "\n", "(", percent, ")")) %>%
+  dplyr::rename(nci_subtype = nci_genetic_subtype) %>%
+  print()
+
+# make data frame containing all p-values
+nci_pvals <- bind_rows(n1_p, mcd_p, ezb_p, bn2_p, other_p) %>%
+  bind_cols(nci_subtype = c("N1", "MCD", "EZB", "BN2", "Other")) %>%
+  mutate(p.value = round(p.value, 3)) %>%
+  print()
+
+# manual color assignment
+mypal = pal_d3(alpha = 1)(4)
+names(mypal) <- c("Cold", "Intermediate-T", "Intermediate-M", "Inflamed")
+
+# facet by nci subtype
+nci_bar2 <- ggplot(nci_sum_prop, 
+                  aes(x = gsva_clust,
+                      y = n,
+                      fill = gsva_clust)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ nci_subtype) +
+  theme_classic2() +
+  scale_color_manual(values = mypal) +
+  scale_fill_manual(values = mypal) +
+  labs(title = "Significant differences in MCD and N1 subtypes",
+       fill = "Cluster",
+       x = "",
+       y = "Proportion of each cluster") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 14)) +
+  theme(strip.text.x = element_text(size = 14, color = "black", face = "bold.italic"
+        )) +
+  theme(legend.position = "none") +
+  geom_text(aes(label = percent_n), 
+            vjust = -0.5, 
+            color = "black", 
+            size = 3) +
+  geom_text(data = nci_pvals, 
+            aes(y = 110, 
+                x = 1.5, 
+                label = paste0("p = ", p.value)), 
+                inherit.aes = FALSE)
+
+nci_bar2
+```
+
+#### Survival analysis per cluster assignment
+```{r}
+library("survival")
+library("survminer")
+
+pheno_clust_data_surv <- pheno_clust_data %>%
+  drop_na(os_years) %>%
+  drop_na(os_status) %>%
+  mutate(five_yr_os = ifelse(os_years > 5, 5, os_years)) %>%
+  mutate(five_yr_status = ifelse(os_years > 5, 0, os_status)) %>%
+  mutate(gsva_clust = fct_recode(gsva_clust, "Cold" = "1",
+                            "Intermediate-T" = "2",
+                            "Intermediate-M" = "3",
+                            "Inflamed" = "4"))
+surv_clust <- Surv(pheno_clust_data_surv$five_yr_os,
+                   pheno_clust_data_surv$five_yr_status)
+
+fit1 <- survfit(surv_clust ~ gsva_clust, 
+                data = pheno_clust_data_surv)
+
+survdiff(surv_clust ~ gsva_clust, 
+                data = pheno_clust_data_surv)
+
+plot1 <- ggsurvplot(fit1, 
+                    data = pheno_clust_data_surv, 
+                    pval = TRUE, 
+                    pval.method = TRUE,
+                    risk.table = TRUE,
+                    palette = "d3",
+                    tables.height = 0.3,
+                    ggtheme = theme_classic2(),
+                    title = "Overall survival with R-CHOP by immune response cluster",
+                    legend.title = "Cluster", 
+                    legend = "none",
+                    tables.y.text = FALSE,
+                    ylab = "Proportion alive",
+                    xlab = "Time in years")
+plot1
+
+fit2 <- survfit(surv_clust ~ clust + abc_gcb_rna, 
+                data = pheno_clust_data)
+
+fit2_sum <- surv_summary(fit2)
+
+plot2 <- ggsurvplot(fit2, data = pheno_clust_data, pval = FALSE)
+plot2$plot + 
+  facet_wrap(~ clust)
+```
+
+#### Deconvolution scores per cluster assignment
+
+See new_deconvolution_results.Rmd section entitled "Boxplots by v5 NCI clusters" for plots
+
+```{r}
+nci_decon <- read_csv("data/cibersort/NCI/abs_cell_number_estimate_022320/CIBERSORTx_Job2_Results.csv") %>%
+  dplyr::rename(sample_id = Mixture) %>%
+  print()
+
+clust_data <- readRDS("output/nci_pheno_gsva_clust_v5.rds") %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+nci_decon_clust_data <- nci_decon %>%
+  left_join(clust_data) %>%
+  dplyr::select(sample_id, gsva_clust, nci_genetic_subtype, abc_gcb_rna, everything()) %>%
+  print()
+
+# write out for plotting in "new_deconvolution_results.Rmd"
+saveRDS(nci_decon_clust_data, "output/nci_decon_pheno_gsva_clust_v5.rds")
+```
+
+#### Mutations by PCA axis extremes
+
+```{r}
+# read in pheno data and cluster assignment
+nci_decon_clust_data <- readRDS("output/nci_decon_pheno_gsva_clust_v5.rds")
+
+# DLBCL mutation data
+muts_dlbcl <- read_delim("data/final_analysis_set.maf", 
+    "\t", escape_double = FALSE, trim_ws = TRUE) %>%
+  dplyr::select(Tumor_Sample_Barcode, everything()) %>%
+  dplyr::select(sample_id = Tumor_Sample_Barcode, 
+                Hugo_Symbol) %>%
+  distinct(sample_id, Hugo_Symbol) %>%
+  dplyr::mutate(n = rep(1, length.out = nrow(.))) %>%
+  spread(key = Hugo_Symbol, value = n, fill = 0) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix()
+muts_dlbcl[1:5, 1:5]
+str(muts_dlbcl)
+
+muts_matrix_df <- muts_dlbcl %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+# get PCA coordinates for each individuals
+axes <- nci_pca$ind$coord %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  dplyr::select(sample_id, pca_1 = Dim.1, pca_2 = Dim.2) %>%
+  as_tibble() %>%
+  print()
+
+# combined dataframe
+muts_axes <- axes %>%
+  left_join(muts_matrix_df) %>%
+  print()
+
+# test correlation
+tidy(cor.test(muts_axes$pca_1, muts_axes$A1BG))
+
+# make named vector of pca axis positons
+pca_1 <- muts_axes$pca_1 
+names(pca_1) <- muts_axes$sample_id
+head(pca_1)
+
+pca_2 <- muts_axes$pca_2 
+names(pca_2) <- muts_axes$sample_id
+head(pca_2)
+
+# make dataframe of mutations in same order
+ordered_muts_matrix <- muts_axes[4:12852] %>%
+  print()
+
+# get correlation for pca_1
+mut_corr_pca1 <- map(ordered_muts_matrix, function(column){
+  cor.test(pca_1, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  arrange(p.value)
+mut_corr_pca1
+
+sig_mut_corr_pca1 <- mut_corr_pca1 %>%
+  mutate(p.adj = p.adjust(p.value, method = "fdr")) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything()) %>%
+  print()
+
+# filter for mutations present in greater than 5% of total cases
+muts_5 <- muts_dlbcl[, colSums(muts_dlbcl) > 24]
+str(muts_5)
+
+muts_5_df <- muts_5 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+# combined dataframe
+muts5_axes <- axes %>%
+  left_join(muts_5_df) %>%
+  print()
+
+# test correlation
+tidy(cor.test(muts5_axes$pca_1, muts5_axes$ACTB))
+
+# make named vector of pca axis positons
+pca5_1 <- muts5_axes$pca_1 
+names(pca5_1) <- muts5_axes$sample_id
+head(pca5_1)
+
+pca5_2 <- muts5_axes$pca_2 
+names(pca5_2) <- muts5_axes$sample_id
+head(pca5_2)
+
+# make dataframe of mutations in same order
+ordered_muts5_matrix <- muts5_axes[4:99] %>%
+  print()
+
+# get correlation for pca_1
+mut5_corr_pca1 <- map(ordered_muts5_matrix, function(column){
+  cor.test(pca5_1, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts5_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust(p.value, method = "fdr")) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything()) %>%
+  arrange(p.value)
+mut5_corr_pca1
+
+sig_mut5_corr_pca1 <- mut5_corr_pca1 %>%
+  arrange(desc(abs(estimate)))  %>%
+  dplyr::filter(p.adj < 0.1) %>%
+  print()
+
+# get correlation for pca_2
+mut5_corr_pca2 <- map(ordered_muts5_matrix, function(column){
+  cor.test(pca5_2, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts5_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust(p.value, method = "fdr")) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything()) %>%
+  arrange(p.value) %>%
+  print(n = 25)
+
+sig_mut5_corr_pca2 <- mut5_corr_pca2 %>%
+  arrange(desc(abs(estimate))) %>%
+  dplyr::filter(p.adj < 0.1) %>%
+  print()
+
+# make table to write out
+write_csv(sig_mut5_corr_pca2, "output/pca1_mut_correlation.csv")
+```
+
+Get correlations of individual gene sets with significant mutations
+```{r}
+gsva_v5_results <- nci_decon_clust_data %>%
+  dplyr::select(sample_id, starts_with("gs_")) %>%
+  print()
+
+tmem30a_data <- muts_matrix_df %>%
+  dplyr::select(sample_id, TMEM30A) %>%
+  left_join(gsva_v5_results) %>%
+  print()
+
+# make named vector of tmem30a mutation status
+tmem30a_muts <- tmem30a_data$TMEM30A
+names(tmem30a_muts) <- tmem30a_data$sample_id
+head(tmem30a_muts)
+
+# make dataframe of gsva results in same order
+ordered_gsva_matrix <- tmem30a_data[3:113] %>%
+  print()
+
+gsva_corr_tmem30 <- map(ordered_gsva_matrix, function(column){
+  cor.test(tmem30a_muts, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gs = colnames(ordered_gsva_matrix)) %>%
+  dplyr::select(gs, everything()) %>%
+  mutate(p.adj = p.adjust(p.value, method = "fdr")) %>%
+  dplyr::select(gs, estimate, p.value, p.adj, everything()) %>%
+  arrange(p.value) %>%
+  print(n = 25)
+
+```
+
+Plots
+```{r}
+pca1_matrix <- muts_axes %>% 
+  arrange(desc(pca_1)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  dplyr::select(-pca_1, -pca_2) %>%
+  drop_na() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_name") %>%
+  as_tibble() %>%
+  dplyr::filter(gene_name %in% sig_mut5_corr_pca1$gene_name) %>%
+  dplyr::right_join(sig_mut5_corr_pca1) %>%
+  dplyr::select(gene_name, estimate, p.adj, everything()) %>%
+  dplyr::select(-p.value, -statistic, -parameter, -conf.low, -conf.high, -method, -alternative) %>%
+  dplyr::select(-estimate, -p.adj) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_name") %>%
+  as.matrix()
+pca1_matrix[, 1:5]
+rownames(pca1_matrix)
+
+pca2_matrix <- muts_axes %>% 
+  arrange(desc(pca_2)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  dplyr::select(-pca_1, -pca_2) %>%
+  drop_na() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_name") %>%
+  as_tibble() %>%
+  dplyr::filter(gene_name %in% sig_mut5_corr_pca2$gene_name) %>%
+  dplyr::right_join(sig_mut5_corr_pca2) %>%
+  dplyr::select(gene_name, estimate, p.adj, everything()) %>%
+  dplyr::select(-p.value, -statistic, -parameter, -conf.low, -conf.high, -method, -alternative) %>%
+  dplyr::select(-estimate, -p.adj) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_name") %>%
+  as.matrix()
+pca2_matrix[, 1:5]
+```
+
+```{r}
+pca1_annotation <- muts_axes %>%
+  dplyr::select(sample_id, pca_1) %>%
+  dplyr::filter(sample_id %in% colnames(pca1_matrix)) %>%
+  arrange(desc(pca_1)) %>%
+  print()
+
+pca1_vector <- pull(pca1_annotation, pca_1)
+names(pca1_vector) <- pca1_annotation$sample_id
+head(pca1_vector)
+
+pca1_ha = HeatmapAnnotation(
+  PC1 = anno_barplot(pca1_vector),
+  annotation_name_side = "left",
+  annotation_name_rot = "0")
+
+corr_vector <- sig_mut5_corr_pca1$estimate
+names(corr_vector) <- sig_mut5_corr_pca1$gene_name
+head(corr_vector)
+
+colors = (list("0" = "#ffffff", "1" = "#000000"))
+hm1 <- Heatmap(pca1_matrix, 
+               col = colors,
+               row_order = rownames(pca1_matrix),
+               row_names_side = "left",
+               show_column_names = FALSE,
+               column_order = names(pca1_vector),
+               top_annotation = pca1_ha,
+               show_heatmap_legend = FALSE) +
+               rowAnnotation(corr = anno_barplot(corr_vector))
+draw(hm1)
+
+pca2_annotation <- muts_axes %>%
+  dplyr::select(sample_id, pca_2) %>%
+  dplyr::filter(sample_id %in% colnames(pca2_matrix)) %>%
+  arrange(desc(pca_2)) %>%
+  print()
+
+pca2_vector <- pull(pca2_annotation, pca_2)
+names(pca2_vector) <- pca2_annotation$sample_id
+head(pca2_vector)
+
+pca2_ha = HeatmapAnnotation(
+  PC2 = anno_barplot(pca2_vector),
+  annotation_name_side = "left",
+  annotation_name_rot = "0")
+
+corr_vector <- sig_mut5_corr_pca2$estimate
+names(corr_vector) <- sig_mut5_corr_pca2$gene_name
+head(corr_vector)
+
+colors = (list("0" = "#ffffff", "1" = "#000000"))
+hm2 <- Heatmap(pca2_matrix, 
+               col = colors,
+               row_order = rownames(pca2_matrix),
+               row_names_side = "left",
+               show_column_names = FALSE,
+               column_order = names(pca2_vector),
+               top_annotation = pca2_ha,
+               show_heatmap_legend = FALSE) +
+               rowAnnotation(corr = anno_barplot(corr_vector))
+draw(hm2)
+
+```
+
+#### Copy number
+```{r}
+# read in copy number data (GISTIC results)
+nih_gistic_results <- read_delim("data/nih_gistic_results_99.all_thresholded.by_genes.txt", "\t", escape_double = FALSE, trim_ws = TRUE)
+
+# convert to marker for either high amp or low amp
+nih_gistic_extremes <- nih_gistic_results[4:479] %>% as.matrix() 
+rownames(nih_gistic_extremes) <- nih_gistic_results$`Gene Symbol`
+nih_gistic_extremes[1:5, 1:5]
+nih_gistic_extremes[nih_gistic_extremes == -1] <- 0
+nih_gistic_extremes[nih_gistic_extremes == 1] <- 0
+nih_gistic_extremes[nih_gistic_extremes == -2] <- 1
+nih_gistic_extremes[nih_gistic_extremes == 2] <- 1
+summary(as.factor(is.na(nih_gistic_extremes)))
+nih_gistic_extremes <- t(nih_gistic_extremes)
+nih_gistic_extremes[1:5, 1:5]
+
+cna_extremes_df <- nih_gistic_extremes %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+# get PCA coordinates for each individuals
+axes <- nci_pca$ind$coord %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  dplyr::select(sample_id, pca_1 = Dim.1, pca_2 = Dim.2) %>%
+  as_tibble() %>%
+  print()
+
+# combined dataframe
+# remove cases missing cna information
+cna_axes <- axes %>%
+  left_join(cna_extremes_df) %>%
+  drop_na() %>%
+  print()
+
+# test correlation
+tidy(cor.test(cna_axes$pca_1, cna_axes$DDX11L1))
+
+# make named vector of pca axis positons
+cna_pca_1 <- cna_axes$pca_1 
+names(cna_pca_1) <- cna_axes$sample_id
+head(cna_pca_1)
+
+cna_pca_2 <- cna_axes$pca_2 
+names(cna_pca_2) <- cna_axes$sample_id
+head(cna_pca_2)
+
+# make dataframe of cna in same order
+ordered_cna_matrix <- cna_axes[4:24058] %>%
+  as.data.frame()
+rownames(ordered_cna_matrix) <- cna_axes$sample_id
+str(ordered_cna_matrix)
+
+# get correlation for pca_1
+cna_corr_pca1 <- map(ordered_cna_matrix, function(column){
+  cor.test(cna_pca_1, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_cna_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  arrange(p.value)
+cna_corr_pca1
+
+sig_cna_corr_pca1 <- cna_corr_pca1 %>%
+  mutate(p.adj = p.adjust(p.value, method = "fdr")) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything()) %>%
+  print()
+
+# filter for cna present in greater than 5% of total cases
+cna_5 <- ordered_cna_matrix[, colSums(ordered_cna_matrix) > 24]
+str(cna_5)
+# reduces to 2810 variables
+
+cna_5_df <- cna_5 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  print()
+
+# combined dataframe
+cna5_axes <- axes %>%
+  left_join(cna_5_df) %>%
+  drop_na() %>%
+  print()
+
+# test correlation
+tidy(cor.test(cna5_axes$pca_1, cna5_axes$DDX11L1))
+
+# make named vector of pca axis positons
+cna_pca5_1 <- cna5_axes$pca_1 
+names(cna_pca5_1) <- cna5_axes$sample_id
+head(cna_pca5_1)
+
+cna_pca5_2 <- cna5_axes$pca_2 
+names(cna_pca5_2) <- cna5_axes$sample_id
+head(cna_pca5_2)
+
+# make dataframe of cna alterations in same order
+ordered_cna5_matrix <- cna5_axes[4:2813] %>%
+  print()
+
+# get correlation for pca_1
+cna5_corr_pca1 <- map(ordered_cna5_matrix, function(column){
+  cor.test(cna_pca5_1, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_cna5_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust(p.value, method = "fdr")) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything()) %>%
+  arrange(p.value)
+cna5_corr_pca1
+
+sig_cna5_corr_pca1 <- cna5_corr_pca1 %>%
+  arrange(desc(abs(estimate)))  %>%
+  dplyr::filter(p.adj < 0.05) %>%
+  print()
+
+# make table to write out
+pca1_cna_correlation <- nih_gistic_results %>%
+  dplyr::select(gene_name = `Gene Symbol`, locus = `Locus ID`, cytoband = Cytoband) %>%
+  right_join(sig_cna5_corr_pca1) %>%
+  dplyr::select(gene_name, cytoband, p.adj, p.value, estimate, everything()) %>%
+  print()
+write_csv(pca1_cna_correlation, "output/pca1_cna_correlation.csv")
+
+# get correlation for pca_2
+cna5_corr_pca2 <- map(ordered_cna5_matrix, function(column){
+  cor.test(cna_pca5_2, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_cna5_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  mutate(p.adj = p.adjust(p.value, method = "fdr")) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything()) %>%
+  arrange(p.value)
+cna5_corr_pca2
+
+sig_cna5_corr_pca2 <- cna5_corr_pca2 %>%
+  arrange(desc(abs(estimate)))  %>%
+  dplyr::filter(p.adj < 0.05) %>%
+  print()
+
+# make table to write out
+pca2_cna_correlation <- nih_gistic_results %>%
+  dplyr::select(gene_name = `Gene Symbol`, locus = `Locus ID`, cytoband = Cytoband) %>%
+  right_join(sig_cna5_corr_pca2) %>%
+  dplyr::select(gene_name, cytoband, p.adj, p.value, estimate, everything()) %>%
+  print()
+write_csv(pca1_cna_correlation, "output/pca2_cna_correlation.csv")
+
+# get direction of change from original data
+nih_gistic_mat <- nih_gistic_results %>%
+  dplyr::rename(gene_name = `Gene Symbol`) %>%
+  dplyr::select(-`Locus ID`, -Cytoband) %>%
+  print()
+nih_gistic_names <- nih_gistic_mat$gene_name
+nih_gistic_data <- nih_gistic_mat[-1] %>% as.matrix()
+rownames(nih_gistic_data) <- nih_gistic_names
+nih_gistic_tmat <- t(nih_gistic_data)
+nih_gistic_tmat[1:5, 1:5]
+nih_gistic_tmat[nih_gistic_tmat == -1] <- 0
+nih_gistic_tmat[nih_gistic_tmat == 1] <- 0
+nih_gistic_tmat[nih_gistic_tmat == -2] <- -1
+nih_gistic_tmat[nih_gistic_tmat == 2] <- 1
+summary(as.factor(is.na(nih_gistic_tmat)))
+nih_gistic_tmat[1:5, 1:5]
+
+```
+
+Plot PCA1
+```{r}
+pca1_direction <- nih_gistic_tmat %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  dplyr::filter(sample_id %in% names(pca5_1)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_name") %>%
+  as_tibble() %>%
+  dplyr::filter(gene_name %in% cna5_corr_pca1$gene_name) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_name") %>%
+  as.matrix()
+pca1_direction[1:5, 1:5]
+
+sig_cna5_corr_pca1_selected <- sig_cna5_corr_pca1 %>%
+  slice(1:30) %>% 
+  pull(gene_name) %>%
+  print()
+
+pca1_direction_filt <- pca1_direction[sig_cna5_corr_pca1_selected, ]
+
+pca1_cna_annotation <- cna_axes %>%
+  dplyr::select(sample_id, pca_1) %>%
+  dplyr::filter(sample_id %in% colnames(pca1_direction_filt)) %>%
+  arrange(desc(pca_1)) %>%
+  print()
+
+cna_pca1_vector <- pull(pca1_cna_annotation, pca_1)
+names(cna_pca1_vector) <- pca1_cna_annotation$sample_id
+head(cna_pca1_vector)
+
+cna_pca1_ha = HeatmapAnnotation(PC1 = anno_barplot(as.matrix(cna_pca1_vector)))
+
+barplot(cna_pca1_vector)
+
+cna_corr_vector <- cna5_corr_pca1$estimate
+names(cna_corr_vector) <- cna5_corr_pca1$gene_name
+head(cna_corr_vector)
+
+colorder <- names(cna_pca1_vector)
+
+colors = (list("-1" = "#0000ff", "0" = "#ffffff", "1" = "#ff0000"))
+hm1 <- Heatmap(pca1_direction_filt, 
+               col = colors,
+               row_order = rownames(pca1_direction_filt),
+               row_names_side = "left",
+               column_order = names(cna_pca1_vector),
+               show_column_names = FALSE,
+               top_annotation = cna_pca1_ha,
+               show_heatmap_legend = FALSE) +
+               rowAnnotation(corr = anno_barplot(cna_corr_vector))
+draw(hm1)
+```
+
+```{r}
+pca2_direction <- nih_gistic_tmat %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "sample_id") %>%
+  as_tibble() %>%
+  dplyr::filter(sample_id %in% names(pca5_1)) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "sample_id") %>%
+  as.matrix() %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_name") %>%
+  as_tibble() %>%
+  dplyr::filter(gene_name %in% cna5_corr_pca2$gene_name) %>%
+  as.data.frame() %>%
+  column_to_rownames(var = "gene_name") %>%
+  as.matrix()
+pca2_direction[1:5, 1:5]
+
+sig_cna5_corr_pca2_selected <- sig_cna5_corr_pca2 %>%
+  slice(1:30) %>% 
+  pull(gene_name) %>%
+  print()
+
+pca2_direction_filt <- pca2_direction[sig_cna5_corr_pca2_selected, ]
+
+pca2_cna_annotation <- cna_axes %>%
+  dplyr::select(sample_id, pca_2) %>%
+  dplyr::filter(sample_id %in% colnames(pca2_direction_filt)) %>%
+  arrange(desc(pca_2)) %>%
+  print()
+
+cna_pca2_vector <- pull(pca2_cna_annotation, pca_2)
+names(cna_pca2_vector) <- pca2_cna_annotation$sample_id
+head(cna_pca2_vector)
+
+cna_pca2_ha = HeatmapAnnotation(PC2 = anno_barplot(as.matrix(cna_pca2_vector)))
+
+barplot(cna_pca2_vector)
+
+cna_corr_vector <- cna5_corr_pca2$estimate
+names(cna_corr_vector) <- cna5_corr_pca2$gene_name
+head(cna_corr_vector)
+
+colorder <- names(cna_pca2_vector)
+rorder <- str_replace_all(rownames(pca2_direction_filt), "-", "_")
+
+colors = (list("-1" = "#0000ff", "0" = "#ffffff", "1" = "#ff0000"))
+hm2 <- Heatmap(pca2_direction_filt, 
+               col = colors,
+               cluster_rows = FALSE,
+               row_names_side = "left",
+               column_order = names(cna_pca2_vector),
+               show_column_names = FALSE,
+               top_annotation = cna_pca2_ha,
+               show_heatmap_legend = FALSE) +
+               rowAnnotation(corr = anno_barplot(cna_corr_vector))
+draw(hm2)
+```
+
+
+
+
+Needs to be fixed
+```{r}
+## Write out new expressionset
+pheno_d <- pheno_clust_data
+pheno_d[1:5, 1:5]
+
+v_metadata <- data.frame(
+  labelDescription = colnames(pheno_d),
+  row.names = colnames(pheno_d) )
+  
+phenoData <- new("AnnotatedDataFrame", 
+                 data = pheno_d, 
+                 varMetadata = v_metadata)
+
+exprs_matrix <- exprs(combined_es)
+str(exprs_matrix)
+
+annotation <- as.character("Duke RNAseq counts derived from raw sequence data published by the Dave lab at Duke in Reddy et al Cell 2017. Quantified with Kallisto with reverse strand parameter, collected with tximport, filtered for only protein-coding genes, selected for cases with expression in >12,000 genes, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected using ComBat by sequencing lane. NCI RNAseq counts originally published by the Staudt lab at NCI in Schmitz et al NEJM 2018. Raw counts downloaded from GDC as HTseq counts, converted to CPM, filtered out genes expressed less than 1 in half or more of cases, TMM normalized and log2-transformed. Batch corrected for NCI vs Duke source using ComBat. 125-gene GSVA v4 gene set expression matrix in columns 1:125 of pData, columns 126:197 are phenotype data including 4-cluster model assignments in column `clust`")
+
+# assemble expressionset
+combined_es_4cluster <- ExpressionSet(
+  assayData = exprs_matrix,
+  phenoData = phenoData,
+  annotation = annotation)
+combined_es_4cluster
+
+# write out new expressionset
+saveRDS(combined_es_4cluster, "output/combined_es_gsva4_4cluster.rds")
 ```

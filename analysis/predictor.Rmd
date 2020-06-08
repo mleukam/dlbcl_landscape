@@ -15,26 +15,30 @@ Clear the workspace
 rm(list = ls())
 ```
 
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 Load packages
 ```{r}
 # core packages
-library("tidyverse")
+library(tidyverse)
 
 # analysis
-library("Biobase")
-library("GSVA")
-library("FactoMineR")
+library(Biobase)
+library(GSVA)
+library(FactoMineR)
 
 # core imaging packages
-library("ggsci")
-library("ggpubr")
-library("viridis")
-library("RColorBrewer")
-library("ggdark")
+library(ggsci)
+library(ggpubr)
+library(viridis)
+library(RColorBrewer)
+library(ggdark)
 
 # specific imaging packages
-library("ggConvexHull")
-library("factoextra")
+library(ggConvexHull)
+library(factoextra)
 ```
 
 Read in log-transformed, TMM-normalized counts in CPM from PD-L1 paper, filtered for expression using the cutoff CPM >1 in half of cases, and filtered for protein coding genes only.
@@ -84,6 +88,26 @@ uchi_expr_matrix <- uchi_expr_df %>%
   as.matrix()
 
 uchi_expr_matrix[1:5, 1:5]
+```
+
+```{r}
+# For deconvolution
+# Get Hugo gene name expression matrix in non-log space
+uchi_expr_hugo <- uchi_expr_df %>% 
+  dplyr::select(-geneID_split)
+
+uchi_hugo_matrix <- uchi_expr_hugo[-1] %>% as.matrix()
+rownames(uchi_hugo_matrix) <- uchi_expr_df$gene_name
+dim(uchi_hugo_matrix)
+uchi_hugo_matrix_ave <- avereps(uchi_hugo_matrix)
+dim(uchi_hugo_matrix_ave)
+
+uchi_mixture <- exp(uchi_hugo_matrix_ave) %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "GeneSymbol")
+uchi_mixture[1:5, 1:5]
+
+write_delim(uchi_mixture, "output/dlbcl_uchi_batch1_mixture.tsv", delim = "\t")
 ```
 
 ## GSVA
@@ -149,17 +173,22 @@ uc_sample_matrix_filtered[1:5, 1:5]
 
 ## Project new samples on PCA
 
-Read in PCA models from GSVA v4 gene sets on combined DLBCL RNAseq dataset (Duke + NCI, n = 1189, 143 gene sets). Clustered into 4 groups using HCPC. These are all from the [GSVA v4 score analysis notebook](visualizing_gsva_scores_4.html).
+Read in PCA models from GSVA v4 and v5 gene sets on combined DLBCL RNAseq dataset (Duke + NCI, n = 1189, 143 gene sets). Clustered into 4 groups using HCPC. These are all from the [GSVA v4 score analysis notebook](visualizing_gsva_scores_4.html) and [GSVA v5 score analysis notebook](visualizing_gsva_scores_5.html).
 
 ```{r}
 set.seed(818)
 dlbcl_pca <- readRDS("output/dlbcl_gsva4_4cluster_pca.rds")
 dlbcl_hcpc <- readRDS("output/dlbcl_gsva4_4cluster_hcpc.rds")
 
+dlbcl_pca <- readRDS("output/dlbcl_gsva4_5cluster_pca.rds")
+dlbcl_hcpc <- readRDS("output/dlbcl_gsva4_5cluster_hcpc.rds")
+
 # logCPM expression set that also has gene set matrix, cluster and phenotype data, n = 1189, gene sets = 125 (filtered for colinearity from 143 original gene sets).
 combined_es_gsva4 <- readRDS("output/combined_es_gsva4_4cluster.rds")
 colnames(pData(combined_es_gsva4))
 pdata <- pData(combined_es_gsva4)
+
+# logCPM expression set that also has gene set matrix, cluster and phenotype data, n = 1189, gene sets = 125 (filtered for colinearity from 143 original gene sets).
 ```
 
 ```{r}
@@ -320,13 +349,13 @@ box_4v1 <- ggplot(data = uchi_pheno_1v4,
                  aes(x = `Immunogenomic\nCluster`,
                      y = ihc_score,
                      fill = `Immunogenomic\nCluster`)) +
+  stat_compare_means(label.y = 100, label.x = 0.7) +
   geom_boxplot() +
   scale_fill_manual(values = mypal) +
-  stat_compare_means(label.y = 75, label.x = 0.7, method = "t.test") +
   theme_classic2() +
-  labs(title = "Immunohistochemical Score", subtitle = "Comparison of 'Inflamed' and 'Cold' clusters") +
-  ylab("CD8 IHC Score") +
-  xlab("Cluster Name") +
+  labs(title = "Inflamed vs Cold cluster IHC") +
+  ylab("IHC Score") +
+  xlab("") +
   theme(legend.position = "none") +
   facet_wrap(uchi_pheno_1v4$cd4cd8)
 
