@@ -155,7 +155,7 @@ dplot2 <- ggplot(tidy_counts, aes(log(counts))) +
 dplot2
 ```
 
-## DGE by cluster
+#### DGE by cluster
 
 The contrast matrix for the differential gene expression will be to compare each cluster to all other clusters)
 
@@ -230,12 +230,12 @@ contr_matrix_c1
 fit_c1 <- contrasts.fit(fit, contr_matrix_c1)
 fit_c1 <- eBayes(fit_c1)
 
-cluster1_dge <- topTable(fit_c1, 
+nci_cluster1_dge <- topTable(fit_c1, 
                          adjust.method = "BH", 
                          sort.by = "none", 
                          number = Inf)
 
-top50_cluster1_dge_up <- cluster1_dge %>%
+top50_cluster1_dge_up <- nci_cluster1_dge %>%
   rownames_to_column(var = "gene_id") %>%
   left_join(gencode_gtf) %>%
   arrange(desc(logFC)) %>%
@@ -243,7 +243,7 @@ top50_cluster1_dge_up <- cluster1_dge %>%
   dplyr::select(gene_name, logFC, adj.P.Val) %>%
   print()
 
-top50_cluster1_dge_down <- cluster1_dge %>%
+top50_cluster1_dge_down <- nci_cluster1_dge %>%
   rownames_to_column(var = "gene_id") %>%
   left_join(gencode_gtf) %>%
   arrange(logFC) %>%
@@ -263,12 +263,12 @@ contr_matrix_c2
 fit_c2 <- contrasts.fit(fit, contr_matrix_c2)
 fit_c2 <- eBayes(fit_c2)
 
-cluster2_dge <- topTable(fit_c2, 
+nci_cluster2_dge <- topTable(fit_c2, 
                          adjust.method = "BH", 
                          sort.by = "none", 
                          number = Inf)
 
-top50_cluster2_dge_up <- cluster2_dge %>%
+top50_cluster2_dge_up <- nci_cluster2_dge %>%
   rownames_to_column(var = "gene_id") %>%
   left_join(gencode_gtf) %>%
   arrange(desc(logFC)) %>%
@@ -276,7 +276,7 @@ top50_cluster2_dge_up <- cluster2_dge %>%
   dplyr::select(gene_name, logFC, adj.P.Val) %>%
   print()
 
-top50_cluster2_dge_down <- cluster2_dge %>%
+top50_cluster2_dge_down <- nci_cluster2_dge %>%
   rownames_to_column(var = "gene_id") %>%
   left_join(gencode_gtf) %>%
   arrange(logFC) %>%
@@ -296,12 +296,12 @@ contr_matrix_c3
 fit_c3 <- contrasts.fit(fit, contr_matrix_c3)
 fit_c3 <- eBayes(fit_c3)
 
-cluster3_dge <- topTable(fit_c3, 
+nci_cluster3_dge <- topTable(fit_c3, 
                          adjust.method = "BH", 
                          sort.by = "none", 
                          number = Inf)
 
-top50_cluster3_dge_up <- cluster3_dge %>%
+top50_cluster3_dge_up <- nci_cluster3_dge %>%
   rownames_to_column(var = "gene_id") %>%
   left_join(gencode_gtf) %>%
   arrange(desc(logFC)) %>%
@@ -309,7 +309,7 @@ top50_cluster3_dge_up <- cluster3_dge %>%
   dplyr::select(gene_name, logFC, adj.P.Val) %>%
   print()
 
-top50_cluster3_dge_down <- cluster3_dge %>%
+top50_cluster3_dge_down <- nci_cluster3_dge %>%
   rownames_to_column(var = "gene_id") %>%
   left_join(gencode_gtf) %>%
   arrange(logFC) %>%
@@ -329,12 +329,12 @@ contr_matrix_c4
 fit_c4 <- contrasts.fit(fit, contr_matrix_c4)
 fit_c4 <- eBayes(fit_c4)
 
-cluster4_dge <- topTable(fit_c4, 
+nci_cluster4_dge <- topTable(fit_c4, 
                          adjust.method = "BH", 
                          sort.by = "none", 
                          number = Inf)
 
-top50_cluster4_dge_up <- cluster4_dge %>%
+top50_cluster4_dge_up <- nci_cluster4_dge %>%
   rownames_to_column(var = "gene_id") %>%
   left_join(gencode_gtf) %>%
   arrange(desc(logFC)) %>%
@@ -342,7 +342,7 @@ top50_cluster4_dge_up <- cluster4_dge %>%
   dplyr::select(gene_name, logFC, adj.P.Val) %>%
   print()
 
-top50_cluster4_dge_down <- cluster4_dge %>%
+top50_cluster4_dge_down <- nci_cluster4_dge %>%
   rownames_to_column(var = "gene_id") %>%
   left_join(gencode_gtf) %>%
   arrange(logFC) %>%
@@ -351,11 +351,11 @@ top50_cluster4_dge_down <- cluster4_dge %>%
   print()
 ```
 
-## Visualizations
+#### Visualizations
 ```{r}
 library(EnhancedVolcano)
 ## Change to gene names
-cluster4_dge_names <- cluster4_dge %>%
+cluster4_dge_names <- nci_cluster4_dge %>%
   as.data.frame() %>%
   rownames_to_column(var = "gene_id") %>%
   as_tibble() %>%
@@ -383,20 +383,18 @@ EnhancedVolcano(
 
 ```
 
-## Write out data
+#### Write out data
 
 ```{r}
-saveRDS(counts_es, "output/counts_expressionset_for_limma.rds")
+saveRDS(nci_cluster1_dge, "output/nci_cluster1_dge.rds")
+saveRDS(nci_cluster2_dge, "output/nci_cluster2_dge.rds")
+saveRDS(nci_cluster3_dge, "output/nci_cluster3_dge.rds")
+saveRDS(nci_cluster4_dge, "output/nci_cluster4_dge.rds")
 ```
 
-```{r}
-saveRDS(cluster1_dge, "output/cluster1_dge.rds")
-saveRDS(cluster2_dge, "output/cluster2_dge.rds")
-saveRDS(cluster3_dge, "output/cluster3_dge.rds")
-saveRDS(cluster4_dge, "output/cluster4_dge.rds")
-```
+## GSVA v4 
 
-## NCI 
+#### NCI data prep 
 
 Read in raw counts
 ```{r}
@@ -406,7 +404,7 @@ total_counts <- read_csv("output/nci_dlbcl_unprocessed_counts.csv")
 gencode_gtf <- read_tsv("data/gencode.v22.primary_assembly.annotation.gtf.geneinfo")
 ```
 
-#### Filter for protein coding genes
+Filter for protein coding genes
 ```{r}
 # filter for protein coding genes
 total_counts_prcode <- total_counts %>%
@@ -421,7 +419,7 @@ nrow(total_counts)
 nrow(total_counts_prcode)
 ```
 
-#### Density plots before expression filtering
+Density plots before expression filtering
 ```{r eval = FALSE}
 tidy_counts <- total_counts_prcode %>% 
   gather(key = "sampleID", value = "intensity", -gene_id) 
@@ -443,7 +441,7 @@ dplot2 <- ggplot(tidy_counts, aes(log(intensity))) +
 dplot2
 ```
 
-#### Filter by expression levels
+Filter by expression levels
 
 Will use CPM for filtering
 ```{r}
@@ -478,7 +476,7 @@ dim(total_nci_filtered)
 total_nci_filtered[1:5, 1:5]
 ```
 
-#### Density plots after expression filtering
+Density plots after expression filtering
 ```{r eval = FALSE}
 tidy_counts <- total_nci_filtered %>% 
   as.data.frame() %>%
@@ -502,7 +500,7 @@ dplot2 <- ggplot(tidy_counts, aes(log(counts))) +
 dplot2
 ```
 
-## Duke
+#### Duke Data prep
 
 Read in raw counts for Duke samples as dgelist
 ```{r}
@@ -564,7 +562,7 @@ summary(is.na(expr_duke_df$gene_id_v22))
 summary(as.factor(expr_duke_df$gene_type))
 ```
 
-#### Filter for protein coding
+Filter for protein coding
 ```{r}
 # filter for protein coding genes only
 expr_duke_filtered <- expr_duke_df %>% 
@@ -584,7 +582,7 @@ str(expr_duke_protcoding)
 expr_duke_protcoding[1:5, 1:5]
 ```
 
-#### Subset cases based on protein coding library coverage
+Subset cases based on protein coding library coverage
 
 Following recommendation in methods section of Reddy et al Cell 2017 (original data source). They reported including only those libraries containing at least 12,000 protein coding genes.
 
@@ -600,7 +598,7 @@ expr_duke_subset[1:5, 1:5]
 ncol(expr_duke_subset)
 ```
 
-#### Initial density plots
+Initial density plots
 ```{r eval = FALSE}
 # Density plots
 # tidy data
@@ -629,7 +627,8 @@ dplot_duke_log +
 
 ```
 
-#### Filtering by expression
+Filtering by expression
+
 Will use CPM for filtering
 ```{r}
 cpm_duke_subset <- cpm(expr_duke_subset, log = FALSE)
@@ -656,7 +655,7 @@ dim(total_duke_filtered)
 total_duke_filtered[1:5, 1:5]
 ```
 
-#### Post-filtering density plots
+Post-filtering density plots
 ```{r eval = FALSE}
 # Density plots
 # tidy data
@@ -686,9 +685,9 @@ dplot_duke_log_2 +
   xlim(-10, 10)
 ```
 
-## Merge
+#### Merge
 
-#### Combine expression data
+Combine expression data
 
 ```{r}
 duke_exprs <- total_duke_filtered %>% 
@@ -730,7 +729,7 @@ combined_exprs_df <- nci_exprs_filt %>%
 combined_exprs_df[1:5, 1:5]
 ```
 
-#### Normalize gene expression distributions
+Normalize gene expression distributions
 
 Normalisation by the method of trimmed mean of M-values is performed using the calcNormFactors function in edgeR. The normalisation factors calculated here are used as a scaling factor for the library sizes. 
 ```{r}
@@ -747,7 +746,7 @@ combined_exprs <- combined_exprs_df %>% as.matrix()
 combined_exprs[1:5, 1:5]
 ```
 
-#### Reformat pheno data to match
+Reformat pheno data to match
 
 ```{r}
 pheno_data_tbl <- pData(combined_es) %>%
@@ -769,7 +768,7 @@ pheno_data <- pheno_data_tbl %>%
   column_to_rownames(var = "sample_id")
 ```
 
-## DGE by cluster
+#### DGE by cluster
 
 The contrast matrix for the differential gene expression will be to compare each cluster to all other clusters)
 
@@ -779,7 +778,7 @@ General contrast coding: https://stats.idre.ucla.edu/r/library/r-library-contras
 
 Contrast coding for linear models in R (detailed instructions on custom matrix): https://stats.stackexchange.com/questions/52252/how-to-specify-a-contrast-matrix-in-r-for-the-difference-between-one-level-and
 
-#### Limma
+Limma
 ```{r}
 # create DGEList
 dge <- DGEList(counts = combined_exprs)
@@ -834,7 +833,6 @@ Read in results
 v <- readRDS("output/limma_voom_elist_1.rds")
 fit <- readRDS("output/limma_voom_marraylmfit.rds")
 ```
-
 
 DGE Cluster 1
 ```{r}
@@ -968,7 +966,7 @@ top50_cluster4_dge_down <- cluster4_dge %>%
   print()
 ```
 
-## Visualizations
+#### Visualizations
 ```{r}
 library(EnhancedVolcano)
 ## Change to gene names
@@ -1000,7 +998,7 @@ EnhancedVolcano(
 
 ```
 
-## Write out data
+#### Write out data
 
 ```{r}
 saveRDS(counts_es, "output/counts_expressionset_for_limma.rds")
