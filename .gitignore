@@ -605,3 +605,7 @@ output/duke_dlbcl_mixture.tsv
 output/nci_dlbcl_mixture.tsv
 output/batch1_cell_seg_df.rds
 output/batch1_cell_counts.pdf
+*.xlsx
+*.xlsx
+*.xlsx
+*.xlsx

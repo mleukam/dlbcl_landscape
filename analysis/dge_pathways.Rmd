@@ -29,10 +29,10 @@ library("msigdbr")
 Read in data
 ```{r}
 # toptables
-cluster1_dge <- readRDS("output/cluster1_dge.rds")
-cluster2_dge <- readRDS("output/cluster2_dge.rds")
-cluster3_dge <- readRDS("output/cluster3_dge.rds")
-cluster4_dge <- readRDS("output/cluster4_dge.rds")
+cluster1_dge <- readRDS("output/nci_cluster1_dge.rds")
+cluster2_dge <- readRDS("output/nci_cluster2_dge.rds")
+cluster3_dge <- readRDS("output/nci_cluster3_dge.rds")
+cluster4_dge <- readRDS("output/nci_cluster4_dge.rds")
 
 ttable_list <- list(cluster1_dge, cluster2_dge, cluster3_dge, cluster4_dge)
 names(ttable_list) <- c("cluster1_dge", "cluster2_dge", "cluster3_dge", "cluster4_dge")
@@ -89,7 +89,7 @@ summary(ttable_list[[3]]$logFC)
 summary(ttable_list[[4]]$logFC)
 
 # set logFC cutoff at average of 3rd quartile fold-change (upregulated genes only)
-l_cut <- (0.23247 + 0.178593 + 0.1258525 + 0.126851) / 4
+l_cut <- (0.2683903 + 0.167624 + 0.106894 + 0.1939774) / 4
 
 # get gene list of entrez IDs that pass cutoff for each cluster from DGE
 go_gene_list <- ttable_list %>%
@@ -133,6 +133,8 @@ ego1_simp <- clusterProfiler::simplify(ego1,
                       cutoff = 0.7,
                       by = "p.adjust",
                       select_fun = min)
+
+dotplot(ego1_simp)
 ```
 
 ```{r}
@@ -156,11 +158,13 @@ ego2_simp <- clusterProfiler::simplify(ego2,
                       cutoff = 0.7,
                       by = "p.adjust",
                       select_fun = min)
+
+dotplot(ego2_simp)
 ```
 
 ```{r}
 # get enriched/overrepresented GO lists for cluster 3 DGE
-ego2 <- enrichGO(gene = go_gene_list[[3]],
+ego3 <- enrichGO(gene = go_gene_list[[3]],
                  OrgDb = org.Hs.eg.db,
                  ont = "BP",
                  pvalueCutoff = 0.05,
@@ -170,17 +174,43 @@ ego2 <- enrichGO(gene = go_gene_list[[3]],
 # http://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/
 
 # convert to gene names
-ego2 <- setReadable(ego1, OrgDb = org.Hs.eg.db)
+ego3 <- setReadable(ego3, OrgDb = org.Hs.eg.db)
 
 # plot
-dotplot(ego2, showCategory = 30)
+dotplot(ego3, showCategory = 30)
 
-ego2_simp <- clusterProfiler::simplify(ego2, 
+ego3_simp <- clusterProfiler::simplify(ego3, 
                       cutoff = 0.7,
                       by = "p.adjust",
                       select_fun = min)
+
+dotplot(ego3_simp)
 ```
 
+```{r}
+# get enriched/overrepresented GO lists for cluster 3 DGE
+ego4 <- enrichGO(gene = go_gene_list[[4]],
+                 OrgDb = org.Hs.eg.db,
+                 ont = "BP",
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "BH",
+                 universe = go_gene_universe,
+                 qvalueCutoff = 0.1)
+# http://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/
+
+# convert to gene names
+ego4 <- setReadable(ego4, OrgDb = org.Hs.eg.db)
+
+# plot
+dotplot(ego4, showCategory = 30)
+
+ego4_simp <- clusterProfiler::simplify(ego4, 
+                      cutoff = 0.7,
+                      by = "p.adjust",
+                      select_fun = min)
+
+dotplot(ego4_simp)
+```
 
 # FGSEA
 
@@ -550,12 +580,37 @@ mainpaths <- function(df){
 map(hallmark_results, mainpaths)
 
 # plots
-pathways1 <- hallmark_results[[1]] %>% arrange(desc(abs(NES))) %>% pull(pathway)
+pathways1 <- hallmark_results[[1]] %>% 
+  arrange(desc(abs(NES))) %>% 
+  pull(pathway)
 ranks = ranklist[[1]]
 plot1 <- plotGseaTable(gs_list_hallmark[pathways1], 
                        ranks, 
                        hallmark_results[[1]])
 
+pathways2 <- hallmark_results[[2]] %>% 
+  arrange(desc(abs(NES))) %>% 
+  pull(pathway)
+ranks = ranklist[[2]]
+plot2 <- plotGseaTable(gs_list_hallmark[pathways2], 
+                       ranks, 
+                       hallmark_results[[2]])
+
+pathways3 <- hallmark_results[[3]] %>% 
+  arrange(desc(abs(NES))) %>% 
+  pull(pathway)
+ranks = ranklist[[3]]
+plot3 <- plotGseaTable(gs_list_hallmark[pathways3], 
+                       ranks, 
+                       hallmark_results[[3]])
+
+pathways4 <- hallmark_results[[4]] %>% 
+  arrange(desc(abs(NES))) %>% 
+  pull(pathway)
+ranks = ranklist[[4]]
+plot4 <- plotGseaTable(gs_list_hallmark[pathways4], 
+                       ranks, 
+                       hallmark_results[[4]])
 ```
 
 #### Larger collection of gene sets

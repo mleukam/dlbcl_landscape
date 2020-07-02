@@ -1703,6 +1703,22 @@ sig_mut_corr_pca1 <- mut_corr_pca1 %>%
   dplyr::select(gene_name, estimate, p.value, p.adj, everything()) %>%
   print()
 
+# get correlation for pca_2
+mut_corr_pca2 <- map(ordered_muts_matrix, function(column){
+  cor.test(pca_2, column) %>%
+    tidy()
+}) %>%
+  bind_rows() %>%
+  bind_cols(gene_name = colnames(ordered_muts_matrix)) %>%
+  dplyr::select(gene_name, everything()) %>%
+  arrange(p.value)
+mut_corr_pca2
+
+sig_mut_corr_pca2 <- mut_corr_pca2 %>%
+  mutate(p.adj = p.adjust(p.value, method = "fdr")) %>%
+  dplyr::select(gene_name, estimate, p.value, p.adj, everything()) %>%
+  print()
+
 # filter for mutations present in greater than 5% of total cases
 muts_5 <- muts_dlbcl[, colSums(muts_dlbcl) > 24]
 str(muts_5)
@@ -1810,6 +1826,7 @@ gsva_corr_tmem30 <- map(ordered_gsva_matrix, function(column){
 
 Plots
 ```{r}
+
 pca1_matrix <- muts_axes %>% 
   arrange(desc(pca_1)) %>%
   as.data.frame() %>%
@@ -1916,6 +1933,112 @@ hm2 <- Heatmap(pca2_matrix,
 draw(hm2)
 
 ```
+
+Pathway analysis of mutations
+```{r}
+library(gprofiler2)
+
+# select all mutations significant at p < 0.05
+# get gene names
+selected_pca1_muts <- sig_mut_corr_pca1 %>%
+  dplyr::filter(p.value < 0.05) %>%
+  dplyr::filter(estimate > 0) %>%
+  pull(gene_name) %>%
+  print()
+
+# test for enrichment with gprofiler
+gostres_pca1 <- gost(query = selected_pca1_muts, 
+                organism = "hsapiens", 
+                ordered_query = FALSE, 
+                multi_query = FALSE, 
+                significant = TRUE, 
+                exclude_iea = FALSE, 
+                measure_underrepresentation = FALSE, 
+                evcodes = FALSE, 
+                user_threshold = 0.05, 
+                correction_method = "g_SCS", 
+                domain_scope = "annotated", 
+                custom_bg = NULL, 
+                numeric_ns = "", 
+                sources = NULL, 
+                as_short_link = TRUE)
+
+gostres_pca1
+
+selected_pca1_muts_neg <- sig_mut_corr_pca1 %>%
+  dplyr::filter(p.value < 0.05) %>%
+  dplyr::filter(estimate < 0) %>%
+  pull(gene_name) %>%
+  print()
+
+# test for enrichment with gprofiler
+gostres_pca1_neg <- gost(query = selected_pca1_muts_neg, 
+                organism = "hsapiens", 
+                ordered_query = FALSE, 
+                multi_query = FALSE, 
+                significant = TRUE, 
+                exclude_iea = FALSE, 
+                measure_underrepresentation = FALSE, 
+                evcodes = FALSE, 
+                user_threshold = 0.05, 
+                correction_method = "g_SCS", 
+                domain_scope = "annotated", 
+                custom_bg = NULL, 
+                numeric_ns = "", 
+                sources = NULL, 
+                as_short_link = TRUE)
+
+gostres_pca1_neg
+
+selected_pca2_muts <- sig_mut_corr_pca2 %>%
+  dplyr::filter(p.value < 0.05) %>%
+  dplyr::filter(estimate > 0) %>%
+  pull(gene_name) %>%
+  print()
+
+gostres_pca2 <- gost(query = selected_pca2_muts, 
+                organism = "hsapiens", 
+                ordered_query = FALSE, 
+                multi_query = FALSE, 
+                significant = TRUE, 
+                exclude_iea = FALSE, 
+                measure_underrepresentation = FALSE, 
+                evcodes = FALSE, 
+                user_threshold = 0.05, 
+                correction_method = "g_SCS", 
+                domain_scope = "annotated", 
+                custom_bg = NULL, 
+                numeric_ns = "", 
+                sources = NULL, 
+                as_short_link = TRUE)
+
+gostres_pca2
+
+selected_pca2_muts_neg <- sig_mut_corr_pca2 %>%
+  dplyr::filter(p.value < 0.05) %>%
+  dplyr::filter(estimate < 0) %>%
+  pull(gene_name) %>%
+  print()
+
+gostres_pca2_neg <- gost(query = selected_pca2_muts_neg, 
+                organism = "hsapiens", 
+                ordered_query = FALSE, 
+                multi_query = FALSE, 
+                significant = TRUE, 
+                exclude_iea = FALSE, 
+                measure_underrepresentation = FALSE, 
+                evcodes = FALSE, 
+                user_threshold = 0.05, 
+                correction_method = "g_SCS", 
+                domain_scope = "annotated", 
+                custom_bg = NULL, 
+                numeric_ns = "", 
+                sources = NULL, 
+                as_short_link = TRUE)
+
+gostres_pca2_neg
+```
+
 
 #### Copy number
 ```{r}
